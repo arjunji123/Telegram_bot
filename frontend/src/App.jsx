@@ -38,12 +38,12 @@ function App() {
           <Route path="/payment" element={<Payment />} />
 
           {/* Protected Routes */}
-          {/* <Route element={<ProtectedRoute loggedIn={loggedIn} />}> */}
+          <Route element={<ProtectedRoute loggedIn={loggedIn} />}>
             <Route path="/home" element={<Home />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/friend" element={<Friend />} />
             <Route path="/withdrawal" element={<Withdrawal />} />
-          {/* </Route> */}
+          </Route>
         </Routes>
 
         {/* Conditionally render Footer */}
