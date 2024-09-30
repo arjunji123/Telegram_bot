@@ -3,7 +3,7 @@ import axios from "axios";
 import Invite from "../Img/invite.webp";
 import "../Styles/Friends.css";
 
-function Friend() {
+function Friend(){
   const [showPopup, setShowPopup] = useState(false);
   const [referralLink, setReferralLink] = useState("");
 
