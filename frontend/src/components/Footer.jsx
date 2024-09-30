@@ -4,7 +4,7 @@ import Home from "../Img/home.png";
 import Tasks from "../Img/tasks.png";
 import Invite from "../Img/invite.webp";
 import Help from "../Img/help.png";
-
+import Coin from "../images/hamster-coin.png"
 function Footer({ loggedIn }) {
   const handleClick = (e) => {
     if (!loggedIn) {
@@ -29,7 +29,13 @@ function Footer({ loggedIn }) {
       <div className="text-center text-[#85827d] w-1/5">
         <Link className="mt-1" to="/friend" onClick={handleClick}>
           <img src={Invite} alt="" className="w-8 h-8 mx-auto" />
-          Frends
+          Friends
+        </Link>
+      </div>
+      <div className="text-center text-[#85827d] w-1/5">
+        <Link className="mt-1" to="/withdrawal" onClick={handleClick}>
+          <img src={Coin} alt="" className="w-8 h-8 mx-auto" />
+          Withdrawal
         </Link>
       </div>
       <div className="text-center text-[#85827d] w-1/5">
