@@ -4,12 +4,14 @@ import Friend from "./components/Friend";
 import Footer from "./components/Footer";
 import Home from "./components/Home";
 import Tasks from "./components/Tasks";
-import Help from "./components/Help";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Preloader from "./components/Preloader"; // Import the Preloader component
 import Payment from "./components/Payment";
+import Withdrawal from "./components/Withdrawal";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -40,7 +42,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/friend" element={<Friend />} />
-            <Route path="/help" element={<Help />} />
+            <Route path="/withdrawal" element={<Withdrawal />} />
           </Route>
         </Routes>
 
