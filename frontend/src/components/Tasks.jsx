@@ -167,7 +167,7 @@ function Tasks() {
                   <div className="px-4 mt-6 flex justify-between gap-2">
                     <div className="daily rounded-lg px-4 py-2 h-20 w-full relative flex justify-between items-center">
                       <span className="text-white">Daily Rewards</span>
-                      <button className="btn" onClick={togglePopup}>
+                      <button className="btn bg-blue-500 text-white font-semibold hover:bg-yellow-400" onClick={togglePopup}>
                         Show Rewards
                       </button>
                     </div>
