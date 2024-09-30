@@ -32,7 +32,6 @@ function Withdrawal() {
   return (
     <div className="bg-black flex justify-center">
       <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-
         <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
           <div className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
             <div className="px-4 z-10">
@@ -66,7 +65,6 @@ function Withdrawal() {
                     </button>
                   </div>
                 </div>
-
               </div>
               <div className="tasks">
                 <div className="px-4 mt-6 flex justify-between gap-2">
@@ -78,7 +76,6 @@ function Withdrawal() {
                     </button>
                   </div>
                 </div>
-
               </div>
               <div className="tasks">
                 <div className="px-4 mt-6 flex justify-between gap-2">
@@ -90,7 +87,6 @@ function Withdrawal() {
                     </button>
                   </div>
                 </div>
-
               </div>
               <div className="tasks">
                 <div className="px-4 mt-6 flex justify-between gap-2">
@@ -102,7 +98,6 @@ function Withdrawal() {
                     </button>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>

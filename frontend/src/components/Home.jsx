@@ -17,7 +17,7 @@ function Home() {
     localStorage.removeItem("userData");
 
     // Redirect to the login page
-    navigate("/");
+    navigate("/login");
   };
 
   const [firstName, setFirstName] = useState("");
