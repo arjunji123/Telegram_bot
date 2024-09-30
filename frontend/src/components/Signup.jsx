@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Validation from "./LoginValidation";
 import "../Styles/LoginDesign.css";
-import login from "../Img/login.png";
+import login from "../Img/logo.png";
 
 function Signup() {
   const [values, setValues] = useState({
@@ -36,7 +36,7 @@ function Signup() {
           values
         );
         console.log("Server Response:", response);
-        navigate("/"); // Redirect to the login page upon successful signup
+        navigate("/payment"); // Redirect to the Payment page upon successful signup
       } catch (err) {
         if (err.response && err.response.status === 400) {
           const backendError = err.response.data.error;
@@ -79,7 +79,7 @@ function Signup() {
               }}
             >
               <div className="top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div style={{ marginLeft: "75px" }}>
+                <div style={{ marginLeft: "110px", marginBottom: "-31px" }}>
                   <img
                     src={login}
                     alt=""
@@ -93,7 +93,7 @@ function Signup() {
 
                     <form onSubmit={handleSubmit}>
                       <div className="form">
-                        <div className="inputBox">
+                        {/* <div className="inputBox">
                           <input
                             type="text"
                             name="name"
@@ -105,7 +105,7 @@ function Signup() {
                           {errors.name && (
                             <span className="text-danger"> {errors.name}</span>
                           )}
-                        </div>
+                        </div> */}
                         <div className="inputBox">
                           <input
                             type="tel"
@@ -143,11 +143,24 @@ function Signup() {
                           <i>Password</i>
                         </div>
                         <div className="inputBox">
-                          <button type="submit">Signup</button>
+                          <input
+                            type="tel"
+                            name="name"
+                            value={values.name}
+                            onChange={handleInput}
+                            required
+                          />
+                          <i>UPI id</i>
+                          {errors.name && (
+                            <span className="text-danger"> {errors.name}</span>
+                          )}
                         </div>
                         <div className="inputBox">
-                          <Link to="/">Login</Link>
+                          <button type="submit">Signup</button>
                         </div>
+                        {/* <div className="inputBox">
+                          <Link to="/">Login</Link>
+                        </div> */}
                       </div>
                     </form>
                     {errors.general && (
@@ -155,8 +168,6 @@ function Signup() {
                     )}
                   </div>
                 </div>
-
-                <br />
               </div>
             </div>
           </div>

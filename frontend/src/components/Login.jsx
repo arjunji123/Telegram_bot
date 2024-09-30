@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "./LoginValidation";
 import "../Styles/LoginDesign.css";
-import login from "../Img/login.png";
+import login from "../Img/logo.png";
 function Login({ setLoggedIn }) {
   const [values, setValues] = useState({
     emailOrMobile: "",
@@ -103,14 +103,14 @@ function Login({ setLoggedIn }) {
               }}
             >
               <div className="top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div style={{ marginLeft: "75px" }}>
+                <div style={{ marginLeft: "110px", marginBottom: "-6px" }}>
                   <img
                     src={login}
                     alt=""
                     className="mx-auto h-40 px-4 py-2 items-center space-x-2"
                   />
                 </div>
-                <h1>Hello {firstName}</h1>
+                <h1> {firstName}</h1>
                 <div className="signin">
                   <div className="content">
                     <h2>Sign In</h2>
@@ -134,10 +134,6 @@ function Login({ setLoggedIn }) {
                             required
                           />
                           <i>Password</i>
-                        </div>
-
-                        <div className="links">
-                          <Link to="/signup">Sign Up</Link>
                         </div>
                         <div className="inputBox">
                           <button type="submit">Login</button>

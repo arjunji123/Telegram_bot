@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-body { 
-    font-family: sans-serif;
+.loader {
+  border-top-color: #ddff00;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
