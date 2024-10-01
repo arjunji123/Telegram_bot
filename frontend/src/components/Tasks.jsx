@@ -1,33 +1,24 @@
 import React, { useState } from "react";
-import "../Styles/Tasks.css";
 import rupees from "../Img/rupees.png";
 import DailyRewards from "../components/DailyRewards";
-import "../Styles/DailyRewards.css";
 import Youtube from "../Img/youtube.png";
 import Telegram from "../Img/telegram.png";
 import Instagram from "../Img/instagram.png";
 import X from "../Img/x.png";
-
+import tick from "../images/blue.png";
 function Tasks() {
-  const [showPopup, setShowPopup] = useState(false);
   const [watchTimes, setWatchTimes] = useState({
     task1: null,
     task2: null,
   });
-
   const [hasWatched, setHasWatched] = useState({
     task1: false,
     task2: false,
   });
-
   const [isVideoWatched, setIsVideoWatched] = useState({
     task1: false,
     task2: false,
   });
-
-  const togglePopup = () => {
-    setShowPopup(!showPopup);
-  };
 
   const handleWatchButtonClick = (task) => {
     setWatchTimes({
@@ -63,13 +54,13 @@ function Tasks() {
   const rows = [
     {
       img: Youtube,
-      title: "Youtube Video-1",
+      title: "YOUTUBE VIDEO - 1",
       videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       taskKey: "task1",
     },
     {
       img: Youtube,
-      title: "Youtube Video-2",
+      title: "YOUTUBE VIDEO - 1",
       videoUrl: "https://www.youtube.com/watch?v=abcd1234",
       taskKey: "task2",
     },
@@ -79,7 +70,7 @@ function Tasks() {
   const socials = [
     {
       img: Youtube,
-      title: "Subscribe on Youtube",
+      title: "SUBSCRIBE ON YOOUTUBE",
       socialUrl: "https://www.youtube.com/",
     },
     {
@@ -100,113 +91,85 @@ function Tasks() {
   ];
 
   return (
-    <div className="bg-black flex justify-center">
+    <div className="bg-white min-h-screen flex justify-center text-white">
       <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
-          <div className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-            <div className="absolutepx-4 z-10">
-              <div className=" top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div className="px-4 py-2 items-center space-x-2">
-                  <img src={rupees} alt="" className="mx-auto w-40 h-40" />
-                </div>
-                <div className="px-4 py-2 items-center space-x-2">
-                  <h1
-                    className="px-4 py-2 items-center space-x-2"
-                    style={{
-                      fontSize: 37,
-                      textAlign: "center",
-                      textShadow: "5px 6px 5px black",
-                    }}
-                  >
-                    Earn more coins
-                  </h1>
-                </div>
-                <div className="px-4 py-2 items-center space-x-2">
-                  <p style={{ textAlign: "left" }}>Watch Video on Youtube</p>
-                </div>
-                <div className="tasks-container">
-                  {rows.map((row, index) => (
-                    <div key={index} className="task-row">
-                      <div
-                        className="task-info"
-                        style={{ display: "flex", alignItems: "center" }}
-                      >
-                        <img
-                          src={row.img}
-                          alt="image"
-                          style={{ marginRight: "10px", width: "71px" }}
-                        />
-                        <h3>{row.title}</h3>
-                        <p>{row.description}</p>
-                      </div>
-                      {!hasWatched[row.taskKey] &&
-                        !isVideoWatched[row.taskKey] && (
-                          <a
-                            href={row.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => handleWatchButtonClick(row.taskKey)}
-                          >
-                            <button className="task-button">Video Watch</button>
-                          </a>
-                        )}
-                      {!hasWatched[row.taskKey] &&
-                        isVideoWatched[row.taskKey] && (
-                          <button
-                            className="task-button"
-                            onClick={() => handleCheckButtonClick(row.taskKey)}
-                          >
-                            Check
-                          </button>
-                        )}
-                      {hasWatched[row.taskKey] && <p>Task Completed!</p>}
-                    </div>
-                  ))}
-                </div>
-                <div className="tasks">
-                  <div className="px-4 mt-6 flex justify-between gap-2">
-                    <div className="daily rounded-lg px-4 py-2 h-20 w-full relative flex justify-between items-center">
-                      <span className="text-white">Daily Rewards</span>
-                      <button className="btn bg-blue-500 text-white font-semibold hover:bg-yellow-400" onClick={togglePopup}>
-                        Show Rewards
-                      </button>
-                    </div>
-                  </div>
-                  {showPopup && <DailyRewards togglePopup={togglePopup} />}
-                </div>
-                <br />
-                <div className="px-4 py-2 items-center space-x-2">
-                  <p style={{ textAlign: "left" }}>Tasks List</p>
-                </div>
+        <div className="mt-4 bg-[#f3ba2f] rounded-t-[48px] relative">
+          <div className="absolute inset-0 bg-[#1d2025] rounded-t-[46px]">
+            <div className="px-6 py-4">
+              <div className="flex justify-center py-4 ">
+                <h1 className="font-poppins">UNITRADE</h1>
+                <img src={tick} alt="" style={{ width: "20px" }} />
+              </div>
+              <p className="text-left mt-6 text-xl font-poppins">EARN</p>
+              <h1 className="text-center text-3xl text-white shadow-lg font-bold font-poppins">
+                COIN QUESTS 0/10
+              </h1>
 
-                <div className="tasks-container">
-                  {socials.map((social, index) => (
-                    <div key={index} className="task-row">
-                      <div
-                        className="task-info"
-                        style={{ display: "flex", alignItems: "center" }}
-                      >
-                        <img
-                          src={social.img}
-                          alt="image"
-                          style={{ marginRight: "10px", width: "71px" }}
-                        />
-                        <div>
-                          <h3 style={{ margin: 0 }}>{social.title}</h3>
-                          <p style={{ margin: 0 }}>{social.description}</p>
-                        </div>
-                      </div>
-                      <a
-                        href={social.socialUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <button className="task-button">Follow</button>
-                      </a>
+              <div className="space-y-4 mt-6">
+                {rows.map((row, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-black p-4 rounded-lg shadow-lg font-poppins "
+                  >
+                    <div className="flex items-center font-poppins">
+                      <img
+                        src={row.img}
+                        alt="youtube"
+                        className="w-12 h-12 mr-4"
+                      />
+                      <h3 className="text-lg font-poppins">{row.title}</h3>
                     </div>
-                  ))}
-                </div>
-                <br />
+                    {!hasWatched[row.taskKey] &&
+                      !isVideoWatched[row.taskKey] && (
+                        <a
+                          href={row.videoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => handleWatchButtonClick(row.taskKey)}
+                          className="bg-white text-black px-4 py-2 rounded-lg font-poppins"
+                        >
+                          Watch
+                        </a>
+                      )}
+                    {!hasWatched[row.taskKey] &&
+                      isVideoWatched[row.taskKey] && (
+                        <button
+                          onClick={() => handleCheckButtonClick(row.taskKey)}
+                          className="bg-blue-500 c px-4 py-2 rounded-lg font-poppins"
+                        >
+                          Check
+                        </button>
+                      )}
+                    {hasWatched[row.taskKey] && (
+                      <p className="text-green-500">Completed</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-4 mt-4">
+                {socials.map((social, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-black-900 p-4 rounded-lg shadow-lg"
+                  >
+                    <div className="flex items-center">
+                      <img
+                        src={social.img}
+                        alt={social.title}
+                        className="w-12 h-12 mr-4"
+                      />
+                      <h3 className="text-lg">{social.title}</h3>
+                    </div>
+                    <a
+                      href={social.socialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-white text-black px-4 py-2 rounded-lg"
+                    >
+                      Follow
+                    </a>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

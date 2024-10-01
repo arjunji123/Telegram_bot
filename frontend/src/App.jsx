@@ -39,10 +39,10 @@ function App() {
 
           {/* Protected Routes */}
           {/* <Route element={<ProtectedRoute loggedIn={loggedIn} />}> */}
-            <Route path="/home" element={<Home />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/friend" element={<Friend />} />
-            <Route path="/withdrawal" element={<Withdrawal />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/friend" element={<Friend />} />
+          <Route path="/withdrawal" element={<Withdrawal />} />
           {/* </Route> */}
         </Routes>
 
