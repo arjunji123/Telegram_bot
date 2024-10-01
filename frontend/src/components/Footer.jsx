@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Home from "../Img/home.png";
 import Tasks from "../Img/tasks.png";
 import Invite from "../Img/invite.webp";
-import Coin from "../images/hamster-coin.png";
+import logo from "../images/logo.png";
 
 function Footer() {
   return (
@@ -28,7 +28,7 @@ function Footer() {
       </div>
       <div className="text-center text-[#85827d] w-1/5">
         <Link className="mt-1" to="/withdrawal">
-          <img src={Coin} alt="" className="w-8 h-8 mx-auto" />
+          <img src={logo} alt="" className="w-8 h-8 mx-auto" />
           Withdrawal
         </Link>
       </div>

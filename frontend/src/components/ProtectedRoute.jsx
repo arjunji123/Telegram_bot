@@ -3,7 +3,8 @@ import { Navigate, Outlet } from "react-router-dom";
 
 function ProtectedRoute({ loggedIn, toast }) {
   if (!loggedIn) {
-    toast.info("Please log in to access this page.", {
+    toast.info("Please log in to access this page.", 
+      {
       position: "top-center",
       autoClose: 3000,
       hideProgressBar: false,
@@ -14,7 +15,6 @@ function ProtectedRoute({ loggedIn, toast }) {
     });
     return <Navigate to="/" />;
   }
-
   return <Outlet />;
 }
 
