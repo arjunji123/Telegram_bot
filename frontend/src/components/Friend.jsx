@@ -3,8 +3,7 @@ import axios from "axios";
 import Invite from "../Img/invite.webp";
 import "../Styles/Friends.css";
 
-function Friend(){
-  const [showPopup, setShowPopup] = useState(false);
+function Friend() {
   const [referralLink, setReferralLink] = useState("");
 
   useEffect(() => {
@@ -41,10 +40,6 @@ function Friend(){
     fetchReferralLink();
   }, []);
 
-  const handleInviteClick = () => {
-    setShowPopup(true);
-  };
-
   const handleShareClick = () => {
     if (referralLink) {
       window.open(
@@ -62,10 +57,6 @@ function Friend(){
     } else {
       alert("Referral link is not available yet.");
     }
-  };
-
-  const closePopup = () => {
-    setShowPopup(false);
   };
 
   return (
@@ -104,31 +95,49 @@ function Friend(){
                     <p>Earn 10% from buddies' earnings</p>
                     <p>Plus an extra 2.5% from their referrals</p>
                   </div>
-                  <button className="invite-button" onClick={handleInviteClick}>
-                    Invite Friends
-                  </button>
-
-                  {showPopup && (
-                    <div className="popup">
-                      <div className="popup-content">
-                        <button
-                          className="share-button"
-                          onClick={handleShareClick}
-                        >
-                          Share
-                        </button>
-                        <button
-                          className="copy-button"
-                          onClick={handleCopyClick}
-                        >
-                          Copy Link
-                        </button>
-                        <button className="close-popup" onClick={closePopup}>
-                          Close
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {/* Updated buttons for styling */}
+                  <div className="flex justify-between items-center px-4 py-2 mt-8">
+                    <button
+                      className="flex items-center justify-center bg-[#4a5df0] text-white py-2 px-4 rounded-full"
+                      onClick={handleShareClick}
+                      style={{ width: "80%", fontSize: "16px" }}
+                    >
+                      <span>Invite a friend</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="ml-2 h-6 w-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v7m0 0v7m0-7h7m-7 0H5"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      className="flex items-center justify-center bg-[#4a5df0] text-white p-2 rounded-full ml-2"
+                      onClick={handleCopyClick}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="h-6 w-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8 9h12M8 13h12m-7 4h7M5 9h.01M5 13h.01M5 17h.01"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
