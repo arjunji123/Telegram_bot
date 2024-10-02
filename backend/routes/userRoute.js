@@ -1,4 +1,7 @@
 const express = require("express");
+const Model = require("../models/userModel");
+const module_slug = Model.module_slug;
+
 const {
   checkAdminLoginOrDashboard,
   showLogin,
@@ -12,6 +15,8 @@ const {
   updatePassword,
   updateProfile,
   allUsers,
+  addFrom,
+  createRecord,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -51,6 +56,14 @@ router.route("/password/update").post(isAuthenticatedUser, updatePassword);
 router.route("/me/update").post(isAuthenticatedUser, updateProfile);
 
 router.route("/users").get(isAuthenticatedUser, allUsers);
+
+router
+  .route("/" + module_slug + "/add")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), addFrom);
+
+router
+  .route("/" + module_slug + "/add")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), createRecord);
 
 /*******REST API*******/
 

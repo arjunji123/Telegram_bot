@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const db = require("../config/mysql_database");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
-const referralCode = "";
+
 const registerSchema = Joi.object({
   name: Joi.string().required().max(50),
   email: Joi.string().email().required().max(255),
@@ -17,13 +17,110 @@ const registerSchema = Joi.object({
 });
 
 // Register a user
+// exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
+//   const { name, mobile, email, password, role } = req.body;
+//   const hashedPassword = await bcrypt.hash(password, 10);
+//   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+//   const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+//   try {
+//     await registerSchema.validateAsync(req.body, {
+//       abortEarly: false,
+//       allowUnknown: true,
+//     });
+//   } catch (error) {
+//     // Joi validation failed, send 400 Bad Request with error details
+//     return next(
+//       new ErrorHandler(
+//         error.details.map((d) => d.message),
+//         400
+//       )
+//     );
+//   }
+
+//   // Check if email or mobile number already exists
+//   const existingEmail = await db.query("SELECT * FROM users WHERE email = ?", [
+//     email,
+//   ]);
+//   const existingMobile = await db.query(
+//     "SELECT * FROM users WHERE mobile = ?",
+//     [mobile]
+//   );
+
+//   if (existingEmail[0].length > 0) {
+//     // If email already exists, send a 400 Bad Request response
+//     return next(new ErrorHandler("Email already exists", 400));
+//   }
+
+//   if (existingMobile[0].length > 0) {
+//     // If mobile number already exists, send a 400 Bad Request response
+//     return next(new ErrorHandler("Mobile number already exists", 400));
+//   }
+
+//   // Generate a unique referral code for the new user
+//   // const referral_code = crypto.randomBytes(4).toString("hex");
+
+//   // // Check if the referral code exists
+//   // let refferal_id = null;
+//   // if (referralCode) {
+//   //   const referrer = await db.query(
+//   //     "SELECT * FROM users WHERE referral_code = ?",
+//   //     [referralCode]
+//   //   );
+//   //   if (referrer[0].length > 0) {
+//   //     refferal_id = referralCode;
+//   //   } else {
+//   //     return next(new ErrorHandler("Invalid referral code", 400));
+//   //   }
+//   // }
+
+//   // Proceed with user creation if both email and mobile number do not exist
+
+//   const userData = {
+//     name,
+//     mobile,
+//     email,
+//     password: hashedPassword,
+//     role,
+//     // referral_code,
+//     // refferal_id,
+//     created_at,
+//     updated_at,
+//   };
+//   const userInsert = await db.query("INSERT INTO users SET ?", userData);
+
+//   // Get the ID of the last inserted row
+//   const lastInsertId = userInsert[0].insertId;
+
+//   // Fetch the latest inserted user data using the ID
+//   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+//     lastInsertId,
+//   ]);
+//   const user = userDetail[0][0];
+//   // Assuming `user` is the object returned from MySQL query
+//   const token = User.generateToken(user.id); // Adjust as per your user object structure
+
+//   sendToken(user, token, 201, res);
+// });
+// Function to generate a unique referral code
+const generateReferralCode = (length = 8) => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let referralCode = "";
+  for (let i = 0; i < length; i++) {
+    referralCode += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return referralCode;
+};
+
+// Register a user
 exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
-  const { name, mobile, email, password } = req.body;
+  const { name, mobile, email, password, role, referralCode } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
   const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
 
   try {
+    // Validate the request body with Joi schema
     await registerSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
@@ -48,59 +145,76 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   );
 
   if (existingEmail[0].length > 0) {
-    // If email already exists, send a 400 Bad Request response
     return next(new ErrorHandler("Email already exists", 400));
   }
 
   if (existingMobile[0].length > 0) {
-    // If mobile number already exists, send a 400 Bad Request response
     return next(new ErrorHandler("Mobile number already exists", 400));
   }
 
-  // Generate a unique referral code for the new user
-  const referral_code = crypto.randomBytes(4).toString("hex");
+  // Initialize parentId to null
+  let parentId = null;
 
-  // Check if the referral code exists
-  let referred_by = null;
+  // If a referralCode is provided, find the parent user
   if (referralCode) {
-    const referrer = await db.query(
-      "SELECT * FROM users WHERE referral_code = ?",
+    const [parentRows] = await db.query(
+      "SELECT id FROM users WHERE referral_code = ?",
       [referralCode]
     );
-    if (referrer[0].length > 0) {
-      referred_by = referralCode;
+
+    // Check if the referral code is valid
+    if (parentRows.length > 0) {
+      parentId = parentRows[0].id; // Set parentId to the user with this referral code
     } else {
-      return next(new ErrorHandler("Invalid referral code", 400));
+      return next(new ErrorHandler("Invalid referral code", 400)); // Handle invalid referral code
     }
   }
 
-  // Proceed with user creation if both email and mobile number do not exist
+  // Generate a unique referral code for the new user
+  const newReferralCode = generateReferralCode();
 
+  // Prepare user data
   const userData = {
     name,
     mobile,
     email,
     password: hashedPassword,
-    referral_code,
-    referred_by,
+    role,
+    referral_code: newReferralCode, // Save the generated referral code
     created_at,
     updated_at,
   };
-  const userInsert = await db.query("INSERT INTO users SET ?", userData);
 
-  // Get the ID of the last inserted row
+  // Insert user into the database
+  const userInsert = await db.query("INSERT INTO users SET ?", userData);
   const lastInsertId = userInsert[0].insertId;
 
-  // Fetch the latest inserted user data using the ID
+  // Now call addUser to manage referrals and points
+  if (parentId) {
+    try {
+      // Add the new user and handle referral system, points logic, etc.
+      await addUser(newReferralCode, parentId);
+    } catch (err) {
+      return next(new ErrorHandler(err.message, 400));
+    }
+  }
+
+  // Fetch the newly inserted user
   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
     lastInsertId,
   ]);
   const user = userDetail[0][0];
-  // Assuming `user` is the object returned from MySQL query
-  const token = User.generateToken(user.id); // Adjust as per your user object structure
 
+  // Generate token and send response
+  const token = User.generateToken(user.id); // Adjust based on your User model
   sendToken(user, token, 201, res);
 });
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 // Login user
 exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {

@@ -8,6 +8,16 @@ const crypto = require("crypto");
 const db = require("../config/mysql_database");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
+const Model = require("../models/userModel");
+const QueryModel = require("../models/queryModel");
+
+const table_name = Model.table_name;
+const module_title = Model.module_title;
+const module_single_title = Model.module_single_title;
+const module_add_text = Model.module_add_text;
+const module_edit_text = Model.module_edit_text;
+const module_slug = Model.module_slug;
+const module_layout = Model.module_layout;
 
 const registerSchema = Joi.object({
   name: Joi.string().required().max(50),
@@ -17,7 +27,7 @@ const registerSchema = Joi.object({
 
 // Register a user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
-  const { name, mobile, email, password } = req.body;
+  const { name, mobile, email, password, role } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
   const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
@@ -98,7 +108,7 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 
   // Find user by email
   const userData = await db.query(
-    "SELECT * FROM admin WHERE email = ? limit 1",
+    "SELECT * FROM users WHERE email = ? limit 1",
     [email]
   );
   //console.log(userData);
@@ -356,8 +366,69 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   const users = await db.query(
-    'SELECT id, name, mobile, email, created_at, DATE_FORMAT(created_at, "%d-%m-%Y") AS created_date FROM users'
+    'SELECT id,name,email,created_at,DATE_FORMAT(created_at, "%d-%m-%Y") AS created_date FROM users  WHERE role = ?',
+    ["user"]
   );
-  // console.log(users);
-  res.render("users/index", { layout: "layouts/main", title: "Users", users });
+
+  res.render(module_slug + "/index", {
+    layout: module_layout,
+    title: module_single_title + " " + module_add_text,
+    module_slug,
+    users,
+  });
+});
+
+exports.addFrom = catchAsyncErrors(async (req, res, next) => {
+  res.render(module_slug + "/add", {
+    layout: module_layout,
+    title: module_single_title + " " + module_add_text,
+    module_slug,
+  });
+});
+
+//create a new blog
+exports.createRecord = catchAsyncErrors(async (req, res, next) => {
+  // console.log("hi", req.body);
+
+  try {
+    await Model.insertSchema.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
+  } catch (error) {
+    // Joi validation failed, send 400 Bad Request with error details
+    return next(
+      new ErrorHandler(
+        error.details.map((d) => d.message),
+        400
+      )
+    );
+  }
+
+  // const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+  // const updatedSlug = req.body.slug || generateSlug(req.body.title);
+
+  if (req.file) {
+    req.body.image = req.file.filename;
+  }
+
+  const insertData = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password, // Be sure to hash the password before saving
+    status: req.body.status,
+    upi_id: req.body.upi,
+    mobile: req.body.mobile,
+    role: "user",
+  };
+
+  const blog = await QueryModel.saveData(table_name, insertData, next);
+
+  req.flash("msg_response", {
+    status: 200,
+    message: "Successfully added " + module_single_title,
+  });
+
+  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
 });

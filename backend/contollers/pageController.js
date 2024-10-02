@@ -161,6 +161,7 @@ exports.getSingleRecord = catchAsyncErrors(async(req, res,next) => {
 });
 
 
+
 exports.deleteImage = catchAsyncErrors(async(req,res,next) => {
    const updateData = {
         image: ""
