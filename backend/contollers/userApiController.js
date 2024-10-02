@@ -18,7 +18,7 @@ const registerSchema = Joi.object({
 
 // Register a user
 exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
-  const { name, mobile, email, password, role } = req.body;
+  const { name, mobile, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
   const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
@@ -38,15 +38,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 
-  // // Check if email already exists
-  // const existingUser = await db.query("SELECT * FROM users WHERE email = ?", [
-  //   email,
-  // ]);
-
-  // if (existingUser[0].length > 0) {
-  //   // If email already exists, send a 400 Bad Request response
-  //   return next(new ErrorHandler("Email already exists", 400));
-  // }
   // Check if email or mobile number already exists
   const existingEmail = await db.query("SELECT * FROM users WHERE email = ?", [
     email,
@@ -90,7 +81,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     mobile,
     email,
     password: hashedPassword,
-    role,
     referral_code,
     referred_by,
     created_at,

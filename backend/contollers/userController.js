@@ -17,7 +17,7 @@ const registerSchema = Joi.object({
 
 // Register a user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
-  const { name, mobile, email, password, role } = req.body;
+  const { name, mobile, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
   const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
@@ -52,7 +52,6 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     mobile,
     email,
     password: hashedPassword,
-    role,
     created_at,
     updated_at,
   };
@@ -99,9 +98,11 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 
   // Find user by email
   const userData = await db.query(
-    "SELECT * FROM users WHERE email = ? limit 1",
+    "SELECT * FROM admin WHERE email = ? limit 1",
     [email]
   );
+  //console.log(userData);
+
   const user = userData[0][0];
 
   // If user not found
@@ -355,8 +356,7 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   const users = await db.query(
-    'SELECT id,name,mobile,email,created_at,DATE_FORMAT(created_at, "%d-%m-%Y") AS created_date FROM users  WHERE role = ?',
-    ["user"]
+    'SELECT id, name, mobile, email, created_at, DATE_FORMAT(created_at, "%d-%m-%Y") AS created_date FROM users'
   );
   // console.log(users);
   res.render("users/index", { layout: "layouts/main", title: "Users", users });
