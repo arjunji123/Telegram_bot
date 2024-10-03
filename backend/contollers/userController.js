@@ -12,6 +12,8 @@ const Model = require("../models/userModel");
 const QueryModel = require("../models/queryModel");
 
 const table_name = Model.table_name;
+const table_name2 = Model.table_name2;
+
 const module_title = Model.module_title;
 const module_single_title = Model.module_single_title;
 const module_add_text = Model.module_add_text;
@@ -20,17 +22,17 @@ const module_slug = Model.module_slug;
 const module_layout = Model.module_layout;
 
 const registerSchema = Joi.object({
-  name: Joi.string().required().max(50),
+  user_name: Joi.string().required().max(50),
   email: Joi.string().email().required().max(255),
   password: Joi.string().min(8).required(),
 });
 
 // Register a user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
-  const { name, mobile, email, password, role } = req.body;
+  const { user_name, mobile, email, password, user_type } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
-  const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
-  const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const date_modified = new Date().toISOString().slice(0, 19).replace("T", " ");
 
   try {
     await registerSchema.validateAsync(req.body, {
@@ -58,12 +60,12 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
   }
 
   const userData = {
-    name,
+    user_name,
     mobile,
     email,
     password: hashedPassword,
-    created_at,
-    updated_at,
+    date_created,
+    date_modified,
   };
   const userInsert = await db.query("INSERT INTO users SET ?", userData);
 
@@ -276,6 +278,7 @@ exports.getUserDetail = catchAsyncErrors(async (req, res, next) => {
   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
     req.user.id,
   ]);
+
   const user = userDetail[0][0];
   const message = req.flash("msg_response");
   res.render("users/profile", {
@@ -335,8 +338,8 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
 
 // update user profile
 exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
-  await db.query("UPDATE users SET name = ?  WHERE id = ?", [
-    req.body.name,
+  await db.query("UPDATE users SET user_name = ?  WHERE id = ?", [
+    req.body.user_name,
     req.user.id,
   ]);
 
@@ -366,7 +369,7 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   const users = await db.query(
-    'SELECT id,name,email,created_at,DATE_FORMAT(created_at, "%d-%m-%Y") AS created_date FROM users  WHERE role = ?',
+    'SELECT id,user_name,email,mobile,date_created,DATE_FORMAT(date_created, "%d-%m-%Y") AS date_created FROM users  WHERE user_type = ?',
     ["user"]
   );
 
@@ -405,7 +408,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     );
   }
 
-  // const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
   // const updatedSlug = req.body.slug || generateSlug(req.body.title);
 
@@ -414,16 +417,22 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   }
 
   const insertData = {
-    name: req.body.name,
+    user_name: req.body.user_name,
     email: req.body.email,
+    mobile: req.body.mobile,
     password: req.body.password, // Be sure to hash the password before saving
     status: req.body.status,
-    upi_id: req.body.upi,
-    mobile: req.body.mobile,
-    role: "user",
-  };
+    date_created: date_created,
 
-  const blog = await QueryModel.saveData(table_name, insertData, next);
+    user_type: "user",
+    date_modified: date_created,
+  };
+  const insertData2 = {
+    upi_id: req.body.upi,
+    referral_by: req.body.referral_by,
+  };
+  const user = await QueryModel.saveData(table_name, insertData, next);
+  const blog = await QueryModel.saveData(table_name2, insertData2, next);
 
   req.flash("msg_response", {
     status: 200,

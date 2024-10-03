@@ -11,7 +11,7 @@ function Signup() {
     email: "",
     password: "",
     mobile: "",
-    role: "user",
+    user_type: "user",
   });
 
   const [errors, setErrors] = useState({});

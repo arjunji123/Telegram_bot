@@ -31,6 +31,7 @@ const getResetPasswordToken = () => {
 const Joi = require("joi");
 
 const table_name = "users";
+const table_name2 = "user_data";
 
 const module_title = "Users";
 const module_single_title = "User";
@@ -39,7 +40,7 @@ const module_edit_text = "Edit";
 const module_slug = "users";
 const module_layout = "layouts/main";
 const insertSchema = Joi.object({
-  name: Joi.string().required().max(255),
+  user_name: Joi.string().required().max(255),
   email: Joi.string().required(),
 });
 module.exports = {
@@ -47,6 +48,7 @@ module.exports = {
   comparePasswords,
   getResetPasswordToken,
   table_name,
+  table_name2,
   insertSchema,
   module_title,
   module_single_title,
