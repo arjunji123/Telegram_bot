@@ -10,7 +10,16 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const Model = require("../models/userModel");
 const QueryModel = require("../models/queryModel");
-
+const { v4: uuidv4 } = require("uuid");
+// const pool = require('../config/db');  // Assuming you're using MySQL pool
+const {
+  findAvailableParentByReferral,
+  findNextAvailableParent,
+  updatePendingCoins,
+  distributeCoinsToParents,
+  hasBothChildren,
+  addUser,
+} = require("../utils/treeLogic");
 const table_name = Model.table_name;
 const table_name2 = Model.table_name2;
 
@@ -389,17 +398,66 @@ exports.addFrom = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-//create a new blog
-exports.createRecord = catchAsyncErrors(async (req, res, next) => {
-  // console.log("hi", req.body);
+// create a new blog
+// exports.createRecord = catchAsyncErrors(async (req, res, next) => {
+//   // console.log("hi", req.body);
 
+//   try {
+//     await Model.insertSchema.validateAsync(req.body, {
+//       abortEarly: false,
+//       allowUnknown: true,
+//     });
+//   } catch (error) {
+//     // Joi validation failed, send 400 Bad Request with error details
+//     return next(
+//       new ErrorHandler(
+//         error.details.map((d) => d.message),
+//         400
+//       )
+//     );
+//   }
+
+//   const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+//   // const updatedSlug = req.body.slug || generateSlug(req.body.title);
+
+//   if (req.file) {
+//     req.body.image = req.file.filename;
+//   }
+
+//   const insertData = {
+//     user_name: req.body.user_name,
+//     email: req.body.email,
+//     mobile: req.body.mobile,
+//     password: req.body.password, // Be sure to hash the password before saving
+//     status: req.body.status,
+//     date_created: date_created,
+
+//     user_type: "user",
+//     date_modified: date_created,
+//   };
+//   const insertData2 = {
+//     upi_id: req.body.upi,
+//     referral_by: req.body.referral_by,
+//   };
+//   const user = await QueryModel.saveData(table_name, insertData, next);
+//   const blog = await QueryModel.saveData(table_name2, insertData2, next);
+
+//   req.flash("msg_response", {
+//     status: 200,
+//     message: "Successfully added " + module_single_title,
+//   });
+
+//   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+// });
+exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   try {
+    // Validate the request body with Joi schema
     await Model.insertSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
     });
   } catch (error) {
-    // Joi validation failed, send 400 Bad Request with error details
     return next(
       new ErrorHandler(
         error.details.map((d) => d.message),
@@ -410,34 +468,76 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
 
   const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-  // const updatedSlug = req.body.slug || generateSlug(req.body.title);
-
   if (req.file) {
     req.body.image = req.file.filename;
   }
 
+  // Step 2: Prepare data for insertion into the user table
   const insertData = {
     user_name: req.body.user_name,
     email: req.body.email,
     mobile: req.body.mobile,
-    password: req.body.password, // Be sure to hash the password before saving
+    password: await bcrypt.hash(req.body.password, 10),
     status: req.body.status,
     date_created: date_created,
-
     user_type: "user",
     date_modified: date_created,
   };
-  const insertData2 = {
-    upi_id: req.body.upi,
-    referral_by: req.body.referral_by,
-  };
-  const user = await QueryModel.saveData(table_name, insertData, next);
-  const blog = await QueryModel.saveData(table_name2, insertData2, next);
 
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully added " + module_single_title,
-  });
+  try {
+    // Step 3: Insert the user data into the database
+    const user = await QueryModel.saveData(table_name, insertData, next);
+    console.log(user);
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+    const referralBy = req.body.referral_by;
+
+    let parentId = null;
+    let position = null;
+
+    // Step 1: Handle referral logic before inserting the user
+    if (referralBy) {
+      const parentInfo = await findAvailableParentByReferral(referralBy);
+      console.log("iii==>" + parentInfo);
+      if (parentInfo) {
+        parentId = parentInfo.parentId; // Parent ID of the referred user
+        position = parentInfo.position; // Position (left or right child)
+      } else {
+        return next(
+          new ErrorHandler(
+            "No available parent found for the given referral code.",
+            400
+          )
+        );
+      }
+    }
+    // Prepare data for another related table (e.g., blog)
+    const insertData2 = {
+      user_id: user.id,
+      upi_id: req.body.upi,
+      referral_by: req.body.referral_by,
+      referral_code: req.body.referral_code || generateReferralCode(),
+      parent_id: parentId, // Assign parent_id if available
+      leftchild_id: position === "leftchild_id" ? parentId : null,
+      rightchild_id: position === "rightchild_id" ? parentId : null,
+      // You can also assign the position here if needed
+    };
+    // Step 4: Insert other related data (for blog or another table)
+    const blog = await QueryModel.saveData(table_name2, insertData2, next);
+
+    // Success response
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully added " + module_single_title,
+    });
+
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (err) {
+    console.error("Error saving data:", err);
+    return next(new ErrorHandler("Error while saving user data.", 500));
+  }
 });
+
+// Function to generate a unique referral code
+function generateReferralCode() {
+  return crypto.randomBytes(3).toString("hex").toUpperCase(); // Generates a random 6-character referral code
+}
