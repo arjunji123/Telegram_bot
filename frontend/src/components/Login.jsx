@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "./LoginValidation";
 import "../Styles/LoginDesign.css";
-import login from "../Img/logo.png";
+import {  logo } from '../images';
 function Login({ setLoggedIn }) {
   const [values, setValues] = useState({
     emailOrMobile: "",
@@ -87,68 +87,79 @@ function Login({ setLoggedIn }) {
   }, []);
 
   return (
-    <div className="bg-black flex justify-center">
-      <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
-          <div
-            className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]"
-            style={{ padding: "65px" }}
-          >
-            <div
-              className="absolute px-4 z-10"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <div className="top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div style={{ marginLeft: "110px", marginBottom: "-6px" }}>
-                  <img
-                    src={login}
-                    alt=""
-                    className="mx-auto h-40 px-4 py-2 items-center space-x-2"
-                  />
-                </div>
-                <h1> {firstName}</h1>
-                <div className="signin">
-                  <div className="content">
-                    <h2>Sign In</h2>
-                    <form onSubmit={handleSubmit}>
-                      <div className="form">
-                        <div className="inputBox">
-                          <input
-                            type="tel"
-                            name="emailOrMobile"
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Email / Phone No.</i>
-                        </div>
+<div className="bg-white flex justify-center items-center min-h-screen">
+  <div className="w-full max-w-lg bg-black text-white h-full md:h-screen shadow-2xl overflow-hidden">
 
-                        <div className="inputBox">
-                          <input
-                            type="password"
-                            name="password"
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Password</i>
-                        </div>
-                        <div className="inputBox">
-                          <button type="submit">Login</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <br />
+    {/* Logo and Welcome Section */}
+    <div className="p-10  rounded-t-2xl shadow-lg relative">
+      <div className="absolute top-0 left-0 w-full h-1 "></div> {/* Classy glowing bar */}
+      <div className="flex justify-center py-4 space-x-1 ">
+                <h1 className="font-poppins text-2xl font-extrabold">UNITRADE</h1>
+                <img src={logo} alt="logo" className="w-6 h-6 mt-0.5" />
               </div>
-            </div>
-          </div>
-        </div>
+      <h1 className="mt-4 text-3xl font-semibold text-[#e0e0e0] tracking-wide">{firstName}</h1>
+      <p className="text-[#b0b0b0] text-sm mt-2">Unitrade smart. Unitrade efficiently.</p>
+    </div>
+
+    {/* Form Section */}
+    <div className="p-8 space-y-8">
+      <h2 className="text-4xl font-bold text-center mb-6 tracking-tight text-[#eaeaea]">Log In</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6 px-4 sm:px-8 max-w-md mx-auto">
+  
+  {/* Email/Phone Input */}
+  <div className="relative">
+    <input
+      type="text"
+      name="emailOrMobile"
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="Email / Phone Number"
+    />
+  </div>
+
+  {/* Password Input */}
+  <div className="relative">
+    <input
+      type="password"
+      name="password"
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="Password"
+    />
+  </div>
+
+  {/* Login Button */}
+  <div className="flex justify-center">
+    <button
+      type="submit"
+      className="w-full py-4 border-white border-2 text-white font-semibold rounded-xl shadow-md hover:opacity-90 transform transition-all duration-300 hover:scale-105"
+    >
+      Log In
+    </button>
+  </div>
+  
+</form>
+
+
+      {/* Forgot Password */}
+      <div className="text-center">
+        <a href="#" className="text-sm text-[#b0b0b0] hover:text-white transition-all">Forgot Password?</a>
       </div>
     </div>
+
+    {/* New Account or Signup */}
+    <div className="bg-[#111113] py-6 text-center rounded-b-2xl">
+      <p className="text-[#909090]">
+        New to Unitrade? 
+        <a href="/" className="text-white font-semibold hover:underline ml-1">Create an Account</a>
+      </p>
+    </div>
+  </div>
+</div>
+
   );
 }
 

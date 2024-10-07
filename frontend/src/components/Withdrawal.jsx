@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../Styles/Tasks.css";
-import rupees from "../Img/rupees.png";
+import Logo from "../utils/Logo";
 import QRCode from "qrcode";
+import { BiSolidDownvote , BiSolidUpvote , BiHistory } from "react-icons/bi";
+import { BsStars, BsPersonFillCheck, BsCurrencyRupee  } from "react-icons/bs";
+import { AiFillCaretDown } from "react-icons/ai";
+import { RiVerifiedBadgeLine } from "react-icons/ri";
 
 
 function Withdrawal() {
@@ -30,86 +34,91 @@ function Withdrawal() {
     setInputValue(e.target.value.trim());
   };
   return (
-    <div className="bg-black flex justify-center">
-      <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
-          <div className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-            <div className="px-4 z-10">
-              <div className=" top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div className="px-4 py-2 items-center space-x-2">
-                  <img src={rupees} alt="" className="mx-auto w-40 h-40" />
+    <div className="bg-white flex justify-center  overflow-y-auto">
+      <div className="w-full bg-black text-white  flex flex-col max-w-xl ">
+        <div className="flex-grow  relative z-0 ">
+          <div className="px-4  space-y-4 z-10">
+            <Logo />
+            <div className="flex pb-8 justify-center font-poppins leading-3 space-x-1 text-5xl font-extrabold">
+              <p>U</p>
+              <p className="">700,00000</p>
+            </div>
+            <div className="grid grid-cols-4   ">
+              <div className="text-white  mx-auto cursor-pointer">
+                <div className="rounded-full w-10 h-10 bg-[#303030] flex justify-center items-center">
+                <BiSolidDownvote  size={26} />
                 </div>
-                <div className="px-4 py-2 items-center space-x-2">
-                  <h1
-                    className="px-4 py-2 items-center space-x-2"
-                    style={{
-                      fontSize: 37,
-                      textAlign: "center",
-                      textShadow: "5px 6px 5px black",
-                    }}
-                  >
-                    Withdrawal coins
-                  </h1>
-                </div>
+                <span className="text-xs text-center ">Receive</span>
               </div>
-              <div className="px-4 py-2 items-center space-x-2">
-                <p style={{ textAlign: "left" }}>Co-companies List</p>
+              <div className="text-white mx-auto cursor-pointer">
+              <div className="rounded-full w-10 h-10 bg-[#303030] flex justify-center items-center">
+                <BiSolidUpvote size={26} />
+                    </div>
+                <span className="text-xs text-center">Send</span>
               </div>
-              <div className="tasks">
-                <div className="px-4 mt-6 flex justify-between gap-2">
-                  <div className="daily rounded-lg px-4 py-2 h-20 w-full relative flex justify-between items-center">
-                    <span className="text-white">Jems Henary</span>
-                    <span className="text-white">0.80rs/coin</span>
-                    <button className="btn bg-blue-500 text-white font-semibold hover:bg-green-500" onClick={togglePopup} >
-                      Withdrawal
-                    </button>
+              <div className="text-white  mx-auto cursor-pointer">
+              <div className="rounded-full w-10 h-10 bg-[#303030] flex justify-center items-center">
+                <BiHistory size={30}  /> </div>
+                <span className="text-xs text-center ">History</span> 
+              </div>
+              <div className="text-white  mx-auto cursor-pointer">
+              <div className="rounded-full w-10 h-10 bg-[#303030] flex justify-center items-center">
+                <BsStars size={22}  /></div>
+                <span className="text-xs text-center ">Points</span>  
+              </div>
+            </div>
+            <div className="w-2/3 border-1 border-[#f5eded] rounded-3xl h-28 md:h-36 mx-auto flex justify-center items-center">
+              <span className="text-3xl font-extrabold font-poppins text-[#f5eded]">WITHDRAW</span>
+            </div>
+
+            <p className="text-center text-sm text-[#f5eded] ">
+              Sell your points at your chosen price, anytime and anywhere. Get instant cash withdrawals with no delays!
+            </p>
+
+            {/* Divider */}
+            <hr className="border-gray-300 mb-4 w-11/12 mx-auto" />
+
+            {/* Co-Companies List */}
+            <div className="pb-16 flex flex-col space-y-4">
+              {[
+                { name: 'Jems Henary', rate: '85.1' },
+                { name: 'Kevin Potter', rate: '94.5' },
+                { name: 'Harry Gill', rate: '99.45' },
+                { name: 'Rosh Richard', rate: '90.4' },
+
+              ].map((company, index) => (
+                <div key={index} className=" rounded-lg  p-3 h-20 w-full relative flex justify-between items-center  transition duration-200 ease-in-out">
+                  <div className="flex">
+                    <BsPersonFillCheck size={28}/>
+                    <div class=" ml-1 space-y-1 ">
+                    <span className=" text-sm uppercase">{company.name}</span> 
+                    <p class=" font-bold leading-none font-sans flex text-lg"><BsCurrencyRupee />
+                   <span>{company.rate}</span> </p>
+                    <h3 class="text-xs uppercase text-[#d3cece]">limit 20k-80k uni coin</h3>
                   </div>
-                </div>
-              </div>
-              <div className="tasks">
-                <div className="px-4 mt-6 flex justify-between gap-2">
-                  <div className="daily rounded-lg px-4 py-2 h-20 w-full relative flex justify-between items-center">
-                    <span className="text-white">Kevin potter</span>
-                    <span className="text-white">0.90rs/coin</span>
-                    <button className="btn bg-blue-500 text-white font-semibold hover:bg-green-500" onClick={togglePopup}>
-                      Withdrawal
-                    </button>
+                  <RiVerifiedBadgeLine size={24} className="text-green-500"/>
                   </div>
+                  
+
+                  {/* <span className="text-white">{company.rate}</span> */}
+                  <button
+                    className="leading-none px-1 text-sm text-center rounded-md bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
+                    onClick={togglePopup} > 
+                    <span>  <AiFillCaretDown size={24} /> </span>
+                   <span className="m-1"> Sell</span> 
+                  </button>
                 </div>
-              </div>
-              <div className="tasks">
-                <div className="px-4 mt-6 flex justify-between gap-2">
-                  <div className="daily rounded-lg px-4 py-2 h-20 w-full relative flex justify-between items-center">
-                    <span className="text-white">Harry gill</span>
-                    <span className="text-white">0.89rs/coin</span>
-                    <button className="btn bg-blue-500 text-white font-semibold hover:bg-green-500" onClick={togglePopup}>
-                      Withdrawal
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="tasks">
-                <div className="px-4 mt-6 flex justify-between gap-2">
-                  <div className="daily rounded-lg px-4 py-2 h-20 w-full relative flex justify-between items-center">
-                    <span className="text-white">Davis rosh</span>
-                    <span className="text-white">1.5rs/coin</span>
-                    <button className="btn bg-blue-500 text-white font-semibold hover:bg-green-500" onClick={togglePopup}>
-                      Withdrawal
-                    </button>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Popup Modal */}
         {showPopup && (
-          <div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50"
-            onClick={togglePopup}
-          >
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50" onClick={togglePopup}>
             <div
               className="bg-gray-800 p-8 rounded-lg shadow-lg w-11/12 max-w-md relative"
-              onClick={(e) => e.stopPropagation()}  // Prevents closing the popup when clicking inside
+              onClick={(e) => e.stopPropagation()} // Prevents closing the popup when clicking inside
             >
               <button
                 onClick={togglePopup}
@@ -117,7 +126,7 @@ function Withdrawal() {
               >
                 &#x2715;
               </button>
-              <h2 className="text-xl font-semibold text-center mb-4 text-white">Withdrawal Money</h2>
+              <h2 className="text-xl font-semibold mx-auto mb-4 text-white">Withdrawal Money</h2>
               <input
                 type="text"
                 id="text"
@@ -130,18 +139,16 @@ function Withdrawal() {
                 <canvas id="qrcode" ref={qrRef}></canvas>
               </div>
               <div className="flex justify-center items-center py-3">
-              <button className="btn bg-slate-600 text-white font-semibold hover:border-gray-100 " >
-                      Submit
-                    </button>
+                <button className="btn bg-slate-600 text-white font-semibold hover:border-gray-100 transition duration-200 ease-in-out">
+                  Submit
+                </button>
               </div>
-          
             </div>
           </div>
         )}
-
-
       </div>
     </div>
+
   );
 }
 

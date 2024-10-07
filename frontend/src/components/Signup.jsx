@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Validation from "./LoginValidation";
 import "../Styles/LoginDesign.css";
-import login from "../Img/logo.png";
+import {  logo } from '../images';
 
 function Signup() {
   const [values, setValues] = useState({
@@ -63,117 +63,115 @@ function Signup() {
   };
 
   return (
-    <div className="bg-black flex justify-center">
-      <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
-          <div
-            className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]"
-            style={{ padding: "65px" }}
-          >
-            <div
-              className="absolute px-4 z-10"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <div className="top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div style={{ marginLeft: "110px", marginBottom: "-31px" }}>
-                  <img
-                    src={login}
-                    alt=""
-                    className="mx-auto h-40 px-4 py-2 items-center space-x-2"
-                  />
-                </div>
-                <br />
-                <div className="signin">
-                  <div className="content">
-                    <h2>Sign Up</h2>
+<div className="bg-white flex justify-center items-center min-h-screen overflow-y-auto">
+  <div className="w-full max-w-lg bg-black text-white h-full md:h-screen shadow-2xl ">
 
-                    <form onSubmit={handleSubmit}>
-                      <div className="form">
-                        {/* <div className="inputBox">
-                          <input
-                            type="text"
-                            name="name"
-                            value={values.name}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Name</i>
-                          {errors.name && (
-                            <span className="text-danger"> {errors.name}</span>
-                          )}
-                        </div> */}
-                        <div className="inputBox">
-                          <input
-                            type="tel"
-                            name="mobile"
-                            value={values.mobile}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Mobile No.</i>
-                          {errors.mobile && (
-                            <span className="text-danger">{errors.mobile}</span>
-                          )}
-                        </div>
-                        <div className="inputBox">
-                          <input
-                            type="email"
-                            name="email"
-                            value={values.email}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Email</i>
-                          {errors.email && (
-                            <span className="text-danger"> {errors.email}</span>
-                          )}
-                        </div>
-                        <div className="inputBox">
-                          <input
-                            type="password"
-                            name="password"
-                            value={values.password}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Password</i>
-                        </div>
-                        <div className="inputBox">
-                          <input
-                            type="tel"
-                            name="name"
-                            value={values.name}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>UPI id</i>
-                          {errors.name && (
-                            <span className="text-danger"> {errors.name}</span>
-                          )}
-                        </div>
-                        <div className="inputBox">
-                          <button type="submit">Signup</button>
-                        </div>
-                        {/* <div className="inputBox">
-                          <Link to="/">Login</Link>
-                        </div> */}
-                      </div>
-                    </form>
-                    {errors.general && (
-                      <span className="text-danger">{errors.general}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    {/* Logo and Welcome Section */}
+    <div className="px-10  shadow-lg relative">
+      <div className="flex justify-center py-4 space-x-1">
+        <h1 className="font-poppins text-2xl font-extrabold">UNITRADE</h1>
+        <img src={logo} alt="logo" className="w-6 h-6 mt-0.5" />
       </div>
     </div>
+
+    {/* Form Section */}
+    <div className="p-8 space-y-8">
+      <h2 className="text-4xl font-bold text-center mb-6 tracking-tight text-[#eaeaea]">Sign Up</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6 px-4 sm:px-8">
+  
+  {/* name  Input */}
+  <div className="relative">
+    <input
+      type="tel"
+      name="name"
+      value={values.name}
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="Name."
+    />
+  </div>
+  {/* Mobile Number Input */}
+  <div className="relative">
+    <input
+      type="tel"
+      name="mobile"
+      value={values.mobile}
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="Mobile No."
+    />
+  </div>
+
+  {/* Email Input */}
+  <div className="relative">
+    <input
+      type="email"
+      name="email"
+      value={values.email}
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="Email"
+    />
+  </div>
+
+  {/* Password Input */}
+  <div className="relative">
+    <input
+      type="password"
+      name="password"
+      value={values.password}
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="Password"
+    />
+  </div>
+
+  {/* UPI ID Input */}
+  <div className="relative">
+    <input
+      type="text"
+      name="upi"
+      value={values.upi}
+      onChange={handleInput}
+      required
+      className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+      placeholder="UPI ID"
+    />
+  </div>
+
+  {/* Submit Button */}
+  <div className="flex justify-center">
+    <button
+      type="submit"
+      className="w-full py-4 border-white border-2 text-white font-semibold rounded-xl shadow-md hover:opacity-90 transform transition-all duration-300 hover:scale-105"
+    >
+      Sign Up
+    </button>
+  </div>
+  
+</form>
+
+
+      {/* Error Message */}
+      {errors.general && <span className="text-red-500 text-center block mt-4">{errors.general}</span>}
+    </div>
+
+    {/* Footer Section */}
+    <div className="bg-[#111113] py-6 text-center ">
+      <p className="text-[#909090]">
+        Already have an account?
+        <a href="/login" className="text-white font-semibold hover:underline ml-1">Login</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+  
   );
 }
 
