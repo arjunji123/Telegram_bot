@@ -21,6 +21,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
@@ -65,6 +66,7 @@ app.use("/api/v1", quests);
 app.use("/api/v1", settings);
 app.use("/api/v1", faqs);
 app.use("/api/v1", testimonials);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(errorMiddleware);
 module.exports = app;

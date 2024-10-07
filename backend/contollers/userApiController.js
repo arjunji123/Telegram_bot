@@ -16,6 +16,15 @@ const registerSchema = Joi.object({
   referral_code: Joi.string().optional(), // User might enter a referral code
 });
 
+const generateReferralCode = (length = 8) => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let referralCode = "";
+  for (let i = 0; i < length; i++) {
+    referralCode += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return referralCode;
+};
+
 // Register a user
 // exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
 //   const { user_name, mobile, email, password } = req.body;
@@ -439,4 +448,49 @@ exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
   });
+});
+
+exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  // Check if a file was uploaded
+  if (!req.file) {
+    return next(new ErrorHandler("No file uploaded", 400));
+  }
+
+  // Get the uploaded file's filename
+  const pay_image = req.file.filename;
+
+  // Get user ID from route parameters
+  const user_id = req.params.id; // Now getting ID from the route parameter
+
+  // Debugging: Log user ID and image filename
+  console.log(`User ID from params: ${user_id}`);
+  console.log(`Image Filename: ${pay_image}`);
+
+  // Update the user data in the database
+  try {
+    const result = await db.query(
+      "UPDATE user_data SET pay_image = ? WHERE id = ?",
+      [
+        pay_image, // Store the filename in the database
+        user_id, // Use the user_id from the route parameter
+      ]
+    );
+
+    // Check if any rows were affected
+    if (result.affectedRows === 0) {
+      return next(
+        new ErrorHandler("No user found with the provided user ID", 404)
+      );
+    }
+
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message: "Screenshot uploaded successfully",
+      pay_image, // Optionally return the filename
+    });
+  } catch (error) {
+    console.error("Database update error:", error); // Log the error for debugging
+    return next(new ErrorHandler("Database update failed", 500));
+  }
 });

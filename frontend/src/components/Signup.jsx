@@ -13,6 +13,8 @@ function Signup() {
     password: "",
     confirmPassword: "",
     mobile: "",
+
+
     upi_id: "",
     referral_by: "02010C",
     user_type: "user",

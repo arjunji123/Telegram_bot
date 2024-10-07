@@ -21,9 +21,9 @@
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>Created</th>
+                            <th>Screenshot</th>
                         </tr>
                     </thead>
-
 
                     <tbody>
                         <% let serialNumber=1; %>
@@ -44,14 +44,21 @@
                                     <td>
                                         <%= user.date_created %>
                                     </td>
+                                    <td>
+                                        <% if (user.pay_image) { %>
+                                            <img src="http://localhost:4000/uploads/<%= user.pay_image %>"
+                                                alt="User Screenshot" style="max-width: 100px; max-height: 100px;" />
+                                            <% } else { %>
+                                                No screenshot uploaded
+                                                <% } %>
+                                    </td>
+
+
                                 </tr>
                                 <% }); %>
-
-
                     </tbody>
                 </table>
             </div>
         </div>
-
     </div>
 </div> <!-- end row -->

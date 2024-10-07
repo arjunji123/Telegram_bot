@@ -1,7 +1,22 @@
 const express = require("express");
+
+const multer = require("multer");
 const Model = require("../models/userModel");
 const module_slug = Model.module_slug;
 
+var Storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    console.log(file);
+    callback(null, "./uploads/");
+  },
+  filename: function (req, file, callback) {
+    console.log(file);
+    callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
+  },
+});
+
+var upload = multer({ storage: Storage });
+// Import multer for image upload
 const {
   checkAdminLoginOrDashboard,
   showLogin,
@@ -27,6 +42,7 @@ const {
   getUserDetailApi,
   updatePasswordApi,
   updateProfileApi,
+  uploadScreenshotApi,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -84,5 +100,12 @@ router
   .post(isApiAuthenticatedUser, updatePasswordApi);
 
 router.route("/api-me/update").put(isApiAuthenticatedUser, updateProfileApi);
+
+router.post(
+  "/upload-screenshot/:id",
+  isApiAuthenticatedUser, // This should come before the upload handler
+  upload.single("pay_image"),
+  uploadScreenshotApi
+);
 
 module.exports = router;
