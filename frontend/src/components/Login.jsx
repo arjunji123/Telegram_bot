@@ -119,7 +119,6 @@ function Login({ setLoggedIn }) {
     />
   </div>
 
-  {/* Password Input */}
   <div className="relative">
     <input
       type="password"
