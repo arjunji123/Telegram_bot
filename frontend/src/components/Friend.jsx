@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Invite from "../Img/invite.webp";
 import "../Styles/Friends.css";
+import { MdGroups } from "react-icons/md";
+import Logo from "../utils/Logo";
+import Footer from "./Footer";
 
 function Friend() {
   const [referralLink, setReferralLink] = useState("");
@@ -60,91 +63,64 @@ function Friend() {
   };
 
   return (
-    <div className="bg-black flex justify-center">
-      <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
-          <div className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-            <div className="px-4 z-10">
-              <div className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div className="px-4 py-2 items-center space-x-2">
-                  <h1
-                    className="px-4 py-2 items-center space-x-2"
-                    style={{ fontSize: 40, textAlign: "center" }}
-                  >
-                    Invite friends!
-                  </h1>
-                </div>
-                <div className="px-4 py-2 items-center space-x-2">
-                  <p style={{ textAlign: "center" }}>
-                    You and your friend will receive bonuses
-                  </p>
-                </div>
-                <hr />
-                <div className="invite-container">
-                  <div className="invite-header">
-                    <h1>App Name</h1>
-                    <div role="img" aria-label="friends">
-                      <img src={Invite} alt="" style={{ width: 227 }} />
-                    </div>
-                    <h2>Invite friends. Earn Money</h2>
-                  </div>
-                  <div className="invite-steps">
-                    <p>Share your invitation link</p>
-                    <p>Your friends join the app</p>
-                    <p>And start earning points</p>
-                    <p>Earn 10% from buddies' earnings</p>
-                    <p>Plus an extra 2.5% from their referrals</p>
-                  </div>
-                  {/* Updated buttons for styling */}
-                  <div className="flex justify-between items-center px-4 py-2 mt-8">
-                    <button
-                      className="flex items-center justify-center bg-[#4a5df0] text-white py-2 px-4 rounded-full"
-                      onClick={handleShareClick}
-                      style={{ width: "80%", fontSize: "16px" }}
-                    >
-                      <span>Invite a friend</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className="ml-2 h-6 w-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4v7m0 0v7m0-7h7m-7 0H5"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      className="flex items-center justify-center bg-[#4a5df0] text-white p-2 rounded-full ml-2"
-                      onClick={handleCopyClick}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className="h-6 w-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M8 9h12M8 13h12m-7 4h7M5 9h.01M5 13h.01M5 17h.01"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+    <div className="bg-white flex justify-center min-h-screen">
+      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-xl overflow-y-auto">
+        <div className="flex-grow relative z-0">
+          <div className="px-4 py-6 z-10">
+            <Logo />
+            <div className="space-y-1">
+              {/* Icon */}
+              <div className="flex justify-center" role="img" aria-label="friends">
+                <img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRBmgzOP_BRigp_fok6RcoiBegiIttLQ8fFVaZ-Hbj3YWdrjJ24" alt="" className="w-32 h-30" />
+                {/* <MdGroups size={100} className="text-center" />  */}
               </div>
+              <h2 className="text-center text-3xl md:text-5xl font-extrabold font-poppins">
+                Invite Frens
+              </h2>
+             
+              {/* Placeholder for Invite section */}
+              <div className="w-2/3 border-2 border-[#d4cbcb] rounded-3xl h-28 md:h-36  mx-auto"></div>
+
+              {/* Description */}
+              <p className="text-center text-sm text-[#d4cbcb] ">
+                Earn extra points by growing your network. The bigger your community, the higher your rewards.
+              </p>
+
+              {/* Divider */}
+              <hr className="border-gray-300 my-4" />
+
+              {/* Invite Button */}
+              {/* <div className="flex justify-center px-4 py-2 mt-8">
+                <button
+                  className="flex items-center justify-center bg-[#00ACDC] text-white py-4 px-4 rounded-xl w-full md:w-2/3"
+                  onClick={handleShareClick}
+                  style={{ fontSize: "16px" }}
+                >
+                  <span>Invite a friend</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="ml-2 h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4v7m0 0v7m0-7h7m-7 0H5"
+                    />
+                  </svg>
+                </button>
+              </div> */}
             </div>
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
+
+
   );
 }
 

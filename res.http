@@ -1,0 +1,14 @@
+
+
+### POST Request Example
+POST http://localhost:4000/api/v1/api-register
+Content-Type: application/json
+
+{
+    "user_name" : "arjun",
+    "email" : "arjuffng@gmail.com",
+    "password" : "12345678",
+    "mobile":"9999148188",
+    "upi_id":"paytm@12345",
+    "referral_by":"02010C"
+}
