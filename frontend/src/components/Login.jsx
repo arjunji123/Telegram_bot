@@ -107,7 +107,7 @@ function Login({ setLoggedIn }) {
 
       <form onSubmit={handleSubmit} className="space-y-6 px-4 sm:px-8 max-w-md mx-auto">
   
-  {/* Email/Phone Input */}
+
   <div className="relative">
     <input
       type="text"
