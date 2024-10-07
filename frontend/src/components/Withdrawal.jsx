@@ -6,7 +6,7 @@ import { BiSolidDownvote , BiSolidUpvote , BiHistory } from "react-icons/bi";
 import { BsStars, BsPersonFillCheck, BsCurrencyRupee  } from "react-icons/bs";
 import { AiFillCaretDown } from "react-icons/ai";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
-
+import Footer from "./Footer";
 
 function Withdrawal() {
   const [showPopup, setShowPopup] = useState(false);
@@ -147,6 +147,7 @@ function Withdrawal() {
           </div>
         )}
       </div>
+      <Footer/>
     </div>
 
   );

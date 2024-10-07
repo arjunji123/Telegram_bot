@@ -4,6 +4,7 @@ import Invite from "../Img/invite.webp";
 import "../Styles/Friends.css";
 import { MdGroups } from "react-icons/md";
 import Logo from "../utils/Logo";
+import Footer from "./Footer";
 
 function Friend() {
   const [referralLink, setReferralLink] = useState("");
@@ -116,6 +117,7 @@ function Friend() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
 
 

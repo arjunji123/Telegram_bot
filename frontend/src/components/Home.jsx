@@ -4,6 +4,7 @@ import "../Styles/Tasks.css";
 // import { dollarCoin, mainCharacter } from '../images'; // Ensure correct image paths
 import { BsPersonCircle } from "react-icons/bs";
 import Logo from "../utils/Logo";
+import Footer from "./Footer";
 
 function Home() {
  const navigate = useNavigate();
@@ -52,6 +53,7 @@ function Home() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

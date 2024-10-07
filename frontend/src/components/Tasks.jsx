@@ -3,6 +3,7 @@ import Logo from "../utils/Logo";
 import { FaXTwitter, FaInstagram  } from "react-icons/fa6";
 import { FaYoutube , FaTelegramPlane } from "react-icons/fa";
 import { AiFillCaretRight  } from "react-icons/ai";
+import Footer from "./Footer";
 
 function Tasks() {
   const [watchTimes, setWatchTimes] = useState({
@@ -168,6 +169,7 @@ function Tasks() {
         </div>
       </div>
     </div>
+    <Footer/>
   </div>
   
   );

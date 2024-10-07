@@ -47,7 +47,7 @@ function App() {
         </Routes>
 
         {/* Conditionally render Footer */}
-        {loggedIn && <Footer />}
+        {/* {loggedIn && <Footer />} */}
       </BrowserRouter>
     </>
   );
