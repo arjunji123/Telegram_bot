@@ -121,7 +121,7 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     password,
     upi_id,
     user_type,
-    referralCode, // This is the referral code provided by the new user
+    referral_by, // This is the referral code provided by the new user
   } = req.body;
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -164,10 +164,10 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   let referralBy = null; // This will hold the referral code of the user who sent the referral code
 
   // If a referral code is provided, find the parent user
-  if (referralCode) {
+  if (referral_by) {
     const [parentRows] = await db.query(
       "SELECT id, referral_code FROM user_data WHERE referral_code = ?",
-      [referralCode]
+      [referral_by]
     );
 
     if (parentRows.length > 0) {
@@ -207,15 +207,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   // Insert additional user data into the user_data table
   userData2.user_id = lastInsertId; // Assuming user_id is a foreign key in user_data table
   await db.query("INSERT INTO user_data SET ?", userData2);
-
-  // Now call addUser to manage referrals and points
-  if (parentId) {
-    try {
-      await addUser(newReferralCode, parentId); // Manage referral points logic
-    } catch (err) {
-      return next(new ErrorHandler(err.message, 400));
-    }
-  }
 
   // Fetch the newly inserted user for token generation
   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
