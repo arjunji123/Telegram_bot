@@ -43,7 +43,7 @@ app.use(
 app.use(flash());
 
 const blogs = require("./routes/blogRoute");
-const pages = require("./routes/pageRoute");
+const quests = require("./routes/pageRoute");
 const services = require("./routes/serviceRoute");
 const user = require("./routes/userRoute");
 const settings = require("./routes/settingRoute");
@@ -53,7 +53,7 @@ const testimonials = require("./routes/testimonialRoute");
 app.use("/admin", user);
 app.use("/admin", blogs);
 app.use("/admin", services);
-app.use("/admin", pages);
+app.use("/admin", quests);
 app.use("/admin", settings);
 app.use("/admin", faqs);
 app.use("/admin", testimonials);
@@ -61,7 +61,7 @@ app.use("/admin", testimonials);
 app.use("/api/v1", user);
 app.use("/api/v1", blogs);
 app.use("/api/v1", services);
-app.use("/api/v1", pages);
+app.use("/api/v1", quests);
 app.use("/api/v1", settings);
 app.use("/api/v1", faqs);
 app.use("/api/v1", testimonials);

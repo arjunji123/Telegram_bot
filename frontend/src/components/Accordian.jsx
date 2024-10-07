@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import data from "./AccordionData";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import "../Styles/Accordian.css";
-//  accordionitem component
+//  accordionitem component 
 const AccordionItem = ({ question, answer, isOpen, onClick }) => {
   const contentHeight = useRef();
   return (

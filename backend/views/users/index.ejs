@@ -2,8 +2,16 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body table-responsive">
-                <h4 class="mt-0 header-title">Users</h4>
-
+                <div class="row page_top_bar">
+                    <div class="col-12">
+                        <div class="col-6 heading float-left">
+                            <h4 class="mt-0 header-title">Users</h4>
+                        </div>
+                        <div class="col-6 btns float-left text-right">
+                            <a class="btn btn-primary" href="/admin/<%= module_slug %>/add">Add New</a>
+                        </div>
+                    </div>
+                </div>
 
                 <table id="responsive-datatable" class="table table-bordered table-bordered dt-responsive nowrap">
                     <thead>
@@ -25,7 +33,7 @@
                                         <%= serialNumber++ %>
                                     </td>
                                     <td>
-                                        <%= user.name %>
+                                        <%= user.user_name %>
                                     </td>
                                     <td>
                                         <%= user.mobile %>
@@ -34,7 +42,7 @@
                                         <%= user.email %>
                                     </td>
                                     <td>
-                                        <%= user.created_date %>
+                                        <%= user.date_created %>
                                     </td>
                                 </tr>
                                 <% }); %>

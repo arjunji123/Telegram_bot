@@ -1,0 +1,69 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title">Preview Quest - <%= blog.quest_name %>
+                </h4>
+
+
+                <div class="row">
+                    <div class="col-lg-12">
+
+                        <div class="row">
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">Quest</label>
+                                    <input type="text" id="simpleinput" class="form-control"
+                                        value="<%= blog.quest_name %>" readOnly>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">Quest Type</label>
+                                    <input type="text" id="simpleinput" name="quest_type" class="form-control"
+                                        value="<%= blog.quest_type %>" readOnly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">MQuest URL</label>
+                                    <input type="text" id="simpleinput" name="quest_url" class="form-control"
+                                        value="<%= blog.quest_url %>" readOnly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">Coin Earn</label>
+                                    <input type="text" id="simpleinput" name="coin_earn" class="form-control"
+                                        value="<%= blog.coin_earn %>" readOnly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">Desc</label>
+                                    <textarea class="form-control" id="editor" name="description"
+                                        readOnly><%= blog.description %></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div> <!-- end col -->
+
+
+            </div>
+            <!-- end row-->
+
+        </div> <!-- end card-body -->
+    </div> <!-- end card -->
+</div><!-- end col -->
+</div>

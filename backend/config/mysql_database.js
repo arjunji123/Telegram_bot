@@ -23,7 +23,7 @@ const mysqlPool = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
-  database: "nodejs",
+  database: "unitrade",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
