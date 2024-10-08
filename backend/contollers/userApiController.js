@@ -103,6 +103,7 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     user_type,
     date_created,
     date_modified,
+    status: "0",
   };
 
   // Prepare user-specific data for user_data table
@@ -159,6 +160,16 @@ exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 
+  // Check if the user status is active (1)
+  if (user.status == 0) {
+    return next(
+      new ErrorHandler(
+        "Your account is deactivated. Please contact support.",
+        403
+      )
+    );
+  }
+
   // Compare passwords
   const isPasswordMatched = await User.comparePasswords(
     password,
@@ -166,16 +177,11 @@ exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {
   );
 
   if (!isPasswordMatched) {
-    return next(new ErrorHandler("Invalid email or password 2", 400));
+    return next(new ErrorHandler("Invalid email or password", 400));
   }
 
   const token = User.generateToken(user.id); // Adjust as per your user object structure
 
-  /* res.status(200).json({
-        success: true,
-        user: user[0],
-        token
-    });*/
   sendToken(user, token, 201, res);
 });
 

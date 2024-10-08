@@ -21,14 +21,16 @@
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>Created</th>
+                            <th>User Type</th>
+                            <th>Status</th>
                             <th>Screenshot</th>
+                            <th>Actions</th> <!-- Added Actions column -->
                         </tr>
                     </thead>
-
                     <tbody>
                         <% let serialNumber=1; %>
-                            <% users[0].forEach(function(user) { %>
-                                <tr>
+                            <% users[0].forEach(user=> { %>
+                                <tr id="user-row-<%= user.id %>">
                                     <td>
                                         <%= serialNumber++ %>
                                     </td>
@@ -45,15 +47,34 @@
                                         <%= user.date_created %>
                                     </td>
                                     <td>
+                                        <%= user.user_type %>
+                                    </td>
+                                    <td>
+                                        <%= user.status===1 ? 'Active' : 'Inactive' %> <!-- Display current status -->
+                                    </td>
+                                    <td>
                                         <% if (user.pay_image) { %>
-                                            <img src="http://localhost:4000/uploads/<%= user.pay_image %>"
-                                                alt="User Screenshot" style="max-width: 100px; max-height: 100px;" />
+                                            <button class="btn btn-info view-image"
+                                                data-image="http://localhost:4000/uploads/<%= user.pay_image %>">View
+                                                Screenshot</button>
                                             <% } else { %>
-                                                No screenshot upladed
+                                                No screenshot uploaded
                                                 <% } %>
                                     </td>
-
-
+                                    <td>
+                                        <form action="/admin/users/update-status" method="POST" style="display:inline;">
+                                            <input type="hidden" name="userId" value="<%= user.id %>">
+                                            <input type="hidden" name="status" value="1"> <!-- Activate button -->
+                                            <button type="submit" class="btn btn-sm btn-success" <%=user.status===1
+                                                ? 'disabled' : '' %>>Activate</button>
+                                        </form>
+                                        <form action="/admin/users/update-status" method="POST" style="display:inline;">
+                                            <input type="hidden" name="userId" value="<%= user.id %>">
+                                            <input type="hidden" name="status" value="0"> <!-- Deactivate button -->
+                                            <button type="submit" class="btn btn-sm btn-danger" <%=user.status===0
+                                                ? 'disabled' : '' %>>Deactivate</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 <% }); %>
                     </tbody>
@@ -61,4 +82,86 @@
             </div>
         </div>
     </div>
-</div> <!-- end row -->
+</div>
+
+<!-- Modal for viewing image -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">User Screenshot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="User Screenshot" style="width: 100%; height: auto;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Show modal with the clicked image
+        $('.view-image').click(function () {
+            var imageUrl = $(this).data('image');
+            $('#modalImage').attr('src', imageUrl);
+            $('#imageModal').modal('show');
+        });
+    });
+</script>
+
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+    }
+
+    input:checked+.slider {
+        background-color: #2196F3;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(26px);
+    }
+
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+</style>

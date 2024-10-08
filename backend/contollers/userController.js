@@ -10,6 +10,7 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const Model = require("../models/userModel");
 const QueryModel = require("../models/queryModel");
+
 const { v4: uuidv4 } = require("uuid");
 // const pool = require('../config/db');  // Assuming you're using MySQL pool
 const {
@@ -377,8 +378,18 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
+  // Fetch user data along with pay_image in a single query using LEFT JOIN
   const users = await db.query(
-    'SELECT id,user_name,email,mobile,date_created,DATE_FORMAT(date_created, "%d-%m-%Y") AS date_created FROM users  WHERE user_type = ?',
+    `SELECT 
+        u.id,
+        u.user_name,
+        u.email,
+        u.mobile,
+        DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
+        ud.pay_image 
+     FROM users u
+     INNER JOIN user_data ud ON u.id = ud.user_id 
+     WHERE u.user_type = ?`,
     ["user"]
   );
 
@@ -386,10 +397,10 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
     layout: module_layout,
     title: module_single_title + " " + module_add_text,
     module_slug,
-    users,
+    users, // Pass the users array directly
+    originalUrl: req.originalUrl, // Pass the original URL here
   });
 });
-
 exports.addFrom = catchAsyncErrors(async (req, res, next) => {
   res.render(module_slug + "/add", {
     layout: module_layout,
@@ -541,3 +552,23 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
 function generateReferralCode() {
   return crypto.randomBytes(3).toString("hex").toUpperCase(); // Generates a random 6-character referral code
 }
+
+exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
+  const userId = req.body.userId; // User ID ko request body se le
+  const newStatus = req.body.status; // Naya status request body se le
+
+  try {
+    // SQL query to update user status
+    await db.query(`UPDATE users SET status = ? WHERE id = ?`, [
+      newStatus,
+      userId,
+    ]);
+
+    // Redirect back to the original URL
+    const redirectUrl = req.body.redirect || "/admin/users"; // Default redirect URL
+    res.redirect(redirectUrl); // Redirect back
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
