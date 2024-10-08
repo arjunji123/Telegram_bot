@@ -6,9 +6,20 @@ Content-Type: application/json
 
 {
     "user_name" : "arjun",
-    "email" : "arjuffng@gmail.com",
+    "email" : "arjuffng1@gmail.com",
     "password" : "12345678",
-    "mobile":"9999148188",
+    "mobile":"9999148189",
     "upi_id":"paytm@12345",
-    "referral_by":"02010C"
+    "referral_by":"02010C",
+    "user_type":"user"
+}
+
+
+### POST Request Example
+POST http://localhost:4000/api/v1/upload-screenshot/:id
+Content-Type: application/json
+
+{
+    "pay_image": "abc.png",
+    "user_id": "12"
 }

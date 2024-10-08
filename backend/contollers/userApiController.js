@@ -112,14 +112,7 @@ const generateReferralCode = (length = 8) => {
 //   sendToken(user, token, 201, res);
 // });
 // Function to generate a unique referral code
-const generateReferralCode = (length = 8) => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let referralCode = "";
-  for (let i = 0; i < length; i++) {
-    referralCode += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return referralCode;
-};
+
 // Register a user
 // Register a user
 exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
@@ -455,6 +448,7 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   if (!req.file) {
     return next(new ErrorHandler("No file uploaded", 400));
   }
+console.log("asdf",req.file);
 
   // Get the uploaded file's filename
   const pay_image = req.file.filename;

@@ -73,16 +73,22 @@ function Signup() {
     
     const isValid = validateForm(values);
     if (!isValid) return; // Exit if validation fails
-
+  
     try {
       const response = await axios.post(
         "http://localhost:4000/api/v1/api-register",
         values
       );
       console.log("Server Response:", response);
-      toast.success("Registration successfull !"); // Success message      
+      
+      // Assuming the generated ID is in response.data.id
+      const userId = response.data.user.id;
+  console.log('userId', userId)
+      toast.success("Registration successful!");
+  
       setTimeout(() => {
-        navigate("/payment"); // Redirect to the Payment page upon successful signup
+        // Redirect to the Payment page with the generated userId
+        navigate(`/payment/${userId}`);
       }, 2000);
     } catch (err) {
       if (err.response && err.response.status === 400) {
@@ -94,15 +100,17 @@ function Signup() {
       }
     }
   };
+  
 
   return (
     <div className="bg-white flex justify-center items-center min-h-screen overflow-y-auto">
       <div className="w-full max-w-lg bg-black text-white h-full md:h-screen shadow-2xl ">
         
-        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover draggable theme="dark" />
 
         {/* Logo and Welcome Section */}
         <div className="px-10 shadow-lg relative">
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover draggable theme="dark" />
+
           <div className="flex justify-center py-4 space-x-1">
             <h1 className="font-poppins text-2xl font-extrabold">UNITRADE</h1>
             <img src={logo} alt="logo" className="w-6 h-6 mt-0.5" />

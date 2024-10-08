@@ -103,7 +103,7 @@ router.route("/api-me/update").put(isApiAuthenticatedUser, updateProfileApi);
 
 router.post(
   "/upload-screenshot/:id",
-  isApiAuthenticatedUser, // This should come before the upload handler
+   // This should come before the upload handler
   upload.single("pay_image"),
   uploadScreenshotApi
 );

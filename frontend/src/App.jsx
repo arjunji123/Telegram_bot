@@ -35,7 +35,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login setLoggedIn={setLoggedIn} />} />
           <Route path="/" element={<Signup />} />
-          <Route path="/payment" element={<Payment />} />
+          <Route path="/payment/:id" element={<Payment />} />
 
           {/* Protected Routes */}
           {/* <Route element={<ProtectedRoute loggedIn={loggedIn} />}> */}
