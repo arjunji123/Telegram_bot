@@ -73,6 +73,7 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     user_name,
     mobile,
     email,
+    user_type,
     password: hashedPassword,
     date_created,
     date_modified,
@@ -409,58 +410,6 @@ exports.addFrom = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// create a new blog
-// exports.createRecord = catchAsyncErrors(async (req, res, next) => {
-//   // console.log("hi", req.body);
-
-//   try {
-//     await Model.insertSchema.validateAsync(req.body, {
-//       abortEarly: false,
-//       allowUnknown: true,
-//     });
-//   } catch (error) {
-//     // Joi validation failed, send 400 Bad Request with error details
-//     return next(
-//       new ErrorHandler(
-//         error.details.map((d) => d.message),
-//         400
-//       )
-//     );
-//   }
-
-//   const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
-
-//   // const updatedSlug = req.body.slug || generateSlug(req.body.title);
-
-//   if (req.file) {
-//     req.body.image = req.file.filename;
-//   }
-
-//   const insertData = {
-//     user_name: req.body.user_name,
-//     email: req.body.email,
-//     mobile: req.body.mobile,
-//     password: req.body.password, // Be sure to hash the password before saving
-//     status: req.body.status,
-//     date_created: date_created,
-
-//     user_type: "user",
-//     date_modified: date_created,
-//   };
-//   const insertData2 = {
-//     upi_id: req.body.upi,
-//     referral_by: req.body.referral_by,
-//   };
-//   const user = await QueryModel.saveData(table_name, insertData, next);
-//   const blog = await QueryModel.saveData(table_name2, insertData2, next);
-
-//   req.flash("msg_response", {
-//     status: 200,
-//     message: "Successfully added " + module_single_title,
-//   });
-
-//   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
-// });
 exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   try {
     // Validate the request body with Joi schema

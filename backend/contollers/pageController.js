@@ -41,9 +41,9 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
 
   const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-  //   if (req.file) {
-  //     req.body.image = req.file.filename;
-  //   }
+  if (req.file) {
+    req.body.image = req.file.filename;
+  }
 
   const insertData = {
     quest_name: req.body.quest_name,
@@ -51,7 +51,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     quest_url: req.body.quest_url,
     date_created: date_created,
     // end_date:
-    // image: req.body.image,
+    image: req.body.image,
     description: req.body.description,
     status: req.body.status,
     coin_earn: req.body.coin_earn,
@@ -95,7 +95,7 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     quest_url: req.body.quest_url,
     date_created: date_created,
     // end_date:
-    // image: req.body.image,
+    image: req.body.image,
     description: req.body.description,
     status: req.body.status,
     coin_earn: req.body.coin_earn,
@@ -214,39 +214,44 @@ function generateSlug(quest_name) {
 }
 
 exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 1;
+  const resultPerPage = 10;
   const page = parseInt(req.query.page) || 1;
   const searchQuery = req.query.search || "";
   const filterQuery = req.query.filter || "";
+
   // Calculate offset for pagination
   const offset = (page - 1) * resultPerPage;
 
   try {
-    // Count total blogs
-    const totalBlogsResult = await db.query(
-      "SELECT COUNT(*) as count FROM " + table_name
+    // Count total quests
+    const totalQuestsResult = await db.query(
+      "SELECT COUNT(*) as count FROM quest"
     );
-    const totalBlogs = totalBlogsResult[0][0].count;
+    const totalQuests = totalQuestsResult[0][0].count;
 
-    // Fetch blogs with pagination and filtering
-    const [blog_records] = await db.query(
-      "SELECT * FROM " + table_name + " order by id desc"
+    // Fetch quests with pagination and filtering
+    const [quest_records] = await db.query(
+      "SELECT quest_name, quest_type, quest_url, date_created, description, status, coin_earn FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
+      [resultPerPage, offset]
     );
 
-    // Filter or process rows if needed
-    const blogs = blog_records.map((row) => ({
-      id: row.id,
+    // Process rows if needed
+    const quests = quest_records.map((row) => ({
       quest_name: row.quest_name,
-      image:
-        process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + row.image,
+      quest_type: row.quest_type,
+      quest_url: row.quest_url,
+      date_created: row.date_created,
+      description: row.description,
+      status: row.status,
+      coin_earn: row.coin_earn,
     }));
 
     res.status(200).json({
       success: true,
-      totalBlogs,
+      totalQuests,
       resultPerPage,
       page,
-      blogs,
+      quests,
     });
   } catch (error) {
     return next(new ErrorHandler("Database query failed", 500));
@@ -254,16 +259,27 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
-  let blog = await QueryModel.findBySpecific(table_name, req.params.slug, next);
+  // Assuming you're using a slug or an ID to find the specific record
+  const questId = req.params.id; // Change this if using a slug or another identifier
 
-  if (!blog) {
-    return next(new ErrorHandler("Record not found", 500));
+  // Fetching the specific quest record
+  const [quest_records] = await db.query(
+    "SELECT quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest WHERE id = ? LIMIT 1",
+    [questId]
+  );
+
+  const quest = quest_records[0]; // Get the first (and should be the only) record
+
+  if (!quest) {
+    return next(new ErrorHandler("Record not found", 404)); // Changed status code to 404 for not found
   }
-  blog.image =
-    process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + blog.image;
+
+  // Process the image URL
+  quest.image =
+    process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + quest.image;
 
   res.status(200).json({
     success: true,
-    blog,
+    quest,
   });
 });
