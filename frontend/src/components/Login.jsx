@@ -54,7 +54,6 @@ function Login({ setLoggedIn }) {
               expiration: expirationTime,
             })
           );
-
           setLoggedIn(true);
           toast.success("Login successfull ! "); // Show success toast
           setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
@@ -67,7 +66,7 @@ function Login({ setLoggedIn }) {
         if (err.response && err.response.status === 400) {
           toast.error("Invalid email or password. Please try again.");
         } else {
-          toast.error("An error occurred. Please try again later.");
+          toast.error(err.response.data.error);
         }
       });
   };
