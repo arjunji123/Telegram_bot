@@ -32,6 +32,7 @@ const {
   allUsers,
   addFrom,
   createRecord,
+  updateUserStatus,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -50,10 +51,8 @@ const {
   isApiAuthenticatedUser,
 } = require("../middleware/auth");
 const router = express.Router();
-
 router.route("/").get(isAuthenticatedUser, checkAdminLoginOrDashboard);
 router.route("/dashboard").get(isAuthenticatedUser, dashboard);
-
 router.route("/register").post(registerUser);
 
 router.route("/login").get(showLogin);
@@ -81,6 +80,9 @@ router
   .route("/" + module_slug + "/add")
   .post(isAuthenticatedUser, authorizeRoles("admin"), createRecord);
 
+// Route for updating user status
+router.post("/users/update-status", updateUserStatus);
+
 /*******REST API*******/
 
 router.route("/api-register").post(registerUserApi);
@@ -103,7 +105,7 @@ router.route("/api-me/update").put(isApiAuthenticatedUser, updateProfileApi);
 
 router.post(
   "/upload-screenshot/:id",
-   // This should come before the upload handler
+  // This should come before the upload handler
   upload.single("pay_image"),
   uploadScreenshotApi
 );
