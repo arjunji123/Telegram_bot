@@ -20,7 +20,7 @@ const router = express.Router();
 var Storage = multer.diskStorage({
   destination: function (req, file, callback) {
     console.log(file);
-    callback(null, "./uploads/quest");
+    callback(null, "./uploads/quests");
   },
   filename: function (req, file, callback) {
     console.log(file);
@@ -67,6 +67,6 @@ router
 
 /** REST API**/
 router.route("/api-" + module_slug + "").get(apiGetAllRecords);
-router.route("/api-" + module_slug + "/:slug").get(apiGetSingleRecord);
+router.route("/api-" + module_slug + "/:id").get(apiGetSingleRecord);
 
 module.exports = router;
