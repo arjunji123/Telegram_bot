@@ -32,6 +32,7 @@ const Joi = require("joi");
 
 const table_name = "users";
 const table_name2 = "user_data";
+const table_name3 = "company_data";
 
 const module_title = "Users";
 const module_single_title = "User";

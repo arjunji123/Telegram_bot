@@ -33,6 +33,7 @@ const {
   addFrom,
   createRecord,
   updateUserStatus,
+  addCoinRate,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -82,6 +83,9 @@ router
 
 // Route for updating user status
 router.post("/users/update-status", updateUserStatus);
+router
+  .route("/coin-rate/add")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), addCoinRate);
 
 /*******REST API*******/
 

@@ -24,7 +24,7 @@
                             <th>User Type</th>
                             <th>Status</th>
                             <th>Screenshot</th>
-                            <th>Actions</th> <!-- Added Actions column -->
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,7 +50,7 @@
                                         <%= user.user_type %>
                                     </td>
                                     <td>
-                                        <%= user.status===1 ? 'Active' : 'Inactive' %> <!-- Display current status -->
+                                        <%= user.status===1 ? 'Active' : 'Inactive' %>
                                     </td>
                                     <td>
                                         <% if (user.pay_image) { %>
@@ -62,18 +62,25 @@
                                                 <% } %>
                                     </td>
                                     <td>
-                                        <form action="/admin/users/update-status" method="POST" style="display:inline;">
-                                            <input type="hidden" name="userId" value="<%= user.id %>">
-                                            <input type="hidden" name="status" value="1"> <!-- Activate button -->
-                                            <button type="submit" class="btn btn-sm btn-success" <%=user.status===1
-                                                ? 'disabled' : '' %>>Activate</button>
-                                        </form>
-                                        <form action="/admin/users/update-status" method="POST" style="display:inline;">
-                                            <input type="hidden" name="userId" value="<%= user.id %>">
-                                            <input type="hidden" name="status" value="0"> <!-- Deactivate button -->
-                                            <button type="submit" class="btn btn-sm btn-danger" <%=user.status===0
-                                                ? 'disabled' : '' %>>Deactivate</button>
-                                        </form>
+                                        <% if (user.user_type==='company' ) { %>
+                                            <!-- View button to open the form modal -->
+                                            <button class="btn btn-primary view-company-form"
+                                                data-id="<%= user.id %>">View</button>
+                                            <% } %>
+                                                <form action="/admin/users/update-status" method="POST"
+                                                    style="display:inline;">
+                                                    <input type="hidden" name="userId" value="<%= user.id %>">
+                                                    <input type="hidden" name="status" value="1">
+                                                    <button type="submit" class="btn btn-sm btn-success"
+                                                        <%=user.status===1 ? 'disabled' : '' %>>Activate</button>
+                                                </form>
+                                                <form action="/admin/users/update-status" method="POST"
+                                                    style="display:inline;">
+                                                    <input type="hidden" name="userId" value="<%= user.id %>">
+                                                    <input type="hidden" name="status" value="0">
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                        <%=user.status===0 ? 'disabled' : '' %>>Deactivate</button>
+                                                </form>
                                     </td>
                                 </tr>
                                 <% }); %>
@@ -84,19 +91,46 @@
     </div>
 </div>
 
-<!-- Modal for viewing image -->
-<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
+<!-- Modal for viewing company form -->
+<div class="modal fade" id="companyFormModal" tabindex="-1" role="dialog" aria-labelledby="companyFormModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="imageModalLabel">User Screenshot</h5>
+                <h5 class="modal-title" id="companyFormModalLabel">Company Details</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <img id="modalImage" src="" alt="User Screenshot" style="width: 100%; height: auto;" />
+                <!-- The form where admin can add a coin rate -->
+                <form action="/coin-rate/add" method="POST">
+                    <div>
+                        <label for="company_id">Company ID</label>
+                        <select name="company_id" required>
+                            <option value="">Select a Company</option>
+                            <% companies.forEach(function(company) { %>
+                                <option value="<%= company.id %>">
+                                    <%= company.name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="coin_rate">Coin Rate</label>
+                        <input type="text" class="form-control" name="coin_rate" required>
+                    </div>
+                    <div>
+                        <label for="description">Description</label>
+                        <textarea class="form-control" name="description"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+
+
+
+
+
             </div>
         </div>
     </div>
@@ -110,58 +144,12 @@
             $('#modalImage').attr('src', imageUrl);
             $('#imageModal').modal('show');
         });
+
+        // Show modal with company form
+        $('.view-company-form').click(function () {
+            var userId = $(this).data('id');
+            // Fetch and populate form data here if needed using AJAX
+            $('#companyFormModal').modal('show');
+        });
     });
 </script>
-
-<style>
-    .switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-    }
-
-    .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: .4s;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: .4s;
-    }
-
-    input:checked+.slider {
-        background-color: #2196F3;
-    }
-
-    input:checked+.slider:before {
-        transform: translateX(26px);
-    }
-
-    .slider.round {
-        border-radius: 34px;
-    }
-
-    .slider.round:before {
-        border-radius: 50%;
-    }
-</style>

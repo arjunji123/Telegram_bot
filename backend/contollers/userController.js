@@ -23,6 +23,7 @@ const {
 } = require("../utils/treeLogic");
 const table_name = Model.table_name;
 const table_name2 = Model.table_name2;
+const table_name3 = Model.table_name3;
 
 const module_title = Model.module_title;
 const module_single_title = Model.module_single_title;
@@ -73,7 +74,6 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     user_name,
     mobile,
     email,
-    user_type,
     password: hashedPassword,
     date_created,
     date_modified,
@@ -387,11 +387,12 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
         u.email,
         u.mobile,
         DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
-        ud.pay_image 
+        ud.pay_image,
+        u.user_type   -- Selecting user_type from the users table
      FROM users u
      INNER JOIN user_data ud ON u.id = ud.user_id 
-     WHERE u.user_type = ?`,
-    ["user"]
+      WHERE u.user_type IN (?, ?)`,
+    ["user", "company"]
   );
 
   res.render(module_slug + "/index", {
@@ -440,7 +441,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     password: await bcrypt.hash(req.body.password, 10),
     status: req.body.status,
     date_created: date_created,
-    user_type: "user",
+    user_type: req.body.user_type, // Get user_type from the form
     date_modified: date_created,
   };
 
@@ -519,5 +520,67 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
   } catch (error) {
     console.error("Error updating user status:", error);
     res.status(500).send("Internal Server Error");
+  }
+});
+
+//////////////////////////////////////////////////
+
+// Joi schema for validation
+// Joi schema for validation
+const coinRateSchema = Joi.object({
+  company_id: Joi.number().integer().required(),
+  coin_rate: Joi.string().required(),
+  description: Joi.string().optional(),
+});
+
+exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
+  // Step 1: Validate the request body
+  try {
+    await coinRateSchema.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
+  } catch (error) {
+    return next(
+      new ErrorHandler(
+        error.details.map((d) => d.message), // Map validation errors
+        400
+      )
+    );
+  }
+
+  // Step 2: Extract company_id from request body
+  const companyId = req.body.company_id;
+
+  // Step 3: Check if the company exists in the users table
+  const companyExists = await QueryModel.findOne("users", { id: companyId });
+
+  // Check if the company exists and if the `user_type` is set as 'company'
+  if (!companyExists || companyExists.user_type !== "company") {
+    return next(
+      new ErrorHandler("Company not found or not a valid company.", 404)
+    );
+  }
+
+  // Step 4: Prepare data for insertion into the company_data table
+  const insertData = {
+    company_id: companyId,
+    coin_rate: req.body.coin_rate,
+    description: req.body.description || "", // Optional description
+  };
+
+  // Step 5: Insert the coin rate data into the company_data table
+  try {
+    const coinRate = await QueryModel.saveData("company_data", insertData);
+
+    // Success response
+    res.status(200).json({
+      success: true,
+      message: "Coin rate added successfully for the company.",
+      coinRate,
+    });
+  } catch (err) {
+    console.error("Error saving coin rate data:", err);
+    return next(new ErrorHandler("Error while saving coin rate data.", 500));
   }
 });
