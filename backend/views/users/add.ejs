@@ -6,7 +6,6 @@
                     <%= title %>
                 </h4>
 
-
                 <div class="row">
                     <div class="col-lg-12">
                         <form method="post" action="/admin/<%= module_slug %>/add"
@@ -35,6 +34,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-lg-12 float-left">
                                     <div class="mb-3">
@@ -44,6 +44,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-lg-12 float-left">
                                     <div class="mb-3">
@@ -52,6 +53,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-lg-12 float-left">
                                     <div class="mb-3">
@@ -60,31 +62,37 @@
                                             value="">
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-lg-12 float-left">
-                                        <div class="mb-3">
-                                            <label for="simpleinput" class="form-label">Status</label>
-                                            <select class="form-control" name="status">
-                                                <option value="1">Active</option>
-                                                <option value="0">Inactive</option>
-                                            </select>
-                                        </div>
+
+                                <div class="col-lg-12 float-left">
+                                    <div class="mb-3">
+                                        <label for="simpleinput" class="form-label">User Type</label>
+                                        <select class="form-control" name="user_type">
+                                            <option value="user">User</option>
+                                            <option value="company">Company</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 float-left">
+                                    <div class="mb-3">
+                                        <label for="simpleinput" class="form-label">Status</label>
+                                        <select class="form-control" name="status">
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-lg-4 float-left"><button class="btn btn-primary"
-                                        type="submit">Submit</button>
-                                </div>
 
+                            <div class="row">
+                                <div class="col-lg-4 float-left">
+                                    <button class="btn btn-primary" type="submit">Submit</button>
+                                </div>
                             </div>
                         </form>
                     </div> <!-- end col -->
-
-
                 </div>
                 <!-- end row-->
-
             </div> <!-- end card-body -->
         </div> <!-- end card -->
     </div><!-- end col -->

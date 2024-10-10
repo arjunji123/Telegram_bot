@@ -231,7 +231,7 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
 
     // Fetch quests with pagination and filtering
     const [quest_records] = await db.query(
-      "SELECT quest_name, quest_type, quest_url, date_created, description, status, coin_earn FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
+      "SELECT quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
       [resultPerPage, offset]
     );
 
@@ -243,6 +243,7 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
       date_created: row.date_created,
       description: row.description,
       status: row.status,
+      image: row.image,
       coin_earn: row.coin_earn,
     }));
 
