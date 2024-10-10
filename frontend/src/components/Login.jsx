@@ -80,30 +80,38 @@ function Login({ setLoggedIn }) {
   }, []);
 
   return (
-    <div className="bg-white flex justify-center items-center min-h-screen">
+  <div className="bg-white flex justify-center items-center min-h-screen ">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
-      <div className="w-full max-w-lg bg-black text-white h-full md:h-screen shadow-2xl overflow-hidden">
-        <div className="p-10  rounded-t-2xl shadow-lg relative">
+      <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden ">
+        {/* Header Section */}
+        <div className="p-6 sm:p-10  shadow-lg relative">
           <div className="absolute top-0 left-0 w-full h-1 "></div>
-          <div className="flex justify-center py-4 space-x-1 ">
-            <h1 className="font-poppins text-2xl font-extrabold">UNITRADE</h1>
-            <img src={logo} alt="logo" className="w-6 h-6 mt-0.5" />
+          <div className="flex justify-center py-4 space-x-1">
+            <h1 className="font-poppins text-xl sm:text-2xl font-extrabold">UNITRADE</h1>
+            <img src={logo} alt="logo" className="w-5 sm:w-6 h-5 sm:h-6 mt-0.5" />
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-[#e0e0e0] tracking-wide">{firstName}</h1>
-          <p className="text-[#b0b0b0] text-sm mt-2">Unitrade smart. Unitrade efficiently.</p>
+          <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-[#e0e0e0] tracking-wide text-center">
+            {firstName}
+          </h1>
+          <p className="text-[#b0b0b0] text-xs sm:text-sm mt-2 text-center">
+            Unitrade smart. Unitrade efficiently.
+          </p>
         </div>
 
-        <div className="p-8 space-y-8">
-          <h2 className="text-4xl font-bold text-center mb-6 tracking-tight text-[#eaeaea]">Log In</h2>
+        {/* Form Section */}
+        <div className="p-6 sm:p-8 space-y-6">
+          <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
+            Log In
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6 px-4 sm:px-8 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 px-2 sm:px-4">
             <div className="relative">
               <input
                 type="text"
                 name="emailOrMobile"
                 onChange={handleInput}
                 required
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Email / Phone Number"
               />
             </div>
@@ -114,7 +122,7 @@ function Login({ setLoggedIn }) {
                 name="password"
                 onChange={handleInput}
                 required
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Password"
               />
             </div>
@@ -122,7 +130,7 @@ function Login({ setLoggedIn }) {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full py-4 border-white border-2 text-white font-semibold rounded-xl shadow-md hover:opacity-90 transform transition-all duration-300 hover:scale-105"
+                className="w-full py-2 sm:py-4 border border-white text-white font-semibold rounded-xl shadow-md hover:opacity-90 transform transition-all duration-300 hover:scale-105 text-sm sm:text-base"
               >
                 Log In
               </button>
@@ -130,19 +138,24 @@ function Login({ setLoggedIn }) {
           </form>
 
           <div className="text-center">
-            <a href="#" className="text-sm text-[#b0b0b0] hover:text-white transition-all">Forgot Password?</a>
+            <a href="#" className="text-xs sm:text-sm text-[#b0b0b0] hover:text-white transition-all">
+              Forgot Password?
+            </a>
           </div>
         </div>
 
-        <div className="bg-[#111113] py-6 text-center rounded-b-2xl">
-          <p className="text-[#909090]">
+        {/* Footer Section */}
+        <div className="bg-[#111113] py-4 sm:py-6 text-center rounded-b-2xl">
+          <p className="text-xs sm:text-sm text-[#909090]">
             New to Unitrade? 
-            <a href="/" className="text-white font-semibold hover:underline ml-1">Create an Account</a>
+            <a href="/" className="text-white font-semibold hover:underline ml-1">
+              Create an Account
+            </a>
           </p>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Login;

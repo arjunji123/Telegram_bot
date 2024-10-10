@@ -91,7 +91,7 @@ function Tasks() {
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
-    <div className="w-full bg-black text-white h-full  flex flex-col max-w-xl  ">
+    <div className="w-full bg-black text-white h-screen  flex flex-col max-w-xl  ">
       <div className="flex-grow mb-4 relative z-0">
         <div className=" px-2 py-6 h-full z-10">
           <Logo/>

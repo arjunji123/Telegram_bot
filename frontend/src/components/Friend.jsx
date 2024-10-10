@@ -64,62 +64,62 @@ function Friend() {
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
-      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-xl overflow-y-auto">
-        <div className="flex-grow relative z-0">
-          <div className="px-4 py-6 z-10">
-            <Logo />
-            <div className="space-y-1">
-              {/* Icon */}
-              <div className="flex justify-center" role="img" aria-label="friends">
-                <img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRBmgzOP_BRigp_fok6RcoiBegiIttLQ8fFVaZ-Hbj3YWdrjJ24" alt="" className="w-32 h-30" />
-                {/* <MdGroups size={100} className="text-center" />  */}
-              </div>
-              <h2 className="text-center text-3xl md:text-5xl font-extrabold font-poppins">
-                Invite Frens
-              </h2>
-             
-              {/* Placeholder for Invite section */}
-              <div className="w-2/3 border-2 border-[#d4cbcb] rounded-3xl h-28 md:h-36  mx-auto"></div>
-
-              {/* Description */}
-              <p className="text-center text-sm text-[#d4cbcb] ">
-                Earn extra points by growing your network. The bigger your community, the higher your rewards.
-              </p>
-
-              {/* Divider */}
-              <hr className="border-gray-300 my-4" />
-
-              {/* Invite Button */}
-              {/* <div className="flex justify-center px-4 py-2 mt-8">
-                <button
-                  className="flex items-center justify-center bg-[#00ACDC] text-white py-4 px-4 rounded-xl w-full md:w-2/3"
-                  onClick={handleShareClick}
-                  style={{ fontSize: "16px" }}
-                >
-                  <span>Invite a friend</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="ml-2 h-6 w-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v7m0 0v7m0-7h7m-7 0H5"
-                    />
-                  </svg>
-                </button>
-              </div> */}
-            </div>
+    <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg overflow-y-auto px-4">
+      <div className="flex-grow relative z-0 py-6">
+        <Logo />
+        <div className="space-y-2 text-center">
+          {/* Icon */}
+          <div className="flex justify-center">
+            <img
+              src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRBmgzOP_BRigp_fok6RcoiBegiIttLQ8fFVaZ-Hbj3YWdrjJ24"
+              alt=""
+              className="w-22 h-20 md:w-32 md:h-32 rounded-full shadow-lg"
+            />
           </div>
+          <h2 className="text-2xl md:text-4xl font-extrabold font-poppins">
+            Invite Frens
+          </h2>
+  
+          {/* Placeholder for Invite section */}
+          <div className="w-8/12 border-2 border-[#d4cbcb] rounded-3xl h-20 md:h-28 mx-auto mt-4"></div>
+  
+          {/* Description */}
+          <p className="text-sm md:text-base text-[#d4cbcb] mx-4">
+            Earn extra points by growing your network. The bigger your community, the higher your rewards.
+          </p>
+  
+          {/* Divider */}
+          <hr className="border-gray-300 my-4" />
+  
+          {/* Invite Button */}
+          {/* <div className="flex justify-center px-4 py-2 mt-8">
+            <button
+              className="flex items-center justify-center bg-[#00ACDC] text-white py-3 px-6 rounded-xl w-3/4 md:w-2/3 shadow-md transition-transform transform hover:scale-105"
+              onClick={handleShareClick}
+            >
+              <span className="text-base md:text-lg font-semibold">Invite a friend</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="ml-2 h-5 w-5 md:h-6 md:w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4v7m0 0v7m0-7h7m-7 0H5"
+                />
+              </svg>
+            </button>
+          </div> */}
         </div>
       </div>
-      <Footer/>
     </div>
-
+    <Footer />
+  </div>
+  
 
   );
 }

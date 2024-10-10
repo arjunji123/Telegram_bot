@@ -72,80 +72,83 @@ function Payment() {
   };
 
   return (
-    <div className="bg-white flex justify-center">
-      <div className="w-full max-w-lg bg-black text-white min-h-screen font-bold flex flex-col shadow-2xl overflow-hidden">
-        {/* Toast Container for displaying toast notifications */}
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          closeOnClick
-          pauseOnHover
-          draggable
-          theme="dark"
-        />
-
-        <div className="px-10 rounded-t-2xl shadow-lg relative">
-          <div className="flex justify-center py-4 space-x-1">
-            <h1 className="font-poppins text-2xl font-extrabold">UNITRADE</h1>
-            <img src={logo} alt="logo" className="w-6 h-6 mt-0.5" />
-          </div>
-          <h2 className="text-3xl font-semibold text-[#e0e0e0] tracking-wide">
-            Payment Details
-          </h2>
+    <div className="bg-white flex justify-center min-h-screen overflow-y-auto">
+    <div className="w-full max-w-lg bg-black text-white min-h-screen font-bold flex flex-col shadow-lg ">
+  
+      {/* Toast Notification */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
+  
+      {/* Header */}
+      <div className="px-6 py-4 shadow-md">
+        <div className="flex justify-center items-center space-x-2">
+          <h1 className="text-xl font-extrabold">UNITRADE</h1>
+          <img src={logo} alt="logo" className="w-5 h-5" />
         </div>
-        <div className="px-8 flex-grow">
-          <div className="bg-[#474237] rounded-lg p-3 my-3">
-            <h3 className="text-lg font-semibold text-center text-[#ada5a5]">
-              Admin's UPI ID: <span className="text-white">admin@upi</span>
-            </h3>
-          </div>
-          <div className="flex justify-center mb-6">
-            <div
-              className="bg-white p-4 rounded-lg shadow-lg"
-              style={{ width: "162px" }}
-            >
-              <h4 className="text-center font-semibold mb-2 text-black">
-                Scan UPI QR Code
-              </h4>
-              <div className="w-30 h-30 bg-gray-200 rounded-lg flex items-center justify-center">
-                <img src={scanner} alt="Scanner" className="w-full h-full object-cover" />
-              </div>
+        <h2 className="text-xl text-center font-semibold mt-2">Payment Details</h2>
+      </div>
+  
+      {/* Main Content */}
+      <div className="px-4 py-6 flex-grow">
+        {/* UPI ID */}
+        <div className="bg-[#474237] rounded-md p-3 mb-4 text-center">
+          <h3 className="text-sm text-[#ada5a5]">
+            Admin's UPI ID: <span className="text-white">admin@upi</span>
+          </h3>
+        </div>
+  
+        {/* QR Code Section */}
+        <div className="flex justify-center mb-4">
+          <div className="bg-white p-3 rounded-md shadow-lg w-36">
+            <h4 className="text-sm font-semibold text-black text-center mb-2">
+              Scan UPI QR Code
+            </h4>
+            <div className="w-28 h-28 bg-gray-200 rounded-md flex items-center justify-center">
+              <img src={scanner} alt="QR Code" className="w-full h-full object-cover" />
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center mb-6">
-            <label className="block mb-1 text-base font-semibold text-center text-gray-700">
-              Upload Payment Proof
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="block w-full max-w-md text-sm text-gray-500
-                file:mr-4 file:py-3 file:px-5
-                file:rounded-lg file:border-0
-                file:text-sm file:font-semibold
-                file:bg-[#00c6ff] file:text-white
-                hover:file:bg-[#53bedb] cursor-pointer mb-4"
-            />
-            <button
-              onClick={handleUpload}
-              className="w-full max-w-md border-white border-2 text-white py-3 rounded-lg shadow-lg transition-transform transform hover:bg-opacity-90 hover:scale-105"
-            >
-              Upload
-            </button>
-          </div>
         </div>
-        <div className="bg-[#111113] py-6 text-center rounded-b-2xl">
-          <p className="text-[#909090]">
-            Need help?{" "}
-            <a href="#" className="text-white font-semibold hover:underline">
-              Contact Support
-            </a>
-          </p>
+  
+        {/* Upload Section */}
+        <div className="flex flex-col items-center mb-4">
+          <label className="text-sm font-semibold mb-2 text-gray-500">
+            Upload Payment Proof
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#00c6ff] file:text-white hover:file:bg-[#53bedb] cursor-pointer mb-3"
+          />
+          <button
+            onClick={handleUpload}
+            className="w-2/3 py-3 border border-white text-white rounded-xl shadow-lg text-sm transition-transform hover:scale-105"
+          >
+            Upload
+          </button>
         </div>
       </div>
+  
+      {/* Footer */}
+      <div className="bg-[#111113] py-4 text-center rounded-b-lg">
+        <p className="text-sm text-[#909090]">
+          Need help?{" "}
+          <a href="#" className="text-white font-semibold hover:underline">
+            Contact Support
+          </a>
+        </p>
+      </div>
     </div>
+  </div>
+  
+  
   );
 }
 
