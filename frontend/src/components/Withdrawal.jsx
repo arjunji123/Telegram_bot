@@ -11,6 +11,8 @@ import Receive from "../utils/Receive";
 import Footer from "./Footer";
 import Send from "../utils/Send";
 import History from "../utils/History";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAPIData } from '../../store/actions/homeActions';
 
 function Withdrawal() {
   const [showPopup, setShowPopup] = useState(false);
@@ -19,6 +21,12 @@ function Withdrawal() {
   const [showSendPopup, setShowSendPopup] = useState(false);
   const [showHistoryPopup, setShowHistoryPopup] = useState(false);
   const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const dispatch = useDispatch();
+  const apiCompanies = useSelector((state) => state.apiData.data.apicompanies);
+console.log('apiCompanies', apiCompanies)
+  useEffect(() => {
+    dispatch(fetchAPIData('apiCompanies'));
+  }, [dispatch]);
 
   const handleIconClick = (index) => {
     setActiveIndex(index);
@@ -118,35 +126,33 @@ function Withdrawal() {
 
           {/* Co-Companies List */}
           <div className="flex flex-col space-y-2 ">
-            {[
-              { name: 'Jems Henary', rate: '85.1' },
-              { name: 'Kevin Potter', rate: '94.5' },
-              { name: 'Harry Gill', rate: '99.45' },
-              { name: 'Rosh Richard', rate: '90.4' },
-            ].map((company, index) => (
-              <div key={index} className="rounded-lg p-2 w-full relative flex justify-between items-center bg-[#1b1a1a] transition duration-200 ease-in-out shadow-md">
-                <div className="flex ">
-                  <BsPersonFillCheck size={18} />
-                  <div className="ml-1"> {/* Reduced left margin */}
-                    <span className="text-[12px] font-semibold uppercase">{company.name}</span> {/* Adjusted name size */}
-                    <p className="font-bold flex items-center text-[17px] "> {/* Adjusted rate size */}
-                      <BsCurrencyRupee className="" />
-                      <span>{company.rate}</span>
-                    </p>
-                    <h3 className="text-[10px] uppercase text-[#d3cece] ">limit 20k-80k uni coin</h3>
+            {apiCompanies && apiCompanies.data && apiCompanies.data.length > 0 ? (
+                 apiCompanies.data && apiCompanies.data.map((company, index) => (
+                  <div key={index} className="rounded-lg p-2 w-full relative flex justify-between items-center bg-[#1b1a1a] transition duration-200 ease-in-out shadow-md">
+                    <div className="flex ">
+                      <BsPersonFillCheck size={18} />
+                      <div className="ml-1"> {/* Reduced left margin */}
+                        <span className="text-[12px] font-semibold uppercase">{company.company_name}</span> {/* Adjusted name size */}
+                        <p className="font-bold flex items-center text-[17px] "> {/* Adjusted rate size */}
+                          <BsCurrencyRupee className="" />
+                          <span>{company.coin_rate}</span>
+                        </p>
+                        <h3 className="text-[10px] uppercase text-[#d3cece] ">limit 20k-80k uni coin</h3>
+                      </div>
+                      <RiVerifiedBadgeLine size={16} className="text-green-500 " /> {/* Reduced icon size */}
+                    </div>
+    
+                    <button
+                      className="leading-none px-2 py-1 text-xs rounded-md bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
+                      onClick={togglePopup}
+                    >
+                      <AiFillCaretDown size={16} /> {/* Reduced icon size */}
+                      <span className="ml-1">Sell</span>
+                    </button>
                   </div>
-                  <RiVerifiedBadgeLine size={16} className="text-green-500 " /> {/* Reduced icon size */}
-                </div>
-
-                <button
-                  className="leading-none px-2 py-1 text-xs rounded-md bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
-                  onClick={togglePopup}
-                >
-                  <AiFillCaretDown size={16} /> {/* Reduced icon size */}
-                  <span className="ml-1">Sell</span>
-                </button>
-              </div>
-            ))}
+            )
+         
+            )): ""}
           </div>
 
 

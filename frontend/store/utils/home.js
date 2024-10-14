@@ -2,7 +2,7 @@
 export const API_URLS = {
   apiMe: 'http://localhost:4000/api/v1/api-me',
   apiQuests: 'http://localhost:4000/api/v1/api-quests',
-  // apiCourses: 'https://quizbackendfirst.onrender.com/api/v1/api-courses',
+  apiCompanies: 'http://localhost:4000/api/v1/api-companies',
   // apiFaqs: 'http://localhost:4000/api/v1/api-faqs',
   // apiBlogs: 'http://localhost:4000/api/v1/api-blogs',
   // apiTestimonials: 'http://localhost:4000/api/v1/api-testimonials',
