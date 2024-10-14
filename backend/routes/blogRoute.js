@@ -69,4 +69,5 @@ router
 router.route("/api-" + module_slug + "").get(apiGetAllRecords);
 router.route("/api-" + module_slug + "/:slug").get(apiGetSingleRecord);
 
+
 module.exports = router;

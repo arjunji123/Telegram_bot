@@ -109,10 +109,8 @@ router.route("/api-password/reset/:token").put(resetPasswordApi);
 router.route("/api-logout").get(logoutApi);
 
 router.route("/api-me").get(isApiAuthenticatedUser, getUserDetailApi);
-router
-  .route("/api-company/:id")
-  .get( getCompanyDetailApi);
-router.route("/api-companies").get( getAllCompaniesApi);
+router.route("/api-company/:id").get(getCompanyDetailApi);
+router.route("/api-companies").get(getAllCompaniesApi);
 router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
