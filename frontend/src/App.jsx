@@ -12,8 +12,11 @@ import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
+import { Provider } from 'react-redux';
+import store from '../store/store';
 
-function App() {
+
+function App({ Component, pageProps }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +32,8 @@ function App() {
   }
 
   return (
-    <>
+    <Provider store={store}> {/* Wrap entire app with Redux provider */}
+
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
@@ -49,7 +53,7 @@ function App() {
         {/* Conditionally render Footer */}
         {/* {loggedIn && <Footer />} */}
       </BrowserRouter>
-    </>
+      </Provider>
   );
 }
 

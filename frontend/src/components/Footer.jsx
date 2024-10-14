@@ -36,7 +36,7 @@ function Footer() {
   };
 
   return (
-    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg bg-black flex justify-around items-center z-50 text-xs py-2 shadow-lg">
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg bg-black flex justify-around items-center z-10 text-xs py-2 shadow-lg">
     <div className="text-center text-white w-1/5">
       <Link
         className="flex flex-col items-center"
@@ -46,7 +46,7 @@ function Footer() {
           handlePageChange('home', '/home');
         }}
       >
-        <IoHome size={28} className={`transition-opacity duration-200 ${activePage === 'home' ? 'opacity-100' : 'opacity-50'}`} />
+        <IoHome size={24} className={`transition-opacity duration-200 ${activePage === 'home' ? 'opacity-100' : 'opacity-50'}`} />
         <span className={`text-xs mt-1 ${activePage === 'home' ? 'font-bold' : 'opacity-50'}`}>Home</span>
       </Link>
     </div>
@@ -59,7 +59,7 @@ function Footer() {
           handlePageChange('tasks', '/tasks');
         }}
       >
-        <img src={earn} alt="Earn" className={`w-7 h-7 transition-opacity duration-200 ${activePage === 'tasks' ? 'opacity-100' : 'opacity-50'}`} />
+        <img src={earn} alt="Earn" className={`w-6 h-6 transition-opacity duration-200 ${activePage === 'tasks' ? 'opacity-100' : 'opacity-50'}`} />
         <span className={`text-xs mt-1 ${activePage === 'tasks' ? 'font-bold' : 'opacity-50'}`}>Earn</span>
       </Link>
     </div>
@@ -72,7 +72,7 @@ function Footer() {
           handlePageChange('friend', '/friend');
         }}
       >
-        <TbUsersGroup size={28} className={`transition-opacity duration-200 ${activePage === 'friend' ? 'opacity-100' : 'opacity-50'}`} />
+        <TbUsersGroup size={24} className={`transition-opacity duration-200 ${activePage === 'friend' ? 'opacity-100' : 'opacity-50'}`} />
         <span className={`text-xs mt-1 ${activePage === 'friend' ? 'font-bold' : 'opacity-50'}`}>Friends</span>
       </Link>
     </div>
@@ -93,7 +93,7 @@ function Footer() {
         <span className={`text-xs mt-1 ${activePage === 'withdrawal' ? 'font-bold' : 'opacity-50'}`}>Wallet</span>
       </Link>
     </div>
-    <div className="text-center text-white w-1/5">
+    {/* <div className="text-center text-white w-1/5">
       <div
         className="flex flex-col items-center cursor-pointer"
         onClick={handleLogout}
@@ -101,7 +101,7 @@ function Footer() {
         <IoLogOutOutline size={28} className={`transition-opacity duration-200 ${activePage === 'logout' ? 'opacity-100' : 'opacity-50'}`} />
         <span className={`text-xs mt-1 ${activePage === 'logout' ? 'font-bold' : 'opacity-50'}`}>Logout</span>
       </div>
-    </div>
+    </div> */}
   </div>
   );
 }

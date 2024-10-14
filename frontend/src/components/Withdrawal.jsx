@@ -7,15 +7,51 @@ import { BsStars, BsPersonFillCheck, BsCurrencyRupee } from "react-icons/bs";
 import { AiFillCaretDown } from "react-icons/ai";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
 import { ImCross } from "react-icons/im";
+import Receive from "../utils/Receive";
 import Footer from "./Footer";
+import Send from "../utils/Send";
+import History from "../utils/History";
 
 function Withdrawal() {
   const [showPopup, setShowPopup] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
+  const [showReceivePopup, setShowReceivePopup] = useState(false);
+  const [showSendPopup, setShowSendPopup] = useState(false);
+  const [showHistoryPopup, setShowHistoryPopup] = useState(false);
+  const [showPointsPopup, setShowPointsPopup] = useState(false);
+
   const handleIconClick = (index) => {
     setActiveIndex(index);
+    // Close all pop-ups when clicking a different icon
+    if (index === 0) {
+      setShowReceivePopup(true);
+      setShowSendPopup(false);
+      setShowHistoryPopup(false);
+      setShowPointsPopup(false);
+    } else if (index === 1) {
+      setShowReceivePopup(false);
+      setShowSendPopup(true);
+      setShowHistoryPopup(false);
+      setShowPointsPopup(false);
+    } else if (index === 2) {
+      setShowReceivePopup(false);
+      setShowSendPopup(false);
+      setShowHistoryPopup(true);
+      setShowPointsPopup(false);
+    } else if (index === 3) {
+      setShowReceivePopup(false);
+      setShowSendPopup(false);
+      setShowHistoryPopup(false);
+      setShowPointsPopup(true);
+    }
   };
 
+  const closePopups = () => {
+    setShowReceivePopup(false);
+    setShowSendPopup(false);
+    setShowHistoryPopup(false);
+    setShowPointsPopup(false);
+  };
   const togglePopup = () => {
     setShowPopup(!showPopup);
   };
@@ -44,34 +80,33 @@ function Withdrawal() {
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4  overflow-y-auto">
         <div className="flex-grow relative z-0 pb-16">
           <Logo />
-          <div className="flex justify-center font-poppins leading-3 space-x-1 text-4xl font-extrabold mb-4">
+          <div className="flex justify-center font-poppins leading-3 space-x-1 text-[34px] font-extrabold mb-4">
             <p>U</p>
             <p className="">700,00000</p>
           </div>
 
           <div className="grid grid-cols-4 gap-2 mb-4">
-      {[
-        { icon: <BiSolidDownvote size={22} />, label: "Receive" },
-        { icon: <BiSolidUpvote size={22} />, label: "Send" },
-        { icon: <BiHistory size={22} />, label: "History" },
-        { icon: <BsStars size={22} />, label: "Points" },
-      ].map((item, index) => (
-        <div
-          key={index}
-          onClick={() => handleIconClick(index)}
-          className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${
-            activeIndex === index ? "opacity-100" : "opacity-50"
-          }`}
-        >
-          <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
-            {item.icon}
+            {[
+              { icon: <BiSolidDownvote size={22} />, label: "Receive" },
+              { icon: <BiSolidUpvote size={22} />, label: "Send" },
+              { icon: <BiHistory size={22} />, label: "History" },
+              { icon: <BsStars size={22} />, label: "Points" },
+            ].map((item, index) => (
+              <div
+                key={index}
+                onClick={() => handleIconClick(index)}
+                className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${activeIndex === index ? "opacity-100" : "opacity-50"
+                  }`}
+              >
+                <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
+                  {item.icon}
+                </div>
+                <span className="text-xs text-center">{item.label}</span>
+              </div>
+            ))}
           </div>
-          <span className="text-xs text-center">{item.label}</span>
-        </div>
-      ))}
-    </div>
 
-          <div className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4">
+          <div  onClick={togglePopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
             <span className="text-xl font-extrabold font-poppins text-[#f5eded]">WITHDRAW</span>
           </div>
 
@@ -125,47 +160,58 @@ function Withdrawal() {
       {/* Popup Modal */}
       {showPopup && (
         <div className="fixed inset-0 flex items-end justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50" onClick={togglePopup}>
-  <div className="bg-[#1B1A1A] p-4 sm:p-6 rounded-t-3xl shadow-xl max-w-lg relative" onClick={(e) => e.stopPropagation()}>
-    <button onClick={togglePopup} className="absolute top-5 right-5 text-gray-400 hover:text-gray-200 focus:outline-none transition duration-300">
-      <ImCross size={20} />
-    </button>
-    
-    <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Withdrawal Money</h2>
-    
-    {/* Description */}
-    <p className="text-sm sm:text-base text-[#B0B0B0] text-center mb-6">
-      Please enter the amount and your UPI ID to generate the QR code for withdrawal.
-    </p>
-    
-    <input
-      type="text"
-      id="amount"
-      placeholder="Enter Amount"
-      className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-    />
-    
-    <input
-      type="text"
-      id="text"
-      value={inputValue}
-      onChange={handleInputChange}
-      placeholder="Enter UPI ID for QR code"
-      className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-    />
-    
-    <div className="flex justify-center items-center bg-[#2C2C2C] p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
-      <canvas id="qrcode" ref={qrRef} className="rounded-lg"></canvas>
-    </div>
-    
-    <div className="flex justify-center items-center">
-      <button className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
-        Submit
-      </button>
-    </div>
-  </div>
-</div>
+          <div className="bg-[#1B1A1A] p-4 sm:p-6 rounded-t-3xl shadow-xl max-w-lg relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={togglePopup} className="absolute top-5 right-5 text-gray-400 hover:text-gray-200 focus:outline-none transition duration-300">
+              <ImCross size={20} />
+            </button>
+
+            <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Withdrawal Money</h2>
+
+            {/* Description */}
+            <p className="text-sm sm:text-base text-[#B0B0B0] text-center mb-6">
+              Please enter the amount and your UPI ID to generate the QR code for withdrawal.
+            </p>
+
+            <input
+              type="text"
+              id="amount"
+              placeholder="Enter Amount"
+              className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
+            />
+
+            <input
+              type="text"
+              id="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              placeholder="Enter UPI ID for QR code"
+              className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
+            />
+
+            <div className="flex justify-center items-center bg-[#2C2C2C] p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
+              <canvas id="qrcode" ref={qrRef} className="rounded-lg"></canvas>
+            </div>
+
+            <div className="flex justify-center items-center">
+              <button className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
 
       )}
+      {
+        showReceivePopup && <Receive closePopups={closePopups} handleInputChange={handleInputChange} qrRef={qrRef}
+          inputValue={inputValue} />
+      }
+      {
+        showSendPopup && <Send closePopups={closePopups} handleInputChange={handleInputChange} qrRef={qrRef}
+          inputValue={inputValue} />
+      }
+      {
+        showHistoryPopup && <History closePopups={closePopups}  />
+      }
     </div>
 
 

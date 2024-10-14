@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import "../Styles/Tasks.css";
 // import { dollarCoin, mainCharacter } from '../images'; // Ensure correct image paths
 import { BsPersonCircle } from "react-icons/bs";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAPIData } from '../../store/actions/homeActions';
 
 function Home() {
- const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
+
+  const dispatch = useDispatch();
+  const apiMe = useSelector((state) => state.apiData.data.apime);
+console.log('apiMe', apiMe)
+  useEffect(() => {
+    dispatch(fetchAPIData('apiMe'));
+  }, [dispatch]);
 
   useEffect(() => {
     // Initialize Telegram WebApp if available
@@ -24,7 +31,7 @@ function Home() {
 
 
   return (
-    <div className="bg-white flex justify-center min-h-screen">
+    <div className="bg-white flex justify-center">
     <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg">
       <div className="flex-grow relative z-0">
         <div className="px-4 py-6 space-y-6">

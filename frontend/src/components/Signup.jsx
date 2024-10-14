@@ -13,8 +13,6 @@ function Signup() {
     password: "",
     confirmPassword: "",
     mobile: "",
-
-
     upi_id: "",
     referral_by: "02010C",
     user_type: "user",
@@ -202,7 +200,7 @@ function Signup() {
           </div>
 
           {/* Referral Input */}
-          <div className="relative">
+          {/* <div className="relative">
             <input
               type="text"
               name="referral_by"
@@ -212,7 +210,7 @@ function Signup() {
               className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Referral By"
             />
-          </div>
+          </div> */}
 
           {/* Submit Button */}
           <div className="flex justify-center">

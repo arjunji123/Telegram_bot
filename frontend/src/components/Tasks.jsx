@@ -1,11 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
-import { FaXTwitter, FaInstagram  } from "react-icons/fa6";
-import { FaYoutube , FaTelegramPlane } from "react-icons/fa";
-import { AiFillCaretRight  } from "react-icons/ai";
+import { FaXTwitter, FaInstagram } from "react-icons/fa6";
+import { FaYoutube, FaTelegramPlane } from "react-icons/fa";
+import { AiFillCaretRight } from "react-icons/ai";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/swiper-bundle.css';
 import Footer from "./Footer";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAPIData } from '../../store/actions/homeActions';
 
 function Tasks() {
+  const dispatch = useDispatch();
+  const apiData = useSelector((state) => state.apiData.data.apiquests);
+  const apiQuests = apiData?.quests || []; 
+  console.log('apiQuests', apiQuests)
+  useEffect(() => {
+    dispatch(fetchAPIData('apiQuests'));
+  }, [dispatch]);
+
+
+   // Filter the quests based on type (Watch and Follow)
+   const videoQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
+   const socialQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
+console.log("videoQuests", videoQuests);
+
+
+  // Mapping API Data to rows (video quests)
+  const rows = videoQuests && videoQuests.map((quest, index) => ({
+    icon: <FaYoutube size={24} color="white" className="mr-4" />,
+    title: quest.quest_name,
+    videoUrl: quest.quest_url,
+    taskKey: `task${index + 1}`, // Generating unique keys
+  }));
+
+  // Mapping API Data to socials (follow quests)
+  const socials = socialQuests && socialQuests.map((quest, index) => {
+    let icon = null;
+    if (quest.quest_name.toLowerCase().includes("youtube")) {
+      icon = <FaYoutube size={24} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("telegram")) {
+      icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("x")) {
+      icon = <FaXTwitter size={24} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("instagram")) {
+      icon = <FaInstagram size={24} color="white" className="mr-4" />;
+    }
+
+    return {
+      icon,
+      title: quest.quest_name,
+      socialUrl: quest.quest_url,
+    };
+  });
   const [watchTimes, setWatchTimes] = useState({
     task1: null,
     task2: null,
@@ -49,129 +95,145 @@ function Tasks() {
       });
     }
   };
-
-  const rows = [
-    {
-       icon: <FaYoutube size={40} color="white" className="mr-4" />,
-      title: "YOUTUBE VIDEO - 1",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      taskKey: "task1",
-    },
-    {
-       icon: <FaYoutube size={40} color="white" className="mr-4" />,
-      title: "YOUTUBE VIDEO - 1",
-      videoUrl: "https://www.youtube.com/watch?v=abcd1234",
-      taskKey: "task2",
-    },
-    // Add more rows as needed
-  ];
-
-  const socials = [
-    {
-      icon: <FaYoutube size={40} color="white" className="mr-4" />,
-      title: "SUBSCRIBE ON YOUTUBE",
-      socialUrl: "https://www.youtube.com/",
-    },
-    {
-      icon: <FaTelegramPlane  size={40} color="white" className="mr-4" />,
-      title: "Follow on Telegram",
-      socialUrl: "https://web.telegram.org/k/",
-    },
-    {
-      icon: <FaXTwitter size={40} color="white" className="mr-4" />,
-      title: "Follow on X",
-      socialUrl: "https://x.com/X",
-    },
-    {
-      icon: <FaInstagram  size={40} color="white" className="mr-4" />,
-      title: "Follow on Instagram",
-      socialUrl: "https://www.instagram.com/",
-    },
-  ];
-
   return (
     <div className="bg-white flex justify-center min-h-screen">
-    <div className="w-full bg-black text-white h-screen  flex flex-col max-w-xl  ">
-      <div className="flex-grow mb-4 relative z-0">
-        <div className=" px-2 py-6 h-full z-10">
-          <Logo/>
-          <p className="text-left mt-6 text-lg font-poppins ml-2">EARN</p>
-          <h1 className="text-center text-3xl text-white shadow-lg font-bold font-poppins">
+      <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
+        <div className="flex-grow mb-4 relative z-0">
+          <div className=" px-2 py-6 h-full z-10">
+            <Logo />
+            <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
+              {/* Sliding Banner */}
+              <Swiper
+              spaceBetween={20}
+              slidesPerView={1}
+              pagination={{ clickable: true }}
+              className="rounded-lg shadow-lg overflow-hidden mb-4"
+            >
+              <SwiperSlide>
+            <div className="bg-gradient-to-r from-[#c7c7c1] to-[#dbdbd1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
+              <div className="flex items-center">
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlrWcBG3SebWTLiMtYf1YBzrZ-dyD9B2LHqiJScut64HP7qbEj0oAJw-JHiCkf9HD2NHI&usqp=CAU" // Replace with your logo path
+                  alt="Logo"
+                  className="h-10 w-10 rounded-full shadow-md" // Logo styling
+                />
+              </div>
+              <div className="mt-4">
+                <h1 className="text-black text-base font-bold ">MemeFi Quest Round 1</h1>
+                <p className="text-[#423d3d] text-xs font-bold">+999 BP</p>
+              </div>
+              <div className="flex justify-between">
+                <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
+                  Open
+                </button>
+                <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
+                  0/3
+                </button>
+              </div>
+
+            </div>
+            </SwiperSlide>
+            <SwiperSlide>
+            <div className="bg-gradient-to-r from-[#d4afd1] to-[#f3d6f1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
+              <div className="flex items-center">
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv1DD_viUEoD_ag_IWy3twGYvW18quZRC8sA&s" // Replace with your logo path
+                  alt="Logo"
+                  className="h-10 w-10 rounded-full shadow-md" // Logo styling
+                />
+              </div>
+              <div className="mt-4">
+                <h1 className="text-black text-base font-bold ">Subscribe to Blum Telegram </h1>
+                <p className="text-[#423d3d] text-xs font-bold">+90 BP</p>
+              </div>
+              <div className="flex justify-between">
+                <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
+                  Start
+                </button>
+                {/* <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
+                  0/3
+                </button> */}
+              </div>
+
+            </div>
+            </SwiperSlide>
+            </Swiper>
+            <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4"> {/* Reduced heading size */}
             COIN QUESTS 0/10
           </h1>
-  
-          <div className="mt-4 ">
-            {rows.map((row, index) => (
-              <>
-              <div
-                key={index}
-                className="flex items-center justify-between bg-black py-3 px-4  font-poppins"
-              >
-                <div className="flex items-center ">
-                {row.icon}
-                  <h3 className="text-base uppercase ">{row.title}</h3>
-                </div>
-                {!hasWatched[row.taskKey] && !isVideoWatched[row.taskKey] && (
-                  <a
-                    href={row.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => handleWatchButtonClick(row.taskKey)}
-                    className="bg-white text-black w-24 flex justify-center py-1 font-mono rounded-full  text-sm font-bold"
-                  >
-                     <span>  <AiFillCaretRight  size={22} /> </span>
-                     <span className=" uppercase"> Watch</span> 
-                  </a>
-                )}
-                {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
-                  <button
-                    onClick={() => handleCheckButtonClick(row.taskKey)}
-                    className="bg-blue-500 px-4 py-2 rounded-lg"
-                  >
-                    Check
-                  </button>
-                )}
-                {hasWatched[row.taskKey] && (
-                  <p className="text-green-500">Completed</p>
-                )}
-              </div>
-                  <hr className="border-2 border-gray-50 w-[260px] mx-auto "/></>
-            ))}
-          </div>
-  
-          <div className=" mt-4 ">
-            {socials.map((social, index) => (
-              <>
+
+            <div className="mt-4 ">
+              {rows && rows.map((row, index) => (
+                <>
                   <div
-                key={index}
-                className="flex items-center justify-between bg-black py-3 px-4 rounded-lg shadow-lg  "
-              >
-                <div className="flex items-center">
-                {social.icon}
-                  <h3 className="text-base uppercase">{social.title}</h3>
-                </div>
-                <a
-                  href={social.socialUrl}
+                    key={index}
+                    className="flex items-center justify-between bg-black py-3 px-4  font-poppins"
+                  >
+                    <div className="flex items-center ">
+                      {row.icon}
+                      <h3 className="text-sm uppercase ">{row.title}</h3>
+                    </div>
+                    {!hasWatched[row.taskKey] && !isVideoWatched[row.taskKey] && (
+                  <a
+                  href={row.videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white text-black px-2 py-1 font-mono rounded-full w-24 flex justify-center text-sm font-bold"
+                  onClick={() => handleWatchButtonClick(row.taskKey)}
+                  className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
                 >
-                   <span>  <AiFillCaretRight  size={22} /> </span>
-                   <span className=" uppercase"> Follow</span> 
+                  <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
+                  <span className="uppercase">Watch</span>
                 </a>
-              </div>
-                  <hr className="border-2 border-white w-[260px] mx-auto "/></>
-          
-            ))}
-                        
+                    )}
+                    {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
+                      <button
+                        onClick={() => handleCheckButtonClick(row.taskKey)}
+                        className="bg-blue-500 px-4 py-2 rounded-lg"
+                      >
+                        Check
+                      </button>
+                    )}
+                    {hasWatched[row.taskKey] && (
+                      <p className="text-green-500">Completed</p>
+                    )}
+                  </div>
+                  <hr className="border-2 border-gray-50  w-2/3 mx-auto " /></>
+              ))}
+            </div>
 
+            <div className=" mt-4 ">
+              {socials && socials.map((social, index) => (
+                <>
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-black py-3 px-4 rounded-lg shadow-lg  "
+                  >
+                    <div className="flex items-center">
+                      {social.icon}
+                      <h3 className="text-sm uppercase">{social.title}</h3>
+                    </div>
+                    <a
+                    href={social.socialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
+                  >
+                    <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
+                    <span className="uppercase">Follow</span>
+                  </a>
+                  </div>
+                  <hr className="border-2 border-white w-2/3 mx-auto " /></>
+
+              ))}
+
+
+            </div>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
-    <Footer/>
-  </div>
-  
+
   );
 }
 
