@@ -6,70 +6,71 @@ import "../Styles/LoginDesign.css";
 import { toast, ToastContainer } from "react-toastify"; // Import react-toastify components
 import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
 import { logo } from '../images';
+import { useDispatch } from 'react-redux';
+import { login } from '../../store/actions/authActions';
 
 function Login({ setLoggedIn }) {
-  const [values, setValues] = useState({
-    emailOrMobile: "",
-    password: "",
-  });
+  const dispatch = useDispatch();
+  const [emailOrMobile, setEmailOrMobile] = useState('');
+  const [password, setPassword] = useState('');
+
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Check local storage for user data and auto-login
-  useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    if (userData) {
-      const { token, expiration } = userData;
-      const currentTime = new Date().getTime();
-      if (currentTime < expiration) {
-        setLoggedIn(true);
-        navigate("/home");
-      } else {
-        localStorage.removeItem("userData");
-      }
-    }
-  }, [navigate, setLoggedIn]);
 
-  const handleInput = (e) => {
-    setValues((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setErrors(''); // Clear previous error message
 
-    axios
-      .post("http://localhost:4000/api/v1/api-login", values)
-      .then((res) => {
-        if (res.data.success === true) {
-          const token_local = res.data.token;
-          const expirationTime = new Date().getTime() + 7 * 24 * 60 * 60 * 1000; // 7 days
-
-          localStorage.setItem(
-            "userData",
-            JSON.stringify({
-              token_local: token_local,
-              expiration: expirationTime,
-            })
-          );
-          setLoggedIn(true);
-          toast.success("Login successfull ! "); // Show success toast
-          setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
-        } else {
-          toast.error("No Record Exists"); // Show error toast
-        }
-      })
-      .catch((err) => {
-        console.error("API Error:", err);
-        if (err.response && err.response.status === 400) {
-          toast.error("Invalid email or password. Please try again.");
-        } else {
-          toast.error(err.response.data.error);
-        }
-      });
+    try {
+      // Dispatch login action and wait for it to complete
+      await dispatch(login({ emailOrMobile, password }));
+      setLoggedIn(true);
+      toast.success("Login successfull ! "); // Show success toast
+      setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
+    } catch (error) {
+      toast.error(error);
+      setErrors('Login failed: ' + error.message);
+    }
   };
+
+  
+
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   axios
+  //     .post("http://localhost:4000/api/v1/api-login", values)
+  //     .then((res) => {
+  //       if (res.data.success === true) {
+  //         const token_local = res.data.token;
+  //         const expirationTime = new Date().getTime() + 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  //         localStorage.setItem(
+  //           "userData",
+  //           JSON.stringify({
+  //             token_local: token_local,
+  //             expiration: expirationTime,
+  //           })
+  //         );
+  //         setLoggedIn(true);
+  //         toast.success("Login successfull ! "); // Show success toast
+  //         setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
+  //       } else {
+  //         toast.error("No Record Exists"); // Show error toast
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("API Error:", err);
+  //       if (err.response && err.response.status === 400) {
+  //         toast.error("Invalid email or password. Please try again.");
+  //       } else {
+  //         toast.error(err.response.data.error);
+  //       }
+  //     });
+  // };
 
   const [firstName, setFirstName] = useState("");
 
@@ -104,12 +105,13 @@ function Login({ setLoggedIn }) {
             Log In
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 px-2 sm:px-4">
+          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6 px-2 sm:px-4">
             <div className="relative">
               <input
                 type="text"
                 name="emailOrMobile"
-                onChange={handleInput}
+                value={emailOrMobile}
+                onChange={(e) => setEmailOrMobile(e.target.value)}
                 required
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Email / Phone Number"
@@ -120,7 +122,8 @@ function Login({ setLoggedIn }) {
               <input
                 type="password"
                 name="password"
-                onChange={handleInput}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Password"

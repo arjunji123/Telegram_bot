@@ -25,3 +25,31 @@ export const fetchData = async (url) => {
     return null; // Return null or handle the error as needed
   }
 };
+
+// export const fetchDataToken = async (url) => {
+//   try {
+//     const token = getToken('user'); // Fetch token after checking expiration
+
+//     if (!token) {
+//       throw new Error('No valid token found! Please login.');
+//     }
+
+//     const response = await fetch(url, {
+//       method: 'GET',
+//       headers: {
+//         'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`Error fetching data from ${url}: ${response.statusText}`);
+//     }
+
+//     const data = await response.json();
+//     return data;
+//   } catch (error) {
+//     console.error('API fetch error:', error.message);
+//     return null; // Return null or handle the error as needed
+//   }
+// };
