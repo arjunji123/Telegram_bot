@@ -63,9 +63,10 @@
                                     </td>
                                     <td>
                                         <% if (user.user_type==='company' ) { %>
-                                            <!-- View button to open the form modal -->
-                                            <button class="btn btn-primary view-company-form"
-                                                data-id="<%= user.id %>">View</button>
+                                          
+                                            <!-- Updated View button to redirect to the company form page -->
+                                            <a href="/admin/<%= module_slug %>/company-form/<%= user.id %>"
+                                                class="btn btn-primary">View</a>
                                             <% } %>
                                                 <form action="/admin/users/update-status" method="POST"
                                                     style="display:inline;">
@@ -82,8 +83,8 @@
                                                         <%=user.status===0 ? 'disabled' : '' %>>Deactivate</button>
                                                 </form>
                                     </td>
-                                </tr>
-                                <% }); %>
+
+                                    <% }); %>
                     </tbody>
                 </table>
             </div>
@@ -91,46 +92,19 @@
     </div>
 </div>
 
-<!-- Modal for viewing company form -->
-<div class="modal fade" id="companyFormModal" tabindex="-1" role="dialog" aria-labelledby="companyFormModalLabel"
+<!-- Modal for viewing images -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="companyFormModalLabel">Company Details</h5>
+                <h5 class="modal-title" id="imageModalLabel">Image Screenshot</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <!-- The form where admin can add a coin rate -->
-                <form action="/coin-rate/add" method="POST">
-                    <div>
-                        <label for="company_id">Company ID</label>
-                        <select name="company_id" required>
-                            <option value="">Select a Company</option>
-                            <% companies.forEach(function(company) { %>
-                                <option value="<%= company.id %>">
-                                    <%= company.name %>
-                                </option>
-                                <% }) %>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="coin_rate">Coin Rate</label>
-                        <input type="text" class="form-control" name="coin_rate" required>
-                    </div>
-                    <div>
-                        <label for="description">Description</label>
-                        <textarea class="form-control" name="description"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-
-
-
-
-
+                <img id="modalImage" src="" alt="Screenshot" class="img-fluid" />
             </div>
         </div>
     </div>
@@ -143,13 +117,6 @@
             var imageUrl = $(this).data('image');
             $('#modalImage').attr('src', imageUrl);
             $('#imageModal').modal('show');
-        });
-
-        // Show modal with company form
-        $('.view-company-form').click(function () {
-            var userId = $(this).data('id');
-            // Fetch and populate form data here if needed using AJAX
-            $('#companyFormModal').modal('show');
         });
     });
 </script>

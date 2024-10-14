@@ -526,7 +526,6 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
 //////////////////////////////////////////////////
 
 // Joi schema for validation
-// Joi schema for validation
 const coinRateSchema = Joi.object({
   company_id: Joi.number().integer().required(),
   coin_rate: Joi.string().required(),
@@ -555,11 +554,8 @@ exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
   // Step 3: Check if the company exists in the users table
   const companyExists = await QueryModel.findOne("users", { id: companyId });
 
-  // Check if the company exists and if the `user_type` is set as 'company'
-  if (!companyExists || companyExists.user_type !== "company") {
-    return next(
-      new ErrorHandler("Company not found or not a valid company.", 404)
-    );
+  if (!companyExists) {
+    return next(new ErrorHandler("Company not found.", 404));
   }
 
   // Step 4: Prepare data for insertion into the company_data table
@@ -571,16 +567,120 @@ exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
 
   // Step 5: Insert the coin rate data into the company_data table
   try {
-    const coinRate = await QueryModel.saveData("company_data", insertData);
+    const coinRate = await QueryModel.saveData(
+      "company_data",
+      insertData,
+      next
+    );
 
     // Success response
-    res.status(200).json({
-      success: true,
+    req.flash("msg_response", {
+      status: 200,
       message: "Coin rate added successfully for the company.",
-      coinRate,
     });
+
+    // Redirect to the users page after successful insert
+    res.redirect(`/admin/users`);
   } catch (err) {
     console.error("Error saving coin rate data:", err);
     return next(new ErrorHandler("Error while saving coin rate data.", 500));
   }
+});
+
+exports.submitCompanyForm = catchAsyncErrors(async (req, res, next) => {
+  const { coin_rate, description } = req.body; // Extract data from the request body
+  const companyId = req.params.id; // Get the company ID from the request parameters
+
+  // Validate input (basic example; you can add more validation as needed)
+  if (!coin_rate || !description) {
+    return next(
+      new ErrorHandler("Coin rate and description are required", 400)
+    );
+  }
+
+  try {
+    // Check if the company data already exists
+    const existingCompanyDataQuery = await db.query(
+      "SELECT * FROM company_data WHERE company_id = ?",
+      [companyId]
+    );
+
+    // If data exists, update the existing record
+    if (existingCompanyDataQuery[0].length > 0) {
+      await db.query(
+        "UPDATE company_data SET coin_rate = ?, description = ? WHERE company_id = ?",
+        [coin_rate, description, companyId]
+      );
+
+      // Optionally, set a flash message or response for successful update
+      req.flash("msg_response", {
+        status: 200,
+        message: "Coin rate updated successfully for company ID: " + companyId,
+      });
+    } else {
+      // If data does not exist, insert a new record
+      const insertData = {
+        company_id: companyId,
+        coin_rate: coin_rate,
+        description: description,
+      };
+
+      await db.query("INSERT INTO company_data SET ?", insertData);
+
+      // Optionally, set a flash message or response for successful insertion
+      req.flash("msg_response", {
+        status: 200,
+        message:
+          "Coin rate submitted successfully for company ID: " + companyId,
+      });
+    }
+
+    // Redirect back to the index page or another appropriate page
+    res.redirect("/admin/" + module_slug); // Change this to the appropriate redirection
+  } catch (error) {
+    console.error("Error while submitting company form:", error);
+    return next(
+      new ErrorHandler(
+        "An error occurred while submitting the company form",
+        500
+      )
+    );
+  }
+});
+
+exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
+  const companyId = req.params.id; // Get the company ID from the URL
+
+  // Fetch the company details from the database
+  const companyDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+    companyId,
+  ]);
+
+  const company = companyDetail[0][0]; // Extract the company object from the result
+
+  // Check if the company exists
+  if (!company) {
+    return next(new ErrorHandler("Company not found", 404)); // Handle company not found
+  }
+
+  // Fetch user details (assuming you have a function to get user details)
+  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+    req.user.id,
+  ]);
+
+  const user = userDetail[0][0]; // Extract the user object from the result
+
+  // Check if the user exists
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404)); // Handle user not found
+  }
+
+  // Render the company form view with the company and user details
+  res.render(module_slug + "/company-form", {
+    layout: module_layout, // Assuming there's a layout file
+    title: "Submit Company Data",
+    companyId, // Pass the company ID to the form
+    company, // Pass the company object to the view (if you need to display any details)
+    user, // Pass the user object to the view
+  });
 });
