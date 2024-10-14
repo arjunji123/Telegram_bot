@@ -41,6 +41,7 @@ router
     authorizeRoles("admin"),
     createRecord
   );
+
 router
   .route("/" + module_slug + "/edit/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), editForm);

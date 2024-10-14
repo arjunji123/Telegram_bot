@@ -467,3 +467,108 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+
+////////////////////////////////////
+
+exports.getCompanyDetailApi = catchAsyncErrors(async (req, res, next) => {
+  try {
+    // Fetch the company ID from the request, assuming it's passed as a parameter
+    const companyId = req.params.id;
+
+    // Log the companyId to verify it
+    console.log("Company ID being fetched:", companyId);
+
+    // Check if companyId is undefined or null
+    if (!companyId) {
+      return next(new ErrorHandler("Company ID is missing", 400));
+    }
+
+    // Fetch user details from the 'users' table where user_type is 'company'
+    const userQuery = await db.query(
+      "SELECT user_name FROM users WHERE id = ? AND user_type = 'company'",
+      [companyId]
+    );
+
+    console.log("User query result:", userQuery);
+
+    // If the user doesn't exist or is not a company
+    if (userQuery[0].length === 0) {
+      return next(new ErrorHandler("Company user not found", 404));
+    }
+
+    const user = userQuery[0][0]; // Extract user details
+
+    // Fetch company data from the 'company_data' table using the companyId
+    const companyDataQuery = await db.query(
+      "SELECT coin_rate, description FROM company_data WHERE company_id = ?",
+      [companyId]
+    );
+
+    console.log("Company data query result:", companyDataQuery);
+
+    // If company data doesn't exist
+    if (companyDataQuery[0].length === 0) {
+      return next(new ErrorHandler("Company data not found", 404));
+    }
+
+    const companyData = companyDataQuery[0][0]; // Extract company data details
+
+    // Construct the response object with all the necessary details
+    const companyProfile = {
+      company_name: user.user_name,
+      coin_rate: companyData.coin_rate || 0, // If coin_rate is null, set to 0
+      description: companyData.description || "", // If description is null, set to an empty string
+    };
+
+    // Send the response with the company's profile
+    res.status(200).json({
+      data: companyProfile,
+    });
+  } catch (error) {
+    console.error("Error fetching company profile:", error);
+    return next(
+      new ErrorHandler("An error occurred while fetching company profile", 500)
+    );
+  }
+});
+
+//////////////////////////////
+
+exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
+  try {
+    // Fetch all users where user_type is 'company' and join with company_data to get additional details
+    const companiesQuery = await db.query(
+      `SELECT u.id AS company_id, u.user_name AS company_name, 
+              c.coin_rate, c.description 
+       FROM users u 
+       LEFT JOIN company_data c ON u.id = c.company_id 
+       WHERE u.user_type = 'company'`
+    );
+
+    console.log("Companies query result:", companiesQuery);
+
+    // If no companies are found
+    if (companiesQuery[0].length === 0) {
+      return next(new ErrorHandler("No companies found", 404));
+    }
+
+    // Map the results to a structured array of companies
+    const companies = companiesQuery[0].map((company) => ({
+      company_id: company.company_id,
+      company_name: company.company_name,
+      coin_rate: company.coin_rate || 0, // Set to 0 if null
+      description: company.description || "", // Set to an empty string if null
+    }));
+
+    // Send the response with the list of companies
+    res.status(200).json({
+      success: true,
+      data: companies,
+    });
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    return next(
+      new ErrorHandler("An error occurred while fetching companies", 500)
+    );
+  }
+});

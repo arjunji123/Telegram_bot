@@ -32,7 +32,9 @@ const {
   addFrom,
   createRecord,
   updateUserStatus,
-  addCoinRate,
+  // addCoinRate,
+  showCompanyForm,
+  submitCompanyForm,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -44,6 +46,8 @@ const {
   updatePasswordApi,
   updateProfileApi,
   uploadScreenshotApi,
+  getCompanyDetailApi,
+  getAllCompaniesApi,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -82,9 +86,14 @@ router
 
 // Route for updating user status
 router.post("/users/update-status", updateUserStatus);
+// router
+//   .route("/coin-rate/add")
+//   .post(isAuthenticatedUser, authorizeRoles("admin"), addCoinRate);
+// Route for showing form and submitting data
 router
-  .route("/coin-rate/add")
-  .post(isAuthenticatedUser, authorizeRoles("admin"), addCoinRate);
+  .route("/" + module_slug + "/company-form/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), showCompanyForm)
+  .post(isAuthenticatedUser, authorizeRoles("admin"), submitCompanyForm);
 
 /*******REST API*******/
 
@@ -99,7 +108,10 @@ router.route("/api-password/reset/:token").put(resetPasswordApi);
 router.route("/api-logout").get(logoutApi);
 
 router.route("/api-me").get(isApiAuthenticatedUser, getUserDetailApi);
-
+router
+  .route("/api-company/:id")
+  .get(isApiAuthenticatedUser, getCompanyDetailApi);
+router.route("/api-companies").get(isApiAuthenticatedUser, getAllCompaniesApi);
 router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
