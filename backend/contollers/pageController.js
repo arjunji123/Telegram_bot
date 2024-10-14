@@ -233,7 +233,7 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
     const [quest_records] = await db.query(
       "SELECT id,quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
       [resultPerPage, offset]
-    );
+    ); 
 
     // Process rows if needed
     const quests = quest_records.map((row) => ({
