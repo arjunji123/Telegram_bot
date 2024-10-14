@@ -284,3 +284,62 @@ exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
     quest,
   });
 });
+/////////////////
+exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
+  // Get the user_id from the logged-in user's session
+  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+  // Get the quest_id from the request body
+  const { quest_id } = req.body;
+
+  console.log("Received request to complete quest:", { user_id, quest_id });
+
+  // Validate input to ensure quest_id is provided
+  if (!quest_id) {
+    console.log("Validation failed: Missing quest_id");
+    return next(new ErrorHandler("Quest ID is required", 400));
+  }
+
+  try {
+    // Fetch the quest details from the quest table to get the coin_earn value
+    const questResult = await db.query(
+      "SELECT id, coin_earn FROM quest WHERE id = ?",
+      [quest_id]
+    );
+    console.log("Quest details fetched:", questResult);
+
+    // Check if the quest exists in the database
+    if (questResult[0].length === 0) {
+      console.log("Quest not found for quest_id:", quest_id);
+      return next(new ErrorHandler("Quest not found", 404));
+    }
+
+    const { id: fetchedQuestId, coin_earn: coinEarn } = questResult[0][0]; // Get the quest ID and coin_earn
+
+    console.log("Quest ID and Coin Earn:", { fetchedQuestId, coinEarn });
+
+    // Prepare the data to insert into the usercoin_audit table
+    const insertData = {
+      user_id, // The user completing the quest
+      quest_id: fetchedQuestId, // The quest ID from the database
+      pending_coin: coinEarn, // Add the coin_earn value to pending_coin
+      coin_operation: "cr", // Set the coin_operation to 'cr' (credit)
+      type: "quest", // Set the type to 'quest'
+      status: "pending", // Set the status as 'pending'
+      date_entered: new Date(), // Current date for tracking
+    };
+    console.log("Insert data for usercoin_audit:", insertData);
+
+    // Insert the data into the usercoin_audit table
+    await db.query("INSERT INTO usercoin_audit SET ?", insertData);
+
+    // Respond with a success message
+    res.status(200).json({
+      success: true,
+      message: `Quest completed successfully. ${coinEarn} coins added to the pending coins.`,
+    });
+  } catch (error) {
+    console.error("Error during quest completion:", error);
+    return next(new ErrorHandler("Database query failed", 500));
+  }
+});

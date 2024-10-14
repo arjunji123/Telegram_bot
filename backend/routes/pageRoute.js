@@ -11,6 +11,7 @@ const {
   deleteImage,
   apiGetAllRecords,
   apiGetSingleRecord,
+  completeQuest,
 } = require("../contollers/pageController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const Model = require("../models/pageModel");
@@ -69,5 +70,7 @@ router
 /** REST API**/
 router.route("/api-" + module_slug + "").get(apiGetAllRecords);
 router.route("/api-" + module_slug + "/:id").get(apiGetSingleRecord);
-
+router
+  .route("/api-" + module_slug + "/complete-quest")
+  .post(isAuthenticatedUser, completeQuest);
 module.exports = router;
