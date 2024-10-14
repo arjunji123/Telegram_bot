@@ -663,24 +663,20 @@ exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Company not found", 404)); // Handle company not found
   }
 
-  // Fetch user details (assuming you have a function to get user details)
-  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-    req.user.id,
-  ]);
+  // Fetch the existing company data from the company_data table
+  const companyDataQuery = await db.query(
+    "SELECT * FROM company_data WHERE company_id = ?",
+    [companyId]
+  );
 
-  const user = userDetail[0][0]; // Extract the user object from the result
+  const companyData = companyDataQuery[0][0] || {}; // Get the company data or set to an empty object if not found
 
-  // Check if the user exists
-  if (!user) {
-    return next(new ErrorHandler("User not found", 404)); // Handle user not found
-  }
-
-  // Render the company form view with the company and user details
+  // Render the company form view with the company details and existing company data
   res.render(module_slug + "/company-form", {
     layout: module_layout, // Assuming there's a layout file
     title: "Submit Company Data",
     companyId, // Pass the company ID to the form
-    company, // Pass the company object to the view (if you need to display any details)
-    user, // Pass the user object to the view
+    company, // Pass the company object to the view
+    companyData, // Pass the existing company data (coin_rate, description)
   });
 });
