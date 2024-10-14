@@ -325,7 +325,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       pending_coin: coinEarn, // Add the coin_earn value to pending_coin
       coin_operation: "cr", // Set the coin_operation to 'cr' (credit)
       type: "quest", // Set the type to 'quest'
-      status: "pending", // Set the status as 'pending'
+      status: "inactive", // Set the status as 'pending'
       date_entered: new Date(), // Current date for tracking
     };
     console.log("Insert data for usercoin_audit:", insertData);
