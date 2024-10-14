@@ -31,6 +31,7 @@ console.log("videoQuests", videoQuests);
     title: quest.quest_name,
     videoUrl: quest.quest_url,
     taskKey: `task${index + 1}`, // Generating unique keys
+    questId: quest.quest_id, // Add quest_id here
   }));
 
   // Mapping API Data to socials (follow quests)
@@ -76,25 +77,48 @@ console.log("videoQuests", videoQuests);
     });
   };
 
-  const handleCheckButtonClick = (task) => {
+  const handleCheckButtonClick = async (task, questId) => {
     const currentTime = Date.now();
     const watchStartTime = watchTimes[task];
     const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
 
     if (timeSpent >= 10) {
-      setHasWatched({
-        ...hasWatched,
-        [task]: true,
-      });
-      alert("Task Completed!");
+        try {
+            // Make the API call to complete the quest
+            const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${token}`, // Make sure to add the token here
+                },
+                body: JSON.stringify({ quest_id: questId }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json(); // Get the response data if needed
+            console.log('Quest completed successfully:', data);
+
+            setHasWatched({
+                ...hasWatched,
+                [task]: true,
+            });
+            alert("Task Completed!");
+        } catch (err) {
+            alert(`Error completing task: ${err.message}`);
+            console.error('Error completing quest:', err);
+        }
     } else {
-      alert("You have not watched the video for at least 10 seconds.");
-      setIsVideoWatched({
-        ...isVideoWatched,
-        [task]: false,
-      });
+        alert("You have not watched the video for at least 10 seconds.");
+        setIsVideoWatched({
+            ...isVideoWatched,
+            [task]: false,
+        });
     }
-  };
+};
+
   return (
     <div className="bg-white flex justify-center min-h-screen">
       <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
@@ -187,14 +211,14 @@ console.log("videoQuests", videoQuests);
                     )}
                     {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
                       <button
-                        onClick={() => handleCheckButtonClick(row.taskKey)}
-                        className="bg-blue-500 px-4 py-2 rounded-lg"
-                      >
-                        Check
-                      </button>
+                      onClick={() => handleCheckButtonClick(row.taskKey, questId)} // Pass the quest ID here
+                      className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
+                  >
+                      Check
+                  </button>
                     )}
                     {hasWatched[row.taskKey] && (
-                      <p className="text-green-500">Completed</p>
+                      <p className="text-green-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold">Completed</p>
                     )}
                   </div>
                   <hr className="border-2 border-gray-50  w-2/3 mx-auto " /></>

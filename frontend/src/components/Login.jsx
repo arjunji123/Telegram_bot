@@ -30,7 +30,7 @@ function Login({ setLoggedIn }) {
       toast.success("Login successfull ! "); // Show success toast
       setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
     } catch (error) {
-      toast.error(error);
+      toast.error("Invalid email/mobile number or password");
       setErrors('Login failed: ' + error.message);
     }
   };
