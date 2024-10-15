@@ -108,15 +108,13 @@ exports.showLogin = catchAsyncErrors(async (req, res, next) => {
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
-  // checking that user email and password are provided
+  // Checking if user email and password are provided
   if (!email || !password) {
-    //return next(new ErrorHandler("Please enter email and password", 400));
-
     req.flash("msg_response", {
       status: 400,
       message: "Please enter email and password",
     });
-    res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 
   // Find user by email
@@ -124,18 +122,16 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     "SELECT * FROM users WHERE email = ? limit 1",
     [email]
   );
-  //console.log(userData);
 
   const user = userData[0][0];
 
   // If user not found
   if (!user) {
-    //return next(new ErrorHandler("Invalid email or password 1", 400));
     req.flash("msg_response", {
       status: 400,
       message: "Invalid email or password",
     });
-    res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 
   // Compare passwords
@@ -145,28 +141,22 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   );
 
   if (!isPasswordMatched) {
-    // return next(new ErrorHandler("Invalid email or password 2", 400));
     req.flash("msg_response", {
       status: 400,
       message: "Invalid email or password",
     });
-    res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 
   const token = User.generateToken(user.id); // Adjust as per your user object structure
 
-  /* res.status(200).json({
-        success: true,
-        user: user[0],
-        token
-    });*/
-  // console.log(user);console.log(token);
-
+  // Send token and then redirect
   sendToken(user, token, 201, res);
 
   req.flash("msg_response", { status: 200, message: "Successfully LoggedIn" });
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/dashboard`);
+  // Redirect to the dashboard after sending the token
+  return res.redirect(`/${process.env.ADMIN_PREFIX}/dashboard`);
 });
 
 exports.logout = catchAsyncErrors(async (req, res, next) => {
