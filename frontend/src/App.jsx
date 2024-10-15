@@ -12,8 +12,11 @@ import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
+import { Provider } from 'react-redux';
+import store from '../store/store';
 
-function App() {
+
+function App({ Component, pageProps }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -29,27 +32,28 @@ function App() {
   }
 
   return (
-    <>
+    <Provider store={store}> {/* Wrap entire app with Redux provider */}
+
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login setLoggedIn={setLoggedIn} />} />
           <Route path="/" element={<Signup />} />
-          <Route path="/payment" element={<Payment />} />
+          <Route path="/payment/:id" element={<Payment />} />
 
           {/* Protected Routes */}
           {/* <Route element={<ProtectedRoute loggedIn={loggedIn} />}> */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/friend" element={<Friend />} />
-          <Route path="/withdrawal" element={<Withdrawal />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/friend" element={<Friend />} />
+            <Route path="/withdrawal" element={<Withdrawal />} />
           {/* </Route> */}
         </Routes>
 
         {/* Conditionally render Footer */}
-        {loggedIn && <Footer />}
+        {/* {loggedIn && <Footer />} */}
       </BrowserRouter>
-    </>
+      </Provider>
   );
 }
 

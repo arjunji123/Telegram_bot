@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import Validation from "./LoginValidation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
-import login from "../Img/logo.png";
+import { logo } from '../images';
 
 function Signup() {
   const [values, setValues] = useState({
-    name: "",
+    user_name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     mobile: "",
+    upi_id: "",
+    referral_by: "02010C",
     user_type: "user",
   });
 
-  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const handleInput = (e) => {
@@ -24,156 +27,215 @@ function Signup() {
     }));
   };
 
+  // Form validation logic
+  const validateForm = (values) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!values.email) {
+      toast.error("Email is required");
+      return false;
+    } else if (!emailRegex.test(values.email)) {
+      toast.error("Invalid email format");
+      return false;
+    }
+
+    const mobileRegex = /^[0-9]{10}$/;
+    if (!values.mobile) {
+      toast.error("Mobile number is required");
+      return false;
+    } else if (!mobileRegex.test(values.mobile)) {
+      toast.error("Invalid mobile number. Must be 10 digits.");
+      return false;
+    }
+
+    if (!values.password) {
+      toast.error("Password is required");
+      return false;
+    } else if (values.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
+
+    if (!values.confirmPassword) {
+      toast.error("Confirm password is required");
+      return false;
+    } else if (values.password !== values.confirmPassword) {
+      toast.error("Passwords do not match");
+      return false;
+    }
+
+    return true; // Return true if all validations pass
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = Validation(values);
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length === 0) {
-      try {
-        const response = await axios.post(
-          "http://localhost:4000/api/v1/api-register",
-          values
-        );
-        console.log("Server Response:", response);
-        navigate("/payment"); // Redirect to the Payment page upon successful signup
-      } catch (err) {
-        if (err.response && err.response.status === 400) {
-          const backendError = err.response.data.error;
-          if (backendError.includes("Email")) {
-            setErrors({
-              ...errors,
-              email: backendError, // Display the backend error message for email
-            });
-          } else if (backendError.includes("Mobile")) {
-            setErrors({
-              ...errors,
-              mobile: backendError, // Display the backend error message for mobile
-            });
-          }
-        } else {
-          console.log("Axios Error:", err);
-          setErrors({
-            ...errors,
-            general: "An unexpected error occurred. Please try again later.",
-          });
-        }
+    
+    const isValid = validateForm(values);
+    if (!isValid) return; // Exit if validation fails
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/api-register",
+        values
+      );
+      console.log("Server Response:", response);
+      
+      // Assuming the generated ID is in response.data.id
+      const userId = response.data.user.id;
+  console.log('userId', userId)
+      toast.success("Registration successful!");
+  
+      setTimeout(() => {
+        // Redirect to the Payment page with the generated userId
+        navigate(`/payment/${userId}`);
+      }, 2000);
+    } catch (err) {
+      if (err.response && err.response.status === 400) {
+        const backendError = err.response.data.error;
+        toast.error(backendError); // Display the backend error message
+      } else {
+        console.log("Axios Error:", err);
+        toast.error("An error occurred during registration. Please try again.");
       }
     }
   };
+  
 
   return (
-    <div className="bg-black flex justify-center">
-      <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <div className="flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
-          <div
-            className="absolute top-[2px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]"
-            style={{ padding: "65px" }}
-          >
-            <div
-              className="absolute px-4 z-10"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <div className="top-[20px] left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
-                <div style={{ marginLeft: "110px", marginBottom: "-31px" }}>
-                  <img
-                    src={login}
-                    alt=""
-                    className="mx-auto h-40 px-4 py-2 items-center space-x-2"
-                  />
-                </div>
-                <br />
-                <div className="signin">
-                  <div className="content">
-                    <h2>Sign Up</h2>
-
-                    <form onSubmit={handleSubmit}>
-                      <div className="form">
-                        {/* <div className="inputBox">
-                          <input
-                            type="text"
-                            name="name"
-                            value={values.name}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Name</i>
-                          {errors.name && (
-                            <span className="text-danger"> {errors.name}</span>
-                          )}
-                        </div> */}
-                        <div className="inputBox">
-                          <input
-                            type="tel"
-                            name="mobile"
-                            value={values.mobile}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Mobile No.</i>
-                          {errors.mobile && (
-                            <span className="text-danger">{errors.mobile}</span>
-                          )}
-                        </div>
-                        <div className="inputBox">
-                          <input
-                            type="email"
-                            name="email"
-                            value={values.email}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Email</i>
-                          {errors.email && (
-                            <span className="text-danger"> {errors.email}</span>
-                          )}
-                        </div>
-                        <div className="inputBox">
-                          <input
-                            type="password"
-                            name="password"
-                            value={values.password}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>Password</i>
-                        </div>
-                        <div className="inputBox">
-                          <input
-                            type="tel"
-                            name="name"
-                            value={values.name}
-                            onChange={handleInput}
-                            required
-                          />
-                          <i>UPI id</i>
-                          {errors.name && (
-                            <span className="text-danger"> {errors.name}</span>
-                          )}
-                        </div>
-                        <div className="inputBox">
-                          <button type="submit">Signup</button>
-                        </div>
-                        {/* <div className="inputBox">
-                          <Link to="/">Login</Link>
-                        </div> */}
-                      </div>
-                    </form>
-                    {errors.general && (
-                      <span className="text-danger">{errors.general}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="bg-white flex justify-center items-center min-h-screen overflow-y-auto ">
+    <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl ">
+      
+      {/* Logo and Welcome Section */}
+      <div className="px-6 sm:px-10 shadow-lg relative">
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover draggable theme="dark" />
+        <div className="flex justify-center py-4 space-x-1">
+          <h1 className="font-poppins text-xl sm:text-2xl font-extrabold">UNITRADE</h1>
+          <img src={logo} alt="logo" className="w-5 h-5 sm:w-6 sm:h-6 mt-0.5" />
         </div>
       </div>
+
+      {/* Form Section */}
+      <div className="p-6 sm:p-8 space-y-6">
+        <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
+          Sign Up
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 px-2 sm:px-4">
+
+          {/* Name and Mobile Input */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                name="user_name"
+                value={values.user_name}
+                onChange={handleInput}
+                required
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                placeholder="Name"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="tel"
+                name="mobile"
+                value={values.mobile}
+                onChange={handleInput}
+                required
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                placeholder="Mobile No."
+              />
+            </div>
+          </div>
+
+          {/* Email Input */}
+          <div className="relative">
+            <input
+              type="email"
+              name="email"
+              value={values.email}
+              onChange={handleInput}
+              required
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              placeholder="Email"
+            />
+          </div>
+
+          {/* Password and Confirm Password Input */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="relative">
+              <input
+                type="password"
+                name="password"
+                value={values.password}
+                onChange={handleInput}
+                required
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                placeholder="Password"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="password"
+                name="confirmPassword"
+                value={values.confirmPassword}
+                onChange={handleInput}
+                required
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                placeholder="Confirm Password"
+              />
+            </div>
+          </div>
+
+          {/* UPI ID Input */}
+          <div className="relative">
+            <input
+              type="text"
+              name="upi_id"
+              value={values.upi_id}
+              onChange={handleInput}
+              required
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              placeholder="UPI ID"
+            />
+          </div>
+
+          {/* Referral Input */}
+          {/* <div className="relative">
+            <input
+              type="text"
+              name="referral_by"
+              value={values.referral_by}
+              onChange={handleInput}
+              disabled
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              placeholder="Referral By"
+            />
+          </div> */}
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="w-full py-2 sm:py-4 border-white border-2 text-white font-semibold rounded-xl shadow-md hover:opacity-90 transform transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+            >
+              Sign Up
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      {/* Footer Section */}
+      <div className="bg-[#111113] py-4 sm:py-6 text-center">
+        <p className="text-xs sm:text-sm text-[#909090]">
+          Already have an account?
+          <Link to="/login" className="text-white font-semibold hover:underline ml-1">
+            Login
+          </Link>
+        </p>
+      </div>
     </div>
+  </div>
   );
 }
 
