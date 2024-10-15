@@ -13,7 +13,6 @@ function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
   const apiQuests = apiData?.quests || []; 
-  console.log('apiQuests', apiQuests)
   useEffect(() => {
     dispatch(fetchAPIData('apiQuests'));
   }, [dispatch]);
@@ -22,7 +21,7 @@ function Tasks() {
    // Filter the quests based on type (Watch and Follow)
    const videoQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
    const socialQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
-console.log("videoQuests", videoQuests);
+
 
 
   // Mapping API Data to rows (video quests)
