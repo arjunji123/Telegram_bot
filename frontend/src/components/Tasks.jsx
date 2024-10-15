@@ -30,7 +30,7 @@ console.log("videoQuests", videoQuests);
     icon: <FaYoutube size={24} color="white" className="mr-4" />,
     title: quest.quest_name,
     videoUrl: quest.quest_url,
-    taskKey: `task${index + 1}`, // Generating unique keys
+    taskKey: `task${index + 1}`, // Unique keys
     questId: quest.quest_id, // Add quest_id here
   }));
 
@@ -76,48 +76,53 @@ console.log("videoQuests", videoQuests);
       [task]: true,
     });
   };
-
   const handleCheckButtonClick = async (task, questId) => {
     const currentTime = Date.now();
     const watchStartTime = watchTimes[task];
     const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
-
+  
     if (timeSpent >= 10) {
-        try {
-            // Make the API call to complete the quest
-            const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${token}`, // Make sure to add the token here
-                },
-                body: JSON.stringify({ quest_id: questId }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json(); // Get the response data if needed
-            console.log('Quest completed successfully:', data);
-
-            setHasWatched({
-                ...hasWatched,
-                [task]: true,
-            });
-            alert("Task Completed!");
-        } catch (err) {
-            alert(`Error completing task: ${err.message}`);
-            console.error('Error completing quest:', err);
-        }
-    } else {
-        alert("You have not watched the video for at least 10 seconds.");
-        setIsVideoWatched({
-            ...isVideoWatched,
-            [task]: false,
+      try {
+        const token = localStorage.getItem('token_local'); // Adjust this based on your actual token storage
+        const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Include the token in the headers if required
+          },
+          body: JSON.stringify({ quest_id: questId }),
         });
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
+        }
+  
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setHasWatched({
+            ...hasWatched,
+            [task]: true,
+          });
+          alert("Task Completed!");
+        } else {
+          const text = await response.text();
+          throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
+        }
+      } catch (err) {
+        alert(`Error completing task: ${err.message}`);
+        console.error('Error completing quest:', err);
+      }
+    } else {
+      alert("You have not watched the video for at least 10 seconds.");
+      setIsVideoWatched({
+        ...isVideoWatched,
+        [task]: false,
+      });
     }
-};
+  };
+  
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
@@ -211,7 +216,7 @@ console.log("videoQuests", videoQuests);
                     )}
                     {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
                       <button
-                      onClick={() => handleCheckButtonClick(row.taskKey, questId)} // Pass the quest ID here
+                      onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
                       className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
                   >
                       Check
