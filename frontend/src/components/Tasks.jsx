@@ -8,6 +8,7 @@ import 'swiper/swiper-bundle.css';
 import Footer from "./Footer";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAPIData } from '../../store/actions/homeActions';
+import { BACKEND_URL } from '../config';
 
 function Tasks() {
   const dispatch = useDispatch();
@@ -126,7 +127,7 @@ function Tasks() {
 
   const handleCheckButtonClick = async (task, questId) => {
     try {
-      const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
+      const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',

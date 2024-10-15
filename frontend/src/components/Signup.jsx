@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
 import { logo } from '../images';
+import { BACKEND_URL } from '../config';
 
 function Signup() {
   const [values, setValues] = useState({
@@ -74,7 +75,7 @@ function Signup() {
   
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/v1/api-register",
+        `${BACKEND_URL}/api/v1/api-register`,
         values
       );
       console.log("Server Response:", response);

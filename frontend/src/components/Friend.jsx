@@ -12,15 +12,15 @@ function Friend() {
   useEffect(() => {
     const fetchReferralLink = async () => {
       try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const { token_local } = userData;
-        console.log(token_local);
+        const userData = JSON.parse(localStorage.getItem("user"));
+        const { token } = userData;
+        console.log(token);
 
         const response = await axios.get(
           "http://localhost:4000/api/v1/api-me",
           {
             headers: {
-              Authorization: `Bearer ${token_local}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );

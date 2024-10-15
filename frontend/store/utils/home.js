@@ -1,14 +1,9 @@
-// utils/api.js
+import { BACKEND_URL } from '../../src/config';
+
 export const API_URLS = {
-  apiMe: 'http://localhost:4000/api/v1/api-me',
-  apiQuests: 'http://localhost:4000/api/v1/api-quests',
-  apiCompanies: 'http://localhost:4000/api/v1/api-companies',
-  // apiFaqs: 'http://localhost:4000/api/v1/api-faqs',
-  // apiBlogs: 'http://localhost:4000/api/v1/api-blogs',
-  // apiTestimonials: 'http://localhost:4000/api/v1/api-testimonials',
-  // apiFeatures: 'http://localhost:4000/api/v1/api-features',
-  // apiBlocks: 'http://localhost:4000/api/v1/api-blocks',
-  // apiContact: 'http://localhost:4000/api/v1/contact',
+  apiMe: `${BACKEND_URL}/api/v1/api-me`,
+  apiQuests: `${BACKEND_URL}/api/v1/api-quests`,
+  apiCompanies: `${BACKEND_URL}/api/v1/api-companies`,
   // Add more API URLs as needed
 };
 
@@ -26,6 +21,7 @@ export const fetchData = async (url) => {
   }
 };
 
+// Uncomment and use this function if you need to fetch data with a token
 // export const fetchDataToken = async (url) => {
 //   try {
 //     const token = getToken('user'); // Fetch token after checking expiration

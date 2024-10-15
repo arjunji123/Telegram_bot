@@ -1,5 +1,5 @@
 import { fetcher } from '../fetcher';
-
+import { BACKEND_URL } from '../../src/config';
 // Action types
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const LOGIN_FAILURE = 'LOGIN_FAILURE';
@@ -34,7 +34,7 @@ const getUserDataFromLocalStorage = () => {
 export const login = (credentials) => async (dispatch) => {
   try {
     console.log('Logging in with:', credentials); // Log credentials for debugging
-    const response = await fetcher.post('http://localhost:4000/api/v1/api-login', credentials);
+    const response = await fetcher.post(`${BACKEND_URL}/api/v1/api-login`, credentials);
 
     console.log('API response:', response); // Log API response
 
