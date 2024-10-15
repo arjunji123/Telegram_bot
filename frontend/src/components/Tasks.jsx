@@ -76,50 +76,89 @@ console.log("videoQuests", videoQuests);
       [task]: true,
     });
   };
+  // const handleCheckButtonClick = async (task, questId) => {
+  //   const currentTime = Date.now();
+  //   const watchStartTime = watchTimes[task];
+  //   const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
+  
+  //   if (timeSpent >= 10) {
+  //     try {
+  //       const token = localStorage.getItem('token_local'); // Adjust this based on your actual token storage
+  //       const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${token}`, // Include the token in the headers if required
+  //         },
+  //         body: JSON.stringify({ quest_id: questId }),
+  //       });
+  
+  //       if (!response.ok) {
+  //         const errorText = await response.text();
+  //         throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
+  //       }
+  
+  //       const contentType = response.headers.get('content-type');
+  //       if (contentType && contentType.includes('application/json')) {
+  //         const data = await response.json();
+  //         setHasWatched({
+  //           ...hasWatched,
+  //           [task]: true,
+  //         });
+  //         alert("Task Completed!");
+  //       } else {
+  //         const text = await response.text();
+  //         throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
+  //       }
+  //     } catch (err) {
+  //       alert(`Error completing task: ${err.message}`);
+  //       console.error('Error completing quest:', err);
+  //     }
+  //   } else {
+  //     alert("You have not watched the video for at least 10 seconds.");
+  //     setIsVideoWatched({
+  //       ...isVideoWatched,
+  //       [task]: false,
+  //     });
+  //   }
+  // };
+  
+
+
   const handleCheckButtonClick = async (task, questId) => {
-    const currentTime = Date.now();
-    const watchStartTime = watchTimes[task];
-    const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
-  
-    if (timeSpent >= 10) {
-      try {
-        const token = localStorage.getItem('token_local'); // Adjust this based on your actual token storage
-        const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Include the token in the headers if required
-          },
-          body: JSON.stringify({ quest_id: questId }),
-        });
-  
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
-        }
-  
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          setHasWatched({
-            ...hasWatched,
-            [task]: true,
-          });
-          alert("Task Completed!");
-        } else {
-          const text = await response.text();
-          throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
-        }
-      } catch (err) {
-        alert(`Error completing task: ${err.message}`);
-        console.error('Error completing quest:', err);
-      }
-    } else {
-      alert("You have not watched the video for at least 10 seconds.");
-      setIsVideoWatched({
-        ...isVideoWatched,
-        [task]: false,
+    try {
+      const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify({
+          "quest_id": questId,
+        }),
       });
+  
+      // Check if the response is OK (status in the range 200-299)
+      if (!response.ok) {
+        // Attempt to read the response as text for better error reporting
+        const errorText = await response.text();
+        console.error('Network response was not ok:', errorText);
+        throw new Error('Failed to complete quest: ' + errorText);
+      }
+  
+      // Check if the response is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        console.log('Quest completed successfully:', data);
+        // Handle success - Update UI or display success message
+      } else {
+        console.error('Expected JSON response, but got:', contentType);
+        throw new Error('Response is not JSON: ' + contentType);
+      }
+    } catch (error) {
+      console.error('Error completing quest:', error);
+      // Show error message to the user (alert or toast)
+      alert('Error: ' + error.message); // Or use a toast notification
     }
   };
   
