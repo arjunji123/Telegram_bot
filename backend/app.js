@@ -17,7 +17,7 @@ const errorMiddleware = require("./middleware/error");
 // );
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://telegram-9f8tqs1jh-arjuns-projects-e072bddd.vercel.app",
     credentials: true,
   })
 );
