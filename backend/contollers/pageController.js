@@ -233,7 +233,7 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
     const [quest_records] = await db.query(
       "SELECT id,quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
       [resultPerPage, offset]
-    ); 
+    );
 
     // Process rows if needed
     const quests = quest_records.map((row) => ({
@@ -326,7 +326,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       pending_coin: coinEarn, // Add the coin_earn value to pending_coin
       coin_operation: "cr", // Set the coin_operation to 'cr' (credit)
       type: "quest", // Set the type to 'quest'
-      status: "inactive", // Set the status as 'pending'
+      status: "active", // Set the status as 'pending'
       date_entered: new Date(), // Current date for tracking
     };
     console.log("Insert data for usercoin_audit:", insertData);
@@ -334,13 +334,53 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
     // Insert the data into the usercoin_audit table
     await db.query("INSERT INTO usercoin_audit SET ?", insertData);
 
-    // Respond with a success message
+    // Respond with a success message and additional data
     res.status(200).json({
       success: true,
       message: `Quest completed successfully. ${coinEarn} coins added to the pending coins.`,
+      data: {
+        user_id,
+        quest_id: fetchedQuestId,
+        coin_earn: coinEarn,
+        status: "active", // The status of the usercoin_audit entry
+        date_entered: new Date(),
+      },
     });
   } catch (error) {
     console.error("Error during quest completion:", error);
+    return next(new ErrorHandler("Database query failed", 500));
+  }
+});
+
+////////////////////////////////////////////
+exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
+  // Get the user_id from the logged-in user's session
+  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+  console.log("Fetching pending coins for user:", user_id);
+
+  try {
+    // Query to get the sum of pending coins for the user where the status is 'inactive'
+    const result = await db.query(
+      "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ? AND status = 'inactive'",
+      [user_id]
+    );
+
+    const totalPendingCoins = result[0][0].totalPendingCoins || 0; // If no coins are found, default to 0
+
+    console.log("Total pending coins fetched:", totalPendingCoins);
+
+    // Respond with the total pending coins
+    res.status(200).json({
+      success: true,
+      message: "Pending coins fetched successfully.",
+      data: {
+        user_id,
+        pendingCoins: totalPendingCoins,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching pending coins:", error);
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
