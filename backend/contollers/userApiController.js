@@ -225,32 +225,31 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Login user
+// Login user using mobile number
 exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {
-  const { emailOrMobile, password } = req.body;
+  const { mobile, password } = req.body; // Change to mobile instead of emailOrMobile
 
-  // Checking that user email/mobile and password are provided
-  if (!emailOrMobile || !password) {
+  // Checking that mobile number and password are provided
+  if (!mobile || !password) {
     return next(
-      new ErrorHandler("Please enter email/mobile number and password", 400)
+      new ErrorHandler("Please enter mobile number and password", 400)
     );
   }
 
-  // Find user by email or mobile number
+  // Find user by mobile number only
   const userData = await db.query(
-    "SELECT * FROM users WHERE email = ? OR mobile = ? LIMIT 1",
-    [emailOrMobile, emailOrMobile]
+    "SELECT * FROM users WHERE mobile = ? LIMIT 1",
+    [mobile] // Query only with mobile
   );
   const user = userData[0][0];
 
   // If user not found
   if (!user) {
-    return next(
-      new ErrorHandler("Invalid email/mobile number or password", 400)
-    );
+    return next(new ErrorHandler("Invalid mobile number or password", 400));
   }
 
   // Check if the user status is active (1)
-  if (user.status == 0) {
+  if (user.status === 0) {
     return next(
       new ErrorHandler(
         "Your account is deactivated. Please contact support.",
@@ -266,12 +265,22 @@ exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {
   );
 
   if (!isPasswordMatched) {
-    return next(new ErrorHandler("Invalid email or password", 400));
+    return next(new ErrorHandler("Invalid mobile number or password", 400));
   }
 
+  // Generate token for the authenticated user
   const token = User.generateToken(user.id); // Adjust as per your user object structure
 
-  sendToken(user, token, 201, res);
+  // Send the token and user details in the response
+  res.status(200).json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      mobile: user.mobile,
+      // Add any other user details you want to include in the response
+    },
+  });
 });
 
 exports.logoutApi = catchAsyncErrors(async (req, res, next) => {
