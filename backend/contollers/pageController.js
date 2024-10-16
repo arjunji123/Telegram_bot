@@ -362,7 +362,7 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   try {
     // Query to get the sum of pending coins for the user where the status is 'inactive'
     const result = await db.query(
-      "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ? AND status = 'inactive'",
+      "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
       [user_id]
     );
 
@@ -376,7 +376,7 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
       message: "Pending coins fetched successfully.",
       data: {
         user_id,
-        pendingCoins: totalPendingCoins,
+        pending_coin: totalPendingCoins,
       },
     });
   } catch (error) {

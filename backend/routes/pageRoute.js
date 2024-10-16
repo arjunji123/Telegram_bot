@@ -76,5 +76,5 @@ router
   .post(isAuthenticatedUser, completeQuest);
 
 // GET route for fetching pending coins
-router.route("/api-" + module_slug + "/pending-coins").get(getUserPendingCoins);
+router.route("/pending-coins").get(isAuthenticatedUser, getUserPendingCoins);
 module.exports = router;
