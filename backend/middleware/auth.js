@@ -38,8 +38,25 @@ exports.isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+// exports.isApiAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
+//   const token = req.cookies.token;
+
+//   if (!token) {
+//     return next(new ErrorHandler("Please login to access this resource.", 401));
+//   }
+
+//   const decodeData = jwt.verify(token, process.env.JWT_SECRET);
+
+//   const loginUser = await db.query("SELECT * FROM users WHERE id = ?", [
+//     decodeData.id,
+//   ]);
+//   req.user = loginUser[0][0];
+//   //req.user =  await User.findById(decodeData.id);
+
+//   next();
+// });
 exports.isApiAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.headers.authorization?.split(" ")[1]; // Get token from "Authorization" header
 
   if (!token) {
     return next(new ErrorHandler("Please login to access this resource.", 401));
@@ -51,7 +68,6 @@ exports.isApiAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
     decodeData.id,
   ]);
   req.user = loginUser[0][0];
-  //req.user =  await User.findById(decodeData.id);
 
   next();
 });
