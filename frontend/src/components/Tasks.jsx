@@ -130,30 +130,27 @@ function Tasks() {
       const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          "quest_id": questId,
+          quest_id: questId,
         }),
       });
   
-      // Check if the response is OK (status in the range 200-299)
       if (!response.ok) {
-        // Attempt to read the response as text for better error reporting
-        const errorText = await response.text();
-        console.error('Network response was not ok:', errorText);
-        throw new Error('Failed to complete quest: ' + errorText);
+        throw new Error(`Failed to complete the quest: ${response.status} ${response.statusText}`);
       }
   
-      // Check if the response is JSON
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
         console.log('Quest completed successfully:', data);
         // Handle success - Update UI or display success message
       } else {
-        console.error('Expected JSON response, but got:', contentType);
-        throw new Error('Response is not JSON: ' + contentType);
+        // Log the response to inspect what it actually is
+        const textResponse = await response.text();
+        console.error('Expected JSON response, but got:', contentType, textResponse);
+        throw new Error('Response is not JSON');
       }
     } catch (error) {
       console.error('Error completing quest:', error);
@@ -161,6 +158,7 @@ function Tasks() {
       alert('Error: ' + error.message); // Or use a toast notification
     }
   };
+  
   
 
   return (

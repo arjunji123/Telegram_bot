@@ -1,7 +1,7 @@
 import { BACKEND_URL } from '../../src/config';
 
 export const API_URLS = {
-  apiMe: `${BACKEND_URL}/api/v1/api-me`,
+  pendingCoins: `${BACKEND_URL}/api/v1/pending-coins`,
   apiQuests: `${BACKEND_URL}/api/v1/api-quests`,
   apiCompanies: `${BACKEND_URL}/api/v1/api-companies`,
   // Add more API URLs as needed
