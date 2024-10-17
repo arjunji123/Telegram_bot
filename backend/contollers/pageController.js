@@ -419,23 +419,24 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   console.log("Fetching pending coins for user:", user_id);
 
   try {
-    // Query to get the sum of pending coins for the user where the status is 'inactive'
-    const result = await db.query(
-      "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
+    // Query to get the pending_coin from user_data for the user
+    const [result] = await db.query(
+      "SELECT pending_coin FROM user_data WHERE user_id = ?",
       [user_id]
     );
 
-    const totalPendingCoins = result[0][0].totalPendingCoins || 0; // If no coins are found, default to 0
+    // Get the pending_coin value from the result, or default to 0 if not found
+    const pendingCoin = result[0]?.pending_coin || 0;
 
-    console.log("Total pending coins fetched:", totalPendingCoins);
+    console.log("Pending coins fetched from user_data:", pendingCoin);
 
-    // Respond with the total pending coins
+    // Respond with the pending coins
     res.status(200).json({
       success: true,
       message: "Pending coins fetched successfully.",
       data: {
         user_id,
-        pending_coin: totalPendingCoins,
+        pending_coin: pendingCoin,
       },
     });
   } catch (error) {
@@ -443,6 +444,7 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
+
 //////////////////////////////////////
 
 exports.transferPendingCoinsToTotal = catchAsyncErrors(
