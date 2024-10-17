@@ -41,7 +41,7 @@ console.log('pendingCoinspendingCoins', pendingCoins)
             {/* User Information */}
             <div className="flex justify-center space-x-1">
               <BsPersonCircle size={24} className="mt-1" />
-              <p className="text-2xl font-extrabold">
+              <p className="text-2xl font-extrabold capitalize">
               {userData ? userData.user_name : 'Neeraj Singh'}
               </p>
             </div>

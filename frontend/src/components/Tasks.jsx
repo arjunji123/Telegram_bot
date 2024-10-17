@@ -125,12 +125,27 @@ function Tasks() {
   
 
 
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  };
+  
   const handleCheckButtonClick = async (task, questId) => {
     try {
+      // Get the token from cookies
+      const token = getCookie('token'); // Assuming your token is stored in a cookie named 'token'
+  console.log(token , "tokentokentokentokentokentoken");
+  
+      if (!token) {
+        throw new Error('Authorization token not found');
+      }
+  
       const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,  // Use the token from the cookie
         },
         body: JSON.stringify({
           quest_id: questId,
@@ -147,17 +162,16 @@ function Tasks() {
         console.log('Quest completed successfully:', data);
         // Handle success - Update UI or display success message
       } else {
-        // Log the response to inspect what it actually is
         const textResponse = await response.text();
         console.error('Expected JSON response, but got:', contentType, textResponse);
         throw new Error('Response is not JSON');
       }
     } catch (error) {
       console.error('Error completing quest:', error);
-      // Show error message to the user (alert or toast)
       alert('Error: ' + error.message); // Or use a toast notification
     }
   };
+  
   
   
 
