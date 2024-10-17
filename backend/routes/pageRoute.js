@@ -13,6 +13,7 @@ const {
   apiGetSingleRecord,
   completeQuest,
   getUserPendingCoins,
+  transferPendingCoinsToTotal,
 } = require("../contollers/pageController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 const Model = require("../models/pageModel");
@@ -77,4 +78,9 @@ router
 
 // GET route for fetching pending coins
 router.route("/pending-coins").get(isAuthenticatedUser, getUserPendingCoins);
+
+router
+  .route("/transfer-coins")
+  .post(isAuthenticatedUser, transferPendingCoinsToTotal);
+
 module.exports = router;
