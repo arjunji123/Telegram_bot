@@ -288,7 +288,7 @@ exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
 /////////////////
 exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
   // Get the user_id from the logged-in user's session
-  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+  const user_id = req.user.id;
 
   // Get the quest_id from the request body
   const { quest_id } = req.body;
@@ -303,51 +303,110 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
 
   try {
     // Fetch the quest details from the quest table to get the coin_earn value
-    const questResult = await db.query(
+    const [questResult] = await db.query(
       "SELECT id, coin_earn FROM quest WHERE id = ?",
       [quest_id]
     );
-    console.log("Quest details fetched:", questResult);
 
     // Check if the quest exists in the database
-    if (questResult[0].length === 0) {
+    if (questResult.length === 0) {
       console.log("Quest not found for quest_id:", quest_id);
       return next(new ErrorHandler("Quest not found", 404));
     }
 
-    const { id: fetchedQuestId, coin_earn: coinEarn } = questResult[0][0]; // Get the quest ID and coin_earn
-
+    const { id: fetchedQuestId, coin_earn: coinEarn } = questResult[0];
     console.log("Quest ID and Coin Earn:", { fetchedQuestId, coinEarn });
 
-    // Prepare the data to insert into the usercoin_audit table
-    const insertData = {
-      user_id, // The user completing the quest
-      quest_id: fetchedQuestId, // The quest ID from the database
-      pending_coin: coinEarn, // Add the coin_earn value to pending_coin
-      coin_operation: "cr", // Set the coin_operation to 'cr' (credit)
-      type: "quest", // Set the type to 'quest'
-      status: "active", // Set the status as 'pending'
-      date_entered: new Date(), // Current date for tracking
+    // Convert coinEarn to an integer
+    const coinEarnValue = Math.floor(parseFloat(coinEarn));
+    if (isNaN(coinEarnValue) || coinEarnValue < 0) {
+      console.error(
+        "Coin earn value is NaN or negative, cannot update user_data"
+      );
+      return next(new ErrorHandler("Invalid coin earn value", 400));
+    }
+
+    // Begin a transaction
+    await db.query("START TRANSACTION");
+
+    // Insert into usercoin_audit
+    const insertAuditData = {
+      user_id,
+      quest_id: fetchedQuestId,
+      pending_coin: coinEarnValue,
+      coin_operation: "cr",
+      type: "quest",
+      status: "active",
+      date_entered: new Date(),
     };
-    console.log("Insert data for usercoin_audit:", insertData);
+    console.log("Insert data for usercoin_audit:", insertAuditData);
 
-    // Insert the data into the usercoin_audit table
-    await db.query("INSERT INTO usercoin_audit SET ?", insertData);
+    const [insertAuditResult] = await db.query(
+      "INSERT INTO usercoin_audit SET ?",
+      insertAuditData
+    );
+    if (insertAuditResult.affectedRows === 0) {
+      await db.query("ROLLBACK");
+      console.error("Failed to insert into usercoin_audit");
+      return next(new ErrorHandler("Failed to complete quest", 500));
+    }
 
-    // Respond with a success message and additional data
+    // Fetch the current pending_coin from user_data
+    const [currentCoinResult] = await db.query(
+      "SELECT pending_coin FROM user_data WHERE user_id = ?",
+      [user_id]
+    );
+
+    const currentPendingCoin = currentCoinResult[0]?.pending_coin || 0;
+    console.log("Current pending_coin for user:", currentPendingCoin);
+
+    // Calculate the new pending_coin value
+    const newPendingCoin = currentPendingCoin + coinEarnValue;
+    console.log("New pending_coin value:", newPendingCoin);
+
+    // Update the pending_coin in user_data with the new value
+    const updateUserDataQuery = `
+      UPDATE user_data
+      SET pending_coin = ?
+      WHERE user_id = ?
+    `;
+    const [updateUserResult] = await db.query(updateUserDataQuery, [
+      newPendingCoin,
+      user_id,
+    ]);
+    if (updateUserResult.affectedRows === 0) {
+      await db.query("ROLLBACK");
+      console.error("Failed to update pending_coin in user_data");
+      return next(new ErrorHandler("Failed to update pending_coin", 500));
+    }
+
+    // Commit the transaction
+    await db.query("COMMIT");
+
+    // Fetch the updated pending_coin value
+    const [updatedPendingCoinResult] = await db.query(
+      "SELECT pending_coin FROM user_data WHERE user_id = ?",
+      [user_id]
+    );
+    const updatedPendingCoin = updatedPendingCoinResult[0]?.pending_coin || 0;
+    console.log("Updated pending_coin for user:", updatedPendingCoin);
+
+    // Respond with success
     res.status(200).json({
       success: true,
-      message: `Quest completed successfully. ${coinEarn} coins added to the pending coins.`,
+      message: `Quest completed successfully. ${coinEarnValue} coins added to the pending coins.`,
       data: {
         user_id,
         quest_id: fetchedQuestId,
-        coin_earn: coinEarn,
-        status: "active", // The status of the usercoin_audit entry
+        coin_earn: coinEarnValue,
+        status: "active",
         date_entered: new Date(),
+        updated_pending_coin: updatedPendingCoin,
       },
     });
   } catch (error) {
     console.error("Error during quest completion:", error);
+    await db.query("ROLLBACK");
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
@@ -384,3 +443,77 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
+//////////////////////////////////////
+
+exports.transferPendingCoinsToTotal = catchAsyncErrors(
+  async (req, res, next) => {
+    // Get the user_id from the logged-in user's session
+    const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+    console.log(
+      "Transferring 5 coins from pending to total for user:",
+      user_id
+    );
+
+    try {
+      // Step 1: Get the current pending coins of the user
+      const pendingResult = await db.query(
+        "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
+        [user_id]
+      );
+
+      const totalPendingCoins = pendingResult[0][0].totalPendingCoins || 0; // Default to 0 if no coins found
+
+      // Step 2: Check if the user has at least 5 pending coins
+      if (totalPendingCoins < 5) {
+        console.log("Insufficient pending coins for user:", user_id);
+        return res.status(400).json({
+          success: false,
+          error: "Insufficient pending coins. At least 5 coins are required.",
+        });
+      }
+
+      // Step 3: Deduct 5 coins from pending
+      await db.query(
+        "UPDATE usercoin_audit SET pending_coin = pending_coin - 5 WHERE user_id = ?",
+        [user_id]
+      );
+
+      // Step 4: Update total coins (assuming there's a 'earn_coin' field in the 'users' table)
+      await db.query(
+        "UPDATE usercoin_audit SET earn_coin = earn_coin + 5 WHERE id = ?",
+        [user_id]
+      );
+
+      // Step 5: Fetch the updated pending coins and total coins
+      const updatedPendingResult = await db.query(
+        "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
+        [user_id]
+      );
+
+      const totalCoinsResult = await db.query(
+        "SELECT earn_coin FROM usercoin_audit WHERE id = ?",
+        [user_id]
+      );
+
+      const updatedPendingCoins =
+        updatedPendingResult[0][0].totalPendingCoins || 0;
+      const updatedTotalCoins = totalCoinsResult[0][0].earn_coin;
+
+      // Respond with the updated values
+      res.status(200).json({
+        success: true,
+        message:
+          "5 coins transferred from pending coins to total coins successfully.",
+        data: {
+          user_id,
+          pending_coin: updatedPendingCoins,
+          earn_coin: updatedTotalCoins,
+        },
+      });
+    } catch (error) {
+      console.error("Error during coin transfer:", error);
+      return next(new ErrorHandler("Database query failed", 500));
+    }
+  }
+);
