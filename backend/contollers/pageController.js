@@ -449,69 +449,136 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
 
 exports.transferPendingCoinsToTotal = catchAsyncErrors(
   async (req, res, next) => {
-    // Get the user_id from the logged-in user's session
-    const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
-
+    const user_id = req.user.id; // Get the user ID from the session
     console.log(
-      "Transferring 5 coins from pending to total for user:",
+      "Initiating transfer of 5 coins from pending to total for user:",
       user_id
     );
 
     try {
-      // Step 1: Get the current pending coins of the user
-      const pendingResult = await db.query(
-        "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
+      // Step 1: Get user data
+      const [userDataResult] = await db.query(
+        "SELECT pending_coin, coins FROM user_data WHERE user_id = ?",
         [user_id]
       );
 
-      const totalPendingCoins = pendingResult[0][0].totalPendingCoins || 0; // Default to 0 if no coins found
-
-      // Step 2: Check if the user has at least 5 pending coins
-      if (totalPendingCoins < 5) {
-        console.log("Insufficient pending coins for user:", user_id);
-        return res.status(400).json({
-          success: false,
-          error: "Insufficient pending coins. At least 5 coins are required.",
-        });
+      if (!userDataResult.length) {
+        console.log("User not found:", user_id);
+        return res
+          .status(404)
+          .json({ success: false, error: "User not found" });
       }
 
-      // Step 3: Deduct 5 coins from pending
-      await db.query(
-        "UPDATE usercoin_audit SET pending_coin = pending_coin - 5 WHERE user_id = ?",
+      let remainingCoinsToTransfer = 5;
+      let { pending_coin: currentPendingCoin, coins: currentEarnCoin } =
+        userDataResult[0];
+
+      console.log("User Data Retrieved:", userDataResult[0]);
+
+      // Step 2: Transfer coins from user_data
+      if (currentPendingCoin > 0) {
+        const coinsFromUserData = Math.min(
+          currentPendingCoin,
+          remainingCoinsToTransfer
+        );
+        const newPendingCoinUserData = currentPendingCoin - coinsFromUserData;
+        const newEarnCoinUserData = currentEarnCoin + coinsFromUserData;
+
+        const [updateUserDataResult] = await db.query(
+          "UPDATE user_data SET pending_coin = ?, coins = ? WHERE user_id = ?",
+          [newPendingCoinUserData, newEarnCoinUserData, user_id]
+        );
+
+        if (updateUserDataResult.affectedRows === 0) {
+          console.log("Failed to update user_data for user:", user_id);
+        } else {
+          console.log(
+            "User data updated. Coins deducted from user_data:",
+            coinsFromUserData
+          );
+        }
+
+        remainingCoinsToTransfer -= coinsFromUserData;
+      } else {
+        console.log(
+          "No pending coins available in user_data for user:",
+          user_id
+        );
+      }
+
+      // Step 3: Transfer coins from usercoin_audit
+      while (remainingCoinsToTransfer > 0) {
+        console.log(
+          "Attempting to transfer coins from usercoin_audit. Remaining coins:",
+          remainingCoinsToTransfer
+        );
+
+        const [auditResult] = await db.query(
+          "SELECT id, pending_coin, earn_coin FROM usercoin_audit WHERE user_id = ? AND pending_coin > 0 LIMIT 1",
+          [user_id]
+        );
+
+        console.log("Audit Result Retrieved:", auditResult); // Debugging line
+
+        if (!auditResult.length) {
+          console.log(
+            "No more pending coins available in usercoin_audit for user:",
+            user_id
+          );
+          break;
+        }
+
+        const {
+          id: auditId,
+          pending_coin: auditPendingCoin,
+          earn_coin: currentAuditEarnCoin,
+        } = auditResult[0];
+
+        const coinsToDeduct = Math.min(
+          auditPendingCoin,
+          remainingCoinsToTransfer
+        );
+        const newPendingCoin = auditPendingCoin - coinsToDeduct;
+        const newEarnCoin = currentAuditEarnCoin + coinsToDeduct;
+
+        try {
+          const [updateAuditResult] = await db.query(
+            "UPDATE usercoin_audit SET pending_coin = ?, earn_coin = ? WHERE id = ?",
+            [newPendingCoin, newEarnCoin, auditId]
+          );
+
+          console.log("Update Audit Result:", updateAuditResult); // Log to check affected rows
+
+          if (updateAuditResult.affectedRows === 0) {
+            console.log(
+              "Failed to update usercoin_audit for audit ID:",
+              auditId
+            );
+            break; // Exit if update fails
+          }
+
+          console.log(
+            `Successfully transferred ${coinsToDeduct} coins from usercoin_audit for audit ID: ${auditId}`
+          );
+          remainingCoinsToTransfer -= coinsToDeduct; // Reduce remaining coins
+        } catch (error) {
+          console.error("Error while updating usercoin_audit:", error);
+          break; // Exit on error
+        }
+      }
+
+      // Step 4: Respond with updated user_data
+      const [updatedUserData] = await db.query(
+        "SELECT user_id, pending_coin, coins FROM user_data WHERE user_id = ?",
         [user_id]
       );
 
-      // Step 4: Update total coins (assuming there's a 'earn_coin' field in the 'users' table)
-      await db.query(
-        "UPDATE usercoin_audit SET earn_coin = earn_coin + 5 WHERE id = ?",
-        [user_id]
-      );
+      console.log("Final User Data After Transfer:", updatedUserData[0]);
 
-      // Step 5: Fetch the updated pending coins and total coins
-      const updatedPendingResult = await db.query(
-        "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
-        [user_id]
-      );
-
-      const totalCoinsResult = await db.query(
-        "SELECT earn_coin FROM usercoin_audit WHERE id = ?",
-        [user_id]
-      );
-
-      const updatedPendingCoins =
-        updatedPendingResult[0][0].totalPendingCoins || 0;
-      const updatedTotalCoins = totalCoinsResult[0][0].earn_coin;
-
-      // Respond with the updated values
       res.status(200).json({
         success: true,
-        message:
-          "5 coins transferred from pending coins to total coins successfully.",
-        data: {
-          user_id,
-          pending_coin: updatedPendingCoins,
-          earn_coin: updatedTotalCoins,
-        },
+        message: "Coins transferred successfully.",
+        data: updatedUserData[0],
       });
     } catch (error) {
       console.error("Error during coin transfer:", error);
