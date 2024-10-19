@@ -14,9 +14,9 @@ const {
   completeQuest,
   getUserPendingCoins,
   transferPendingCoinsToTotal,
-} = require("../contollers/pageController");
+} = require("../contollers/coinController");
 const { isAuthenticatedUser, authorizeRoles, isApiAuthenticatedUser } = require("../middleware/auth");
-const Model = require("../models/pageModel");
+const Model = require("../models/coinModel");
 const module_slug = Model.module_slug;
 const router = express.Router();
 
