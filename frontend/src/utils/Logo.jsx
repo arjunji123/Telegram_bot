@@ -18,9 +18,9 @@ function Logo() {
     </div>
 
     {/* Second div with the icon aligned to the right */}
-    <div className="ml-auto cursor-pointer" onClick={togglePopup}>
+    {/* <div className="ml-auto cursor-pointer" onClick={togglePopup}>
       <PiDotsThreeCircle size={38} />
-    </div>
+    </div> */}
   </div>
 
   {showPopup && (

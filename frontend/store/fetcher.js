@@ -21,3 +21,48 @@ export const fetcher = {
     return jsonResponse;
   },
 };
+
+export const fetcherGet = async (url, method = 'GET', body = null) => {
+  try {
+    // Get token from localStorage
+    const tokenData = localStorage.getItem('user');
+    if (!tokenData) {
+      throw new Error('No token data found in localStorage');
+    }
+
+    const parsedTokenData = JSON.parse(tokenData);
+    const token = parsedTokenData.token;
+
+    if (!token) {
+      throw new Error('Token not found');
+    }
+
+    // Define fetch options
+    const options = {
+      method: method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // If body is provided, add it to the request
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+
+    // Make the API call using fetch
+    const response = await fetch(url, options);
+
+    // Check if response is OK
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    // Parse and return the response JSON
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Error in fetcher: ${error.message}`);
+  }
+};

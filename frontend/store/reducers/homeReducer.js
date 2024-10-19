@@ -1,11 +1,12 @@
 const initialState = {
-  data: {},
-  loading: {},
-  error: {}
+  data: {},    // Store all API response data
+  loading: {}, // Store loading states of various APIs
+  error: {}    // Store error messages for different APIs
 };
 
 const homeReducer = (state = initialState, action) => {
   const { type, payload, error } = action;
+
   // Handle loading state
   if (type.startsWith('FETCH_') && type.endsWith('_REQUEST')) {
     const apiName = type.split('_')[1].toLowerCase();

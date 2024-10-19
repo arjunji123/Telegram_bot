@@ -11,7 +11,7 @@ import { login } from '../../store/actions/authActions';
 
 function Login({ setLoggedIn }) {
   const dispatch = useDispatch();
-  const [emailOrMobile, setEmailOrMobile] = useState('');
+  const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
 
   const [errors, setErrors] = useState({});
@@ -24,8 +24,7 @@ function Login({ setLoggedIn }) {
     setErrors(''); // Clear previous error message
 
     try {
-      // Dispatch login action and wait for it to complete
-      await dispatch(login({ emailOrMobile, password }));
+      await dispatch(login({ mobile, password }));
       setLoggedIn(true);
       toast.success("Login successfull ! "); // Show success toast
       setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
@@ -35,42 +34,6 @@ function Login({ setLoggedIn }) {
     }
   };
 
-  
-
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   axios
-  //     .post("http://localhost:4000/api/v1/api-login", values)
-  //     .then((res) => {
-  //       if (res.data.success === true) {
-  //         const token_local = res.data.token;
-  //         const expirationTime = new Date().getTime() + 7 * 24 * 60 * 60 * 1000; // 7 days
-
-  //         localStorage.setItem(
-  //           "userData",
-  //           JSON.stringify({
-  //             token_local: token_local,
-  //             expiration: expirationTime,
-  //           })
-  //         );
-  //         setLoggedIn(true);
-  //         toast.success("Login successfull ! "); // Show success toast
-  //         setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
-  //       } else {
-  //         toast.error("No Record Exists"); // Show error toast
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.error("API Error:", err);
-  //       if (err.response && err.response.status === 400) {
-  //         toast.error("Invalid email or password. Please try again.");
-  //       } else {
-  //         toast.error(err.response.data.error);
-  //       }
-  //     });
-  // };
 
   const [firstName, setFirstName] = useState("");
 
@@ -109,12 +72,12 @@ function Login({ setLoggedIn }) {
             <div className="relative">
               <input
                 type="text"
-                name="emailOrMobile"
-                value={emailOrMobile}
-                onChange={(e) => setEmailOrMobile(e.target.value)}
+                name="mobile"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
                 required
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
-                placeholder="Email / Phone Number"
+                placeholder="Phone Number"
               />
             </div>
 
