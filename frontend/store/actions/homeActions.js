@@ -36,6 +36,10 @@ export const FETCH_ME_REQUEST = 'FETCH_ME_REQUEST';
 export const SET_ME_DATA  = 'SET_ME_DATA';
 export const FETCH_ME_FAILURE = 'FETCH_ME_FAILURE';
 
+export const FETCH_COIN_REQUEST = 'FETCH_COIN_REQUEST';
+export const SET_COIN_DATA  = 'SET_COIN_DATA';
+export const FETCH_COIN_FAILURE = 'FETCH_COIN_FAILURE';
+
 // Fetch User Request Action
 const fetchMeRequest = () => {
   return {
@@ -55,6 +59,28 @@ const setMeData  = (data) => {
 const fetchMeFailure = (error) => {
   return {
     type: FETCH_ME_FAILURE,
+    payload: error,
+  };
+};
+// Fetch User Request Action
+const fetchCoinRequest = () => {
+  return {
+    type: FETCH_COIN_REQUEST,
+  };
+};
+
+// Fetch User Success Action
+const setCoinData  = (data) => {
+  return {
+    type: SET_COIN_DATA,
+    payload: data,
+  };
+};
+
+// Fetch User Failure Action
+const fetchCoinFailure = (error) => {
+  return {
+    type: FETCH_COIN_FAILURE,
     payload: error,
   };
 };
@@ -83,5 +109,15 @@ export const fetchMeData = () => async (dispatch) => {
     dispatch(setMeData(data));
   } catch (error) {
     dispatch(fetchMeFailure(error.message));
+  }
+};
+export const fetchCoinData = () => async (dispatch) => {
+  dispatch(fetchCoinRequest());
+  
+  try {
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/pending-coins`);
+    dispatch(setCoinData(data));
+  } catch (error) {
+    dispatch(fetchCoinFailure(error.message));
   }
 };

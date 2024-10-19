@@ -4,18 +4,19 @@ import { BsPersonCircle } from "react-icons/bs";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMeData, fetchAPIData } from '../../store/actions/homeActions';
+import { fetchMeData, fetchCoinData } from '../../store/actions/homeActions';
+
+
 
 function Home() {
   const [firstName, setFirstName] = useState("");
   const dispatch = useDispatch();
-  const pendingCoins = useSelector((state) => state.apiData.data.pendingcoins);
-  const apiData = useSelector((state) => state.apiData.data.me);
-  const userData = apiData && apiData.data  || null;
+  const apiData = useSelector((state) => state.apiData.data);
+  const userData = apiData && apiData.me && apiData.me.data  || null;
+  const pendingCoin = apiData && apiData.coin && apiData.coin.data  || null;
 
-console.log('pendingCoinspendingCoins', pendingCoins)
   useEffect(() => {
-    dispatch(fetchAPIData('pendingCoins'));
+  dispatch(fetchCoinData());
     dispatch(fetchMeData());
   }, [dispatch]);
 
@@ -27,6 +28,8 @@ console.log('pendingCoinspendingCoins', pendingCoins)
       setFirstName(firstName);
     }
   }, []);
+ 
+
 
   return (
     <div className="bg-white flex justify-center">
@@ -63,8 +66,12 @@ console.log('pendingCoinspendingCoins', pendingCoins)
               />
             </div>
 
-            <div  className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center mb-4 cursor-pointer">
-            <span className="text-xl font-extrabold font-poppins text-[#f5eded]">Pending Coin</span>
+            <div  className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
+            <p className="text-xl font-extrabold font-poppins text-[#f5eded]">Pending Coin 
+              <span className="pl-2 text-2xl">
+              {pendingCoin ? pendingCoin.pending_coin : '700,0000'}
+              </span>
+              </p>
           </div>
           </div>
         </div>

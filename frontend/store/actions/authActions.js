@@ -12,13 +12,14 @@ export const LOAD_USER = 'LOAD_USER';
 
 // Set token in cookies (expires in 7 days)
 const setToken = (token) => {
-  Cookies.set('token', token, { expires: 7 });
+  Cookies.set('token', JSON.stringify(token), { expires: 7 });
 };
 
-// Get token from cookies
-const getToken = () => {
-  return Cookies.get('token');
-};
+
+// Token ko get karna
+const token = Cookies.get('token');
+console.log(token);  
+
 
 // Remove token from cookies
 const removeToken = () => {
@@ -59,7 +60,7 @@ export const login = (credentials) => async (dispatch) => {
       setToken(response.token); // Store the token in cookies
       const userData = { token: response.token, ...response }; // Create user data object
       storeUserData(userData); // Save user data in localStorage
-
+      setToken(userData)
       dispatch({
         type: LOGIN_SUCCESS,
         payload: userData,

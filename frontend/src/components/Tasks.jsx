@@ -9,19 +9,20 @@ import Footer from "./Footer";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAPIData } from '../../store/actions/homeActions';
 import { BACKEND_URL } from '../config';
+import Cookies from 'js-cookie';
 
 function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
-  const apiQuests = apiData?.quests || []; 
+  const apiQuests = apiData?.quests || [];
   useEffect(() => {
     dispatch(fetchAPIData('apiQuests'));
   }, [dispatch]);
 
 
-   // Filter the quests based on type (Watch and Follow)
-   const videoQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
-   const socialQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
+  // Filter the quests based on type (Watch and Follow)
+  const videoQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
+  const socialQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
 
 
 
@@ -51,6 +52,8 @@ function Tasks() {
       icon,
       title: quest.quest_name,
       socialUrl: quest.quest_url,
+      taskKey: `task${index + 1}`, // Unique keys
+      questId: quest.quest_id, // Add quest_id here
     };
   });
   const [watchTimes, setWatchTimes] = useState({
@@ -76,104 +79,110 @@ function Tasks() {
       [task]: true,
     });
   };
-  // const handleCheckButtonClick = async (task, questId) => {
-  //   const currentTime = Date.now();
-  //   const watchStartTime = watchTimes[task];
-  //   const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
-  
-  //   if (timeSpent >= 10) {
-  //     try {
-  //       const token = localStorage.getItem('token_local'); // Adjust this based on your actual token storage
-  //       const response = await fetch('http://localhost:4000/api/v1/api-quests/complete-quest', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           'Authorization': `Bearer ${token}`, // Include the token in the headers if required
-  //         },
-  //         body: JSON.stringify({ quest_id: questId }),
-  //       });
-  
-  //       if (!response.ok) {
-  //         const errorText = await response.text();
-  //         throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
-  //       }
-  
-  //       const contentType = response.headers.get('content-type');
-  //       if (contentType && contentType.includes('application/json')) {
-  //         const data = await response.json();
-  //         setHasWatched({
-  //           ...hasWatched,
-  //           [task]: true,
-  //         });
-  //         alert("Task Completed!");
-  //       } else {
-  //         const text = await response.text();
-  //         throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
-  //       }
-  //     } catch (err) {
-  //       alert(`Error completing task: ${err.message}`);
-  //       console.error('Error completing quest:', err);
-  //     }
-  //   } else {
-  //     alert("You have not watched the video for at least 10 seconds.");
-  //     setIsVideoWatched({
-  //       ...isVideoWatched,
-  //       [task]: false,
-  //     });
-  //   }
-  // };
-  
-
-
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+  const [followed, setFollowed] = useState({});
+  const [hasFollowed, setHasFollowed] = useState({});
+  const handleFollowButtonClick = (task) => {
+    setFollowed({
+      ...followed,
+      [task]: Date.now(),
+    });
   };
-  
   const handleCheckButtonClick = async (task, questId) => {
+    const currentTime = Date.now();
+    const watchStartTime = watchTimes[task];
+    const timeSpent = (currentTime - watchStartTime) / 1000;
+
+    if (timeSpent >= 10) {
+      try {
+        const tokenData = localStorage.getItem('user');
+        if (!tokenData) {
+          throw new Error('No token data found in localStorage');
+        }
+    
+        const parsedTokenData = JSON.parse(tokenData);
+        const token = parsedTokenData.token;
+    
+        if (!token) {
+          throw new Error('Token not found');
+        }
+        const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,  
+          },
+          body: JSON.stringify({ quest_id: questId }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setHasWatched({
+            ...hasWatched,
+            [task]: true,
+          });
+          alert("Task Completed!");
+        } else {
+          const text = await response.text();
+          throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
+        }
+      } catch (err) {
+        alert(`Error completing task: ${err.message}`);
+        console.error('Error completing quest:', err);
+      }
+    } else {
+      alert("You have not watched the video for at least 10 seconds.");
+      setIsVideoWatched({
+        ...isVideoWatched,
+        [task]: false,
+      });
+    }
+  };
+
+
+  const handleCheckFollowButtonClick = async (task, questId) => {
     try {
-      // Get the token from cookies
-      const token = getCookie('token'); // Assuming your token is stored in a cookie named 'token'
-  console.log(token , "tokentokentokentokentokentoken");
-  
-      if (!token) {
-        throw new Error('Authorization token not found');
+      const tokenData = localStorage.getItem('user');
+      if (!tokenData) {
+        throw new Error('No token data found in localStorage');
       }
   
+      const parsedTokenData = JSON.parse(tokenData);
+      const token = parsedTokenData.token;
+  
+      if (!token) {
+        throw new Error('Token not found');
+      }
+
       const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  // Use the token from the cookie
+          'Authorization': `Bearer ${token}`,  
         },
-        body: JSON.stringify({
-          quest_id: questId,
-        }),
+        body: JSON.stringify({ quest_id: questId }),
       });
-  
+
       if (!response.ok) {
-        throw new Error(`Failed to complete the quest: ${response.status} ${response.statusText}`);
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
-  
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        console.log('Quest completed successfully:', data);
-        // Handle success - Update UI or display success message
-      } else {
-        const textResponse = await response.text();
-        console.error('Expected JSON response, but got:', contentType, textResponse);
-        throw new Error('Response is not JSON');
-      }
+
+      setHasFollowed({
+        ...hasFollowed,
+        [task]: true,
+      });
+      alert("Follow Task Completed!");
+
     } catch (error) {
-      console.error('Error completing quest:', error);
-      alert('Error: ' + error.message); // Or use a toast notification
+      console.error('Error completing follow quest:', error);
+      alert('Error completing follow quest: ' + error.message);
     }
   };
-  
-  
-  
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
@@ -182,65 +191,65 @@ function Tasks() {
           <div className=" px-2 py-6 h-full z-10">
             <Logo />
             <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
-              {/* Sliding Banner */}
-              <Swiper
+            {/* Sliding Banner */}
+            <Swiper
               spaceBetween={20}
               slidesPerView={1}
               pagination={{ clickable: true }}
               className="rounded-lg shadow-lg overflow-hidden mb-4"
             >
               <SwiperSlide>
-            <div className="bg-gradient-to-r from-[#c7c7c1] to-[#dbdbd1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
-              <div className="flex items-center">
-                <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlrWcBG3SebWTLiMtYf1YBzrZ-dyD9B2LHqiJScut64HP7qbEj0oAJw-JHiCkf9HD2NHI&usqp=CAU" // Replace with your logo path
-                  alt="Logo"
-                  className="h-10 w-10 rounded-full shadow-md" // Logo styling
-                />
-              </div>
-              <div className="mt-4">
-                <h1 className="text-black text-base font-bold ">MemeFi Quest Round 1</h1>
-                <p className="text-[#423d3d] text-xs font-bold">+999 BP</p>
-              </div>
-              <div className="flex justify-between">
-                <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
-                  Open
-                </button>
-                <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
-                  0/3
-                </button>
-              </div>
+                <div className="bg-gradient-to-r from-[#c7c7c1] to-[#dbdbd1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
+                  <div className="flex items-center">
+                    <img
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlrWcBG3SebWTLiMtYf1YBzrZ-dyD9B2LHqiJScut64HP7qbEj0oAJw-JHiCkf9HD2NHI&usqp=CAU" // Replace with your logo path
+                      alt="Logo"
+                      className="h-10 w-10 rounded-full shadow-md" // Logo styling
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <h1 className="text-black text-base font-bold ">MemeFi Quest Round 1</h1>
+                    <p className="text-[#423d3d] text-xs font-bold">+999 BP</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
+                      Open
+                    </button>
+                    <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
+                      0/3
+                    </button>
+                  </div>
 
-            </div>
-            </SwiperSlide>
-            <SwiperSlide>
-            <div className="bg-gradient-to-r from-[#d4afd1] to-[#f3d6f1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
-              <div className="flex items-center">
-                <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv1DD_viUEoD_ag_IWy3twGYvW18quZRC8sA&s" // Replace with your logo path
-                  alt="Logo"
-                  className="h-10 w-10 rounded-full shadow-md" // Logo styling
-                />
-              </div>
-              <div className="mt-4">
-                <h1 className="text-black text-base font-bold ">Subscribe to Blum Telegram </h1>
-                <p className="text-[#423d3d] text-xs font-bold">+90 BP</p>
-              </div>
-              <div className="flex justify-between">
-                <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
-                  Start
-                </button>
-                {/* <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div className="bg-gradient-to-r from-[#d4afd1] to-[#f3d6f1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
+                  <div className="flex items-center">
+                    <img
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv1DD_viUEoD_ag_IWy3twGYvW18quZRC8sA&s" // Replace with your logo path
+                      alt="Logo"
+                      className="h-10 w-10 rounded-full shadow-md" // Logo styling
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <h1 className="text-black text-base font-bold ">Subscribe to Blum Telegram </h1>
+                    <p className="text-[#423d3d] text-xs font-bold">+90 BP</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
+                      Start
+                    </button>
+                    {/* <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
                   0/3
                 </button> */}
-              </div>
+                  </div>
 
-            </div>
-            </SwiperSlide>
+                </div>
+              </SwiperSlide>
             </Swiper>
             <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4"> {/* Reduced heading size */}
-            COIN QUESTS 0/10
-          </h1>
+              COIN QUESTS 0/10
+            </h1>
 
             <div className="mt-4 ">
               {rows && rows.map((row, index) => (
@@ -254,27 +263,27 @@ function Tasks() {
                       <h3 className="text-sm uppercase ">{row.title}</h3>
                     </div>
                     {!hasWatched[row.taskKey] && !isVideoWatched[row.taskKey] && (
-                  <a
-                  href={row.videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => handleWatchButtonClick(row.taskKey)}
-                  className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
-                >
-                  <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
-                  <span className="uppercase">Watch</span>
-                </a>
+                      <a
+                        href={row.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleWatchButtonClick(row.taskKey)}
+                        className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
+                      >
+                        <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
+                        <span className="uppercase">Watch</span>
+                      </a>
                     )}
                     {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
                       <button
-                      onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
-                      className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
-                  >
-                      Check
-                  </button>
+                        onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
+                        className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
+                      >
+                        Check
+                      </button>
                     )}
                     {hasWatched[row.taskKey] && (
-                      <p className="text-green-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold">Completed</p>
+                      <p className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs uppercase font-bold">Completed</p>
                     )}
                   </div>
                   <hr className="border-2 border-gray-50  w-2/3 mx-auto " /></>
@@ -292,15 +301,31 @@ function Tasks() {
                       {social.icon}
                       <h3 className="text-sm uppercase">{social.title}</h3>
                     </div>
+                    {!hasFollowed[social.taskKey] && !followed[social.taskKey] && (
                     <a
-                    href={social.socialUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
-                  >
-                    <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
-                    <span className="uppercase">Follow</span>
-                  </a>
+                      href={social.socialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => handleFollowButtonClick(social.taskKey)}
+                      className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
+                    >
+                      <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
+                      <span className="uppercase">Follow</span>
+                    </a>
+                     )}
+                       {!hasFollowed[social.taskKey] && followed[social.taskKey] && (
+                    <button
+                      onClick={() => handleCheckFollowButtonClick(social.taskKey, social.questId)}
+                      className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
+                    >
+                      Check
+                    </button>
+                  )}
+                  {hasFollowed[social.taskKey] && (
+                    <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold">
+                      Completed
+                    </span>
+                  )}
                   </div>
                   <hr className="border-2 border-white w-2/3 mx-auto " /></>
 

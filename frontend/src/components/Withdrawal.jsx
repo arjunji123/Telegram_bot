@@ -86,9 +86,9 @@ console.log('apiCompanies', apiCompanies)
   return (
     <div className="bg-white flex justify-center overflow-y-auto">
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4  overflow-y-auto">
-        <div className="flex-grow relative z-0 pb-16">
+        <div className="flex-grow relative z-0 pt-6  pb-16">
           <Logo />
-          <div className="flex justify-center font-poppins leading-3 space-x-1 text-[34px] font-extrabold mb-4">
+          <div className="flex justify-center font-poppins leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
             <p>U</p>
             <p className="">700,00000</p>
           </div>
