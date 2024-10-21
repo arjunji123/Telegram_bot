@@ -26,16 +26,7 @@ const removeToken = () => {
   Cookies.remove('token');
 };
 
-// Helper function to check if token is expired
-const isTokenExpired = (token) => {
-  try {
-    const decoded = JSON.parse(atob(token.split('.')[1])); // Decode JWT token
-    return decoded.exp < Date.now() / 1000; // Compare expiration time
-  } catch (e) {
-    console.error('Failed to decode token:', e);
-    return true; // Treat as expired if decoding fails
-  }
-};
+
 
 // Centralized function to store user data in localStorage
 const storeUserData = (user) => {
@@ -116,27 +107,7 @@ export const logout = () => (dispatch) => {
   });
 };
 
-// Check if the token is valid and dispatch appropriate actions
-export const checkToken = () => (dispatch) => {
-  const token = getToken(); // Get token from cookies
-  const user = getUserDataFromLocalStorage();
 
-  if (token && user) {
-    if (isTokenExpired(token)) {
-      dispatch(logout()); // Logout if token is expired
-      return { expired: true };
-    } else {
-      dispatch({
-        type: LOAD_USER,
-        payload: user, // Dispatch user data if token is valid
-      });
-    }
-  } else {
-    console.log('No valid token or user found.');
-  }
-
-  return { expired: false };
-};
 
 // Load user from localStorage into the app state
 export const loadUserFromLocalStorage = () => (dispatch) => {

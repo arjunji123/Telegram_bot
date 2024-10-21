@@ -23,7 +23,7 @@ function Withdrawal() {
   const [showPointsPopup, setShowPointsPopup] = useState(false);
   const dispatch = useDispatch();
   const apiCompanies = useSelector((state) => state.apiData.data.apicompanies);
-console.log('apiCompanies', apiCompanies)
+// console.log('apiCompanies', apiCompanies)
   useEffect(() => {
     dispatch(fetchAPIData('apiCompanies'));
   }, [dispatch]);
