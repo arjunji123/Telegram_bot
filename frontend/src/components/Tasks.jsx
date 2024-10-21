@@ -3,59 +3,80 @@ import Logo from "../utils/Logo";
 import { FaXTwitter, FaInstagram } from "react-icons/fa6";
 import { FaYoutube, FaTelegramPlane } from "react-icons/fa";
 import { AiFillCaretRight } from "react-icons/ai";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.css';
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper-bundle.css";
 import Footer from "./Footer";
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAPIData } from '../../store/actions/homeActions';
-import { BACKEND_URL } from '../config';
-import Cookies from 'js-cookie';
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAPIData } from "../../store/actions/homeActions";
+import { BACKEND_URL } from "../config";
+
 
 function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
   const apiQuests = apiData?.quests || [];
+  // State for tracking completed tasks
+  const [completedTasks, setCompletedTasks] = useState({});
+
+  // Load completed tasks from localStorage on component mount
   useEffect(() => {
-    dispatch(fetchAPIData('apiQuests'));
+    const storedCompletedTasks = localStorage.getItem("completedTasks");
+    if (storedCompletedTasks) {
+      setCompletedTasks(JSON.parse(storedCompletedTasks));
+    }
+  }, []);
+  // Load completion state from localStorage when the component mounts
+  useEffect(() => {
+    const storedHasFollowed = localStorage.getItem("hasFollowed");
+    if (storedHasFollowed) {
+      setHasFollowed(JSON.parse(storedHasFollowed));
+    }
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchAPIData("apiQuests"));
   }, [dispatch]);
 
-
   // Filter the quests based on type (Watch and Follow)
-  const videoQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
-  const socialQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
-
-
+  const videoQuests =
+    apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
+  const socialQuests =
+    apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
 
   // Mapping API Data to rows (video quests)
-  const rows = videoQuests && videoQuests.map((quest, index) => ({
-    icon: <FaYoutube size={24} color="white" className="mr-4" />,
-    title: quest.quest_name,
-    videoUrl: quest.quest_url,
-    taskKey: `task${index + 1}`, // Unique keys
-    questId: quest.quest_id, // Add quest_id here
-  }));
-
-  // Mapping API Data to socials (follow quests)
-  const socials = socialQuests && socialQuests.map((quest, index) => {
-    let icon = null;
-    if (quest.quest_name.toLowerCase().includes("youtube")) {
-      icon = <FaYoutube size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("telegram")) {
-      icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("x")) {
-      icon = <FaXTwitter size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("instagram")) {
-      icon = <FaInstagram size={24} color="white" className="mr-4" />;
-    }
-
-    return {
-      icon,
+  const rows =
+    videoQuests &&
+    videoQuests.map((quest, index) => ({
+      icon: <FaYoutube size={24} color="white" className="mr-4" />,
       title: quest.quest_name,
-      socialUrl: quest.quest_url,
+      videoUrl: quest.quest_url,
       taskKey: `task${index + 1}`, // Unique keys
       questId: quest.quest_id, // Add quest_id here
-    };
-  });
+    }));
+
+  // Mapping API Data to socials (follow quests)
+  const socials =
+    socialQuests &&
+    socialQuests.map((quest, index) => {
+      let icon = null;
+      if (quest.quest_name.toLowerCase().includes("youtube")) {
+        icon = <FaYoutube size={24} color="white" className="mr-4" />;
+      } else if (quest.quest_name.toLowerCase().includes("telegram")) {
+        icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
+      } else if (quest.quest_name.toLowerCase().includes("x")) {
+        icon = <FaXTwitter size={24} color="white" className="mr-4" />;
+      } else if (quest.quest_name.toLowerCase().includes("instagram")) {
+        icon = <FaInstagram size={24} color="white" className="mr-4" />;
+      }
+
+      return {
+        icon,
+        title: quest.quest_name,
+        socialUrl: quest.quest_url,
+        taskKey: `task${index + 1}`, // Unique keys
+        questId: quest.quest_id, // Add quest_id here
+      };
+    });
   const [watchTimes, setWatchTimes] = useState({
     task1: null,
     task2: null,
@@ -89,98 +110,132 @@ function Tasks() {
   };
   const handleCheckButtonClick = async (task, questId) => {
     const currentTime = Date.now();
-    const watchStartTime = watchTimes[task];
-    const timeSpent = (currentTime - watchStartTime) / 1000;
+    const watchStartTime = watchTimes[task]; // Assuming watchTimes is an object tracking when the user started watching
+    const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
 
     if (timeSpent >= 10) {
       try {
-        const tokenData = localStorage.getItem('user');
+        const tokenData = localStorage.getItem("user");
         if (!tokenData) {
-          throw new Error('No token data found in localStorage');
+          throw new Error("No token data found in localStorage");
         }
-    
+
         const parsedTokenData = JSON.parse(tokenData);
         const token = parsedTokenData.token;
-    
+
         if (!token) {
-          throw new Error('Token not found');
+          throw new Error("Token not found");
         }
-        const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,  
-          },
-          body: JSON.stringify({ quest_id: questId }),
-        });
+
+        const response = await fetch(
+          `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ quest_id: questId }),
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
+          throw new Error(
+            `Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`
+          );
         }
 
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
-          setHasWatched({
-            ...hasWatched,
+
+          // Update the state to mark the task as completed
+          setHasWatched((prev) => ({
+            ...prev,
             [task]: true,
-          });
+          }));
+
+          // Update completed tasks state
+          setCompletedTasks((prev) => ({
+            ...prev,
+            [task]: true,
+          }));
+
+          // Update localStorage
+          localStorage.setItem(
+            "completedTasks",
+            JSON.stringify({
+              ...completedTasks,
+              [task]: true,
+            })
+          );
+
           alert("Task Completed!");
         } else {
           const text = await response.text();
-          throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
+          throw new Error(
+            `Expected JSON but received non-JSON response. Here is the response: ${text}`
+          );
         }
       } catch (err) {
         alert(`Error completing task: ${err.message}`);
-        console.error('Error completing quest:', err);
+        console.error("Error completing quest:", err);
       }
     } else {
       alert("You have not watched the video for at least 10 seconds.");
-      setIsVideoWatched({
-        ...isVideoWatched,
+      setIsVideoWatched((prev) => ({
+        ...prev,
         [task]: false,
-      });
+      }));
     }
   };
 
-
+  // Update handleCheckFollowButtonClick to save to localStorage
   const handleCheckFollowButtonClick = async (task, questId) => {
     try {
-      const tokenData = localStorage.getItem('user');
+      const tokenData = localStorage.getItem("user");
       if (!tokenData) {
-        throw new Error('No token data found in localStorage');
-      }
-  
-      const parsedTokenData = JSON.parse(tokenData);
-      const token = parsedTokenData.token;
-  
-      if (!token) {
-        throw new Error('Token not found');
+        throw new Error("No token data found in localStorage");
       }
 
-      const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  
-        },
-        body: JSON.stringify({ quest_id: questId }),
-      });
+      const parsedTokenData = JSON.parse(tokenData);
+      const token = parsedTokenData.token;
+
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      const response = await fetch(
+        `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ quest_id: questId }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
-      setHasFollowed({
-        ...hasFollowed,
-        [task]: true,
+      // Mark the task as completed and save the state in localStorage
+      setHasFollowed((prev) => {
+        const updatedState = {
+          ...prev,
+          [task]: true,
+        };
+        localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
+        return updatedState;
       });
-      alert("Follow Task Completed!");
 
+      alert("Follow Task Completed!");
     } catch (error) {
-      console.error('Error completing follow quest:', error);
-      alert('Error completing follow quest: ' + error.message);
+      console.error("Error completing follow quest:", error);
+      alert("Error completing follow quest: " + error.message);
     }
   };
 
@@ -190,7 +245,9 @@ function Tasks() {
         <div className="flex-grow mb-4 relative z-0">
           <div className=" px-2 py-6 h-full z-10">
             <Logo />
-            <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
+            <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">
+              EARN
+            </p>
             {/* Sliding Banner */}
             <Swiper
               spaceBetween={20}
@@ -208,7 +265,9 @@ function Tasks() {
                     />
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-black text-base font-bold ">MemeFi Quest Round 1</h1>
+                    <h1 className="text-black text-base font-bold ">
+                      MemeFi Quest Round 1
+                    </h1>
                     <p className="text-[#423d3d] text-xs font-bold">+999 BP</p>
                   </div>
                   <div className="flex justify-between">
@@ -219,7 +278,6 @@ function Tasks() {
                       0/3
                     </button>
                   </div>
-
                 </div>
               </SwiperSlide>
               <SwiperSlide>
@@ -232,7 +290,9 @@ function Tasks() {
                     />
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-black text-base font-bold ">Subscribe to Blum Telegram </h1>
+                    <h1 className="text-black text-base font-bold ">
+                      Subscribe to Blum Telegram{" "}
+                    </h1>
                     <p className="text-[#423d3d] text-xs font-bold">+90 BP</p>
                   </div>
                   <div className="flex justify-between">
@@ -243,102 +303,127 @@ function Tasks() {
                   0/3
                 </button> */}
                   </div>
-
                 </div>
               </SwiperSlide>
             </Swiper>
-            <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4"> {/* Reduced heading size */}
+            <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">
+              {" "}
+              {/* Reduced heading size */}
               COIN QUESTS 0/10
             </h1>
 
-            <div className="mt-4 ">
-              {rows && rows.map((row, index) => (
-                <>
+            <div className="mt-4">
+              {rows &&
+                rows.map((row, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between bg-black py-3 px-4  font-poppins"
-                  >
-                    <div className="flex items-center ">
-                      {row.icon}
-                      <h3 className="text-sm uppercase ">{row.title}</h3>
-                    </div>
-                    {!hasWatched[row.taskKey] && !isVideoWatched[row.taskKey] && (
-                      <a
-                        href={row.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => handleWatchButtonClick(row.taskKey)}
-                        className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
-                      >
-                        <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
-                        <span className="uppercase">Watch</span>
-                      </a>
-                    )}
-                    {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
-                      <button
-                        onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
-                        className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
-                      >
-                        Check
-                      </button>
-                    )}
-                    {hasWatched[row.taskKey] && (
-                      <p className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs uppercase font-bold">Completed</p>
-                    )}
-                  </div>
-                  <hr className="border-2 border-gray-50  w-2/3 mx-auto " /></>
-              ))}
-            </div>
-
-            <div className=" mt-4 ">
-              {socials && socials.map((social, index) => (
-                <>
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-black py-3 px-4 rounded-lg shadow-lg  "
+                    className="flex items-center justify-between bg-black py-3 px-4 font-poppins"
                   >
                     <div className="flex items-center">
-                      {social.icon}
-                      <h3 className="text-sm uppercase">{social.title}</h3>
+                      {row.icon}
+                      <h3 className="text-sm uppercase">{row.title}</h3>
                     </div>
-                    {!hasFollowed[social.taskKey] && !followed[social.taskKey] && (
-                    <a
-                      href={social.socialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleFollowButtonClick(social.taskKey)}
-                      className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
-                    >
-                      <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
-                      <span className="uppercase">Follow</span>
-                    </a>
-                     )}
-                       {!hasFollowed[social.taskKey] && followed[social.taskKey] && (
-                    <button
-                      onClick={() => handleCheckFollowButtonClick(social.taskKey, social.questId)}
-                      className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
-                    >
-                      Check
-                    </button>
-                  )}
-                  {hasFollowed[social.taskKey] && (
-                    <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold">
-                      Completed
-                    </span>
-                  )}
+
+                    {/* If task is completed, show 'Completed' message */}
+                    {completedTasks[row.taskKey] ? (
+                      <p className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs uppercase font-bold">
+                        Completed
+                      </p>
+                    ) : (
+                      <>
+                        {/* Render Watch and Check buttons based on task status */}
+                        {!isVideoWatched[row.taskKey] && (
+                          <a
+                            href={row.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleWatchButtonClick(row.taskKey)}
+                            className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
+                          >
+                            <span>
+                              <AiFillCaretRight size={18} />
+                            </span>
+                            <span className="uppercase">Watch</span>
+                          </a>
+                        )}
+
+                        {isVideoWatched[row.taskKey] && (
+                          <button
+                            onClick={() =>
+                              handleCheckButtonClick(row.taskKey, row.questId)
+                            }
+                            className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
+                          >
+                            Check
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
-                  <hr className="border-2 border-white w-2/3 mx-auto " /></>
-
-              ))}
-
-
+                ))}
+              <hr className="border-2 border-gray-50 w-2/3 mx-auto " />
+            </div>
+            <div className="mt-4">
+              {socials &&
+                socials.map((social, index) => (
+                  <div key={index}>
+                    <div className="flex items-center justify-between bg-black py-3 px-4 rounded-lg shadow-lg">
+                      <div className="flex items-center">
+                        {social.icon}
+                        <h3 className="text-sm uppercase">{social.title}</h3>
+                      </div>
+                      {/* Conditional rendering based on follow status */}
+                      {!hasFollowed[social.taskKey] &&
+                        !followed[social.taskKey] && (
+                          <a
+                            href={social.socialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() =>
+                              handleFollowButtonClick(social.taskKey)
+                            }
+                            className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
+                          >
+                            <span>
+                              <AiFillCaretRight size={18} />
+                            </span>
+                            <span className="uppercase">Follow</span>
+                          </a>
+                        )}
+                      {!hasFollowed[social.taskKey] &&
+                        followed[social.taskKey] && (
+                          <button
+                            onClick={() =>
+                              handleCheckFollowButtonClick(
+                                social.taskKey,
+                                social.questId
+                              )
+                            }
+                            className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${
+                              hasFollowed[social.taskKey]
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-blue-500"
+                            }`}
+                            disabled={hasFollowed[social.taskKey]}
+                          >
+                            Check
+                          </button>
+                        )}
+                      {hasFollowed[social.taskKey] && (
+                        <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold">
+                          Completed
+                        </span>
+                      )}
+                    </div>
+                    <hr className="border-2 border-white w-2/3 mx-auto" />
+                  </div>
+                ))}
             </div>
           </div>
         </div>
       </div>
       <Footer />
     </div>
-
   );
 }
 
