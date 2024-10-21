@@ -25,6 +25,7 @@
                             <th>Status</th>
                             <th>Screenshot</th>
                             <th>Actions</th>
+                            <th>View</th> <!-- New View Column -->
                         </tr>
                     </thead>
                     <tbody>
@@ -55,16 +56,15 @@
                                     <td>
                                         <% if (user.pay_image) { %>
                                             <button class="btn btn-info view-image"
-                                                data-image="http://localhost:4000/uploads/<%= user.pay_image %>">View
-                                                Screenshot</button>
+                                                data-image="http://localhost:4000/uploads/<%= user.pay_image %>">
+                                                View Screenshot
+                                            </button>
                                             <% } else { %>
                                                 No screenshot uploaded
                                                 <% } %>
                                     </td>
                                     <td>
                                         <% if (user.user_type==='company' ) { %>
-                                          
-                                            <!-- Updated View button to redirect to the company form page -->
                                             <a href="/admin/<%= module_slug %>/company-form/<%= user.id %>"
                                                 class="btn btn-primary">View</a>
                                             <% } %>
@@ -84,7 +84,14 @@
                                                 </form>
                                     </td>
 
-                                    <% }); %>
+                                    <td class="action_box"><a href="/admin/<%= module_slug %>/<%= user.id %>"><i
+                                                class="fe-eye"></i></a> <a
+                                            href="/admin/<%= module_slug %>/edit/<%= user.id %>"><i
+                                                class="fe-edit"></i></a> <a
+                                            href="/admin/<%= module_slug %>/delete/<%= user.id %>"><i
+                                                class="fe-trash-2"></i></a></td>
+                                </tr>
+                                <% }); %>
                     </tbody>
                 </table>
             </div>

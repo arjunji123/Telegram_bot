@@ -36,6 +36,10 @@ const {
   // addCoinRate,
   showCompanyForm,
   submitCompanyForm,
+  getSingleUser,
+  editUserForm,
+  updateUserRecord,
+  deleteRecord,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -95,7 +99,19 @@ router
   .route("/" + module_slug + "/company-form/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), showCompanyForm)
   .post(isAuthenticatedUser, authorizeRoles("admin"), submitCompanyForm);
+router
+  .route("/" + module_slug + "/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleUser);
+router
+  .route("/" + module_slug + "/edit/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), editUserForm);
 
+router
+  .route("/" + module_slug + "/update/:id")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), updateUserRecord);
+router
+  .route("/" + module_slug + "/delete/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
 /*******REST API*******/
 
 router.route("/api-register").post(registerUserApi);

@@ -15,7 +15,11 @@ const {
   getUserPendingCoins,
   transferPendingCoinsToTotal,
 } = require("../contollers/pageController");
-const { isAuthenticatedUser, authorizeRoles, isApiAuthenticatedUser } = require("../middleware/auth");
+const {
+  isAuthenticatedUser,
+  authorizeRoles,
+  isApiAuthenticatedUser,
+} = require("../middleware/auth");
 const Model = require("../models/pageModel");
 const module_slug = Model.module_slug;
 const router = express.Router();

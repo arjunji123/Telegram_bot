@@ -10,6 +10,7 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const Model = require("../models/userModel");
 const QueryModel = require("../models/queryModel");
+const UserModel = require("../models/userModel");
 
 const { v4: uuidv4 } = require("uuid");
 // const pool = require('../config/db');  // Assuming you're using MySQL pool
@@ -670,4 +671,84 @@ exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
     company, // Pass the company object to the view
     companyData, // Pass the existing company data (coin_rate, description)
   });
+});
+
+///////////////////////////////////////////////
+
+// API to get a single user record
+exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
+  // Find the user by ID using the Mongoose model
+  const user = await QueryModel.findById(table_name, req.params.id, next);
+
+  if (!user) {
+    return res.status(404).send("User not found");
+  }
+
+  // Render the user details page
+  res.render(module_slug + "/detail", {
+    layout: module_layout, // Use the correct layout
+    title: module_single_title, // Use the correct title
+    user,
+  });
+});
+
+////////////////////
+
+exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
+  const user = await QueryModel.findById(table_name, req.params.id, next);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  res.render(module_slug + "/edit", {
+    layout: module_layout,
+    title: module_single_title + " " + module_edit_text,
+    user, // Pass the user details to the view
+    module_slug,
+  });
+});
+
+////////////////////////////
+
+exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
+
+  const updateData = {
+    user_name: req.body.user_name,
+    email: req.body.email,
+    status: req.body.status,
+  };
+
+  // Call your function to update the user in the database
+  const user = await QueryModel.findByIdAndUpdateData(
+    table_name,
+    req.params.id,
+    updateData,
+    next
+  );
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  req.flash("msg_response", {
+    status: 200,
+    message: "Successfully updated user details.",
+  });
+
+  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`); // Redirect to the index page
+});
+
+///////////////////////////////////////////////
+
+
+exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
+  await QueryModel.findByIdAndDelete(table_name, req.params.id, next);
+
+  req.flash("msg_response", {
+    status: 200,
+    message: "Successfully deleted " + module_single_title,
+  });
+
+  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
 });

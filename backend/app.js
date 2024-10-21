@@ -45,7 +45,7 @@ app.use(flash());
 
 const blogs = require("./routes/blogRoute");
 const quests = require("./routes/pageRoute");
-const coins = require("./routes/coinRoute");
+// const coins = require("./routes/coinRoute");
 const services = require("./routes/serviceRoute");
 const user = require("./routes/userRoute");
 const settings = require("./routes/settingRoute");
@@ -56,7 +56,7 @@ app.use("/admin", user);
 app.use("/admin", blogs);
 app.use("/admin", services);
 app.use("/admin", quests);
-app.use("/admin", coins);
+// app.use("/admin", coins);
 app.use("/admin", settings);
 app.use("/admin", faqs);
 app.use("/admin", testimonials);

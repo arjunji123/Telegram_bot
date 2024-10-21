@@ -463,7 +463,7 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   if (!req.file) {
     return next(new ErrorHandler("No file uploaded", 400));
   }
-console.log("asdf",req.file);
+  console.log("asdf", req.file);
 
   // Get the uploaded file's filename
   const pay_image = req.file.filename;
@@ -478,7 +478,7 @@ console.log("asdf",req.file);
   // Update the user data in the database
   try {
     const result = await db.query(
-      "UPDATE user_data SET pay_image = ? WHERE id = ?",
+      "UPDATE user_data SET pay_image = ? WHERE user_id = ?",
       [
         pay_image, // Store the filename in the database
         user_id, // Use the user_id from the route parameter
