@@ -39,7 +39,7 @@ function Home() {
     setCoins(newCoins);
 
     // Remove coins after animation
-    setTimeout(() => setCoins([]), 2500);
+    setTimeout(() => setCoins([]), 2500); }
   useEffect(() => {
     if (userData) {
       setPendingCoins(userData.pending_coin); // Initialize pending coins from user data
@@ -133,6 +133,7 @@ function Home() {
                 />
               </div>
             </div>
+            </div>
 
       
      
@@ -182,7 +183,7 @@ function Home() {
             <p className="text-xl font-extrabold font-poppins text-[#f5eded]">Pending Coin 
               <span className="pl-2 text-2xl">
               {pendingCoin ? pendingCoin.pending_coin : '700,0000'}
-              </span>
+              </span></p>
             {/* Profile Picture */}
             <div
               className="px-4 my-6 cursor-pointer flex justify-center"

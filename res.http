@@ -19,8 +19,8 @@ POST http://localhost:4000/api/v1/api-login
 Content-Type: application/json
 
 {
-    "emailOrMobile": "myea@example.com",
- "password": "passwaord123"
+    "mobile": "9876543210",
+ "password": "12345678"
 }
 
 
@@ -39,7 +39,7 @@ GET http://localhost:4000/api/v1/api-quests
 
 ##################
 GET http://localhost:4000/api/v1/api-me
-Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ODYsImlhdCI6MTcyODkwNDQ1NSwiZXhwIjoxNzI5MzM2NDU1fQ.ADLeyJ39poFGDi1tYcpVADvxiLL3bgk9H07Op1d2d4k"
+Authorization: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OTYsImlhdCI6MTcyOTI0OTAzNiwiZXhwIjoxNzI5NjgxMDM2fQ.dA4vmU-s0K4fN0T-ihjuaUejeQd6rlv8sVfrIZzLHd8"
 Content-Type: application/json
 
 
@@ -48,11 +48,15 @@ Content-Type: application/json
 ##################
 GET http://localhost:4000/api/v1/api-companies
 
+##################
+GET http://localhost:4000/api/v1/pending-coins
+Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OTYsImlhdCI6MTcyOTI0NTQ0MSwiZXhwIjoxNzI5Njc3NDQxfQ.mkSfXqm7hsb6fViTILxOC4eTISYRfAbN5dglISzUaTk"
+Content-Type: application/json
 
 ### POST Request Example
 POST http://localhost:4000/api/v1/api-quests/complete-quest
 Content-Type: application/json
 
 {
-  "quest_id": 3
+  "quest_id": 1
 }
