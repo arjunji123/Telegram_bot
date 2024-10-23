@@ -147,7 +147,7 @@ function Friend() {
               <ImCross size={20} />
             </button>
 
-            <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Invite a fren</h2>
+            <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Invite a Fren</h2>
 
 
             <div className="flex justify-center items-center  p-2 sm:p-3 rounded-lg mb-4 shadow-sm">

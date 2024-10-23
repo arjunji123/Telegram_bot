@@ -3,130 +3,255 @@ import Logo from "../utils/Logo";
 import { FaXTwitter, FaInstagram } from "react-icons/fa6";
 import { FaYoutube, FaTelegramPlane } from "react-icons/fa";
 import { AiFillCaretRight } from "react-icons/ai";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/swiper-bundle.css";
+import Follow from "../utils/Follow";
+import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAPIData } from "../../store/actions/homeActions";
 import { BACKEND_URL } from "../config";
-
+import axios from "axios";
 
 function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
   const apiQuests = apiData?.quests || [];
-  // State for tracking completed tasks
   const [completedTasks, setCompletedTasks] = useState({});
+  const [watchTimes, setWatchTimes] = useState({});
+  const [videoDurations, setVideoDurations] = useState({});
+  const [hasWatched, setHasWatched] = useState({});
+  const [isVideoWatched, setIsVideoWatched] = useState({});
+  const [followed, setFollowed] = useState({});
+  const [hasFollowed, setHasFollowed] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [screenshot, setScreenshot] = useState(null);
+  const togglePopup = () => {
+    setShowPopup(!showPopup);
+  };
+  const handleFileChange = (e) => {
+    setScreenshot(e.target.files[0]); // Capture screenshot
+  };
 
-  // Load completed tasks from localStorage on component mount
   useEffect(() => {
     const storedCompletedTasks = localStorage.getItem("completedTasks");
     if (storedCompletedTasks) {
       setCompletedTasks(JSON.parse(storedCompletedTasks));
     }
-  }, []);
-  // Load completion state from localStorage when the component mounts
-  useEffect(() => {
-    const storedHasFollowed = localStorage.getItem("hasFollowed");
-    if (storedHasFollowed) {
-      setHasFollowed(JSON.parse(storedHasFollowed));
-    }
-  }, []);
-
-  useEffect(() => {
     dispatch(fetchAPIData("apiQuests"));
   }, [dispatch]);
 
-  // Filter the quests based on type (Watch and Follow)
   const videoQuests =
-    apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
-  const socialQuests =
-    apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
+  apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
+const socialQuests =
+  apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
 
-  // Mapping API Data to rows (video quests)
-  const rows =
-    videoQuests &&
-    videoQuests.map((quest, index) => ({
-      icon: <FaYoutube size={24} color="white" className="mr-4" />,
+  const rows = videoQuests.map((quest, index) => ({
+    icon: <FaYoutube size={24} color="white" className="mr-4" />,
+    title: quest.quest_name,
+    videoUrl: quest.quest_url,
+    taskKey: `task${index + 1}`,
+    questId: quest.quest_id,
+  }));
+  const handleWatchButtonClick = async (task, videoUrl) => {
+    try {
+      setWatchTimes(prev => ({ ...prev, [task]: Date.now() }));
+      setIsVideoWatched(prev => ({ ...prev, [task]: true }));
+      console.log("videoUrl:", videoUrl); 
+      // Ensure the videoUrl is valid
+      const url = new URL(videoUrl); 
+      const videoId = url.searchParams.get("v");
+      
+      if (!videoId) {
+        throw new Error("Invalid YouTube URL");
+      }
+  
+      // Fetch the duration from YouTube API
+      const duration = await fetchVideoDuration(videoId);
+      setVideoDurations(prev => ({ ...prev, [task]: duration }));
+    } catch (error) {
+      console.error("Error handling video URL:", error);
+      // Optional: Show an error message to the user
+    }
+  };
+  
+  const API_KEY = 'AIzaSyCNdfiNQIQ2H_-BN4vvddtlHBAbjsAwRTU'; 
+  const fetchVideoDuration = async (videoId) => {
+
+    
+    try {
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${API_KEY}`);
+      const data = await response.json();
+      if (data.items.length > 0) {
+        const duration = data.items[0].contentDetails.duration;
+        return convertDurationToSeconds(duration);
+      }
+      throw new Error("Video not found");
+    } catch (error) {
+      alert(`Error fetching video duration: ${error.message}`);
+      return 0; // Default duration to 0 on error
+    }
+  };
+  
+
+  const convertDurationToSeconds = (duration) => {
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    const hours = (parseInt(match[1]) || 0) * 3600;
+    const minutes = (parseInt(match[2]) || 0) * 60;
+    const seconds = parseInt(match[3]) || 0;
+    return hours + minutes + seconds;
+  };
+  
+  const handleCheckButtonClick = (task, questId) => {
+    const currentTime = Date.now();
+    const watchStartTime = watchTimes[task];
+    const timeSpent = (currentTime - watchStartTime) / 1000;
+  
+    // Check against the video duration
+    const requiredDuration = videoDurations[task] || 0;
+  
+    if (timeSpent >= requiredDuration) {
+      completeQuest(questId, task);
+    } else {
+      const remainingTime = requiredDuration - timeSpent;
+      alert(`You need to watch the video for ${remainingTime.toFixed(2)} more seconds.`);
+      setIsVideoWatched(prev => ({ ...prev, [task]: false }));
+    }
+  };
+
+  const completeQuest = async (questId, task) => {
+    try {
+      const tokenData = localStorage.getItem("user");
+      if (!tokenData) throw new Error("No token data found in localStorage");
+  
+      const parsedTokenData = JSON.parse(tokenData);
+      const token = parsedTokenData.token;
+  
+      const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quest_id: questId }),
+      });
+  
+      if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
+  
+      setHasWatched(prev => ({ ...prev, [task]: true }));
+      setCompletedTasks(prev => ({ ...prev, [task]: true }));
+      localStorage.setItem("completedTasks", JSON.stringify({ ...completedTasks, [task]: true }));
+  
+      alert("Task Completed!");
+    } catch (error) {
+      alert(`Error completing task: ${error.message}`);
+      console.error("Error completing quest:", error);
+    }
+  };
+  const socials =
+  socialQuests &&
+  socialQuests.map((quest, index) => {
+    let icon = null;
+    if (quest.quest_name.toLowerCase().includes("youtube")) {
+      icon = <FaYoutube size={24} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("telegram")) {
+      icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("x")) {
+      icon = <FaXTwitter size={24} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("instagram")) {
+      icon = <FaInstagram size={24} color="white" className="mr-4" />;
+    }
+
+    return {
+      icon,
       title: quest.quest_name,
-      videoUrl: quest.quest_url,
+      socialUrl: quest.quest_url,
       taskKey: `task${index + 1}`, // Unique keys
       questId: quest.quest_id, // Add quest_id here
-    }));
-
-  // Mapping API Data to socials (follow quests)
-  const socials =
-    socialQuests &&
-    socialQuests.map((quest, index) => {
-      let icon = null;
-      if (quest.quest_name.toLowerCase().includes("youtube")) {
-        icon = <FaYoutube size={24} color="white" className="mr-4" />;
-      } else if (quest.quest_name.toLowerCase().includes("telegram")) {
-        icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
-      } else if (quest.quest_name.toLowerCase().includes("x")) {
-        icon = <FaXTwitter size={24} color="white" className="mr-4" />;
-      } else if (quest.quest_name.toLowerCase().includes("instagram")) {
-        icon = <FaInstagram size={24} color="white" className="mr-4" />;
-      }
-
-      return {
-        icon,
-        title: quest.quest_name,
-        socialUrl: quest.quest_url,
-        taskKey: `task${index + 1}`, // Unique keys
-        questId: quest.quest_id, // Add quest_id here
-      };
-    });
-  const [watchTimes, setWatchTimes] = useState({
-    task1: null,
-    task2: null,
+    };
   });
-  const [hasWatched, setHasWatched] = useState({
-    task1: false,
-    task2: false,
-  });
-  const [isVideoWatched, setIsVideoWatched] = useState({
-    task1: false,
-    task2: false,
-  });
-
-  const handleWatchButtonClick = (task) => {
-    setWatchTimes({
-      ...watchTimes,
-      [task]: Date.now(),
-    });
-    setIsVideoWatched({
-      ...isVideoWatched,
-      [task]: true,
-    });
-  };
-  const [followed, setFollowed] = useState({});
-  const [hasFollowed, setHasFollowed] = useState({});
   const handleFollowButtonClick = (task) => {
     setFollowed({
       ...followed,
       [task]: Date.now(),
     });
   };
-  const handleCheckButtonClick = async (task, questId) => {
-    const currentTime = Date.now();
-    const watchStartTime = watchTimes[task]; // Assuming watchTimes is an object tracking when the user started watching
-    const timeSpent = (currentTime - watchStartTime) / 1000; // Time spent in seconds
+  // const handleCheckFollowButtonClick = async (task, questId) => {
+  //   try {
+  //     const tokenData = localStorage.getItem("user");
+  //     if (!tokenData) {
+  //       throw new Error("No token data found in localStorage");
+  //     }
 
-    if (timeSpent >= 10) {
+  //     const parsedTokenData = JSON.parse(tokenData);
+  //     const token = parsedTokenData.token;
+
+  //     if (!token) {
+  //       throw new Error("Token not found");
+  //     }
+
+  //     const response = await fetch(
+  //       `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: JSON.stringify({ quest_id: questId }),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error(`Error: ${response.status} ${response.statusText}`);
+  //     }
+
+  //     // Mark the task as completed and save the state in localStorage
+  //     setHasFollowed((prev) => {
+  //       const updatedState = {
+  //         ...prev,
+  //         [task]: true,
+  //       };
+  //       localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
+  //       return updatedState;
+  //     });
+
+  //     alert("Follow Task Completed!");
+  //   } catch (error) {
+  //     console.error("Error completing follow quest:", error);
+  //     alert("Error completing follow quest: " + error.message);
+  //   }
+  // };
+
+    // Handle submit click
+    const handleSubmit = async (task, questId) => {
+      if (!screenshot) {
+        alert('Please upload a screenshot!');
+        return;
+      }
+  
       try {
+        setIsUploading(true);
+  
+        // 1. Upload the screenshot
+        const formData = new FormData();
+        formData.append('screenshot', screenshot);
+        formData.append('taskId', task); // Pass the task ID to the API
+  
+        await axios.post('/api/upload-screenshot', formData);
+  
+        // 2. Complete the follow quest (your function logic)
         const tokenData = localStorage.getItem("user");
         if (!tokenData) {
           throw new Error("No token data found in localStorage");
         }
-
+  
         const parsedTokenData = JSON.parse(tokenData);
         const token = parsedTokenData.token;
-
+  
         if (!token) {
           throw new Error("Token not found");
         }
-
+  
         const response = await fetch(
           `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
           {
@@ -135,110 +260,38 @@ function Tasks() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ quest_id: questId }),
+            body: JSON.stringify({ quest_id: questId }), // Complete the quest with questId
           }
         );
-
+  
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(
-            `Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`
-          );
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-
-          // Update the state to mark the task as completed
-          setHasWatched((prev) => ({
+  
+        // Mark the task as completed and save the state in localStorage
+        setHasFollowed((prev) => {
+          const updatedState = {
             ...prev,
-            [task]: true,
-          }));
-
-          // Update completed tasks state
-          setCompletedTasks((prev) => ({
-            ...prev,
-            [task]: true,
-          }));
-
-          // Update localStorage
-          localStorage.setItem(
-            "completedTasks",
-            JSON.stringify({
-              ...completedTasks,
-              [task]: true,
-            })
-          );
-
-          alert("Task Completed!");
-        } else {
-          const text = await response.text();
-          throw new Error(
-            `Expected JSON but received non-JSON response. Here is the response: ${text}`
-          );
-        }
-      } catch (err) {
-        alert(`Error completing task: ${err.message}`);
-        console.error("Error completing quest:", err);
+            [taskId]: true, // Save follow status per task
+          };
+          localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
+          return updatedState;
+        });
+  
+        // Mark as completed and update UI
+        setFollowed(true); 
+        setShowPopup(false); // Close the pop-up
+        alert("Follow Task Completed!");
+  
+      } catch (error) {
+        console.error("Error completing follow quest:", error);
+        alert("Error completing follow quest: " + error.message);
+      } finally {
+        setIsUploading(false);
       }
-    } else {
-      alert("You have not watched the video for at least 10 seconds.");
-      setIsVideoWatched((prev) => ({
-        ...prev,
-        [task]: false,
-      }));
-    }
-  };
-
-  // Update handleCheckFollowButtonClick to save to localStorage
-  const handleCheckFollowButtonClick = async (task, questId) => {
-    try {
-      const tokenData = localStorage.getItem("user");
-      if (!tokenData) {
-        throw new Error("No token data found in localStorage");
-      }
-
-      const parsedTokenData = JSON.parse(tokenData);
-      const token = parsedTokenData.token;
-
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const response = await fetch(
-        `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quest_id: questId }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
-      // Mark the task as completed and save the state in localStorage
-      setHasFollowed((prev) => {
-        const updatedState = {
-          ...prev,
-          [task]: true,
-        };
-        localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
-        return updatedState;
-      });
-
-      alert("Follow Task Completed!");
-    } catch (error) {
-      console.error("Error completing follow quest:", error);
-      alert("Error completing follow quest: " + error.message);
-    }
-  };
-
+    };
+  
+  
   return (
     <div className="bg-white flex justify-center min-h-screen">
       <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
@@ -249,63 +302,7 @@ function Tasks() {
               EARN
             </p>
             {/* Sliding Banner */}
-            <Swiper
-              spaceBetween={20}
-              slidesPerView={1}
-              pagination={{ clickable: true }}
-              className="rounded-lg shadow-lg overflow-hidden mb-4"
-            >
-              <SwiperSlide>
-                <div className="bg-gradient-to-r from-[#c7c7c1] to-[#dbdbd1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
-                  <div className="flex items-center">
-                    <img
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlrWcBG3SebWTLiMtYf1YBzrZ-dyD9B2LHqiJScut64HP7qbEj0oAJw-JHiCkf9HD2NHI&usqp=CAU" // Replace with your logo path
-                      alt="Logo"
-                      className="h-10 w-10 rounded-full shadow-md" // Logo styling
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <h1 className="text-black text-base font-bold ">
-                      MemeFi Quest Round 1
-                    </h1>
-                    <p className="text-[#423d3d] text-xs font-bold">+999 BP</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
-                      Open
-                    </button>
-                    <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
-                      0/3
-                    </button>
-                  </div>
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="bg-gradient-to-r from-[#d4afd1] to-[#f3d6f1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
-                  <div className="flex items-center">
-                    <img
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv1DD_viUEoD_ag_IWy3twGYvW18quZRC8sA&s" // Replace with your logo path
-                      alt="Logo"
-                      className="h-10 w-10 rounded-full shadow-md" // Logo styling
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <h1 className="text-black text-base font-bold ">
-                      Subscribe to Blum Telegram{" "}
-                    </h1>
-                    <p className="text-[#423d3d] text-xs font-bold">+90 BP</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
-                      Start
-                    </button>
-                    {/* <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
-                  0/3
-                </button> */}
-                  </div>
-                </div>
-              </SwiperSlide>
-            </Swiper>
+            <CustomSwiper />
             <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">
               {" "}
               {/* Reduced heading size */}
@@ -337,7 +334,7 @@ function Tasks() {
                             href={row.videoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            onClick={() => handleWatchButtonClick(row.taskKey)}
+                            onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
                             className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
                           >
                             <span>
@@ -393,12 +390,13 @@ function Tasks() {
                       {!hasFollowed[social.taskKey] &&
                         followed[social.taskKey] && (
                           <button
-                            onClick={() =>
-                              handleCheckFollowButtonClick(
-                                social.taskKey,
-                                social.questId
-                              )
-                            }
+                            // onClick={() =>
+                            //   handleCheckFollowButtonClick(
+                            //     social.taskKey,
+                            //     social.questId
+                            //   )
+                            // }
+                            onClick={togglePopup}
                             className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${
                               hasFollowed[social.taskKey]
                                 ? "bg-gray-400 cursor-not-allowed"
@@ -410,7 +408,7 @@ function Tasks() {
                           </button>
                         )}
                       {hasFollowed[social.taskKey] && (
-                        <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold">
+                        <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold" disabled>
                           Completed
                         </span>
                       )}
@@ -423,6 +421,12 @@ function Tasks() {
         </div>
       </div>
       <Footer />
+      {showPopup && <Follow
+      togglePopup={togglePopup}
+       handleSubmit={handleSubmit} 
+       handleFileChange={handleFileChange}
+       isUploading={isUploading}
+       />}
     </div>
   );
 }

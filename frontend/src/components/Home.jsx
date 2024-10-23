@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../Styles/Tasks.css";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
+import { BsPersonCircle } from "react-icons/bs";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMeData, fetchCoinData } from '../../store/actions/homeActions';
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,13 +22,7 @@ function Home() {
     dispatch(fetchMeData());
   }, [dispatch]);
 
-  useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      const firstName = tg.initDataUnsafe?.user?.first_name;
-      setFirstName(firstName);
-    }
-  }, []);
+
 
   const handleClick = () => {
     const newCoins = Array.from({ length: 10 }, (_, i) => ({
@@ -39,54 +34,7 @@ function Home() {
     setCoins(newCoins);
 
     // Remove coins after animation
-    setTimeout(() => setCoins([]), 2500); }
-  useEffect(() => {
-    if (userData) {
-      setPendingCoins(userData.pending_coin); // Initialize pending coins from user data
-    }
-  }, [userData]);
-
-  const handleProfileClick = () => {
-    navigate("/profile");
-  };
-
-  const handleImageClick = async () => {
-    if (progress < 100 && pendingCoins >= 5) {
-      setProgress((prev) => prev + 20);
-      const updatedPendingCoins = pendingCoins - 5; // Deduct coins to be transferred
-
-      try {
-        const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
-        const response = await fetch(`${BACKEND_URL}/api/v1/transfer-coins`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Include token in Authorization header
-          },
-          body: JSON.stringify({ coinsToTransfer: 5 }), // Sending amount of coins
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          setPendingCoins(updatedPendingCoins); // Update pending coins state after successful transfer
-        } else {
-          console.error(
-            "Failed to transfer coins:",
-            data.message || "Unknown error"
-          );
-        }
-      } catch (error) {
-        console.error("Error transferring coins:", error);
-      }
-    } else {
-      console.log("Insufficient coins or maximum progress reached.");
-    }
-
-    // Trigger vibration effect for mobile devices
-    if (navigator.vibrate) {
-      navigator.vibrate(50); // Vibrate for 50 milliseconds
-    }
+    setTimeout(() => setCoins([]), 2500);
   };
 
   return (
@@ -97,7 +45,7 @@ function Home() {
             {/* Logo */}
             <Logo />
             {/* User Information */}
-            <div
+            {/* <div
               className="absolute top-0 left-4 flex items-center space-x-2 cursor-pointer"
               onClick={handleProfileClick}
             >
@@ -109,16 +57,20 @@ function Home() {
               <p className="text-sm font-bold capitalize">
                 {userData ? userData.user_name : "Neeraj Singh"}
               </p>
-            </div>
+            </div> */}
 
+            <div className="flex justify-center space-x-1">
+                  <BsPersonCircle size={28} className="mt-1" />
+                  <p className="text-2xl font-extrabold capitalize">  {userData ? userData.user_name : "Neeraj Singh"}</p>
+                </div>
             {/* User Balance */}
-            <div className="flex justify-center space-x-1 text-4xl font-extrabold font-sans mt-8">
+            <div className="flex justify-center space-x-1 text-3xl font-extrabold font-sans ">
               <p>U</p>
               <p>{userData ? userData.coins : "700,0000"}</p>
             </div>
 
             {/* Progress Bar */}
-            <div className="progress-container flex justify-center mt-4">
+            {/* <div className="progress-container flex justify-center mt-4">
               <div
                 className="progress-bar-container w-full h-4 bg-gray-700 rounded-full"
                 style={{ maxWidth: "80%" }}
@@ -132,8 +84,7 @@ function Home() {
                   }}
                 />
               </div>
-            </div>
-            </div>
+            </div> */}
 
       
      
@@ -183,24 +134,7 @@ function Home() {
             <p className="text-xl font-extrabold font-poppins text-[#f5eded]">Pending Coin 
               <span className="pl-2 text-2xl">
               {pendingCoin ? pendingCoin.pending_coin : '700,0000'}
-              </span></p>
-            {/* Profile Picture */}
-            <div
-              className="px-4 my-6 cursor-pointer flex justify-center"
-              onClick={handleImageClick}
-            >
-              <img
-                src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
-                alt="Main Character"
-                className="rounded-full w-56 h-56 object-cover"
-              />
-            </div>
-
-            {/* Pending Coins */}
-            <div className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
-              <p className="text-xl font-extrabold font-poppins text-[#f5eded]">
-                Pending Coin
-                <span className="pl-2 text-2xl">{pendingCoins}</span>
+              </span>
               </p>
             </div>
           </div>
