@@ -53,6 +53,7 @@ const {
   uploadScreenshotApi,
   getCompanyDetailApi,
   getAllCompaniesApi,
+  getUserReferralCode,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -127,6 +128,8 @@ router.route("/api-logout").get(logoutApi);
 router.route("/api-me").get(isApiAuthenticatedUser, getUserDetailApi);
 router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
+
+router.route("/referral-code").get(isApiAuthenticatedUser, getUserReferralCode);
 router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
