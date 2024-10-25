@@ -84,6 +84,6 @@ router
 router.route("/pending-coins").get(isApiAuthenticatedUser, getUserPendingCoins);
 router
   .route("/transfer-coins")
-  .post(isAuthenticatedUser, transferPendingCoinsToTotal);
+  .post(isApiAuthenticatedUser, transferPendingCoinsToTotal);
 
 module.exports = router;

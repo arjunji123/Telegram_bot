@@ -22,6 +22,15 @@ exports.saveData = async (table_name, postData) => {
   }
 };
 
+
+exports.updateData = async (table_name, data, condition) => {
+  try {
+    await db.query(`UPDATE ${table_name} SET ? WHERE ?`, [data, condition]);
+  } catch (error) {
+    throw new ErrorHandler(`${error}`, 400);
+  }
+};
+
 exports.findByIdAndUpdateData = async (table_name, id, updateData, next) => {
   const record_exit = await db.query(
     `SELECT id FROM ${table_name} WHERE id = ?`,
