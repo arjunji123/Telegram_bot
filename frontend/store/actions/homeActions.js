@@ -85,22 +85,6 @@ const fetchCoinFailure = (error) => {
   };
 };
 
-// Async Action to fetch user data using the fetcher
-// export const fetchMeData = () => {
-//   return async (dispatch) => {
-//     dispatch(fetchMeRequest());
-
-//     try {
-//       // Use fetcher to make the API call
-//       const data = await fetcherGet(`${BACKEND_URL}/api/v1/api-me`);
-//       // Dispatch success action with the data
-//       dispatch(fetchMeSuccess(data));
-//     } catch (error) {
-//       // Dispatch failure action if fetcher throws an error
-//       dispatch(fetchMeFailure(error.message));
-//     }
-//   };
-// };
 export const fetchMeData = () => async (dispatch) => {
   dispatch(fetchMeRequest());
   

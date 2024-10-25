@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../Styles/Tasks.css";
 import Logo from "../utils/Logo";
 import QRCode from "qrcode";
 import { BiSolidDownvote, BiSolidUpvote, BiHistory } from "react-icons/bi";
@@ -12,7 +11,9 @@ import Footer from "./Footer";
 import Send from "../utils/Send";
 import History from "../utils/History";
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAPIData } from '../../store/actions/homeActions';
+import { fetchAPIData, fetchMeData } from '../../store/actions/homeActions';
+import { receiveMoney, sendMoney, sellMoney } from '../../store/actions/withdrawalActions';
+
 
 function Withdrawal() {
   const [showPopup, setShowPopup] = useState(false);
@@ -21,11 +22,32 @@ function Withdrawal() {
   const [showSendPopup, setShowSendPopup] = useState(false);
   const [showHistoryPopup, setShowHistoryPopup] = useState(false);
   const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const [sendData, setSendData] = useState({
+    toAddress: '',
+    fromAddress: '',
+    amount: '',
+});
+  const [receiveData, setReceiveData] = useState({
+    toAddress: '',
+    fromAddress: '',
+    amount: '',
+});
+const [sellData, setSellData] = useState({
+  user_id: "",
+  company_id: "",
+  address: "",
+  amount: "",
+  coin_rate: "",
+});
   const dispatch = useDispatch();
+  const { loading, data, error } = useSelector((state) => state.moneyData);
   const apiCompanies = useSelector((state) => state.apiData.data.apicompanies);
+  const apiData = useSelector((state) => state.apiData.data);
+  const userData = apiData && apiData.me && apiData.me.data  || null;
 // console.log('apiCompanies', apiCompanies)
   useEffect(() => {
     dispatch(fetchAPIData('apiCompanies'));
+    dispatch(fetchMeData());
   }, [dispatch]);
 
   const handleIconClick = (index) => {
@@ -83,6 +105,46 @@ function Withdrawal() {
   const handleInputChange = (e) => {
     setInputValue(e.target.value.trim());
   };
+  const handleReceiveMoney = () => {
+    const id = 1; // Replace with the actual id logic as needed
+    const { toAddress, fromAddress, amount } = receiveData;
+    dispatch(receiveMoney(id, toAddress, fromAddress, amount));
+    closePopups(); // Close popup after dispatching the action
+};
+const handleReceiveInputChange = (e) => {
+  const { name, value } = e.target;
+  setReceiveData((prevState) => ({
+      ...prevState,
+      [name]: value,
+  }));
+};
+  const handleSendMoney = () => {
+    const id = 1; // Replace with the actual id logic as needed
+    const { toAddress, fromAddress, amount } = sendData;
+    dispatch(sendMoney(id, toAddress, fromAddress, amount));
+    closePopups(); // Close popup after dispatching the action
+};
+const handleSendInputChange = (e) => {
+  const { name, value } = e.target;
+  setSendData((prevState) => ({
+      ...prevState,
+      [name]: value,
+  }));
+};
+const handleSellChange = (e) => {
+  const { name, value } = e.target;
+  setSellData((prev) => ({ ...prev, [name]: value }));
+};
+
+const handleSellSubmit = (e) => {
+  e.preventDefault();
+
+  const user_id = "your_user_id"; // Replace with actual user_id
+  const company_id = "your_company_id"; // Replace with actual company_id
+  
+  dispatch(sellMoney(user_id, company_id, sellData));
+};
+
   return (
     <div className="bg-white flex justify-center overflow-y-auto">
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4  overflow-y-auto">
@@ -90,7 +152,7 @@ function Withdrawal() {
           <Logo />
           <div className="flex justify-center font-poppins leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
             <p>U</p>
-            <p className="">700,00000</p>
+            <p className="">{userData ? userData.coins : "700,0000"}</p>
           </div>
 
           <div className="grid grid-cols-4 gap-2 mb-4">
@@ -171,35 +233,43 @@ function Withdrawal() {
               <ImCross size={20} />
             </button>
 
-            <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Withdrawal Money</h2>
+            <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Sell Coin</h2>
 
             {/* Description */}
             <p className="text-sm sm:text-base text-[#B0B0B0] text-center mb-6">
-              Please enter the amount and your UPI ID to generate the QR code for withdrawal.
+              Please enter the amount and your UPI ID to generate the QR code for Sell your coin.
             </p>
 
             <input
               type="text"
-              id="amount"
+              name="amount"
+              onChange={handleSellChange}
               placeholder="Enter Amount"
+              className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
+            />
+            <input
+              type="text"
+              name="coin_rate"
+              onChange={handleSellChange}
+              placeholder="Coin Rate"
               className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
             />
 
             <input
               type="text"
-              id="text"
-              value={inputValue}
-              onChange={handleInputChange}
+              name="address"
+              // value={address}
+              onChange={handleSellChange}
               placeholder="Enter UPI ID for QR code"
               className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
             />
 
-            <div className="flex justify-center items-center bg-[#2C2C2C] p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
+            {/* <div className="flex justify-center items-center bg-[#2C2C2C] p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
               <canvas id="qrcode" ref={qrRef} className="rounded-lg"></canvas>
-            </div>
+            </div> */}
 
             <div className="flex justify-center items-center">
-              <button className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
+              <button  onClick={handleSellSubmit} className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
                 Submit
               </button>
             </div>
@@ -208,12 +278,12 @@ function Withdrawal() {
 
       )}
       {
-        showReceivePopup && <Receive closePopups={closePopups} handleInputChange={handleInputChange} qrRef={qrRef}
-          inputValue={inputValue} />
+        showReceivePopup && <Receive closePopups={closePopups} handleReceiveMoney={handleReceiveMoney} handleReceiveInputChange={handleReceiveInputChange} 
+          receiveData={receiveData} />
       }
       {
-        showSendPopup && <Send closePopups={closePopups} handleInputChange={handleInputChange} qrRef={qrRef}
-          inputValue={inputValue} />
+        showSendPopup && <Send closePopups={closePopups} handleSendInputChange={handleSendInputChange} handleSendMoney={handleSendMoney}
+          sendData={sendData} />
       }
       {
         showHistoryPopup && <History closePopups={closePopups}  />

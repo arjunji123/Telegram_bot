@@ -6,11 +6,15 @@ import { BsPersonCircle } from "react-icons/bs";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMeData, fetchCoinData } from '../../store/actions/homeActions';
 import { motion, AnimatePresence } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 function Home() {
   const [firstName, setFirstName] = useState("");
   const [progress, setProgress] = useState(0);
   const [pendingCoins, setPendingCoins] = useState(0);
+  const [totalCoins, setTotalCoins] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data);
   const userData = apiData && apiData.me && apiData.me.data  || null;
@@ -22,7 +26,35 @@ function Home() {
     dispatch(fetchMeData());
   }, [dispatch]);
 
+ // Handle button click to deduct and add coins
+ const handleButtonClick = async () => {
+  if (pendingCoins < coinAmount) {
+    toast('Not enough pending coins!');
+    return;
+  }
 
+  setIsLoading(true);
+
+  try {
+    // POST request to deduct from pending and add to total
+    const response = await axios.post(BACKEND_URL_DEDUCT_ADD, {
+      userId: userId,
+      coinAmount: coinAmount,
+    });
+
+    if (response.status === 200) {
+      // Update pending and total coins in the UI
+      setPendingCoins((prev) => prev - coinAmount);
+      setTotalCoins((prev) => prev + coinAmount);
+      alert('Coins successfully transferred!');
+    }
+  } catch (error) {
+    console.error('Error deducting and adding coins:', error);
+    alert('Something went wrong. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleClick = () => {
     const newCoins = Array.from({ length: 10 }, (_, i) => ({
@@ -39,6 +71,7 @@ function Home() {
 
   return (
     <div className="bg-white flex justify-center">
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
         <div className="flex-grow relative z-0">
           <div className="px-4 py-6 space-y-6">
@@ -129,7 +162,9 @@ function Home() {
 
          
           </div>
-
+          {/* <button onClick={handleButtonClick} disabled={isLoading}>
+        {isLoading ? 'Processing...' : `Transfer ${coinAmount} Coins`}
+      </button> */}
              <div  className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
             <p className="text-xl font-extrabold font-poppins text-[#f5eded]">Pending Coin 
               <span className="pl-2 text-2xl">

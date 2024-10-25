@@ -9,6 +9,8 @@ import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAPIData } from "../../store/actions/homeActions";
 import { BACKEND_URL } from "../config";
+import { toast, ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
 import axios from "axios";
 
 function Tasks() {
@@ -87,7 +89,7 @@ const socialQuests =
       }
       throw new Error("Video not found");
     } catch (error) {
-      alert(`Error fetching video duration: ${error.message}`);
+      toast(`Error fetching video duration: ${error.message}`);
       return 0; // Default duration to 0 on error
     }
   };
@@ -113,7 +115,7 @@ const socialQuests =
       completeQuest(questId, task);
     } else {
       const remainingTime = requiredDuration - timeSpent;
-      alert(`You need to watch the video for ${remainingTime.toFixed(2)} more seconds.`);
+      toast(`You need to watch the video for ${remainingTime.toFixed(2)} more seconds.`);
       setIsVideoWatched(prev => ({ ...prev, [task]: false }));
     }
   };
@@ -141,9 +143,9 @@ const socialQuests =
       setCompletedTasks(prev => ({ ...prev, [task]: true }));
       localStorage.setItem("completedTasks", JSON.stringify({ ...completedTasks, [task]: true }));
   
-      alert("Task Completed!");
+      toast("Task Completed!");
     } catch (error) {
-      alert(`Error completing task: ${error.message}`);
+      toast.error(`Error completing task: ${error.message}`);
       console.error("Error completing quest:", error);
     }
   };
@@ -225,7 +227,7 @@ const socialQuests =
     // Handle submit click
     const handleSubmit = async (task, questId) => {
       if (!screenshot) {
-        alert('Please upload a screenshot!');
+        toast('Please upload a screenshot!');
         return;
       }
   
@@ -281,11 +283,11 @@ const socialQuests =
         // Mark as completed and update UI
         setFollowed(true); 
         setShowPopup(false); // Close the pop-up
-        alert("Follow Task Completed!");
+        toast("Follow Task Completed!");
   
       } catch (error) {
         console.error("Error completing follow quest:", error);
-        alert("Error completing follow quest: " + error.message);
+        toast.error("Error completing follow quest: " + error.message);
       } finally {
         setIsUploading(false);
       }
@@ -294,6 +296,7 @@ const socialQuests =
   
   return (
     <div className="bg-white flex justify-center min-h-screen">
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
         <div className="flex-grow mb-4 relative z-0">
           <div className=" px-2 py-6 h-full z-10">
@@ -330,13 +333,10 @@ const socialQuests =
                       <>
                         {/* Render Watch and Check buttons based on task status */}
                         {!isVideoWatched[row.taskKey] && (
-                          <a
-                            href={row.videoUrl}
-                            target="_blank"
+                          <a href={row.videoUrl}  target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
-                            className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
-                          >
+                            className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold" >
                             <span>
                               <AiFillCaretRight size={18} />
                             </span>
