@@ -190,7 +190,7 @@ const handleSellSubmit = (e) => {
           <div className="flex flex-col space-y-2 ">
             {apiCompanies && apiCompanies.data && apiCompanies.data.length > 0 ? (
                  apiCompanies.data && apiCompanies.data.map((company, index) => (
-                  <div key={index} className="rounded-lg p-2 w-full relative flex justify-between items-center bg-[#1b1a1a] transition duration-200 ease-in-out shadow-md">
+                  <div key={index} className="rounded-lg p-2 w-full  relative flex justify-between items-center bg-[#1b1a1a] transition duration-200 ease-in-out shadow-md">
                     <div className="flex ">
                       <BsPersonFillCheck size={18} />
                       <div className="ml-1"> {/* Reduced left margin */}

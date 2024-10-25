@@ -712,3 +712,37 @@ exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+
+////////////////////////////////////////
+
+exports.getUserReferralCode = catchAsyncErrors(async (req, res, next) => {
+  // Get the user_id from the logged-in user's session
+  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+  console.log("Fetching referral code for user:", user_id);
+
+  try {
+    // Query to get the referral code for the user
+    const result = await db.query(
+      "SELECT referral_code FROM user_data WHERE user_id = ?",
+      [user_id]
+    );
+
+    const referralCode = result[0][0]?.referral_code || null; // If no referral code is found, default to null
+
+    console.log("Referral code fetched:", referralCode);
+
+    // Respond with the referral code
+    res.status(200).json({
+      success: true,
+      message: "Referral code fetched successfully.",
+      data: {
+        user_id,
+        referral_code: referralCode,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching referral code:", error);
+    return next(new ErrorHandler("Database query failed", 500));
+  }
+});
