@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import Invite from "../Img/invite.webp";
 import "../Styles/Friends.css";
 import { ImCross } from "react-icons/im";
@@ -82,7 +81,15 @@ function Friend() {
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+           <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
     <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg overflow-y-auto px-4">
       <div className="flex-grow relative z-0 py-6">
         <Logo />

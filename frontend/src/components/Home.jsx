@@ -54,7 +54,15 @@ function Home() {
 
   return (
     <div className="bg-white flex justify-center">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+               <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
       <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
         <div className="flex-grow relative z-0">
           <div className="px-4 py-6 space-y-6">

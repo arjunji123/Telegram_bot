@@ -7,26 +7,49 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
 import scanner from "../Img/scanner.png";
+import { BACKEND_URL } from "../config";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAPIData } from "../../store/actions/homeActions";
+import { FaCopy } from 'react-icons/fa'; // Make sure to install react-icons
+import QRCode from "qrcode";
 
 function Payment() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const apiData = useSelector((state) => state.apiData.data.apisettings);
+  const apiSettings = apiData?.settings || [];
   const { id } = useParams(); // Extract userId from URL
-
   const [firstName, setFirstName] = useState("");
   const [screenshot, setScreenshot] = useState(null); // To store the selected file
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+console.log('apiSettings', apiSettings)
+useEffect(() => {
+  // Initialize Telegram WebApp
+  const tg = window.Telegram.WebApp;
 
-  useEffect(() => {
-    // Initialize Telegram WebApp
-    const tg = window.Telegram.WebApp;
+  // Extract user information
+  const firstName = tg.initDataUnsafe?.user?.first_name;
+  setFirstName(firstName);
+  
+  // Fetch additional API data
+  dispatch(fetchAPIData("apiSettings"));
 
-    // Extract user information
-    const firstName = tg.initDataUnsafe?.user?.first_name;
-    setFirstName(firstName);
+  // Function to generate the QR code
+  const generateQRCode = async () => {
+    try {
+      // const upiString = `upi://pay?pa=yourupi@bank&pn=YourName&mc=1234&tid=1234567890&am=1.00&cu=INR&tn=Your%20Transaction%20Note`;
+  const upiString = apiSettings && apiSettings.upi;
+      const url = await QRCode.toDataURL(upiString); // Generate QR code
+      setQrCodeUrl(url);
+    } catch (err) {
+      console.error('Error generating QR Code:', err);
+    }
+  };
 
-    // Log the userId passed via URL for debugging
-    console.log("Received userId:", id);
+  generateQRCode(); // Call QR code generation
 
-  }, [id]);
+}, [dispatch]); 
+
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -42,7 +65,7 @@ function Payment() {
         formData.append("user_id", id); // Send the userId with the image
 
         const response = await axios.post(
-          `http://localhost:4000/api/v1/upload-screenshot/${id}`, // Use the dynamic id in URL
+          `${BACKEND_URL}/api/v1/upload-screenshot/${id}`, // Use the dynamic id in URL
           formData,
           {
             headers: {
@@ -70,7 +93,15 @@ function Payment() {
       toast.warn("Please select a screenshot to upload."); // Show warning if no file is selected
     }
   };
-
+  const handleCopy = () => {
+    const upiId = apiSettings && apiSettings.upi ? apiSettings.upi : "admin@upi";
+    
+    navigator.clipboard.writeText(upiId).then(() => {
+      toast('UPI ID copied to clipboard!');
+    }).catch((err) => {
+      console.error('Failed to copy: ', err);
+    });
+  };
   return (
     <div className="bg-white flex justify-center min-h-screen overflow-y-auto">
     <div className="w-full max-w-lg bg-black text-white min-h-screen font-bold flex flex-col shadow-lg ">
@@ -98,20 +129,26 @@ function Payment() {
       {/* Main Content */}
       <div className="px-4 py-6 flex-grow">
         {/* UPI ID */}
-        <div className="bg-[#474237] rounded-md p-3 mb-4 text-center">
+        <div className="bg-[#474237] rounded-md p-3 mb-4 text-center flex justify-between">
           <h3 className="text-sm text-[#ada5a5]">
-            Admin's UPI ID: <span className="text-white">admin@upi</span>
+            Admin's UPI ID: <span className="text-white">
+              {apiSettings && apiSettings.upi ? apiSettings.upi :"admin@upi"}
+            </span>
           </h3>
+          <button onClick={handleCopy} className="ml-2">
+        <FaCopy className="text-white cursor-pointer" title="Copy UPI ID" />
+      </button>
         </div>
   
         {/* QR Code Section */}
         <div className="flex justify-center mb-4">
           <div className="bg-white p-3 rounded-md shadow-lg w-36">
             <h4 className="text-sm font-semibold text-black text-center mb-2">
-              Scan UPI QR Code
+            Scan to Pay via UPI
             </h4>
             <div className="w-28 h-28 bg-gray-200 rounded-md flex items-center justify-center">
-              <img src={scanner} alt="QR Code" className="w-full h-full object-cover" />
+            {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" />}
+              {/* <img src={scanner} alt="QR Code" className="w-full h-full object-cover" /> */}
             </div>
           </div>
         </div>

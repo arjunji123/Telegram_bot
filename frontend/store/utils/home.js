@@ -4,6 +4,7 @@ export const API_URLS = {
   pendingCoins: `${BACKEND_URL}/api/v1/pending-coins`,
   apiQuests: `${BACKEND_URL}/api/v1/api-quests`,
   apiCompanies: `${BACKEND_URL}/api/v1/api-companies`,
+  apiSettings: `${BACKEND_URL}/api/v1/api-settings`,
   // Add more API URLs as needed
 };
 

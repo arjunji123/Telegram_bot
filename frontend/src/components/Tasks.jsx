@@ -296,8 +296,15 @@ const socialQuests =
   
   return (
     <div className="bg-white flex justify-center min-h-screen">
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
-      <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
+          <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />      <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
         <div className="flex-grow mb-4 relative z-0">
           <div className=" px-2 py-6 h-full z-10">
             <Logo />
