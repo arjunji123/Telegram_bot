@@ -54,6 +54,7 @@ const {
   getCompanyDetailApi,
   getAllCompaniesApi,
   getUserReferralCode,
+  transferCoins,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -142,5 +143,6 @@ router.post(
   upload.single("pay_image"),
   uploadScreenshotApi
 );
+router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
 module.exports = router;

@@ -673,6 +673,7 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
 
 //////////////////////////////////////////////////
 
+
 // Joi schema for validation
 const coinRateSchema = Joi.object({
   company_id: Joi.number().integer().required(),

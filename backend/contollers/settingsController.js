@@ -53,6 +53,7 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     // fb_url: req.body.fb_url,
     upi: req.body.upi,
     qr_code: req.body.qr_code,
+    reduce_coin_rate: req.body.reduce_coin_rate,
     // google_url: req.body.google_url,
     // linkdin_url: req.body.linkdin_url,
     // twitter_url: req.body.twitter_url,
