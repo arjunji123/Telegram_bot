@@ -71,7 +71,6 @@ function Friend() {
               {/* Icon */}
               <div className="flex justify-center" role="img" aria-label="friends">
                 <img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRBmgzOP_BRigp_fok6RcoiBegiIttLQ8fFVaZ-Hbj3YWdrjJ24" alt="" className="w-32 h-30" />
-                {/* <MdGroups size={100} className="text-center" />  */}
               </div>
               <h2 className="text-center text-3xl md:text-5xl font-extrabold font-poppins">
                 Invite Frens
