@@ -43,9 +43,9 @@ function Tasks() {
   }, [dispatch]);
 
   const videoQuests =
-  apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
+  apiQuests && apiQuests.filter((quest) => quest.activity === "watch");
 const socialQuests =
-  apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
+  apiQuests && apiQuests.filter((quest) => quest.activity === "follow");
 
   const rows = videoQuests.map((quest, index) => ({
     icon: <FaYoutube size={24} color="white" className="mr-4" />,
