@@ -461,35 +461,40 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
   async (req, res, next) => {
     const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
 
-    console.log(
-      "Transferring 5 coins from pending to total for user:",
-      user_id
-    );
+    console.log("Transferring coins from pending to total for user:", user_id);
 
     try {
-      // Step 1: Check if the user has enough pending coins in user_data table
+      // Step 1: Retrieve the reduce_coin_rate from settings table
+      const settingsResult = await db.query(
+        "SELECT reduce_coin_rate FROM settings LIMIT 1" // Assuming there's only one row in the settings table
+      );
+
+      const reduceCoinRate = settingsResult[0][0]?.reduce_coin_rate || 0;
+
+      // Step 2: Check if the user has enough pending coins in user_data table
       const userPendingResult = await db.query(
         "SELECT pending_coin FROM user_data WHERE user_id = ?",
         [user_id]
       );
 
       const userPendingCoins = userPendingResult[0][0]?.pending_coin || 0;
-      if (userPendingCoins < 5) {
+
+      // Check if user has enough pending coins
+      if (userPendingCoins < reduceCoinRate) {
         return res.status(400).json({
           success: false,
-          error:
-            "Insufficient pending coins in user_data. At least 5 coins are required.",
+          error: `Insufficient pending coins in user_data. At least ${reduceCoinRate} coins are required.`,
         });
       }
 
-      // Step 2: Deduct 5 coins from user_data table
+      // Step 3: Deduct coins from user_data table
       await db.query(
-        "UPDATE user_data SET pending_coin = pending_coin - 5, coins = coins + 5 WHERE user_id = ?",
-        [user_id]
+        "UPDATE user_data SET pending_coin = pending_coin - ?, coins = coins + ? WHERE user_id = ?",
+        [reduceCoinRate, reduceCoinRate, user_id]
       );
 
-      // Step 3: Transfer coins from usercoin_audit table
-      let coinsToTransfer = 5; // Initial amount to transfer
+      // Step 4: Transfer coins from usercoin_audit table
+      let coinsToTransfer = reduceCoinRate; // Use the reduceCoinRate for transfer
       const auditRows = await db.query(
         "SELECT * FROM usercoin_audit WHERE user_id = ? ORDER BY id ASC",
         [user_id]
@@ -521,7 +526,7 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
         });
       }
 
-      // Step 4: Fetch updated values
+      // Step 5: Fetch updated values
       const updatedPendingCoinsResult = await db.query(
         "SELECT pending_coin FROM user_data WHERE user_id = ?",
         [user_id]
@@ -540,8 +545,7 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
       // Respond with the updated values
       res.status(200).json({
         success: true,
-        message:
-          "5 coins transferred from pending coins to total coins successfully.",
+        message: `${reduceCoinRate} coins transferred from pending coins to total coins successfully.`,
         data: {
           user_id,
           pending_coin: updatedPendingCoins,
@@ -556,3 +560,5 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
 );
 
 ////////////////////////////////////////////////////////
+
+
