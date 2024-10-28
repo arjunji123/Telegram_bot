@@ -19,11 +19,38 @@
                             </div>
                             <div class="col-lg-6 float-left">
                                 <div class="mb-3">
-                                    <label for="simpleinput" class="form-label">Quest Type</label>
-                                    <input type="text" id="simpleinput" name="quest_type" class="form-control"
-                                        value="<%= blog.quest_type %>" readOnly>
+                                    <label for="quest_type" class="form-label">Quest Type</label>
+                                    <select id="quest_type" name="quest_type" class="form-control" disabled>
+                                        <option value="banner" <%=blog.quest_type==='banner' ? 'selected' : '' %>>Banner
+                                        </option>
+                                        <option value="non-banner" <%=blog.quest_type==='non-banner' ? 'selected' : ''
+                                            %>>Non-Banner</option>
+                                    </select>
                                 </div>
                             </div>
+
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="activity" class="form-label">Activity</label>
+                                    <select id="activity" name="activity" class="form-control" disabled>
+                                        <option value="watch" <%=blog.activity==='watch' ? 'selected' : '' %>>Watch
+                                        </option>
+                                        <option value="follow" <%=blog.activity==='follow' ? 'selected' : '' %>>Follow
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">End Date</label>
+                                    <input type="datetime-local" id="end_date" name="end_date" class="form-control"
+                                        value="<%= blog.end_date ? blog.end_date : '' %>" disabled>
+                                </div>
+                            </div>
+
+
+
                         </div>
 
                         <div class="row">
