@@ -50,6 +50,8 @@ export const TRANSFER_COINS_REQUEST = "TRANSFER_COINS_REQUEST";
 export const TRANSFER_COINS_SUCCESS = "TRANSFER_COINS_SUCCESS";
 export const TRANSFER_COINS_FAILURE = "TRANSFER_COINS_FAILURE";
 
+
+
 // Fetch User Request Action
 const fetchMeRequest = () => {
   return {
@@ -133,7 +135,7 @@ export const fetchReffralData = () => async (dispatch) => {
 export const transferCoins = (coinData) => async (dispatch) => {
   try {
     // Call the fetcherPost function for the transfer coins API
-    const response = await fetcherPost("http://localhost:4000/api/v1/transfer-coins", coinData);
+    const response = await fetcherPost(`${BACKEND_URL}/api/v1/transfer-coins`, coinData);
 
     console.log("Transfer successful:", response);
     dispatch({ type: TRANSFER_COINS_SUCCESS, payload: response });
@@ -147,3 +149,4 @@ export const transferCoins = (coinData) => async (dispatch) => {
     toast.error("Failed to transfer coins.");
   }
 };
+

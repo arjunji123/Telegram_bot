@@ -1,24 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
-import Invite from "../Img/invite.webp";
 import "../Styles/Friends.css";
 import { ImCross } from "react-icons/im";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
 import QRCode from "qrcode";
-import {  fetchReffralData } from "../../store/actions/homeActions";
+import {  fetchReffralData  } from "../../store/actions/homeActions";
+import { shareCoins } from "../../store/actions/coinActions";
 import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
+import { FaShare } from "react-icons/fa6";
+import ShareCoin from "../utils/ShareCoin";
 
 function Friend() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data);
  const refferalData = apiData?.reffral?.data || null;
  const referral_code = refferalData?.referral_code
+ const [sendData, setSendData] = useState({
+  recipientReferralCode: '',
+  amount: ''
+});
+const { success, error, loading } = useSelector((state) => ({
+  success: state.coinData.success,
+  error: state.coinData.error,
+  loading: state.coinData.loading,
+}));
 
   const [showPopup, setShowPopup] = useState(false);
   const togglePopup = () => {
     setShowPopup(!showPopup);
+  };
+  const [sharePopup, setSharePopup] = useState(false);
+  const toggleSharePopup = () => {
+    setSharePopup(!sharePopup);
   };
   const qrRef = useRef(null);
   useEffect(() => {
@@ -79,6 +94,37 @@ function Friend() {
     }
   };
 
+  const handleSendInputChange = (e) => {
+    const { name, value } = e.target;
+    setSendData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  const handleSendMoney = () => {
+    if (!sendData.amount || !sendData.recipientReferralCode) {
+      toast.warn("Please fill in all fields.");
+      return;
+    }
+    dispatch(shareCoins(sendData));
+  };
+
+  useEffect(() => {
+    console.log('Success:', success);
+    console.log('Error:', error);
+    
+    if (success) {
+      setSharePopup(false); // Close the popup on success
+
+      // Reset the form state if needed
+      setSendData({
+        amount: '',
+        recipientReferralCode: '',
+      });
+    } else if (error) {
+    }
+  }, [success, error]);
+
   return (
     <div className="bg-white flex justify-center min-h-screen">
            <ToastContainer
@@ -118,28 +164,16 @@ function Friend() {
           <hr className="border-gray-300 my-4" />
   
           {/* Invite Button */}
-          {/* <div className="flex justify-center px-4 py-2 mt-8">
+          <div className="flex items-end justify-center px-4 py-2 mt-8">
             <button
-              className="flex items-center justify-center bg-[#00ACDC] text-white py-3 px-6 rounded-xl w-3/4 md:w-2/3 shadow-md transition-transform transform hover:scale-105"
-              onClick={handleShareClick}
+              className="flex items-center justify-center bg-white text-black py-3 px-6 rounded-xl w-10/12 shadow-md transition-transform transform hover:scale-105"
+              onClick={toggleSharePopup}
             >
-              <span className="text-base md:text-lg font-semibold">Invite a friend</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="ml-2 h-5 w-5 md:h-6 md:w-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4v7m0 0v7m0-7h7m-7 0H5"
-                />
-              </svg>
+              <span className="text-sm md:text-lg font-semibold uppercase">Share Coin with Frens</span>
+              <FaShare className="ml-5" size={18}/>
+
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
@@ -183,6 +217,15 @@ function Friend() {
         </div>
 
       )}
+      {
+        sharePopup && <ShareCoin
+        toggleSharePopup= {toggleSharePopup}
+        handleSendInputChange={handleSendInputChange}
+        handleSendMoney={handleSendMoney}
+        sendData={sendData}
+        setSendData={setSendData}
+        />
+      }
   </div>
   
 
