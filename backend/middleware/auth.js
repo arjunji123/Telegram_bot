@@ -13,6 +13,8 @@ exports.isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
       status: 400,
       message: "Please login to access this resource.",
     });
+    //console.log("ioioio");
+
     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 

@@ -99,8 +99,9 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 
 exports.showLogin = catchAsyncErrors(async (req, res, next) => {
   const message = req.flash("msg_response");
-
-  if (req.user) {
+  const token = req.cookies.token;
+  //console.log("bbbttttttttbbbb", token);
+  if (token) {
     res.redirect("/admin/dashboard");
   }
 
@@ -136,6 +137,14 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     });
     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
+  // Check if user_type is either "admin" or "company"
+  if (user.user_type !== "admin" && user.user_type !== "company") {
+    req.flash("msg_response", {
+      status: 403,
+      message: "You do not have permission to access this panel",
+    });
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+  }
 
   // Compare passwords
   const isPasswordMatched = await User.comparePasswords(
@@ -152,6 +161,7 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   }
 
   const token = User.generateToken(user.id); // Adjust as per your user object structure
+  // console.log("aaaa", token);
 
   // Send token and then redirect
   sendToken(user, token, 201, res);
@@ -672,7 +682,6 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
 });
 
 //////////////////////////////////////////////////
-
 
 // Joi schema for validation
 const coinRateSchema = Joi.object({

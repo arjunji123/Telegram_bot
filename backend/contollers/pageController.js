@@ -5,6 +5,8 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFeatures = require("../utils/apiFeatures");
 const db = require("../config/mysql_database");
 const Joi = require("joi");
+const moment = require("moment-timezone");
+const sanitizeHtml = require("sanitize-html");
 
 const table_name = Model.table_name;
 const module_title = Model.module_title;
@@ -23,56 +25,100 @@ exports.addFrom = catchAsyncErrors(async (req, res, next) => {
 });
 
 //create a new blog
-exports.createRecord = catchAsyncErrors(async (req, res, next) => {
+// end data
+exports.createRecord = async (req, res, next) => {
   try {
+    // Validate input data
     await Model.insertSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
     });
   } catch (error) {
-    // Joi validation failed, send 400 Bad Request with error details
     return next(
-      new ErrorHandler(
-        error.details.map((d) => d.message),
-        400
-      )
+      new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
     );
   }
 
-  const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
+  // Create the date in the desired timezone
+  const date_created = moment()
+    .tz("Your/Timezone")
+    .format("YYYY-MM-DD HH:mm:ss");
 
   if (req.file) {
     req.body.image = req.file.filename;
   }
 
-  const insertData = {
-    quest_name: req.body.quest_name,
-    quest_type: req.body.quest_type,
-    quest_url: req.body.quest_url,
-    date_created: date_created,
-    // end_date:
-    image: req.body.image,
-    description: req.body.description,
-    status: req.body.status,
-    coin_earn: req.body.coin_earn,
-  };
+  // Sanitize the description to remove HTML tags
 
-  const blog = await QueryModel.saveData(table_name, insertData, next);
+  const sanitizedDescription = sanitizeHtml(req.body.description, {
+    allowedTags: [], // No tags allowed
 
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully added " + module_single_title,
+    allowedAttributes: {}, // No attributes allowed
   });
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
-});
+  // Create the insert data object with names
+  const insertData = {
+    quest_name: req.body.quest_name,
+    quest_type: req.body.quest_type === "banner" ? "banner" : "non-banner",
+    activity: req.body.activity === "watch" ? "watch" : "follow",
+    quest_url: req.body.quest_url,
+    date_created: date_created,
+    image: req.body.image,
+    description: sanitizedDescription,
+    status: req.body.status,
+    coin_earn: req.body.coin_earn,
+    end_date: req.body.end_date, // Assuming end_date is also passed in the request
+  };
+
+  console.log("Data to be inserted:", insertData); // Log the data to be inserted
+
+  try {
+    const blog = await QueryModel.saveData("quest", insertData);
+
+    if (!blog) {
+      return next(new ErrorHandler("Failed to add record", 500));
+    }
+
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully added the quest.",
+    });
+
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (error) {
+    console.error("Error in createRecord:", error.message);
+    return next(new ErrorHandler("An error occurred while saving data", 500));
+  }
+};
 
 exports.editForm = catchAsyncErrors(async (req, res, next) => {
   const blog = await QueryModel.findById(table_name, req.params.id, next);
 
   if (!blog) {
-    return;
+    return next(new ErrorHandler("Blog not found", 404));
   }
+
+  // Log the original value of end_date
+  console.log("Original End Date:", blog.end_date);
+
+  // Ensure end_date is a valid date and format it
+  if (blog.end_date) {
+    const endDate = new Date(blog.end_date);
+
+    if (!isNaN(endDate.getTime())) {
+      // Convert to local time format if needed
+      const utcOffset = endDate.getTimezoneOffset();
+      const localEndDate = new Date(endDate.getTime() - utcOffset * 60 * 1000);
+      blog.end_date = localEndDate.toISOString().slice(0, 16);
+    } else {
+      console.error("Invalid date:", blog.end_date);
+      blog.end_date = ""; // Handle invalid date
+    }
+  }
+
+  // Log the formatted end_date
+  console.log("Formatted End Date:", blog.end_date);
+
   res.render(module_slug + "/edit", {
     layout: module_layout,
     title: module_single_title + " " + module_edit_text,
@@ -80,7 +126,6 @@ exports.editForm = catchAsyncErrors(async (req, res, next) => {
     module_slug,
   });
 });
-
 exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
   const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
@@ -89,18 +134,28 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     req.body.image = req.file.filename;
   }
 
+  // Log the incoming end_date
+  console.log("Incoming End Date:", req.body.end_date);
+
+  // Sanitize the description to remove HTML tags
+  const sanitizedDescription = sanitizeHtml(req.body.description, {
+    allowedTags: [], // No tags allowed
+    allowedAttributes: {}, // No attributes allowed
+  });
   const updateData = {
     quest_name: req.body.quest_name,
     quest_type: req.body.quest_type,
+    activity: req.body.activity, // New field for activity
     quest_url: req.body.quest_url,
+    end_date: req.body.end_date, // New field for end date
     date_created: date_created,
-    // end_date:
     image: req.body.image,
-    description: req.body.description,
+    description: sanitizedDescription,
     status: req.body.status,
     coin_earn: req.body.coin_earn,
   };
 
+  // Update the record in the database
   const blog = await QueryModel.findByIdAndUpdateData(
     table_name,
     req.params.id,
@@ -173,8 +228,33 @@ exports.getSingleRecord = catchAsyncErrors(async (req, res, next) => {
   const blog = await QueryModel.findById(table_name, req.params.id, next);
 
   if (!blog) {
-    return;
+    return next(new ErrorHandler("Blog not found", 404)); // Handle not found error
   }
+
+  // Log the original value of end_date
+  console.log("Original End Date:", blog.end_date);
+
+  // Format end_date if it exists
+  if (blog.end_date) {
+    // Create a date object from end_date
+    const endDate = new Date(blog.end_date);
+
+    // Check if endDate is valid
+    if (!isNaN(endDate.getTime())) {
+      // Format to 'YYYY-MM-DDTHH:mm' for datetime-local input
+      // Convert to local timezone (e.g., 'Asia/Kolkata') before formatting
+      blog.end_date = moment(endDate)
+        .tz("Your_Time_Zone")
+        .format("YYYY-MM-DDTHH:mm"); // Change 'Your_Time_Zone' accordingly
+    } else {
+      console.error("Invalid date:", blog.end_date);
+      blog.end_date = ""; // Handle invalid date
+    }
+  }
+
+  // Log the formatted end_date
+  console.log("Formatted End Date:", blog.end_date);
+
   res.render(module_slug + "/detail", {
     layout: module_layout,
     title: module_single_title,
@@ -214,40 +294,43 @@ function generateSlug(quest_name) {
 }
 
 exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 10;
-  const page = parseInt(req.query.page) || 1;
-  const searchQuery = req.query.search || "";
-  const filterQuery = req.query.filter || "";
+  const resultPerPage = 10; // Set number of records per page
+  const page = parseInt(req.query.page) || 1; // Current page from query parameters
+  const searchQuery = req.query.search || ""; // Search term from query parameters
 
   // Calculate offset for pagination
   const offset = (page - 1) * resultPerPage;
 
   try {
-    // Count total quests
+    // Count total quests with optional search filter
     const totalQuestsResult = await db.query(
-      "SELECT COUNT(*) as count FROM quest"
+      "SELECT COUNT(*) as count FROM quest WHERE quest_name LIKE ? OR description LIKE ?",
+      [`%${searchQuery}%`, `%${searchQuery}%`]
     );
     const totalQuests = totalQuestsResult[0][0].count;
 
-    // Fetch quests with pagination and filtering
+    // Fetch quests with pagination and filtering, including activity and end_date
     const [quest_records] = await db.query(
-      "SELECT id,quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
-      [resultPerPage, offset]
+      "SELECT id, quest_name, quest_type, activity, quest_url, date_created, end_date, description, status, coin_earn, image FROM quest WHERE quest_name LIKE ? OR description LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?",
+      [`%${searchQuery}%`, `%${searchQuery}%`, resultPerPage, offset]
     );
 
-    // Process rows if needed
+    // Process rows to structure the data correctly
     const quests = quest_records.map((row) => ({
       quest_id: row.id,
       quest_name: row.quest_name,
-      quest_type: row.quest_type,
+      quest_type: row.quest_type, // Directly use the quest_type from the database
+      activity: row.activity, // Ensure activity is fetched from the database
       quest_url: row.quest_url,
       date_created: row.date_created,
+      end_date: row.end_date, // Include end_date in the response
       description: row.description,
       status: row.status,
       image: row.image,
       coin_earn: row.coin_earn,
     }));
 
+    // Send the response
     res.status(200).json({
       success: true,
       totalQuests,
@@ -256,6 +339,7 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
       quests,
     });
   } catch (error) {
+    console.error("Error in apiGetAllRecords:", error.message);
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
@@ -560,5 +644,3 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
 );
 
 ////////////////////////////////////////////////////////
-
-
