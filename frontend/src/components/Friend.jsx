@@ -66,7 +66,6 @@ const { success, error, loading } = useSelector((state) => ({
       const message = `Join our app using this referral link: ${referral_code}`;
       const encodedMessage = encodeURIComponent(message);
       
-      // Telegram link using the app
       const telegramAppLink = `tg://msg?text=${encodedMessage}`;
       // Fallback link using Telegram web
       const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
