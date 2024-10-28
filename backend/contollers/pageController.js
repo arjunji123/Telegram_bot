@@ -431,24 +431,23 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   console.log("Fetching pending coins for user:", user_id);
 
   try {
-    // Query to get the pending_coin from user_data for the user
-    const [result] = await db.query(
-      "SELECT pending_coin FROM user_data WHERE user_id = ?",
+    // Query to get the sum of pending coins for the user where the status is 'inactive'
+    const result = await db.query(
+      "SELECT SUM(pending_coin) AS totalPendingCoins FROM usercoin_audit WHERE user_id = ?",
       [user_id]
     );
 
-    // Get the pending_coin value from the result, or default to 0 if not found
-    const pendingCoin = result[0]?.pending_coin || 0;
+    const totalPendingCoins = result[0][0].totalPendingCoins || 0; // If no coins are found, default to 0
 
-    console.log("Pending coins fetched from user_data:", pendingCoin);
+    console.log("Total pending coins fetched:", totalPendingCoins);
 
-    // Respond with the pending coins
+    // Respond with the total pending coins
     res.status(200).json({
       success: true,
       message: "Pending coins fetched successfully.",
       data: {
         user_id,
-        pending_coin: pendingCoin,
+        pending_coin: totalPendingCoins,
       },
     });
   } catch (error) {
@@ -456,7 +455,6 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
-
 //////////////////////////////////////
 
 exports.transferPendingCoinsToTotal = catchAsyncErrors(
@@ -464,7 +462,7 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
     const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
 
     console.log(
-      "Initiating transfer of 5 coins from pending to total for user:",
+      "Transferring 5 coins from pending to total for user:",
       user_id
     );
 
@@ -529,7 +527,7 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
         [user_id]
       );
 
-      console.log("Final User Data After Transfer:", updatedUserData[0]);
+      const updatedPendingCoins = updatedPendingCoinsResult[0][0].pending_coin;
 
       const updatedTotalCoinsResult = await db.query(
         "SELECT SUM(coins) AS totalEarnCoins FROM user_data WHERE user_id = ?",
