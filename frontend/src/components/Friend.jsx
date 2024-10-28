@@ -15,45 +15,61 @@ function Friend() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data);
  const refferalData = apiData?.reffral?.data || null;
-  const [referralLink, setReferralLink] = useState("");
+ const referral_code = refferalData?.referral_code
+
   const [showPopup, setShowPopup] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const togglePopup = () => {
     setShowPopup(!showPopup);
   };
-  const qrRef = useRef(refferalData && refferalData.referral_code);
-  useEffect(() => {
-    if (qrRef.current) {
-      generateQRCode(refferalData && refferalData.referral_code);
-    }
-  }, [inputValue]);
-
-  const generateQRCode = (text) => {
-    QRCode.toCanvas(qrRef.current, text, (error) => {
-      if (error) {
-        console.error(error);
-      }
-    });
-  };
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value.trim());
-  };
+  const qrRef = useRef(null);
   useEffect(() => {
     // Fetch user and coin data on component mount
     dispatch(fetchReffralData());
   }, [dispatch]);
+  useEffect(() => {
+    if (refferalData?.referral_code && showPopup) {
+      // Timeout to allow the popup and QR ref to render
+      setTimeout(() => {
+        generateQRCode(refferalData.referral_code);
+      }, 100);
+    }
+  }, [refferalData?.referral_code, showPopup]);
+
+  const generateQRCode = (text) => {
+    if (qrRef.current) {
+      QRCode.toCanvas(qrRef.current, text, (error) => {
+        if (error) {
+          console.error("QR Code generation error:", error);
+        }
+      });
+    }
+  };
+
+
 
   const handleShareClick = () => {
-    if (referralLink) {
-      window.open(
-        `tg://msg?text=Join our app using this referral link: ${referralLink}`
-      );
+    if (referral_code) {
+      const message = `Join our app using this referral link: ${referral_code}`;
+      const encodedMessage = encodeURIComponent(message);
+      
+      // Telegram link using the app
+      const telegramAppLink = `tg://msg?text=${encodedMessage}`;
+      // Fallback link using Telegram web
+      const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
+  
+      // Try to open the app link first
+      const opened = window.open(telegramAppLink, '_blank');
+  
+      // If it fails (opened is null), use the web link
+      if (!opened) {
+        window.open(telegramWebLink, '_blank');
+      }
     } else {
       alert("Referral link is not available yet.");
     }
   };
-
+  
+  
   const handleCopyClick = () => {
     const referralCode = refferalData && refferalData.referral_code
     if (referralCode) {
@@ -134,6 +150,7 @@ function Friend() {
             <div className="flex justify-center items-center  p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
               <canvas width={100} height={100} id="qrcode" ref={qrRef} className="rounded-lg "></canvas>
             </div>
+            
             {/* <input
               type="text"
               id="text"
@@ -146,7 +163,7 @@ function Friend() {
 
             <div    onClick={handleShareClick} className="flex justify-center items-center mb-2">
               <button className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
-                Send
+              Share on Telegram 
               </button>
             </div>
 

@@ -42,6 +42,9 @@ function Home() {
         setCoins(newCoins);
         // Remove coins after animation
         setTimeout(() => setCoins([]), 2500);
+              // Re-fetch data to update userData and pendingCoin without hard refresh
+      dispatch(fetchCoinData());
+      dispatch(fetchMeData());
       })
       .catch((error) => {
         // Show error message if transfer fails

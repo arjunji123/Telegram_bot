@@ -146,8 +146,8 @@ const handleSellSubmit = (e) => {
 };
 
   return (
-    <div className="bg-white flex justify-center overflow-y-auto">
-      <div className="w-full bg-black text-white flex flex-col max-w-lg px-4  overflow-y-auto">
+    <div className="bg-white flex justify-center min-h-screen">
+      <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
         <div className="flex-grow relative z-0 pt-6  pb-16">
           <Logo />
           <div className="flex justify-center font-poppins leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
@@ -193,9 +193,9 @@ const handleSellSubmit = (e) => {
                   <div key={index} className="rounded-lg p-2 w-full  relative flex justify-between items-center bg-[#1b1a1a] transition duration-200 ease-in-out shadow-md">
                     <div className="flex ">
                       <BsPersonFillCheck size={18} />
-                      <div className="ml-1"> {/* Reduced left margin */}
+                      <div className="ml-1"> 
                         <span className="text-[12px] font-semibold uppercase">{company.company_name}</span> {/* Adjusted name size */}
-                        <p className="font-bold flex items-center text-[17px] "> {/* Adjusted rate size */}
+                        <p className="font-bold flex items-center text-[17px] "> 
                           <BsCurrencyRupee className="" />
                           <span>{company.coin_rate}</span>
                         </p>
