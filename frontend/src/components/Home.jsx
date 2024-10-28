@@ -4,7 +4,7 @@ import Logo from "../utils/Logo";
 import Footer from "./Footer";
 import { BsPersonCircle } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMeData, fetchCoinData, transferCoins } from "../../store/actions/homeActions";
+import { fetchMeData, fetchCoinData, transferCoins, fetchReffralData } from "../../store/actions/homeActions";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 

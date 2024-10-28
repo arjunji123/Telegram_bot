@@ -6,20 +6,28 @@ import { ImCross } from "react-icons/im";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
 import QRCode from "qrcode";
+import {  fetchReffralData } from "../../store/actions/homeActions";
+import { useDispatch, useSelector } from "react-redux";
+import { toast, ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 function Friend() {
+  const dispatch = useDispatch();
+  const apiData = useSelector((state) => state.apiData.data);
+ const refferalData = apiData?.reffral?.data || null;
   const [referralLink, setReferralLink] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const togglePopup = () => {
     setShowPopup(!showPopup);
   };
-  const qrRef = useRef(null);
+  const qrRef = useRef(refferalData && refferalData.referral_code);
   useEffect(() => {
     if (qrRef.current) {
-      generateQRCode(inputValue);
+      generateQRCode(refferalData && refferalData.referral_code);
     }
   }, [inputValue]);
+
   const generateQRCode = (text) => {
     QRCode.toCanvas(qrRef.current, text, (error) => {
       if (error) {
@@ -32,38 +40,9 @@ function Friend() {
     setInputValue(e.target.value.trim());
   };
   useEffect(() => {
-    const fetchReferralLink = async () => {
-      try {
-        const userData = JSON.parse(localStorage.getItem("user"));
-        const { token } = userData;
-        console.log(token);
-
-        const response = await axios.get(
-          "http://localhost:4000/api/v1/api-me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const referralCode = response.data.user.referral_code; // Adjust based on actual response
-        console.log(referralCode);
-
-        if (referralCode) {
-          setReferralLink(
-            `http://localhost:5173/referral?code=${referralCode}`
-          );
-        } else {
-          console.error("Referral code not found");
-        }
-      } catch (error) {
-        console.error("Failed to fetch referral link", error);
-      }
-    };
-
-    fetchReferralLink();
-  }, []);
+    // Fetch user and coin data on component mount
+    dispatch(fetchReffralData());
+  }, [dispatch]);
 
   const handleShareClick = () => {
     if (referralLink) {
@@ -76,16 +55,18 @@ function Friend() {
   };
 
   const handleCopyClick = () => {
-    if (referralLink) {
-      navigator.clipboard.writeText(referralLink);
-      alert("Referral link copied!");
+    const referralCode = refferalData && refferalData.referral_code
+    if (referralCode) {
+      navigator.clipboard.writeText(referralCode);
+      toast("Referral link copied!");
     } else {
-      alert("Referral link is not available yet.");
+      toast("Referral link is not available yet.");
     }
   };
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
     <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg overflow-y-auto px-4">
       <div className="flex-grow relative z-0 py-6">
         <Logo />
@@ -153,14 +134,14 @@ function Friend() {
             <div className="flex justify-center items-center  p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
               <canvas width={100} height={100} id="qrcode" ref={qrRef} className="rounded-lg "></canvas>
             </div>
-            <input
+            {/* <input
               type="text"
               id="text"
               value={inputValue}
               onChange={handleInputChange}
               placeholder="Enter refferal link for QR code"
               className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-            />
+            /> */}
 
 
             <div    onClick={handleShareClick} className="flex justify-center items-center mb-2">

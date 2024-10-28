@@ -42,6 +42,10 @@ export const FETCH_COIN_REQUEST = 'FETCH_COIN_REQUEST';
 export const SET_COIN_DATA  = 'SET_COIN_DATA';
 export const FETCH_COIN_FAILURE = 'FETCH_COIN_FAILURE';
 
+export const FETCH_REFFRAL_REQUEST = 'FETCH_REFFRAL_REQUEST';
+export const SET_REFFRAL_DATA  = 'SET_REFFRAL_DATA';
+export const FETCH_REFFRAL_FAILURE = 'FETCH_REFFRAL_FAILURE';
+
 export const TRANSFER_COINS_REQUEST = "TRANSFER_COINS_REQUEST";
 export const TRANSFER_COINS_SUCCESS = "TRANSFER_COINS_SUCCESS";
 export const TRANSFER_COINS_FAILURE = "TRANSFER_COINS_FAILURE";
@@ -109,6 +113,20 @@ export const fetchCoinData = () => async (dispatch) => {
     dispatch(setCoinData(data));
   } catch (error) {
     dispatch(fetchCoinFailure(error.message));
+  }
+};
+
+export const fetchReffralData = () => async (dispatch) => {
+  dispatch({type: FETCH_REFFRAL_REQUEST});
+  
+  try {
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/referral-code`);
+    dispatch({ type: SET_REFFRAL_DATA, payload: data });
+  } catch (error) {
+    dispatch({
+      type: FETCH_REFFRAL_FAILURE,
+      payload: error.message,
+    });
   }
 };
 
