@@ -40,6 +40,7 @@ useEffect(() => {
       // const upiString = `upi://pay?pa=yourupi@bank&pn=YourName&mc=1234&tid=1234567890&am=1.00&cu=INR&tn=Your%20Transaction%20Note`;
   const upiString = apiSettings && apiSettings.upi;
       const url = await QRCode.toDataURL(upiString); // Generate QR code
+      // console.log('url', url)
       setQrCodeUrl(url);
     } catch (err) {
       console.error('Error generating QR Code:', err);

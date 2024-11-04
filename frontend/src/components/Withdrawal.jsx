@@ -155,12 +155,12 @@ const handleSellSubmit = (e) => {
             <p className="">{userData ? userData.coins : "700,0000"}</p>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 gap-2 mb-4">
             {[
-              { icon: <BiSolidDownvote size={22} />, label: "Receive" },
+              // { icon: <BiSolidDownvote size={22} />, label: "Receive" },
               { icon: <BiSolidUpvote size={22} />, label: "Send" },
               { icon: <BiHistory size={22} />, label: "History" },
-              { icon: <BsStars size={22} />, label: "Points" },
+              // { icon: <BsStars size={22} />, label: "Points" },
             ].map((item, index) => (
               <div
                 key={index}

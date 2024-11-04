@@ -4,49 +4,21 @@ import { useNavigate } from "react-router-dom";
 import { BsArrowLeft, BsPencil, BsFillSaveFill } from "react-icons/bs";
 import { useDropzone } from "react-dropzone";
 import Footer from "./Footer";
-import { useDispatch } from "react-redux";
-// Uncomment this when you have the action defined
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMeData } from "../../store/actions/homeActions";
 // import { updateProfileData } from "../../store/actions/homeActions";
 
 function Profile() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [userData, setUserData] = useState(null);
+  const apiData = useSelector((state) => state.apiData.data);
+  const userData = apiData?.me?.data || null;
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const tokenData = localStorage.getItem("user");
-        if (!tokenData) {
-          throw new Error("No token data found in localStorage");
-        }
-
-        const parsedTokenData = JSON.parse(tokenData);
-        const token = parsedTokenData.token;
-
-        if (!token) {
-          throw new Error("Token not found");
-        }
-
-        const response = await axios.get(
-          "http://localhost:4000/api/v1/api-me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setUserData(response.data.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    dispatch(fetchMeData());
+  }, [dispatch]);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -90,8 +62,8 @@ function Profile() {
   }
 
   return (
-    <div className="bg-black flex justify-center">
-      <div className="w-full bg-black-900 text-white min-h-screen flex flex-col max-w-lg relative">
+    <div className="bg-white flex justify-center">
+      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
         {/* Back Button */}
         <div className="absolute top-4 left-4">
           <button onClick={() => navigate(-1)}>
@@ -112,7 +84,7 @@ function Profile() {
                 src={
                   imagePreview ||
                   userData.profile_image ||
-                  "https://default-avatar-url.com"
+                  "https://cdn-icons-png.flaticon.com/512/7077/7077313.png"
                 }
                 alt="Profile"
                 className="rounded-full w-24 h-24 object-cover border-4 border-gray-600"
@@ -134,26 +106,38 @@ function Profile() {
           {/* User Information */}
           <div className="text-center space-y-2">
             <h1 className="text-xl font-semibold">{userData.user_name}</h1>
-            <p className="text-sm text-gray-400">{userData.email}</p>
-            <p className="text-sm text-gray-400">{userData.mobile}</p>
+            <p className="text-sm text-gray-100">{userData.email}</p>
+            <p className="text-sm text-gray-100">{userData.mobile}</p>
           </div>
 
           {/* User Coins Information */}
-          <div className="w-full space-y-4 text-center">
-            <div className="flex justify-between w-10/12 mx-auto bg-gray-800 rounded-lg p-2 transition-transform duration-200 hover:scale-105">
-              <span className="text-md font-semibold">Coins:</span>
-              <span className="text-lg">{userData.coins}</span>
+          <div className="w-full  text-center">
+            <div className="space-y-4 w-10/12 mx-auto border-2 border-[#f5eded] rounded-lg p-2 transition-transform duration-200 hover:scale-105">
+            <p className="flex justify-between">
+            <span className="text-md font-semibold">Coins:</span>
+            <span className="text-lg">{userData.coins}</span>
+            </p>
+            <p className="flex justify-between">
+            <span className="text-md font-semibold">Pending Coins:</span>
+            <span className="text-lg">{userData.pending_coin}</span>
+            </p>
+            <p className="flex justify-between">
+          <span className="text-md font-semibold">UPI ID:</span>
+              <span className="text-md">
+                {userData.upi_id || "Not provided"}
+              </span>
+          </p>
             </div>
-            <div className="flex justify-between w-10/12 mx-auto bg-gray-800 rounded-lg p-2 transition-transform duration-200 hover:scale-105">
+            {/* <div className="flex justify-between w-10/12 mx-auto border-2 border-[#f5eded] rounded-lg p-2 transition-transform duration-200 hover:scale-105">
               <span className="text-md font-semibold">Pending Coins:</span>
               <span className="text-lg">{userData.pending_coin}</span>
             </div>
-            <div className="flex justify-between w-10/12 mx-auto bg-gray-800 rounded-lg p-2 transition-transform duration-200 hover:scale-105">
+            <div className="flex justify-between w-10/12 mx-auto border-2 border-[#f5eded] rounded-lg p-2 transition-transform duration-200 hover:scale-105">
               <span className="text-md font-semibold">UPI ID:</span>
-              <span className="text-lg">
+              <span className="text-md">
                 {userData.upi_id || "Not provided"}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
 

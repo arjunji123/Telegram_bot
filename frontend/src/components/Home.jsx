@@ -8,15 +8,20 @@ import { fetchMeData, fetchCoinData, transferCoins, fetchReffralData } from "../
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data);
   const userData = apiData?.me?.data || null;
   const pendingCoin = apiData?.coin?.data || null;
   
   const [coins, setCoins] = useState([]);
-  
+
+  const handleNavigate = () => {
+    navigate('/Profile');
+  };
   useEffect(() => {
     // Fetch user and coin data on component mount
     dispatch(fetchCoinData());
@@ -67,7 +72,7 @@ function Home() {
         <div className="flex-grow relative z-0">
           <div className="px-4 py-6 space-y-6">
             <Logo />
-            <div className="flex justify-center space-x-1">
+            <div   onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
               <BsPersonCircle size={28} className="mt-1" />
               <p className="text-2xl font-extrabold capitalize">
                 {userData ? userData.user_name : "Loading..."}
