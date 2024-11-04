@@ -48,7 +48,7 @@ const socialQuests =
   apiQuests && apiQuests.filter((quest) => quest.activity === "follow");
 
   const rows = videoQuests.map((quest, index) => ({
-    icon: <FaYoutube size={24} color="white" className="mr-4" />,
+    icon: quest.image,
     title: quest.quest_name,
     videoUrl: quest.quest_url,
     taskKey: `task${index + 1}`,
@@ -152,19 +152,8 @@ const socialQuests =
   const socials =
   socialQuests &&
   socialQuests.map((quest, index) => {
-    let icon = null;
-    if (quest.quest_name.toLowerCase().includes("youtube")) {
-      icon = <FaYoutube size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("telegram")) {
-      icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("x")) {
-      icon = <FaXTwitter size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("instagram")) {
-      icon = <FaInstagram size={24} color="white" className="mr-4" />;
-    }
-
     return {
-      icon,
+      icon: quest.image,
       title: quest.quest_name,
       socialUrl: quest.quest_url,
       taskKey: `task${index + 1}`, // Unique keys
@@ -274,7 +263,7 @@ const socialQuests =
         setHasFollowed((prev) => {
           const updatedState = {
             ...prev,
-            [taskId]: true, // Save follow status per task
+            [task]: true, // Save follow status per task
           };
           localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
           return updatedState;
@@ -324,10 +313,11 @@ const socialQuests =
                 rows.map((row, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between bg-black py-3 px-4 font-poppins"
+                    className="flex items-center justify-between bg-black py-2 px-4 font-poppins"
                   >
                     <div className="flex items-center">
-                      {row.icon}
+                      <img className="w-12 h-12 mr-4" src= {row.icon} alt="" />
+                     
                       <h3 className="text-sm uppercase">{row.title}</h3>
                     </div>
 
@@ -371,9 +361,9 @@ const socialQuests =
               {socials &&
                 socials.map((social, index) => (
                   <div key={index}>
-                    <div className="flex items-center justify-between bg-black py-3 px-4 rounded-lg shadow-lg">
+                    <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
                       <div className="flex items-center">
-                        {social.icon}
+                      <img className="w-12 h-12 mr-4" src= {social.icon} alt="" />
                         <h3 className="text-sm uppercase">{social.title}</h3>
                       </div>
                       {/* Conditional rendering based on follow status */}
