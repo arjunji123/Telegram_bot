@@ -325,11 +325,7 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
       description: row.description,
       status: row.status,
       image:
-        process.env.BACKEND_URL +
-        "backend/uploads/" +
-        module_slug +
-        "/" +
-        row.image,
+        process.env.BACKEND_URL + "uploads/" + module_slug + "/" + row.image,
       coin_earn: row.coin_earn,
     }));
 
