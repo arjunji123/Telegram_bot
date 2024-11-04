@@ -50,7 +50,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
   if (req.file) req.body.image = req.file.filename;
   // Check if email, mobile, or UPI ID already exists
-  // Check if email, mobile, or UPI ID already exists
   const { email, mobile } = req.body;
   const existingUserQuery = `
   SELECT email, mobile FROM users WHERE email = ? OR mobile = ?
@@ -223,12 +222,14 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   }
 
   try {
-    const user = await QueryModel.saveData("users", insertData); // Ensure the table name is correct
-    const userId = user.id; // Assuming `user.id` is the newly created user's ID
+    // Insert user data into the users table
+    const user = await QueryModel.saveData("users", insertData); // Assuming QueryModel.saveData is a valid method
+    const userId = user.id; // Use `insertId` directly if it’s the ID of the newly created user
     const referralCode = generateReferralCode(userId);
 
+    // Prepare additional data for the user_data table
     const insertData2 = {
-      user_id: user.id,
+      user_id: userId,
       upi_id: req.body.upi_id,
       referral_by: referralBy,
       referral_code: req.body.referral_code || referralCode,
@@ -237,6 +238,7 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       rightchild_id: null,
     };
 
+    // Insert additional user data into user_data table
     const newUserData = await UserDataModel.create(insertData2);
     if (!newUserData) {
       return res
@@ -244,17 +246,29 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
         .json({ success: false, error: "Error inserting user data" });
     }
 
-    // Update parent record with the new child ID
+    // Update parent record with the new child ID if parentId and position are set
     if (parentId && position) {
-      const updateData = { [position]: user.id };
+      const updateData = { [position]: userId };
       await UserDataModel.updateData("user_data", updateData, {
         user_id: parentId,
       });
     }
 
-    res
-      .status(201)
-      .json({ success: true, message: "User registered successfully." });
+    // Fetch the newly inserted user to generate the token
+    const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+      userId,
+    ]);
+    const newUser = userDetail[0][0]; // Assuming this returns the correct user object
+
+    // Generate token for the new user
+    const token = User.generateToken(newUser.id); // Adjust based on your User model
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: newUser,
+    });
+    return;
   } catch (error) {
     console.error("Error during user registration:", error);
     return res.status(500).json({ success: false, error: error.message });

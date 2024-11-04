@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
-var session = require("express-session");
+const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const flash = require("connect-flash");
@@ -41,7 +41,12 @@ app.use(
     saveUninitialized: false,
   })
 );
+
 app.use(flash());
+app.use((req, res, next) => {
+  res.locals.user = req.session.user;
+  next();
+});
 
 const blogs = require("./routes/blogRoute");
 const quests = require("./routes/pageRoute");

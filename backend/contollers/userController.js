@@ -91,6 +91,7 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     lastInsertId,
   ]);
   const user = userDetail[0][0];
+
   // Assuming `user` is the object returned from MySQL query
   const token = User.generateToken(user.id); // Adjust as per your user object structure
 
@@ -159,7 +160,7 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     });
     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
-
+  req.session.user = user;
   const token = User.generateToken(user.id); // Adjust as per your user object structure
   // console.log("aaaa", token);
 
@@ -176,12 +177,28 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
-  });
-
-  //req.flash('msg_response', { status: 200, message: 'Logout Successfully' });
-  req.flash("msg_response", { status: 200, message: "Logout Successfully" });
-
-  res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+  }); // Check if req.session exists before trying to destroy it
+  if (res.session) {
+    res.session.destroy((err) => {
+      if (err) {
+        return next(err); // Handle the error if necessary
+      }
+      res.clearCookie("connect.sid"); // Clear the session ID cookie
+      res.flash("msg_response", {
+        status: 200,
+        message: "Logout Successfully",
+      });
+      res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+    });
+  } else {
+    // Handle the case where req.session is undefined
+    res.clearCookie("connect.sid");
+    req.flash("msg_response", {
+      status: 200,
+      message: "Session already cleared or not found",
+    });
+    res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+  }
 });
 
 //forgot password for sending token in mail
@@ -378,7 +395,11 @@ exports.checkAdminLoginOrDashboard = catchAsyncErrors(
 );
 
 exports.dashboard = catchAsyncErrors(async (req, res, next) => {
-  res.render("users/dashboard", { layout: "layouts/main", title: "Dashboard" });
+  res.render("users/dashboard", {
+    layout: "layouts/main",
+    title: "Dashboard", // Set a title for the page if needed
+    user: req.user, // Pass user data if required
+  });
 });
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
