@@ -71,7 +71,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-lg-12 float-left">
                                 <div class="mb-3">
                                     <label for="simpleinput" class="form-label">Image</label>
@@ -79,7 +79,37 @@
                                         readOnly><%= blog.image %></textarea>
                                 </div>
                             </div>
+                        </div> -->
+
+
+                        <div class="row">
+                            <div class="col-lg-12 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">Image</label>
+                                    <!-- Text area to show image path -->
+                                    <textarea class="form-control" id="image" name="description"
+                                        readOnly><%= blog.image %></textarea>
+
+                                    <% if (blog.image) { %>
+                                        <img src="<%- '/uploads/' + module_slug + '/' + blog.image %>"
+                                            style="width:300px" /><br />
+                                        <input type="hidden" name="old_image" value="<%- blog.image %>">
+                                        <div class="delete_btn_box">
+                                            <a href="/admin/<%= module_slug %>/delete-image/<%= blog.id %>">Delete
+                                                Image</a>
+                                        </div>
+                                        <% } else { %>
+                                            <p>No image available</p>
+                                            <% } %>
+                                </div>
+                            </div>
                         </div>
+
+
+
+
+
+
 
                         <div class="row">
                             <div class="col-lg-12 float-left">

@@ -35,45 +35,44 @@ exports.createRecord = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
+      new ErrorHandler(
+        error.details.map((d) => d.message).join(', '),
+        400
+      )
     );
   }
 
   // Create the date in the desired timezone
-  const date_created = moment()
-    .tz("Your/Timezone")
-    .format("YYYY-MM-DD HH:mm:ss");
+  const date_created = moment().tz('Your/Timezone').format('YYYY-MM-DD HH:mm:ss');
 
   if (req.file) {
     req.body.image = req.file.filename;
   }
 
   // Sanitize the description to remove HTML tags
-
   const sanitizedDescription = sanitizeHtml(req.body.description, {
     allowedTags: [], // No tags allowed
-
     allowedAttributes: {}, // No attributes allowed
   });
 
-  // Create the insert data object with names
+  // Prepare the insert data with quest_type and activity names
   const insertData = {
     quest_name: req.body.quest_name,
-    quest_type: req.body.quest_type === "banner" ? "banner" : "non-banner",
-    activity: req.body.activity === "watch" ? "watch" : "follow",
+    quest_type: req.body.quest_type === 'banner' ? 'banner' : 'non-banner', 
+    activity: req.body.activity === 'watch' ? 'watch' : 'follow', 
     quest_url: req.body.quest_url,
     date_created: date_created,
     image: req.body.image,
     description: sanitizedDescription,
     status: req.body.status,
     coin_earn: req.body.coin_earn,
-    end_date: req.body.end_date, // Assuming end_date is also passed in the request
+    end_date: req.body.end_date // Assuming end_date is also passed in the request
   };
 
   console.log("Data to be inserted:", insertData); // Log the data to be inserted
 
   try {
-    const blog = await QueryModel.saveData("quest", insertData);
+    const blog = await QueryModel.saveData('quest', insertData);
 
     if (!blog) {
       return next(new ErrorHandler("Failed to add record", 500));
