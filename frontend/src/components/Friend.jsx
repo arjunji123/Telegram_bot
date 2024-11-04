@@ -5,12 +5,12 @@ import Logo from "../utils/Logo";
 import Footer from "./Footer";
 import QRCode from "qrcode";
 import {  fetchReffralData  } from "../../store/actions/homeActions";
-import { shareCoins } from "../../store/actions/coinActions";
+// import { shareCoins } from "../../store/actions/coinActions";
 import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
-import { FaShare } from "react-icons/fa6";
-import ShareCoin from "../utils/ShareCoin";
+// import { FaShare } from "react-icons/fa6";
+// import ShareCoin from "../utils/ShareCoin";
 
 function Friend() {
   const dispatch = useDispatch();
@@ -93,36 +93,8 @@ const { success, error, loading } = useSelector((state) => ({
     }
   };
 
-  const handleSendInputChange = (e) => {
-    const { name, value } = e.target;
-    setSendData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-  const handleSendMoney = () => {
-    if (!sendData.amount || !sendData.recipientReferralCode) {
-      toast.warn("Please fill in all fields.");
-      return;
-    }
-    dispatch(shareCoins(sendData));
-  };
 
-  useEffect(() => {
-    // console.log('Success:', success);
-    // console.log('Error:', error);
-    
-    if (success) {
-      setSharePopup(false); // Close the popup on success
 
-      // Reset the form state if needed
-      setSendData({
-        amount: '',
-        recipientReferralCode: '',
-      });
-    } else if (error) {
-    }
-  }, [success, error]);
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
@@ -163,7 +135,7 @@ const { success, error, loading } = useSelector((state) => ({
           <hr className="border-gray-300 my-4" />
   
           {/* Invite Button */}
-          <div className="flex items-end justify-center px-4 py-2 mt-8">
+          {/* <div className="flex items-end justify-center px-4 py-2 mt-8">
             <button
               className="flex items-center justify-center bg-white text-black py-3 px-6 rounded-xl w-10/12 shadow-md transition-transform transform hover:scale-105"
               onClick={toggleSharePopup}
@@ -172,7 +144,7 @@ const { success, error, loading } = useSelector((state) => ({
               <FaShare className="ml-5" size={18}/>
 
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
@@ -216,7 +188,7 @@ const { success, error, loading } = useSelector((state) => ({
         </div>
 
       )}
-      {
+      {/* {
         sharePopup && <ShareCoin
         toggleSharePopup= {toggleSharePopup}
         handleSendInputChange={handleSendInputChange}
@@ -224,7 +196,7 @@ const { success, error, loading } = useSelector((state) => ({
         sendData={sendData}
         setSendData={setSendData}
         />
-      }
+      } */}
   </div>
   
 

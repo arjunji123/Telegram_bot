@@ -13,7 +13,9 @@ import History from "../utils/History";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAPIData, fetchMeData } from '../../store/actions/homeActions';
 import { receiveMoney, sendMoney, sellMoney } from '../../store/actions/withdrawalActions';
-
+import { shareCoins } from "../../store/actions/coinActions";
+import ShareCoin from "../utils/ShareCoin";
+import { toast, ToastContainer } from "react-toastify"; 
 
 function Withdrawal() {
   const [showPopup, setShowPopup] = useState(false);
@@ -22,11 +24,18 @@ function Withdrawal() {
   const [showSendPopup, setShowSendPopup] = useState(false);
   const [showHistoryPopup, setShowHistoryPopup] = useState(false);
   const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const [sharePopup, setSharePopup] = useState(false);
+  const toggleSharePopup = () => {
+    setSharePopup(!sharePopup);
+  };
   const [sendData, setSendData] = useState({
-    toAddress: '',
-    fromAddress: '',
-    amount: '',
-});
+    recipientReferralCode: '',
+    amount: ''
+  });
+  const { success} = useSelector((state) => ({
+    success: state.coinData.success,
+
+  }));
   const [receiveData, setReceiveData] = useState({
     toAddress: '',
     fromAddress: '',
@@ -118,19 +127,37 @@ const handleReceiveInputChange = (e) => {
       [name]: value,
   }));
 };
-  const handleSendMoney = () => {
-    const id = 1; // Replace with the actual id logic as needed
-    const { toAddress, fromAddress, amount } = sendData;
-    dispatch(sendMoney(id, toAddress, fromAddress, amount));
-    closePopups(); // Close popup after dispatching the action
-};
+
 const handleSendInputChange = (e) => {
   const { name, value } = e.target;
-  setSendData((prevState) => ({
-      ...prevState,
-      [name]: value,
+  setSendData((prevData) => ({
+    ...prevData,
+    [name]: value,
   }));
 };
+const handleSendMoney = () => {
+  if (!sendData.amount || !sendData.recipientReferralCode) {
+    toast.warn("Please fill in all fields.");
+    return;
+  }
+  dispatch(shareCoins(sendData));
+};
+
+useEffect(() => {
+  // console.log('Success:', success);
+  // console.log('Error:', error);
+  
+  if (success) {
+    setSharePopup(false); // Close the popup on success
+
+    // Reset the form state if needed
+    setSendData({
+      amount: '',
+      recipientReferralCode: '',
+    });
+  } else if (error) {
+  }
+}, [success, error]);
 const handleSellChange = (e) => {
   const { name, value } = e.target;
   setSellData((prev) => ({ ...prev, [name]: value }));
@@ -147,6 +174,15 @@ const handleSellSubmit = (e) => {
 
   return (
     <div className="bg-white flex justify-center min-h-screen">
+            <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
         <div className="flex-grow relative z-0 pt-6  pb-16">
           <Logo />
@@ -155,12 +191,12 @@ const handleSellSubmit = (e) => {
             <p className="">{userData ? userData.coins : "700,0000"}</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mb-4">
+          {/* <div className="grid grid-cols-4 gap-2 mb-4">
             {[
-              // { icon: <BiSolidDownvote size={22} />, label: "Receive" },
+              { icon: <BiSolidDownvote size={22} />, label: "Receive" },
               { icon: <BiSolidUpvote size={22} />, label: "Send" },
               { icon: <BiHistory size={22} />, label: "History" },
-              // { icon: <BsStars size={22} />, label: "Points" },
+              { icon: <BsStars size={22} />, label: "Points" },
             ].map((item, index) => (
               <div
                 key={index}
@@ -174,7 +210,30 @@ const handleSellSubmit = (e) => {
                 <span className="text-xs text-center">{item.label}</span>
               </div>
             ))}
-          </div>
+          </div> */}
+           <div className="grid grid-cols-2 gap-2 mb-4">
+      {/* Send Button */}
+      <div
+        onClick={() => toggleSharePopup()}
+        className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-50"}`}
+      >
+        <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
+          <BiSolidUpvote size={22} />
+        </div>
+        <span className="text-xs text-center">Send</span>
+      </div>
+
+      {/* History Button */}
+      <div
+        onClick={() => handleIconClick(2)}
+        className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-50"}`}
+      >
+        <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
+          <BiHistory size={22} />
+        </div>
+        <span className="text-xs text-center">History</span>
+      </div>
+    </div>
 
           <div  onClick={togglePopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
             <span className="text-xl font-extrabold font-poppins text-[#f5eded]">WITHDRAW</span>
@@ -284,6 +343,15 @@ const handleSellSubmit = (e) => {
       {
         showSendPopup && <Send closePopups={closePopups} handleSendInputChange={handleSendInputChange} handleSendMoney={handleSendMoney}
           sendData={sendData} />
+      }
+       {
+        sharePopup && <ShareCoin
+        toggleSharePopup= {toggleSharePopup}
+        handleSendInputChange={handleSendInputChange}
+        handleSendMoney={handleSendMoney}
+        sendData={sendData}
+        setSendData={setSendData}
+        />
       }
       {
         showHistoryPopup && <History closePopups={closePopups}  />
