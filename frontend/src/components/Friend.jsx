@@ -78,7 +78,7 @@ const { success, error, loading } = useSelector((state) => ({
         window.open(telegramWebLink, '_blank');
       }
     } else {
-      alert("Referral link is not available yet.");
+      toast("Referral link is not available yet.");
     }
   };
   
@@ -109,8 +109,8 @@ const { success, error, loading } = useSelector((state) => ({
   };
 
   useEffect(() => {
-    console.log('Success:', success);
-    console.log('Error:', error);
+    // console.log('Success:', success);
+    // console.log('Error:', error);
     
     if (success) {
       setSharePopup(false); // Close the popup on success
