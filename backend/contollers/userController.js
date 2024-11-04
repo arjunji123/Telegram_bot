@@ -12,7 +12,7 @@ const Model = require("../models/userModel");
 const QueryModel = require("../models/queryModel");
 const UserDataModel = require("../models/treeModel");
 // const { generateReferralCode } = require("../utils/helpers");
-const mysqlPool = require("../config/mysql_database"); // Assuming you're using MySQL pool
+const pool = require("../config/mysql_database"); // Assuming you're using MySQL pool
 
 const { v4: uuidv4 } = require("uuid");
 // const pool = require('../config/db');  // Assuming you're using MySQL pool
@@ -863,6 +863,62 @@ exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
 ///////////////////////////////////////////////
 
 // API to get a single user record
+
+// exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
+//   const userId = req.params.id; // Get user ID from request parameters
+//   console.log("Fetching user with ID:", userId); // Log user ID
+
+//   try {
+//     // Use a parameterized query to avoid SQL injection
+//     const query = `
+//       SELECT
+//         u.*,
+//         ud.parent_id,
+//         ud.leftchild_id,
+//         ud.rightchild_id,
+//         ud.referral_by,
+//         ud.coins,
+//         ud.pending_coin,
+//         ud.upi_id
+//       FROM
+//         users u
+//       LEFT JOIN
+//         user_data ud ON u.id = ud.user_id
+//       WHERE
+//         u.id = ${userId}
+//     `;
+//     // Log the query being executed
+//     console.log("Executing query:", query);
+//     // Execute the query with the userId parameter
+//     const result = await pool.query(query, [userId]);
+
+//     // Log the result for debugging
+//     console.log("Query executed successfully. Result:", result); // Check the structure of result
+
+//     // Check if no user was found
+//     if (result && result[0] && result[0].length === 0) {
+//       console.log(`User with ID ${userId} not found in database.`);
+//       return res.status(404).send("User not found");
+//     }
+
+//     // Get the user data from the result
+//     const user = result.rows[0];
+//     // Check if user object is defined
+//     if (!user) {
+//       return res.status(404).send("User not found");
+//     }
+//     // Render the user detail page with the user data
+//     res.render(module_slug + "/detail", {
+//       layout: module_layout,
+//       title: module_single_title,
+//       user,
+//     });
+//   } catch (error) {
+//     console.error("Database query error:", error); // Log the detailed error
+//     return res.status(500).send("Server Error: " + error.message); // Return error message
+//   }
+// });
+
 exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
   // Find the user by ID using the Mongoose model
   const user = await QueryModel.findById(table_name, req.params.id, next);

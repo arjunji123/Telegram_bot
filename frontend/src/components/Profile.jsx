@@ -84,7 +84,7 @@ function Profile() {
                 src={
                   imagePreview ||
                   userData.profile_image ||
-                  "https://cdn-icons-png.flaticon.com/512/7077/7077313.png"
+                  'src/Img/images.png'
                 }
                 alt="Profile"
                 className="rounded-full w-24 h-24 object-cover border-4 border-gray-600"
