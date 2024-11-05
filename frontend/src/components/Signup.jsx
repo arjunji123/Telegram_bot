@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState , useEffect} from "react";
+import { Link, useNavigate, useLocation  } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
@@ -20,7 +20,18 @@ function Signup() {
   });
 
   const navigate = useNavigate();
+  const location = useLocation(); // Use location to access the URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const referralCode = params.get('referral_code'); // Get the referral code from the URL
 
+    if (referralCode) {
+      setValues((prev) => ({
+        ...prev,
+        referral_by: referralCode, // Set the referral code into the state
+      }));
+    }
+  }, [location]);
   const handleInput = (e) => {
     setValues((prev) => ({
       ...prev,

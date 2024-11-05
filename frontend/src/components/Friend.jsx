@@ -11,6 +11,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; 
 // import { FaShare } from "react-icons/fa6";
 // import ShareCoin from "../utils/ShareCoin";
+import { FRONTEND_URL } from '../config';
 
 function Friend() {
   const dispatch = useDispatch();
@@ -61,24 +62,50 @@ const { success, error, loading } = useSelector((state) => ({
 
 
 
+  // const handleShareClick = () => {
+  //   if (referral_code) {
+  //     const message = `Join our app using this referral link: ${referral_code}`;
+  //     const encodedMessage = encodeURIComponent(message);
+      
+  //     const telegramAppLink = `tg://msg?text=${encodedMessage}`;
+  //     // Fallback link using Telegram web
+  //     const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
+  
+  //     // Try to open the app link first
+  //     const opened = window.open(telegramAppLink, '_blank');
+  
+  //     // If it fails (opened is null), use the web link
+  //     if (!opened) {
+  //       window.open(telegramWebLink, '_blank');
+  //     }
+  //   } else {
+  //     toast("Referral link is not available yet.");
+  //   }
+  // };
+  
   const handleShareClick = () => {
     if (referral_code) {
-      const message = `Join our app using this referral link: ${referral_code}`;
+      // Generate the signup link with the referral code
+      const signupLink = `${FRONTEND_URL}/signup?referral_code=${referral_code}`; // Replace with your actual signup page URL
+  
+      // Create the message to share
+      const message = `Join our app using this referral link: ${signupLink}`;
       const encodedMessage = encodeURIComponent(message);
       
+      // Create the Telegram link
       const telegramAppLink = `tg://msg?text=${encodedMessage}`;
-      // Fallback link using Telegram web
+      // Fallback link for Telegram web
       const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
   
-      // Try to open the app link first
+      // Attempt to open the app link first
       const opened = window.open(telegramAppLink, '_blank');
   
-      // If it fails (opened is null), use the web link
+      // If the app link fails to open (opened is null), try the web link
       if (!opened) {
         window.open(telegramWebLink, '_blank');
       }
     } else {
-      toast("Referral link is not available yet.");
+      toast.error("Referral link is not available yet."); // Use toast.error for better UX
     }
   };
   

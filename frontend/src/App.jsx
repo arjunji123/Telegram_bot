@@ -39,7 +39,7 @@ function App({ Component, pageProps }) {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login setLoggedIn={setLoggedIn} />} />
-          <Route path="/" element={<Signup />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/payment/:id" element={<Payment />} />
 
           {/* Protected Routes */}

@@ -4,10 +4,10 @@ import { ImCross } from "react-icons/im";
 function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate}) {
     const [coinAmount, setCoinAmount] = useState(0);
     const [rupeeValue, setRupeeValue] = useState(0);
-  console.log(coinRate);
+//   console.log(coinRate);
   
     useEffect(() => {
-        const rupeesPerCoin = 0.85; // 1 coin = 0.85 rupees
+        const rupeesPerCoin = coinRate; // 1 coin = 0.85 rupees
         const totalRupees = coinAmount * rupeesPerCoin;
         setRupeeValue(totalRupees.toFixed(2)); // Set rupee value with 2 decimal points
       }, [coinAmount]); // Run the effect whenever coinAmount changes
