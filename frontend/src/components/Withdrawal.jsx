@@ -6,7 +6,7 @@ import { BsStars, BsPersonFillCheck, BsCurrencyRupee } from "react-icons/bs";
 import { AiFillCaretDown } from "react-icons/ai";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
 import { ImCross } from "react-icons/im";
-import Receive from "../utils/Receive";
+import WithdrawCoin from "../utils/WithdrawCoin";
 import Footer from "./Footer";
 import Send from "../utils/Send";
 import History from "../utils/History";
@@ -23,7 +23,7 @@ function Withdrawal() {
   const [showReceivePopup, setShowReceivePopup] = useState(false);
   const [showSendPopup, setShowSendPopup] = useState(false);
   const [showHistoryPopup, setShowHistoryPopup] = useState(false);
-  const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const [showWithdrawal, setShowWithdrawalPopup] = useState(false);
   const [sharePopup, setSharePopup] = useState(false);
   const toggleSharePopup = () => {
     setSharePopup(!sharePopup);
@@ -66,33 +66,27 @@ const [sellData, setSellData] = useState({
       setShowReceivePopup(true);
       setShowSendPopup(false);
       setShowHistoryPopup(false);
-      setShowPointsPopup(false);
     } else if (index === 1) {
       setShowReceivePopup(false);
       setShowSendPopup(true);
       setShowHistoryPopup(false);
-      setShowPointsPopup(false);
     } else if (index === 2) {
       setShowReceivePopup(false);
       setShowSendPopup(false);
       setShowHistoryPopup(true);
-      setShowPointsPopup(false);
-    } else if (index === 3) {
-      setShowReceivePopup(false);
-      setShowSendPopup(false);
-      setShowHistoryPopup(false);
-      setShowPointsPopup(true);
-    }
+    } 
   };
 
   const closePopups = () => {
     setShowReceivePopup(false);
     setShowSendPopup(false);
     setShowHistoryPopup(false);
-    setShowPointsPopup(false);
   };
   const togglePopup = () => {
     setShowPopup(!showPopup);
+  };
+  const toggleWithdrawalPopup = () => {
+    setShowWithdrawalPopup(!showWithdrawal);
   };
   const [inputValue, setInputValue] = useState("");
   const qrRef = useRef(null);
@@ -235,7 +229,7 @@ const handleSellSubmit = (e) => {
       </div>
     </div>
 
-          <div  onClick={togglePopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
+          <div  onClick={toggleWithdrawalPopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
             <span className="text-xl font-extrabold font-poppins text-[#f5eded]">WITHDRAW</span>
           </div>
 
@@ -337,7 +331,7 @@ const handleSellSubmit = (e) => {
 
       )}
       {
-        showReceivePopup && <Receive closePopups={closePopups} handleReceiveMoney={handleReceiveMoney} handleReceiveInputChange={handleReceiveInputChange} 
+        showWithdrawal && <WithdrawCoin toggleWithdrawalPopup={toggleWithdrawalPopup} handleReceiveMoney={handleReceiveMoney} handleReceiveInputChange={handleReceiveInputChange} 
           receiveData={receiveData} />
       }
       {
