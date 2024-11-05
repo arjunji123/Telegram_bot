@@ -45,7 +45,7 @@ function Tasks() {
   const nonBannerQuests = apiQuests.filter(quest => quest.quest_type === "non-banner");
 
     const rows = nonBannerQuests.filter((quest) => quest.activity === "watch").map((quest, index) => ({
-      taskKey: `task${index + 1}`, // Unique keys
+      taskKey: `task${quest.quest_id}`, // Unique keys
       questId: quest.quest_id, // Add quest_id here
       title: quest.quest_name,
       icon: quest.image,
@@ -153,7 +153,7 @@ function Tasks() {
     }
   };
   const socials = nonBannerQuests.filter((quest) => quest.activity === "follow").map((quest, index) => ({
-    taskKey: `task${index + 1}`, // Unique keys
+    taskKey: `task${quest.quest_id}`, // Unique keys
     questId: quest.quest_id,
     title: quest.quest_name,
     icon: quest.image,

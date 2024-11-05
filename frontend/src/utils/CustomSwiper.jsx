@@ -1,7 +1,7 @@
 // Import Swiper React components and styles
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
-import { AiFillCaretRight } from "react-icons/ai";
+
 
 const CustomSwiper = ({ banners, followed, togglePopup,
   completedTasks,
@@ -45,7 +45,11 @@ const CustomSwiper = ({ banners, followed, togglePopup,
       </div>
     </SwiperSlide> */}
 
-      {banners && banners.map((banner, index) => (
+{banners && banners.map((banner, index) => {
+        // Dynamically assign taskKey to each banner
+        const taskKey = `task${banner.quest_id}`;
+
+        return (
         <SwiperSlide key={index}>
 
           <div className="bg-gradient-to-r from-[#c7c7c1] to-[#dbdbd1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
@@ -63,27 +67,27 @@ const CustomSwiper = ({ banners, followed, togglePopup,
               <p className="text-[#423d3d] text-xs font-bold">+{banner.points} BP</p>
             </div>
             <div className="flex justify-between">
-              {completedTasks[banner.taskKey] ? (
+              {completedTasks[taskKey] ? (
                 <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold">
                   Completed
                 </span>
               ) : (
                 <>
-                  {banner.activity === "watch" && !isVideoWatched[banner.taskKey] && (
+                  {banner.activity === "watch" && !isVideoWatched[taskKey] && (
                     <a
-                      href={banner.videoUrl}
+                      href={banner.quest_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => handleWatchButtonClick(banner.taskKey, banner.videoUrl)}
+                      onClick={() => handleWatchButtonClick(taskKey, banner.quest_url)}
                       className="bg-black text-white w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
                     >
                       <span className="uppercase">Watch</span>
                     </a>
                   )}
 
-                  {banner.activity === "watch" && isVideoWatched[banner.taskKey] && (
+                  {banner.activity === "watch" && isVideoWatched[taskKey] && (
                     <button
-                      onClick={() => handleCheckButtonClick(banner.taskKey, banner.quest_id)}
+                      onClick={() => handleCheckButtonClick(taskKey, banner.quest_id)}
                       className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
                     >
                       Check
@@ -91,30 +95,30 @@ const CustomSwiper = ({ banners, followed, togglePopup,
                   )}
 
                   <div className="flex justify-between">
-                    {banner.activity === "follow" && !hasFollowed[banner.taskKey] && !followed[banner.taskKey] && (
+                    {banner.activity === "follow" && !hasFollowed[taskKey] && !followed[taskKey] && (
                       <a
                         href={banner.quest_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() => handleFollowButtonClick(banner.taskKey)}
+                        onClick={() => handleFollowButtonClick(taskKey)}
                         className="bg-black text-white px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
                       >
                         <span className="uppercase">Follow</span>
                       </a>
                     )}
 
-                    {banner.activity === "follow" && !hasFollowed[banner.taskKey] && followed[banner.taskKey] && (
+                    {banner.activity === "follow" && !hasFollowed[taskKey] && followed[taskKey] && (
                       <button
                         onClick={togglePopup} // Or replace with handleCheckFollowButtonClick if needed
-                        className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${hasFollowed[banner.taskKey] ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500"
+                        className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${hasFollowed[taskKey] ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500"
                           }`}
-                        disabled={hasFollowed[banner.taskKey]}
+                        disabled={hasFollowed[taskKey]}
                       >
                         Check
                       </button>
                     )}
 
-                    {banner.activity === "follow" && hasFollowed[banner.taskKey] && (
+                    {banner.activity === "follow" && hasFollowed[taskKey] && (
                       <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold" disabled>
                         Completed
                       </span>
@@ -130,7 +134,8 @@ const CustomSwiper = ({ banners, followed, togglePopup,
 
           </div>
         </SwiperSlide>
-      ))}
+       );
+      })}
     </Swiper>
   );
 };

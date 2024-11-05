@@ -29,7 +29,7 @@ function Login({ setLoggedIn }) {
       toast.success("Login successfull ! "); // Show success toast
       setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
     } catch (error) {
-      toast.error("Invalid email/mobile number or password");
+      toast.error("Invalid mobile number or password");
       setErrors('Login failed: ' + error.message);
     }
   };
@@ -45,7 +45,15 @@ function Login({ setLoggedIn }) {
 
   return (
   <div className="bg-white flex justify-center items-center min-h-screen ">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+       <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
       <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden ">
         {/* Header Section */}
         <div className="p-6 sm:p-10  shadow-lg relative">

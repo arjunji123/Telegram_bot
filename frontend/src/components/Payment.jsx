@@ -33,23 +33,23 @@ useEffect(() => {
   
   // Fetch additional API data
   dispatch(fetchAPIData("apiSettings"));
-
-  // Function to generate the QR code
+}, [dispatch]);
+useEffect(() => {
   const generateQRCode = async () => {
-    try {
-      // const upiString = `upi://pay?pa=yourupi@bank&pn=YourName&mc=1234&tid=1234567890&am=1.00&cu=INR&tn=Your%20Transaction%20Note`;
-  const upiString = apiSettings && apiSettings.upi;
-      const url = await QRCode.toDataURL(upiString); // Generate QR code
-      // console.log('url', url)
-      setQrCodeUrl(url);
-    } catch (err) {
-      console.error('Error generating QR Code:', err);
+    if (apiSettings && apiSettings.upi) {
+      try {
+        const upiString = apiSettings.upi;
+        const url = await QRCode.toDataURL(upiString);
+        setQrCodeUrl(url);
+      } catch (err) {
+        console.error('Error generating QR Code:', err);
+      }
     }
   };
 
-  generateQRCode(); // Call QR code generation
+  generateQRCode(); // Generate QR code when apiSettings is updated
 
-}, [dispatch]); 
+}, [apiSettings]);
 
 
   const handleFileChange = (event) => {

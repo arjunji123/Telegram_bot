@@ -209,7 +209,7 @@ const handleSellSubmit = (e) => {
       {/* Send Button */}
       <div
         onClick={() => toggleSharePopup()}
-        className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-50"}`}
+        className="text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out opacity-100"
       >
         <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
           <BiSolidUpvote size={22} />
@@ -220,7 +220,7 @@ const handleSellSubmit = (e) => {
       {/* History Button */}
       <div
         onClick={() => handleIconClick(2)}
-        className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-50"}`}
+        className="text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out opacity-100"
       >
         <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
           <BiHistory size={22} />
