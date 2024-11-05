@@ -8,7 +8,7 @@ import { RiVerifiedBadgeLine } from "react-icons/ri";
 import { ImCross } from "react-icons/im";
 import WithdrawCoin from "../utils/WithdrawCoin";
 import Footer from "./Footer";
-import Send from "../utils/Send";
+import Sell from "../utils/Sell";
 import History from "../utils/History";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAPIData, fetchMeData } from '../../store/actions/homeActions';
@@ -25,6 +25,7 @@ function Withdrawal() {
   const [showHistoryPopup, setShowHistoryPopup] = useState(false);
   const [showWithdrawal, setShowWithdrawalPopup] = useState(false);
   const [sharePopup, setSharePopup] = useState(false);
+  const [selectedCoinRate, setSelectedCoinRate] = useState(null); 
   const toggleSharePopup = () => {
     setSharePopup(!sharePopup);
   };
@@ -84,6 +85,10 @@ const [sellData, setSellData] = useState({
   };
   const togglePopup = () => {
     setShowPopup(!showPopup);
+  };
+  const handleSellClick = (coinRate) => {
+    setSelectedCoinRate(coinRate); // Set the selected coin rate
+    togglePopup(); // Open the popup
   };
   const toggleWithdrawalPopup = () => {
     setShowWithdrawalPopup(!showWithdrawal);
@@ -259,7 +264,7 @@ const handleSellSubmit = (e) => {
     
                     <button
                       className="leading-none px-2 py-1 text-xs rounded-md bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
-                      onClick={togglePopup}
+                      onClick={() => handleSellClick(company.coin_rate)}
                     >
                       <AiFillCaretDown size={16} /> {/* Reduced icon size */}
                       <span className="ml-1">Sell</span>
@@ -269,74 +274,19 @@ const handleSellSubmit = (e) => {
          
             )): ""}
           </div>
-
-
-
-
         </div>
 
 
       </div>
       <Footer />
-      {/* Popup Modal */}
-      {showPopup && (
-        <div className="fixed inset-0 flex items-end justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50" onClick={togglePopup}>
-          <div className="bg-[#1B1A1A] p-4 sm:p-6 rounded-t-3xl shadow-xl max-w-lg relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={togglePopup} className="absolute top-5 right-5 text-gray-400 hover:text-gray-200 focus:outline-none transition duration-300">
-              <ImCross size={20} />
-            </button>
-
-            <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">Sell Coin</h2>
-
-            {/* Description */}
-            <p className="text-sm sm:text-base text-[#B0B0B0] text-center mb-6">
-              Please enter the amount and your UPI ID to generate the QR code for Sell your coin.
-            </p>
-
-            <input
-              type="text"
-              name="amount"
-              onChange={handleSellChange}
-              placeholder="Enter Amount"
-              className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-            />
-            <input
-              type="text"
-              name="coin_rate"
-              onChange={handleSellChange}
-              placeholder="Coin Rate"
-              className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-            />
-
-            <input
-              type="text"
-              name="address"
-              // value={address}
-              onChange={handleSellChange}
-              placeholder="Enter UPI ID for QR code"
-              className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-            />
-
-            {/* <div className="flex justify-center items-center bg-[#2C2C2C] p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
-              <canvas id="qrcode" ref={qrRef} className="rounded-lg"></canvas>
-            </div> */}
-
-            <div className="flex justify-center items-center">
-              <button  onClick={handleSellSubmit} className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
-                Submit
-              </button>
-            </div>
-          </div>
-        </div>
-
-      )}
+    
       {
         showWithdrawal && <WithdrawCoin toggleWithdrawalPopup={toggleWithdrawalPopup} handleReceiveMoney={handleReceiveMoney} handleReceiveInputChange={handleReceiveInputChange} 
           receiveData={receiveData} />
       }
       {
-        showSendPopup && <Send closePopups={closePopups} handleSendInputChange={handleSendInputChange} handleSendMoney={handleSendMoney}
-          sendData={sendData} />
+        showPopup && <Sell togglePopup={togglePopup} handleSellChange={handleSellChange} handleSellSubmit={handleSellSubmit}
+        coinRate={selectedCoinRate} />
       }
        {
         sharePopup && <ShareCoin
