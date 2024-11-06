@@ -2,11 +2,26 @@ import React, {useState, useEffect  } from 'react';
 import { ImCross } from "react-icons/im";
 
 function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, userData}) {
-    const [coinAmount, setCoinAmount] = useState(0);
     const [rupeeValue, setRupeeValue] = useState(0);
     const [editableUpiId, setEditableUpiId] = useState(userData?.upi_id || "");
-  //  console.log(upiId);
-  
+    const totalCoin = userData?.coins
+    const [coinAmount, setCoinAmount] = useState('');
+    const [error, setError] = useState('');
+  console.log(totalCoin);
+
+  const handleInputChange = (e) => {
+    const inputValue = e.target.value;
+
+    // Check if input value exceeds the total available coins
+    if (inputValue > totalCoin) {
+      setError(`You have only  ${totalCoin} coins available.`);
+    } else {
+      setError(''); // Clear error if within limit
+    }
+
+    setCoinAmount(inputValue);
+  };
+
     useEffect(() => {
         const rupeesPerCoin = coinRate; // 1 coin = 0.85 rupees
         const totalRupees = coinAmount * rupeesPerCoin;
@@ -39,11 +54,11 @@ function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, user
       <input
          type="number"
          value={coinAmount}
-         onChange={(e) => setCoinAmount(e.target.value)}
+         onChange={handleInputChange}
          placeholder="Enter coin amount"
         className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
       />
-      
+       {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
       {/* <p className="text-sm sm:text-base text-[#B0B0B0] text-center mb-6">Rupee Value: ₹{rupeeValue}</p> */}
       
 <div className='flex justify-between items-center w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3  transition duration-300 text-sm sm:text-base'>

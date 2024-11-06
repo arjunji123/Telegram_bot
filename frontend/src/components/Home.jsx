@@ -41,8 +41,9 @@ function Home() {
         // Animate coins on successful transfer
         const newCoins = Array.from({ length: 10 }, (_, i) => ({
           id: Date.now() + i,
-          x: (Math.random() - 0.5) * 300,
-          y: (Math.random() - 0.5) * 300,
+          x: (Math.random() - 0.5) * 500,
+          y: (Math.random() - 0.5) * 500,
+          rotate: Math.random() * 360, 
         }));
         setCoins(newCoins);
         // Remove coins after animation
@@ -59,50 +60,51 @@ function Home() {
 
   return (
     <div className="bg-white flex justify-center">
-               <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="dark"
-      />
-      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
-        <div className="flex-grow relative z-0">
-          <div className="px-4 py-6 space-y-6">
-            <Logo />
-            <div   onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
-              <BsPersonCircle size={28} className="mt-1" />
-              <p className="text-2xl font-extrabold capitalize">
-                {userData ? userData.user_name : "Loading..."}
-              </p>
-            </div>
+    <ToastContainer
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      closeOnClick
+      pauseOnHover
+      draggable
+      theme="dark"
+    />
+    <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
+      <div className="flex-grow relative z-0">
+        <div className="px-4 py-6 space-y-6">
+          <Logo />
+          <div onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
+            <BsPersonCircle size={28} className="mt-1" />
+            <p className="text-2xl font-extrabold capitalize">
+              {userData ? userData.user_name : ""}
+            </p>
+          </div>
+  
+          {/* User Balance */}
+          <div className="flex justify-center space-x-1 text-3xl font-extrabold font-sans">
+            <p>U</p>
+            <p>{userData ? userData.coins : ""}</p>
+          </div>
+  
+          {/* Coin Button and Image */}
+          <div className="coin-animation-container my-6 relative">
+            <motion.div
+           whileHover={{ scale: 1.05 }}
+           whileTap={{ scale: 0.95 }}
 
-            {/* User Balance */}
-            <div className="flex justify-center space-x-1 text-3xl font-extrabold font-sans">
-              <p>U</p>
-              <p>{userData ? userData.coins : "Loading..."}</p>
-            </div>
-
-            {/* Coin Button and Image */}
-            <div className="coin-animation-container my-6 relative">
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="coin-btn"
-                onClick={handleClick}
-              >
-                <img
-                  src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
-                  alt="Main Character"
-                  className="character-img"
-                />
-              </motion.div>
-
-              {/* Hamster-style Coin Animation */}
-              <div className="coins-container flex justify-center items-center">
-                <AnimatePresence>
+              className="coin-btn"
+              onClick={handleClick}
+            >
+              <img
+                src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
+                alt="Main Character"
+                className="character-img"
+              />
+            </motion.div>
+  
+            {/* Hamster-style Coin Animation */}
+            <div className="coins-container flex justify-center items-center">
+            <AnimatePresence>
                   {coins.map((coin) => (
                     <motion.div
                       key={coin.id}
@@ -112,38 +114,44 @@ function Home() {
                         opacity: 1,
                         x: coin.x,
                         y: coin.y,
-                        rotate: [0, 360],
-                        scale: [1, 1.5, 1],
+                        rotate: [coin.rotate, coin.rotate + 360],
+                        scale: [1, 1.3, 1],
+                        filter: "grayscale(100%)", // Grayscale for black-and-white effect
                       }}
-                      exit={{ opacity: 0, scale: 0 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
                       transition={{ duration: 2, ease: "easeOut" }}
                     >
-                      <img
-                        src="src/images/dollar-coin.png"
-                        alt="Hamster Coin"
-                        className="coin-image w-6 h-6"
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Pending Coin Display */}
-            <div className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
-              <p className="text-xl font-extrabold font-poppins text-[#f5eded]">
-                Pending Coin
-                <span className="pl-2 text-2xl">
-                  {pendingCoin ? pendingCoin.pending_coin : "Loading..."}
-                </span>
-              </p>
+                    <img
+                      src="src/images/dollar-coin.png"
+                      alt="Hamster Coin"
+                      className="coin-image w-6 h-6"
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
         </div>
-        {/* Footer */}
-        <Footer />
       </div>
+  
+      {/* Pending Coin Display - Updated Style */}
+      <div className="absolute bottom-20  w-full px-4">
+           {/* Pending Coin Display */}
+           <div className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
+              <p className="text-xl font-extrabold font-poppins text-[#f5eded]">
+                Pending Coin
+                <span className="pl-2 text-2xl">
+                  {pendingCoin ? pendingCoin.pending_coin : ""}
+                </span>
+              </p>
+            </div>
+      </div>
+  
+      {/* Footer */}
+      <Footer />
     </div>
+  </div>
+  
   );
 }
 
