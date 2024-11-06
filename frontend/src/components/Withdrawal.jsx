@@ -234,9 +234,9 @@ const handleSellSubmit = (e) => {
       </div>
     </div>
 
-          <div  onClick={toggleWithdrawalPopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
+          {/* <div  onClick={toggleWithdrawalPopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
             <span className="text-xl font-extrabold font-poppins text-[#f5eded]">WITHDRAW</span>
-          </div>
+          </div> */}
 
           <p className="text-center text-xs text-[#f5eded] mb-4">
             Sell your points at your chosen price, anytime and anywhere. Get instant cash withdrawals with no delays!
@@ -286,7 +286,7 @@ const handleSellSubmit = (e) => {
       }
       {
         showPopup && <Sell togglePopup={togglePopup} handleSellChange={handleSellChange} handleSellSubmit={handleSellSubmit}
-        coinRate={selectedCoinRate} />
+        coinRate={selectedCoinRate} userData={userData} />
       }
        {
         sharePopup && <ShareCoin
