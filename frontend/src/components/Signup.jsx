@@ -212,7 +212,7 @@ function Signup() {
           </div>
 
           {/* Referral Input */}
-          <div className="relative">
+          <div className="relative hidden">
             <input
               type="text"
               name="referral_by"
