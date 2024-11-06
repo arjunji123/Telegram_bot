@@ -6,7 +6,6 @@ import { logo } from '../images';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
-import scanner from "../Img/scanner.png";
 import { BACKEND_URL } from "../config";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAPIData } from "../../store/actions/homeActions";
@@ -104,81 +103,72 @@ useEffect(() => {
     });
   };
   return (
-    <div className="bg-white flex justify-center min-h-screen overflow-y-auto">
-    <div className="w-full max-w-lg bg-black text-white min-h-screen font-bold flex flex-col shadow-lg ">
-  
+    <div className="bg-white flex justify-center items-center min-h-screen ">
+    <div className="w-full max-w-lg bg-black text-white  shadow-lg overflow-hidden">
+
       {/* Toast Notification */}
       <ToastContainer
         position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
+        autoClose={3000}
+        hideProgressBar
         closeOnClick
         pauseOnHover
         draggable
         theme="dark"
       />
-  
+
       {/* Header */}
-      <div className="px-6 py-4 shadow-md">
-        <div className="flex justify-center items-center space-x-2">
-          <h1 className="text-xl font-extrabold">UNITRADE</h1>
-          <img src={logo} alt="logo" className="w-5 h-5" />
-        </div>
-        <h2 className="text-xl text-center font-semibold mt-2">Payment Details</h2>
+      <div className="flex items-center justify-center py-5 border-b border-white">
+        <img src={logo} alt="logo" className="w-8 h-8 mr-2" />
+        <h1 className="text-2xl font-bold tracking-wide">UNITRADE</h1>
       </div>
-  
+
       {/* Main Content */}
-      <div className="px-4 py-6 flex-grow">
-        {/* UPI ID */}
-        <div className="bg-[#474237] rounded-md p-3 mb-4 text-center flex justify-between">
-          <h3 className="text-sm text-[#ada5a5]">
-            Admin's UPI ID: <span className="text-white">
-              {apiSettings && apiSettings.upi ? apiSettings.upi :"admin@upi"}
-            </span>
-          </h3>
-          <button onClick={handleCopy} className="ml-2">
-        <FaCopy className="text-white cursor-pointer" title="Copy UPI ID" />
-      </button>
+      <div className="px-5 py-6 space-y-8">
+        {/* UPI ID Section */}
+        <div className="flex items-center justify-between bg-black p-4 rounded-lg shadow-md border border-white">
+          <span className="text-xs text-white">Admin's UPI ID:</span>
+          <span className="font-semibold text-white">{apiSettings?.upi || "admin@upi"}</span>
+          <button onClick={handleCopy}>
+            <FaCopy className="text-white hover:text-black transition duration-150" title="Copy UPI ID" />
+          </button>
         </div>
-  
+
         {/* QR Code Section */}
-        <div className="flex justify-center mb-4">
-          <div className="bg-white p-3 rounded-md shadow-lg w-36">
-            <h4 className="text-sm font-semibold text-black text-center mb-2">
-            Scan to Pay via UPI
-            </h4>
-            <div className="w-28 h-28 bg-gray-200 rounded-md flex items-center justify-center">
-            {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" />}
-              {/* <img src={scanner} alt="QR Code" className="w-full h-full object-cover" /> */}
-            </div>
+        <div className="flex flex-col items-center space-y-2">
+          <h4 className="text-xs font-semibold text-white">Scan to Pay</h4>
+          <div className="bg-white p-3 rounded-lg shadow-md w-32 h-32 flex items-center justify-center">
+            {qrCodeUrl ? (
+              <img src={qrCodeUrl} alt="QR Code" className="object-cover w-full h-full" />
+            ) : (
+              <div className="w-full h-full bg-black"></div>
+            )}
           </div>
         </div>
-  
+
         {/* Upload Section */}
-        <div className="flex flex-col items-center mb-4">
-          <label className="text-sm font-semibold mb-2 text-gray-500">
-            Upload Payment Proof
-          </label>
+        <div className="flex flex-col items-center">
+          <label className="text-xs font-medium text-white mb-2">Upload Payment Proof</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#00c6ff] file:text-white hover:file:bg-[#53bedb] cursor-pointer mb-3"
+            className="block w-full text-xs text-white file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-black file:text-white hover:file:bg-white hover:file:text-black cursor-pointer mb-3"
           />
           <button
             onClick={handleUpload}
-            className="w-2/3 py-3 border border-white text-white rounded-xl shadow-lg text-sm transition-transform hover:scale-105"
+            className="w-full py-3 bg-black text-white font-semibold text-sm rounded-lg hover:bg-white hover:text-black transition duration-200"
           >
             Upload
           </button>
         </div>
       </div>
-  
+
       {/* Footer */}
-      <div className="bg-[#111113] py-4 text-center rounded-b-lg">
-        <p className="text-sm text-[#909090]">
+      <div className="bg-black py-3 text-center text-white border-t border-white">
+        <p className="text-xs">
           Need help?{" "}
-          <a href="#" className="text-white font-semibold hover:underline">
+          <a href="#" className="text-white font-medium hover:underline">
             Contact Support
           </a>
         </p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "../Styles/Friends.css";
 import { ImCross } from "react-icons/im";
 import Logo from "../utils/Logo";
@@ -28,6 +28,7 @@ const { success, error, loading } = useSelector((state) => ({
   loading: state.coinData.loading,
 }));
 
+
   const [showPopup, setShowPopup] = useState(false);
   const togglePopup = () => {
     setShowPopup(!showPopup);
@@ -36,52 +37,32 @@ const { success, error, loading } = useSelector((state) => ({
   const toggleSharePopup = () => {
     setSharePopup(!sharePopup);
   };
-  const qrRef = useRef(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState(null);
   useEffect(() => {
     // Fetch user and coin data on component mount
     dispatch(fetchReffralData());
   }, [dispatch]);
+  const signupLink = `${FRONTEND_URL}/signup?referral_code=${refferalData?.referral_code}`;
+
   useEffect(() => {
     if (refferalData?.referral_code && showPopup) {
-      // Timeout to allow the popup and QR ref to render
       setTimeout(() => {
-        generateQRCode(refferalData.referral_code);
+        generateQRCode(signupLink); // Use the signupLink
       }, 100);
     }
   }, [refferalData?.referral_code, showPopup]);
 
-  const generateQRCode = (text) => {
-    if (qrRef.current) {
-      QRCode.toCanvas(qrRef.current, text, (error) => {
-        if (error) {
-          console.error("QR Code generation error:", error);
-        }
-      });
+  const generateQRCode = async (link) => {
+    try {
+      const qrCode = await QRCode.toDataURL(link);
+      // console.log('QR Code generated:', qrCode); // Debugging
+      setQrCodeUrl(qrCode); // Set the QR code image URL to state
+    } catch (error) {
+      console.error('Error generating QR code:', error);
     }
   };
 
 
-
-  // const handleShareClick = () => {
-  //   if (referral_code) {
-  //     const message = `Join our app using this referral link: ${referral_code}`;
-  //     const encodedMessage = encodeURIComponent(message);
-      
-  //     const telegramAppLink = `tg://msg?text=${encodedMessage}`;
-  //     // Fallback link using Telegram web
-  //     const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
-  
-  //     // Try to open the app link first
-  //     const opened = window.open(telegramAppLink, '_blank');
-  
-  //     // If it fails (opened is null), use the web link
-  //     if (!opened) {
-  //       window.open(telegramWebLink, '_blank');
-  //     }
-  //   } else {
-  //     toast("Referral link is not available yet.");
-  //   }
-  // };
   
   const handleShareClick = () => {
     if (referral_code) {
@@ -111,9 +92,9 @@ const { success, error, loading } = useSelector((state) => ({
   
   
   const handleCopyClick = () => {
-    const referralCode = refferalData && refferalData.referral_code
-    if (referralCode) {
-      navigator.clipboard.writeText(referralCode);
+    // const referralCode = refferalData && refferalData.referral_code
+    if (signupLink) {
+      navigator.clipboard.writeText(signupLink);
       toast("Referral link copied!");
     } else {
       toast("Referral link is not available yet.");
@@ -187,7 +168,8 @@ const { success, error, loading } = useSelector((state) => ({
 
 
             <div className="flex justify-center items-center  p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
-              <canvas width={100} height={100} id="qrcode" ref={qrRef} className="rounded-lg "></canvas>
+              {/* <canvas width={100} height={100} id="qrcode" ref={qrRef} className="rounded-lg "></canvas> */}
+              <img src={qrCodeUrl} alt="Signup QR Code" />
             </div>
             
             {/* <input
