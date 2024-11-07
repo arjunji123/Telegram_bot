@@ -27,8 +27,12 @@ function Tasks() {
   const [showPopup, setShowPopup] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [screenshot, setScreenshot] = useState(null);
-  const togglePopup = () => {
+  const [activeTaskKey, setActiveTaskKey] = useState(null);
+  const [activeQuestId, setActiveQuestId] = useState(null);
+  const togglePopup = (taskKey, questId) => {
     setShowPopup(!showPopup);
+    setActiveTaskKey(taskKey);
+    setActiveQuestId(questId);
   };
   const handleFileChange = (e) => {
     setScreenshot(e.target.files[0]); // Capture screenshot
@@ -215,76 +219,87 @@ function Tasks() {
 
   // Handle submit click
   const handleSubmit = async (task, questId) => {
+    console.log("questIdquestId", questId);
+  
+    // Basic validations
     if (!screenshot) {
       toast('Please upload a screenshot!');
       return;
     }
-
+  
+    if (!questId) {
+      toast('Quest ID is required!');
+      return;
+    }
+  
+    if (!task) {
+      toast('Task ID is required!');
+      return;
+    }
+  
     try {
       setIsUploading(true);
-
+  
       // 1. Upload the screenshot
       const formData = new FormData();
       formData.append('screenshot', screenshot);
-      formData.append('taskId', task); // Pass the task ID to the API
-
-      await axios.post('/api/upload-screenshot', formData);
-
+  
+      await axios.post(`${BACKEND_URL}/api/v1/upload-quest-screenshot/${questId}`, formData);
+  
       // 2. Complete the follow quest (your function logic)
       const tokenData = localStorage.getItem("user");
       if (!tokenData) {
         throw new Error("No token data found in localStorage");
       }
-
+  
       const parsedTokenData = JSON.parse(tokenData);
       const token = parsedTokenData.token;
-
+  
       if (!token) {
         throw new Error("Token not found");
       }
-
-      const response = await fetch(
-        `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quest_id: questId }), // Complete the quest with questId
-        }
-      );
-
+  
+      // Completing the quest API call
+      const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
+      });
+  
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
-
-      // Mark the task as completed and save the state in localStorage
+  
+      // Mark the task as completed and update localStorage
       setHasFollowed((prev) => {
         const updatedState = {
           ...prev,
           [task]: true, // Save follow status per task
         };
-        localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
+        localStorage.setItem("hasFollowed", JSON.stringify(updatedState)); // Update localStorage
         return updatedState;
       });
-
+  
       // Mark as completed and update UI
       setFollowed(true);
       setShowPopup(false); // Close the pop-up
       toast("Follow Task Completed!");
-
+  
     } catch (error) {
       console.error("Error completing follow quest:", error);
       toast.error("Error completing follow quest: " + error.message);
     } finally {
-      setIsUploading(false);
+      setIsUploading(false); // Set uploading state to false
     }
   };
+  
 
 
   return (
-    <div className="bg-white flex justify-center min-h-screen">
+    <div className="bg-white flex justify-center min-h-screen font-poppins">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -402,7 +417,15 @@ function Tasks() {
                               //     social.questId
                               //   )
                               // }
-                              onClick={togglePopup}
+                    
+                              onClick={() =>
+                                togglePopup(
+                                    social.taskKey,
+                                    social.questId,                                   
+                                  )
+                                 
+                                  
+                                }
                               className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${hasFollowed[social.taskKey]
                                   ? "bg-gray-400 cursor-not-allowed"
                                   : "bg-blue-500"
@@ -428,12 +451,17 @@ function Tasks() {
         </div>
       </div>
       <Footer />
-      {showPopup && <Follow
-        togglePopup={togglePopup}
-        handleSubmit={handleSubmit}
-        handleFileChange={handleFileChange}
-        isUploading={isUploading}
-      />}
+      {showPopup && (
+  <Follow
+    togglePopup={() => togglePopup(null, null)}  // Pass correct taskKey and questId here if necessary
+    handleSubmit={handleSubmit}
+    handleFileChange={handleFileChange}
+    isUploading={isUploading}
+    task={activeTaskKey} // Pass task to handleSubmit
+    questId={activeQuestId} // Pass questId to handleSubmit
+  />
+)}
+
     </div>
   );
 }

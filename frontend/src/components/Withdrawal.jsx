@@ -172,7 +172,7 @@ const handleSellSubmit = (e) => {
 };
 
   return (
-    <div className="bg-white flex justify-center min-h-screen">
+    <div className="bg-white flex justify-center min-h-screen font-poppins">
             <ToastContainer
         position="top-right"
         autoClose={5000}
