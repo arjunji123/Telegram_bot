@@ -729,6 +729,40 @@ exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
 
 ////////////////////////////////////////
 
+
+
+// testing 
+exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  // Check if files were uploaded
+  if (!req.files || req.files.length === 0) {
+    return next(new ErrorHandler("No files uploaded", 400));
+  }
+
+  // Map each uploaded file to get the filename
+  const quest_screenshots = req.files.map(file => file.filename); 
+  const quest_id = req.params.quest_id;
+
+  try {
+    // Convert filenames array to JSON for storage in the database
+    const updateResult = await db.query(
+      "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
+      [JSON.stringify(quest_screenshots), quest_id]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      return next(new ErrorHandler("No quest found with the provided quest ID", 404));
+    }
+
+    res.status(200).json({ success: true, message: "Screenshots uploaded successfully" });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Database update failed", 500));
+  }
+});
+
+
+
+
 exports.getUserReferralCode = catchAsyncErrors(async (req, res, next) => {
   // Get the user_id from the logged-in user's session
   const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID

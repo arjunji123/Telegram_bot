@@ -403,7 +403,7 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
-  // Fetch user data along with pay_image in a single query using LEFT JOIN
+  // Fetch user data along with quest_screenshot and pay_image using LEFT JOIN
   const users = await db.query(
     `SELECT 
         u.id,
@@ -413,20 +413,46 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
         DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
         ud.pay_image,
         u.user_type,
-        u.status  
+        qa.quest_screenshot,  -- Assuming quest_screenshot is in usercoin_audit table
+        qa.quest_id -- Make sure to include quest_id for approval/disapproval
      FROM users u
      INNER JOIN user_data ud ON u.id = ud.user_id 
+     LEFT JOIN usercoin_audit qa ON u.id = qa.user_id  -- Adjust this join as needed
      WHERE u.user_type IN (?, ?)`,
     ["user", "company"]
   );
 
+  // Process each user's quest_screenshot field to ensure it's an array of images
+  users.forEach(user => {
+    if (user.quest_screenshot) {
+      try {
+        // Attempt to parse quest_screenshot as JSON array
+        user.quest_screenshot = JSON.parse(user.quest_screenshot);
+
+        // Ensure quest_screenshot is an array
+        if (!Array.isArray(user.quest_screenshot)) {
+          user.quest_screenshot = [user.quest_screenshot];
+        }
+      } catch (e) {
+        // Fallback to comma-separated string split if JSON parsing fails
+        // user.quest_screenshot = user.quest_screenshot.split(',');
+        user.quest_screenshot = user.quest_screenshot.split(',').map(img => img.trim());
+      
+      }
+    } else {
+      user.quest_screenshot = []; // Ensure it's an array even if empty
+    }
+  });
+
+  // Render the view with users data
   res.render(module_slug + "/index", {
     layout: module_layout,
-    title: module_single_title + " " + module_add_text,
+    title: `${module_single_title} ${module_add_text}`,
     module_slug,
     users, // Pass the users array directly
     originalUrl: req.originalUrl, // Pass the original URL here
   });
+  
 });
 
 exports.addFrom = catchAsyncErrors(async (req, res, next) => {
@@ -681,6 +707,86 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
 
 ////////////////////////////////////////////
 ///////////////////////////////////////////
+
+
+
+
+// Approve quest screenshot and update coins
+// Approve quest screenshot and update pending coins
+exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
+
+  try {
+    // Fetch the coin_earn value from the quest table
+    const [questData] = await db.query(
+      `SELECT coin_earn FROM quest WHERE id = ?`,
+      [quest_id]
+
+
+
+
+    );
+
+    // Check if the quest exists
+    if (questData.length === 0) {
+      return next(new ErrorHandler("Quest not found", 404));
+    }
+
+    const coinEarned = questData[0].coin_earn;
+
+    // Check if the quest has a positive coin_earn value
+    if (coinEarned <= 0) {
+      return next(new ErrorHandler("Coin earn value must be greater than zero.", 400));
+    }
+
+    // Update the pending_coin in usercoin_audit based on coinEarned
+    const result = await db.query(
+      `UPDATE usercoin_audit 
+       SET pending_coin = pending_coin + ?, 
+           quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [coinEarned, quest_id]
+    );
+
+    // Check if the update affected any rows
+    if (result.affectedRows === 0) {
+      return next(new ErrorHandler("No matching quest found or screenshot already processed", 404));
+    }
+
+    res.status(200).json({ success: true, message: "Quest approved, pending coins updated successfully." });
+  } catch (error) {
+    console.error("Database update error:", error); // Log specific error for troubleshooting
+    return next(new ErrorHandler("Approval process failed: " + error.message, 500));
+  }
+});
+
+
+
+
+
+// Disapprove quest screenshot and remove the image
+exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
+
+  try {
+    // Remove the quest screenshot only from the usercoin_audit table
+    await db.query(
+      `UPDATE usercoin_audit 
+       SET quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [quest_id]
+    );
+
+    res.status(200).json({ success: true, message: "Quest disapproved, screenshot removed." });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Disapproval process failed", 500));
+  }
+});
+
+
+
+
 
 exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
   const userId = req.body.userId; // User ID ko request body se le
