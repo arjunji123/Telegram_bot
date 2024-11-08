@@ -869,3 +869,63 @@ exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+
+
+
+
+
+///////////////////////////////////////////////////
+
+
+
+exports.getQuestHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;  // Assuming the user ID is in the request
+
+    // Step 1: Get all quests and their completion status in one query using LEFT JOIN
+    const questHistoryQuery = `
+      SELECT 
+        q.id AS quest_id, 
+        q.quest_name, 
+        q.status, 
+        q.coin_earn, 
+        IFNULL(uca.status, 'not_completed') AS completion_status
+      FROM quest q
+      LEFT JOIN usercoin_audit uca 
+        ON q.id = uca.quest_id 
+        AND uca.user_id = ? 
+        AND uca.status = 'completed' 
+        AND uca.deleted = 0
+      WHERE q.deleted = 0;
+    `;
+
+    // Step 2: Fetch quest history using db.query
+    const [questHistory] = await db.query(questHistoryQuery, [userId]);
+
+    // Step 3: Process the data to return the response
+    const formattedQuestHistory = questHistory.map(quest => {
+      return {
+        quest_name: quest.quest_name,
+        quest_id: quest.quest_id,
+        status: quest.completion_status === 'completed' ? 'completed' : 'not_completed',
+        coin_earn: quest.coin_earn,
+      };
+    });
+
+    // Step 4: Return the response with quest history
+    return res.status(200).json({
+      success: true,
+      message: 'Quest history fetched successfully.',
+      data: formattedQuestHistory,
+    });
+  } catch (error) {
+    console.error('Error fetching quest history:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error fetching quest history.',
+      error: error.message,
+    });
+  }
+};
+
+

@@ -58,6 +58,7 @@ const {
   getUserReferralCode,
   transferCoins,
   uploadQuestScreenshotApi,
+  getQuestHistory,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -117,6 +118,8 @@ router
 router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
+
+  router.get('/quest-history', isApiAuthenticatedUser, getQuestHistory);
 /*******REST API*******/
 
 router.route("/api-register").post(registerUserApi);
