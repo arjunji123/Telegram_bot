@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Route, Routes , Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Friend from "./components/Friend";
-import { loadUserFromLocalStorage } from '../store/actions/authActions';
+import { loadUserFromLocalStorage } from "../store/actions/authActions";
 import Home from "./components/Home";
 import Tasks from "./components/Tasks";
 import Login from "./components/Login";
@@ -39,27 +39,26 @@ function App({ Component, pageProps }) {
       {" "}
       {/* Wrap entire app with Redux provider */}
       <BrowserRouter>
-      <AuthListener /> {/* Listen for localStorage changes */}
+        <AuthListener /> {/* Listen for localStorage changes */}
         <Routes>
-             {/* Redirect root path ("/") to login */}
-             <Route path="/" element={<Navigate to="/login" />} />
+          {/* Redirect root path ("/") to login */}
+          <Route path="/" element={<Navigate to="/signup" />} />
           {/* Public Routes */}
           <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login  />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/payment/:id" element={<Payment />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/payment/:id" element={<Payment />} />
           </Route>
           {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/friend" element={<Friend />} />
-          <Route path="/withdrawal" element={<Withdrawal />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/history" element={<History />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/friend" element={<Friend />} />
+            <Route path="/withdrawal" element={<Withdrawal />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/history" element={<History />} />
           </Route>
         </Routes>
-
       </BrowserRouter>
     </Provider>
   );
