@@ -143,7 +143,6 @@ const { success, error, loading } = useSelector((state) => ({
     <Footer />
 
   </div>
-  
 
   );
 }

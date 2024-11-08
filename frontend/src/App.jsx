@@ -11,6 +11,7 @@ import PublicRoute from "./components/PublicRoute";
 import Preloader from "./components/Preloader"; // Import the Preloader component
 import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
+import History from "./components/History";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import { Provider } from "react-redux";
@@ -55,6 +56,7 @@ function App({ Component, pageProps }) {
           <Route path="/friend" element={<Friend />} />
           <Route path="/withdrawal" element={<Withdrawal />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/history" element={<History />} />
           </Route>
         </Routes>
 

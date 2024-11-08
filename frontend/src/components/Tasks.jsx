@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
 import { AiFillCaretRight } from "react-icons/ai";
+import { FaRegCheckCircle } from "react-icons/fa";
 import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
@@ -52,6 +53,7 @@ function Tasks() {
       title: quest.quest_name,
       icon: quest.image,
       videoUrl: quest.quest_url,
+      coin: quest.coin_earn
     }));
   const handleWatchButtonClick = async (task, videoUrl) => {
     console.log("taskKeytaskKey", task);
@@ -160,6 +162,7 @@ function Tasks() {
     title: quest.quest_name,
     icon: quest.image,
     socialUrl: quest.quest_url,
+    coin: quest.coin_earn
   }));
 
   const handleFollowButtonClick = (task) => {
@@ -293,13 +296,16 @@ function Tasks() {
                       <div className="flex items-center">
                         <img className="w-12 h-12 mr-4" src={row.icon} alt="" />
 
-                        <h3 className="text-sm uppercase">{row.title}</h3>
+                        <div>
+                          <h3 className="text-sm capitalize  text-white font-bold">{row.title}</h3>
+                          <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
+                          </div>
                       </div>
 
                       {/* If task is completed, show 'Completed' message */}
                       {completedTasks[row.taskKey] ? (
-                        <p className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs uppercase font-bold">
-                          Completed
+                        <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
+                       <FaRegCheckCircle size={20} className="text-[#606060]"/>
                         </p>
                       ) : (
                         <>
@@ -308,11 +314,8 @@ function Tasks() {
                             <a href={row.videoUrl} target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
-                              className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold" >
-                              <span>
-                                <AiFillCaretRight size={18} />
-                              </span>
-                              <span className="uppercase">Watch</span>
+                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold" >
+                              <span className="">Watch</span>
                             </a>
                           )}
 
@@ -321,9 +324,9 @@ function Tasks() {
                               onClick={() =>
                                 handleCheckButtonClick(row.taskKey, row.questId)
                               }
-                              className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
+                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold"
                             >
-                              Check
+                              Verify
                             </button>
                           )}
                         </>
@@ -339,7 +342,11 @@ function Tasks() {
                       <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
                         <div className="flex items-center">
                           <img className="w-12 h-12 mr-4" src={social.icon} alt="" />
-                          <h3 className="text-sm uppercase">{social.title}</h3>
+                          <div>
+                          <h3 className="text-sm capitalize  text-white font-bold">{social.title}</h3>
+                          <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
+                          </div>
+                        
                         </div>
                         {/* Conditional rendering based on follow status */}
                         {!hasFollowed[social.taskKey] &&
@@ -351,12 +358,9 @@ function Tasks() {
                               onClick={() =>
                                 handleFollowButtonClick(social.taskKey)
                               }
-                              className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
+                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold"
                             >
-                              <span>
-                                <AiFillCaretRight size={18} />
-                              </span>
-                              <span className="uppercase">Follow</span>
+                              <span className="">Follow</span>
                             </a>
                           )}
                         {!hasFollowed[social.taskKey] &&
@@ -368,19 +372,19 @@ function Tasks() {
                                     social.questId,                                   
                                   )                                 
                                 }
-                              className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${hasFollowed[social.taskKey]
+                              className={`bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold ${hasFollowed[social.taskKey]
                                   ? "bg-gray-400 cursor-not-allowed"
-                                  : "bg-blue-500"
+                                  : "bg-[#282828]"
                                 }`}
                               disabled={hasFollowed[social.taskKey]}
                             >
-                              Check
+                              Verify
                             </button>
                           )}
                         {hasFollowed[social.taskKey] && (
-                          <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold" disabled>
-                            Completed
-                          </span>
+                         <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
+                         <FaRegCheckCircle size={20} className="text-[#606060]"/>
+                          </p>
                         )}
                       </div>
                       <hr className="border-2 border-white w-2/3 mx-auto" />

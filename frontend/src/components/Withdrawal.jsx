@@ -5,7 +5,7 @@ import { BiSolidDownvote, BiSolidUpvote, BiHistory } from "react-icons/bi";
 import { BsStars, BsPersonFillCheck, BsCurrencyRupee } from "react-icons/bs";
 import { AiFillCaretDown } from "react-icons/ai";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
-import { ImCross } from "react-icons/im";
+import { useNavigate } from 'react-router-dom';
 import WithdrawCoin from "../utils/WithdrawCoin";
 import Footer from "./Footer";
 import Sell from "../utils/Sell";
@@ -18,6 +18,7 @@ import ShareCoin from "../utils/ShareCoin";
 import { toast, ToastContainer } from "react-toastify"; 
 
 function Withdrawal() {
+  const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
   const [showReceivePopup, setShowReceivePopup] = useState(false);
@@ -74,7 +75,8 @@ const [sellData, setSellData] = useState({
     } else if (index === 2) {
       setShowReceivePopup(false);
       setShowSendPopup(false);
-      setShowHistoryPopup(true);
+      // setShowHistoryPopup(true);
+      navigate('/history')
     } 
   };
 
