@@ -9,6 +9,7 @@ const db = require("../config/mysql_database");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const QueryModel = require("../models/queryModel");
+const { log } = require("console");
 
 const registerSchema = Joi.object({
   user_name: Joi.string().required(),
@@ -301,8 +302,12 @@ exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Invalid mobile number or password", 400));
   }
 
-  // Check if the user status is active (1)
-  if (user.status === 0) {
+  // Debugging: Log user to check the values
+  console.log(user); // Add this to check the user data being fetched
+
+  // Ensure status is a number and check if the user is active
+  if (parseInt(user.status) === 0) {
+    // parseInt to ensure we compare number values
     return next(
       new ErrorHandler(
         "Your account is deactivated. Please contact support.",
@@ -558,6 +563,50 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
+exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  // Check if a file was uploaded
+  if (!req.file) {
+    return next(new ErrorHandler("No file uploaded", 400));
+  }
+
+  // Log uploaded file information for debugging
+  console.log("Uploaded file:", req.file);
+
+  // Get the uploaded file's filename
+  const quest_screenshot = req.file.filename;
+
+  // Get quest ID from route parameters
+  const quest_id = req.params.id;
+
+  // Debugging: Log quest ID and image filename
+  console.log(`Quest ID from params: ${quest_id}`);
+  console.log(`Screenshot Filename: ${quest_screenshot}`);
+
+  // Update the quest data in the database
+  try {
+    const result = await db.query(
+      "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
+      [quest_screenshot, quest_id]
+    );
+
+    // Check if any rows were affected
+    if (result.affectedRows === 0) {
+      return next(
+        new ErrorHandler("No quest found with the provided quest ID", 404)
+      );
+    }
+
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message: "Screenshots uploaded successfully",
+      quest_screenshot, // Optionally return the filename
+    });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Database update failed", 500));
+  }
+});
 
 exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
   try {
@@ -695,7 +744,7 @@ exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
       `SELECT u.id AS company_id, u.user_name AS company_name, 
               c.coin_rate, c.description 
        FROM users u 
-       LEFT JOIN company_data c ON u.id = c.company_id 
+       INNER JOIN company_data c ON u.id = c.company_id 
        WHERE u.user_type = 'company'`
     );
 
@@ -797,12 +846,84 @@ exports.getUserReferralCode = catchAsyncErrors(async (req, res, next) => {
 
 //////////////////////////////////////
 
+// exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
+//   const { amount, recipientReferralCode } = req.body;
+//   const senderId = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+//   try {
+//     // Validate input
+//     if (!amount || !recipientReferralCode) {
+//       return next(
+//         new ErrorHandler("Amount and recipient referral code are required", 400)
+//       );
+//     }
+
+//     if (amount <= 0) {
+//       return next(new ErrorHandler("Amount must be greater than 0", 400));
+//     }
+
+//     // Step 1: Fetch sender's coins
+//     const senderCoinsQuery = await db.query(
+//       "SELECT coins FROM user_data WHERE user_id = ?",
+//       [senderId]
+//     );
+
+//     const senderCoins = senderCoinsQuery[0][0]?.coins || 0;
+
+//     // Check if the sender has enough coins
+//     if (senderCoins < amount) {
+//       return next(new ErrorHandler("Insufficient coins to transfer", 400));
+//     }
+
+//     // Step 2: Fetch recipient's user ID based on the referral code from user_data table
+//     const recipientQuery = await db.query(
+//       "SELECT user_id FROM user_data WHERE referral_code = ?", // Fetching from 'user_data' table
+//       [recipientReferralCode]
+//     );
+
+//     const recipient = recipientQuery[0][0];
+
+//     if (!recipient) {
+//       return next(new ErrorHandler("Recipient not found", 404));
+//     }
+
+//     const recipientId = recipient.user_id; // Correctly getting the recipient ID
+
+//     // Step 3: Update sender's coins by deducting the transferred amount
+//     await db.query("UPDATE user_data SET coins = coins - ? WHERE user_id = ?", [
+//       amount,
+//       senderId,
+//     ]);
+
+//     // Step 4: Update recipient's pending coins by adding the transferred amount
+//     const updateRecipientQuery = await db.query(
+//       "UPDATE user_data SET pending_coin = pending_coin + ? WHERE user_id = ?",
+//       [amount, recipientId]
+//     );
+
+//     // Check if the update was successful
+//     if (updateRecipientQuery[0].affectedRows === 0) {
+//       return next(new ErrorHandler("Failed to update recipient's coins", 500));
+//     }
+
+//     // Step 5: Respond with success
+//     res.status(200).json({
+//       success: true,
+//       message: `${amount} coins successfully transferred to user with referral code ${recipientReferralCode}.`,
+//     });
+//   } catch (error) {
+//     console.error("Error transferring coins:", error);
+//     return next(
+//       new ErrorHandler("An error occurred while transferring coins", 500)
+//     );
+//   }
+// });
 exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
   const { amount, recipientReferralCode } = req.body;
-  const senderId = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+  const senderId = req.user.id; // Sender's user ID
 
   try {
-    // Validate input
+    // Input validation
     if (!amount || !recipientReferralCode) {
       return next(
         new ErrorHandler("Amount and recipient referral code are required", 400)
@@ -818,7 +939,6 @@ exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
       "SELECT coins FROM user_data WHERE user_id = ?",
       [senderId]
     );
-
     const senderCoins = senderCoinsQuery[0][0]?.coins || 0;
 
     // Check if the sender has enough coins
@@ -826,43 +946,95 @@ exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Insufficient coins to transfer", 400));
     }
 
-    // Step 2: Fetch recipient's user ID based on the referral code from user_data table
+    // Step 2: Fetch recipient's user ID based on referral code
     const recipientQuery = await db.query(
-      "SELECT user_id FROM user_data WHERE referral_code = ?", // Fetching from 'user_data' table
+      "SELECT user_id FROM user_data WHERE referral_code = ?",
       [recipientReferralCode]
     );
-
     const recipient = recipientQuery[0][0];
 
     if (!recipient) {
       return next(new ErrorHandler("Recipient not found", 404));
     }
 
-    const recipientId = recipient.user_id; // Correctly getting the recipient ID
+    const recipientId = recipient.user_id;
 
-    // Step 3: Update sender's coins by deducting the transferred amount
-    await db.query("UPDATE user_data SET coins = coins - ? WHERE user_id = ?", [
-      amount,
-      senderId,
-    ]);
+    // Step 3: Begin a transaction
+    await db.query("START TRANSACTION");
 
-    // Step 4: Update recipient's pending coins by adding the transferred amount
-    const updateRecipientQuery = await db.query(
+    // Step 4: Update sender's coins by deducting the amount
+    const senderUpdateResult = await db.query(
+      "UPDATE user_data SET coins = coins - ? WHERE user_id = ?",
+      [amount, senderId]
+    );
+    console.log("Sender Update Result:", senderUpdateResult);
+
+    // Step 5: Update recipient's pending coins
+    const recipientUpdateResult = await db.query(
       "UPDATE user_data SET pending_coin = pending_coin + ? WHERE user_id = ?",
       [amount, recipientId]
     );
+    console.log("Recipient Update Result:", recipientUpdateResult);
 
-    // Check if the update was successful
-    if (updateRecipientQuery[0].affectedRows === 0) {
-      return next(new ErrorHandler("Failed to update recipient's coins", 500));
+    // Check if the updates were successful
+    if (
+      senderUpdateResult[0].affectedRows === 0 ||
+      recipientUpdateResult[0].affectedRows === 0
+    ) {
+      await db.query("ROLLBACK"); // Rollback transaction if any update fails
+      return next(
+        new ErrorHandler("Failed to update sender or recipient's coins", 500)
+      );
     }
 
-    // Step 5: Respond with success
+    // Step 6: Insert entries into usercoin_audit table with status 'completed'
+    const currentTime = new Date();
+
+    // Entry 1: Sender's transaction
+    const senderAuditResult = await db.query(
+      "INSERT INTO usercoin_audit (user_id, pending_coin, transaction_id, date_entered, coin_operation, description, earn_coin, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        senderId,
+        0, // Sender's pending_coin as 0
+        recipientId, // Recipient ID as transaction_id
+        currentTime,
+        "cr", // Sender's coin_operation "cr"
+        "Amount send", // Description
+        amount, // earn_coin set to transferred amount
+        "transfer",
+        "completed", // Status set to 'completed'
+      ]
+    );
+    console.log("Sender Audit Result:", senderAuditResult);
+
+    // Entry 2: Recipient's transaction
+    const recipientAuditResult = await db.query(
+      "INSERT INTO usercoin_audit (user_id, pending_coin, transaction_id, date_entered, coin_operation, description, earn_coin, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        recipientId,
+        amount, // Recipient's pending_coin as received amount
+        senderId, // Sender ID as transaction_id
+        currentTime,
+        "dr", // Recipient's coin_operation "dr"
+        "Receive amount", // Description
+        0, // earn_coin set to 0
+        "transfer",
+        "completed", // Status set to 'completed'
+      ]
+    );
+    console.log("Recipient Audit Result:", recipientAuditResult);
+
+    // Step 7: Commit the transaction
+    await db.query("COMMIT");
+
+    // Step 8: Respond with success
     res.status(200).json({
       success: true,
       message: `${amount} coins successfully transferred to user with referral code ${recipientReferralCode}.`,
     });
   } catch (error) {
+    // Rollback transaction in case of error
+    await db.query("ROLLBACK");
     console.error("Error transferring coins:", error);
     return next(
       new ErrorHandler("An error occurred while transferring coins", 500)
@@ -870,17 +1042,111 @@ exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+/////////////////////////////////////
 
+const sellTransactionSchema = Joi.object({
+  company_id: Joi.string().required(), // Company ID to identify the company
+  tranction_coin: Joi.number().positive().required(), // Number of coins being sold, should be positive
+  transctionRate: Joi.number()
+    .positive()
+    .error(new Error('"tranction_rate" must be a valid positive number')),
+  transction_amount: Joi.number().positive().required(), // Total transaction amount, should be positive
+  // user_id: Joi.string().required(), // User ID for who is making the transaction
+  // date_created: Joi.date().default(() => new Date()), // Auto-populated date (ensure it's a function)
+  status: Joi.string().valid("approved", "unapproved").default("unapproved"), // Status of the transaction
+});
+////////////////
 
+exports.createSellTransaction = async (req, res, next) => {
+  try {
+    // Log the incoming request body for debugging
+    console.log("Request Body:", req.body);
 
+    // Validate incoming request body against the schema (if you are using Joi, for example)
+    await sellTransactionSchema.validateAsync(req.body, {
+      abortEarly: false, // Continue validation after the first error
+      allowUnknown: true, // Allow unknown fields
+    });
 
-///////////////////////////////////////////////////
+    // Extract user ID (assume it's retrieved from session or token)
+    const user_id = req.user?.id; // Optional chaining for safety
+    if (!user_id) {
+      return next(new ErrorHandler("User ID is required", 401)); // Handle missing user ID
+    }
+    // Retrieve company data from the database
+    const companyData = await db.query(
+      "SELECT * FROM company_data WHERE company_id = ?",
+      [req.body.company_id]
+    );
 
+    console.log("Company Data:", companyData); // Log company data
 
+    // Check if companyData is returned correctly
+    if (!companyData || companyData.length === 0) {
+      return next(
+        new ErrorHandler("Company not found or invalid company ID", 404)
+      ); // Handle invalid company
+    }
+
+    // Ensure coin_rate is a valid number
+    // const transctionRate = parseFloat(companyData[0].coin_rate);
+    const transctionRate = parseFloat(companyData[0][0].coin_rate);
+
+    console.log("Transaction Rate:", transctionRate); // Log the transaction rate
+
+    if (isNaN(transctionRate)) {
+      return next(
+        new ErrorHandler('"tranction_rate" must be a valid number', 400)
+      ); // Handle if coin_rate is not a number
+    }
+
+    // Add this validated transaction rate to the request or next logic
+    req.body.tranction_rate = transctionRate; // Ensure this field is set
+
+    const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+    // Insert the transaction into the database
+    const result = await db.query(
+      "INSERT INTO user_transction (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) VALUES (?, ?, ?, ?, ?, NOW(),?)",
+      [
+        user_id,
+        req.body.company_id,
+        req.body.tranction_coin,
+        transctionRate, // Ensure this field is set,
+        req.body.transction_amount,
+
+        "unapproved",
+      ]
+    );
+
+    console.log("Transaction Created:", result); // Log the inserted transaction data
+
+    // Respond with success message and transaction data
+    res.status(201).json({
+      success: true,
+      message: "Transaction created successfully!",
+      // data: result, // You can send back the result of the insertion or any relevant data
+    });
+  } catch (error) {
+    console.error("Error creating sell transaction:", error); // Log the error object
+
+    if (error.isJoi) {
+      // Handle Joi validation errors
+      return next(
+        new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
+      );
+    }
+
+    // Handle other types of errors (e.g., database errors)
+    return next(
+      new ErrorHandler("Failed to create transaction: " + error.message, 500)
+    );
+  }
+};
 
 exports.getQuestHistory = async (req, res) => {
   try {
-    const userId = req.user.id;  // Assuming the user ID is in the request
+    const userId = req.user.id; // Assuming the user ID is in the request
 
     // Step 1: Get all quests and their completion status in one query using LEFT JOIN
     const questHistoryQuery = `
@@ -903,11 +1169,14 @@ exports.getQuestHistory = async (req, res) => {
     const [questHistory] = await db.query(questHistoryQuery, [userId]);
 
     // Step 3: Process the data to return the response
-    const formattedQuestHistory = questHistory.map(quest => {
+    const formattedQuestHistory = questHistory.map((quest) => {
       return {
         quest_name: quest.quest_name,
         quest_id: quest.quest_id,
-        status: quest.completion_status === 'completed' ? 'completed' : 'not_completed',
+        status:
+          quest.completion_status === "completed"
+            ? "completed"
+            : "not_completed",
         coin_earn: quest.coin_earn,
       };
     });
@@ -915,17 +1184,15 @@ exports.getQuestHistory = async (req, res) => {
     // Step 4: Return the response with quest history
     return res.status(200).json({
       success: true,
-      message: 'Quest history fetched successfully.',
+      message: "Quest history fetched successfully.",
       data: formattedQuestHistory,
     });
   } catch (error) {
-    console.error('Error fetching quest history:', error);
+    console.error("Error fetching quest history:", error);
     return res.status(500).json({
       success: false,
-      message: 'Error fetching quest history.',
+      message: "Error fetching quest history.",
       error: error.message,
     });
   }
 };
-
-

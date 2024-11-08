@@ -13,13 +13,14 @@ const QueryModel = require("../models/queryModel");
 const UserDataModel = require("../models/treeModel");
 // const { generateReferralCode } = require("../utils/helpers");
 const pool = require("../config/mysql_database"); // Assuming you're using MySQL pool
-
+const { LocalStorage } = require("node-localstorage");
+const localStorage = new LocalStorage("./scratch");
 const { v4: uuidv4 } = require("uuid");
 // const pool = require('../config/db');  // Assuming you're using MySQL pool
 const {
   findAvailableParentByReferral,
   findNextAvailableParent,
-  updatePendingCoins,
+  // updatePendingCoins,
   distributeCoinsToParents,
   hasBothChildren,
   addUser,
@@ -35,6 +36,11 @@ const module_edit_text = Model.module_edit_text;
 const module_slug = Model.module_slug;
 const module_layout = Model.module_layout;
 
+const COIN_PARENT_ADDITION = 10;
+const COIN_ANCESTOR_ADDITION = 5;
+const COIN_REFERRAL_BONUS = 100;
+const FIXED_COINS = 100;
+const REFERRAL_BONUS_THRESHOLD = 2;
 const registerSchema = Joi.object({
   user_name: Joi.string().required().max(50),
   email: Joi.string().email().required().max(255),
@@ -161,6 +167,7 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
   req.session.user = user;
+  localStorage.setItem("user_type_n", user.user_type);
   const token = User.generateToken(user.id); // Adjust as per your user object structure
   // console.log("aaaa", token);
 
@@ -177,13 +184,17 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
-  }); // Check if req.session exists before trying to destroy it
+  });
+  // Check if req.session exists before trying to destroy it
   if (res.session) {
     res.session.destroy((err) => {
       if (err) {
         return next(err); // Handle the error if necessary
       }
-      res.clearCookie("connect.sid"); // Clear the session ID cookie
+      res.clearCookie("connect.sid");
+      res.clearCookie("token"); // Clear the session ID cookie
+      localStorage.removeItem("user_type_n");
+
       res.flash("msg_response", {
         status: 200,
         message: "Logout Successfully",
@@ -193,6 +204,13 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
   } else {
     // Handle the case where req.session is undefined
     res.clearCookie("connect.sid");
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.removeItem("user_type_n"); // Clear specific data
+      // or
+      localStorage.clear(); // Clear all data
+      console.log("User data removed from localStorage");
+    }
+    res.clearCookie("token");
     req.flash("msg_response", {
       status: 200,
       message: "Session already cleared or not found",
@@ -417,9 +435,8 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
         qa.quest_id -- Make sure to include quest_id for approval/disapproval
      FROM users u
      INNER JOIN user_data ud ON u.id = ud.user_id 
-     LEFT JOIN usercoin_audit qa ON u.id = qa.user_id  -- Adjust this join as needed
-     WHERE u.user_type IN (?, ?)`,
-    ["user", "company"]
+     WHERE u.user_type IN (?)`,
+    ["user"]
   );
 
   // Process each user's quest_screenshot field to ensure it's an array of images
@@ -492,7 +509,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     password: await bcrypt.hash(req.body.password, 10),
     status: req.body.status,
     date_created: dateCreated,
-    user_type: req.body.user_type,
+    user_type: "user",
     date_modified: dateCreated,
   };
 
@@ -688,6 +705,37 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
         .json({ success: false, error: "Error inserting user data" });
     }
 
+    // After creating the new user, insert an entry in the usercoin_audit table
+    if (req.body.pending_coin === 100) {
+      try {
+        const auditData = {
+          user_id: user.id,
+          pending_coin: 100,
+          type: "self",
+          status: "completed",
+          coin_operation: "cr",
+          date_created: dateCreated,
+        };
+
+        const auditQuery = `
+      INSERT INTO usercoin_audit (user_id, pending_coin, type, status, coin_operation, date_created)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+        const auditResult = await db.query(auditQuery, [
+          auditData.user_id,
+          auditData.pending_coin,
+          auditData.type,
+          auditData.status,
+          auditData.coin_operation,
+          auditData.date_created,
+        ]);
+
+        console.log("Audit record inserted:", auditResult);
+      } catch (error) {
+        console.error("Error inserting audit record:", error);
+      }
+    }
     // Update parent record with new child ID
     if (parentId && position) {
       const updateData = { [position]: user.id };
@@ -696,275 +744,379 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
       });
     }
 
-    res
-      .status(201)
-      .json({ success: true, message: "User created successfully." });
+    // Check if request is for JSON response or redirect
+    if (req.headers.accept && req.headers.accept.includes("application/json")) {
+      // Send JSON response for API requests
+      return res
+        .status(201)
+        .json({ success: true, message: "User created successfully." });
+    } else {
+      // Redirect for form submissions
+      const redirectUrl = req.body.redirect || "/admin/users"; // Default redirect URL
+      return res.redirect(redirectUrl);
+    }
   } catch (error) {
     console.error("Error during user creation:", error); // Log the error for debugging
-    return res.status(500).json({ success: false, error: error.message });
+
+    if (req.headers.accept && req.headers.accept.includes("application/json")) {
+      // Send JSON error response for API requests
+      return res.status(500).json({ success: false, error: error.message });
+    } else {
+      // Redirect to error page for form submissions
+      req.flash("error", "Internal Server Error"); // Optional flash message
+      return res.redirect("/admin/error"); // Redirect to error page
+    }
   }
 });
 
 ////////////////////////////////////////////
 ///////////////////////////////////////////
 
+// exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
+//   const userId = req.body.userId; // User ID ko request body se le
+//   const newStatus = req.body.status; // Naya status request body se le
 
+//   try {
+//     // SQL query to update user status
+//     await db.query(`UPDATE users SET status = ? WHERE id = ?`, [
+//       newStatus,
+//       userId,
+//     ]);
 
-
-// Approve quest screenshot and update coins
-// Approve quest screenshot and update pending coins
-exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
-  const { quest_id } = req.params;
-
-  try {
-    // Fetch the coin_earn value from the quest table
-    const [questData] = await db.query(
-      `SELECT coin_earn FROM quest WHERE id = ?`,
-      [quest_id]
-
-
-
-
-    );
-
-    // Check if the quest exists
-    if (questData.length === 0) {
-      return next(new ErrorHandler("Quest not found", 404));
-    }
-
-    const coinEarned = questData[0].coin_earn;
-
-    // Check if the quest has a positive coin_earn value
-    if (coinEarned <= 0) {
-      return next(new ErrorHandler("Coin earn value must be greater than zero.", 400));
-    }
-
-    // Update the pending_coin in usercoin_audit based on coinEarned
-    const result = await db.query(
-      `UPDATE usercoin_audit 
-       SET pending_coin = pending_coin + ?, 
-           quest_screenshot = NULL 
-       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
-      [coinEarned, quest_id]
-    );
-
-    // Check if the update affected any rows
-    if (result.affectedRows === 0) {
-      return next(new ErrorHandler("No matching quest found or screenshot already processed", 404));
-    }
-
-    res.status(200).json({ success: true, message: "Quest approved, pending coins updated successfully." });
-  } catch (error) {
-    console.error("Database update error:", error); // Log specific error for troubleshooting
-    return next(new ErrorHandler("Approval process failed: " + error.message, 500));
-  }
-});
-
-
-
-
-
-// Disapprove quest screenshot and remove the image
-exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
-  const { quest_id } = req.params;
-
-  try {
-    // Remove the quest screenshot only from the usercoin_audit table
-    await db.query(
-      `UPDATE usercoin_audit 
-       SET quest_screenshot = NULL 
-       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
-      [quest_id]
-    );
-
-    res.status(200).json({ success: true, message: "Quest disapproved, screenshot removed." });
-  } catch (error) {
-    console.error("Database update error:", error);
-    return next(new ErrorHandler("Disapproval process failed", 500));
-  }
-});
-
-
-
-
-
+//     // Redirect back to the original URL
+//     const redirectUrl = req.body.redirect || "/admin/users"; // Default redirect URL
+//     res.redirect(redirectUrl); // Redirect back
+//   } catch (error) {
+//     console.error("Error updating user status:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
 exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
-  const userId = req.body.userId; // User ID ko request body se le
-  const newStatus = req.body.status; // Naya status request body se le
+  const userId = req.body.userId;
+  const newStatus = req.body.status;
+  const performedByUserId = req.body.performedByUserId;
+  const redirectUrl = req.body.redirect || "/admin/users";
 
   try {
-    // SQL query to update user status
-    await db.query(`UPDATE users SET status = ? WHERE id = ?`, [
-      newStatus,
-      userId,
-    ]);
+    // Update user status in the database
+    await QueryModel.updateData("users", { status: newStatus }, { id: userId });
+    console.info(`User status updated for User ID: ${userId}`);
 
-    // Redirect back to the original URL
-    const redirectUrl = req.body.redirect || "/admin/users"; // Default redirect URL
-    res.redirect(redirectUrl); // Redirect back
+    // Distribute coins based on activation
+    await distributeCoins(userId);
+
+    // Redirect after successful update
+    res.redirect(redirectUrl);
   } catch (error) {
     console.error("Error updating user status:", error);
     res.status(500).send("Internal Server Error");
   }
 });
+async function distributeCoins(userId) {
+  const COIN_REFERRAL_BONUS = 100; // Coins added to activated user
+  const COIN_PARENT_ADDITION = 10; // Coins added to the direct parent
+  const COIN_ANCESTOR_ADDITION = 5; // Coins added to each ancestor
+  const FIXED_COINS = 40; // Total coins available for distribution
+
+  try {
+    // Step 1: Fetch the user's current pending coin amount
+    const userCoinsData = await QueryModel.getData(
+      "user_data",
+      { user_id: userId },
+      ["pending_coin", "referral_by"]
+    );
+    const currentPendingCoin = userCoinsData[0]?.pending_coin || 0;
+
+    // Step 2: Add referral bonus only if the user has a referrer and hasn't received it yet
+    if (
+      userCoinsData[0]?.referral_by &&
+      currentPendingCoin < COIN_REFERRAL_BONUS
+    ) {
+      const updatedUserCoins = currentPendingCoin + COIN_REFERRAL_BONUS;
+      await QueryModel.updateData(
+        "user_data",
+        { pending_coin: updatedUserCoins },
+        { user_id: userId }
+      );
+      console.info(
+        `Referral bonus of ${COIN_REFERRAL_BONUS} coins awarded to User ID: ${userId}`
+      );
+    } else {
+      console.info(
+        `User ID ${userId} already has referral bonus or no referrer. Skipping award.`
+      );
+    }
+
+    // Step 3: Set up remaining coins and start distributing to parents and ancestors
+    let remainingCoins = FIXED_COINS;
+    let currentUserId = userId;
+    let isFirstParent = true; // Flag to check if it's the direct parent
+
+    while (remainingCoins > 0) {
+      const parentData = await QueryModel.getData(
+        "user_data",
+        { user_id: currentUserId },
+        ["parent_id"]
+      );
+      const parentId = parentData[0]?.parent_id;
+
+      // Break the loop if no more parents are found
+      if (!parentId) break;
+
+      // Determine the amount of coins to add (10 for direct parent, 5 for ancestors)
+      const coinsToAdd = isFirstParent
+        ? COIN_PARENT_ADDITION
+        : COIN_ANCESTOR_ADDITION;
+      const actualCoinsToAdd =
+        remainingCoins >= coinsToAdd ? coinsToAdd : remainingCoins;
+
+      // Update pending coins for the current parent/ancestor
+      const parentCoinsData = await QueryModel.getData(
+        "user_data",
+        { user_id: parentId },
+        ["pending_coin"]
+      );
+      const updatedCoins =
+        (parentCoinsData[0]?.pending_coin || 0) + actualCoinsToAdd;
+      await QueryModel.updateData(
+        "user_data",
+        { pending_coin: updatedCoins },
+        { user_id: parentId }
+      );
+
+      // Deduct coins from remaining balance
+      remainingCoins -= actualCoinsToAdd;
+      currentUserId = parentId;
+      isFirstParent = false; // Set flag to false after the direct parent is processed
+    }
+  } catch (error) {
+    console.error("Error distributing coins:", error);
+    throw error;
+  }
+}
+
+async function updatePendingCoins(
+  userId,
+  coins,
+  operation = "cr",
+  description = "",
+  type = "self",
+  companyId = null,
+  performedByUserId = null
+) {
+  try {
+    if (!performedByUserId) {
+      performedByUserId = getCurrentUserId();
+    }
+
+    // Update the pending coins for the user
+    await QueryModel.updateData(
+      "user_data",
+      { pending_coin: coins },
+      { id: userId }
+    );
+
+    // Save a record in the usercoin_audit table
+    await QueryModel.saveData("usercoin_audit", {
+      user_id: userId,
+      pending_coin: coins,
+      quest_id: null,
+      coin_operation: operation,
+      description: description,
+      status: "active",
+      deleted: 0,
+      earn_coin: operation === "cr" ? 1 : 0,
+      type: type,
+      company_id: companyId,
+      date_entered: new Date(),
+      performed_by_user_id: performedByUserId,
+    });
+  } catch (error) {
+    console.error("Error in updatePendingCoins:", error.message);
+  }
+}
+
+function logCoinsReceived(coinsReceived) {
+  for (const [userId, coins] of Object.entries(coinsReceived)) {
+    console.info(`User ID: ${userId} received ${coins} coins.`);
+  }
+}
+
+exports.findById = async (table_name, id) => {
+  try {
+    console.info(`Attempting to find record in ${table_name} with ID: ${id}`);
+    const record = await db.query(`SELECT * FROM ${table_name} WHERE id = ?`, [
+      id,
+    ]);
+    console.info(`Query Result:`, record); // Log the full result
+
+    if (!record[0] || !record[0][0])
+      throw new ErrorHandler("Record not found", 400);
+
+    return record[0][0];
+  } catch (error) {
+    console.error(`Error in findById: ${error.message}`);
+    throw new ErrorHandler(`${error.message}`, 400);
+  }
+};
 
 //////////////////////////////////////////////////
 
 // Joi schema for validation
-const coinRateSchema = Joi.object({
-  company_id: Joi.number().integer().required(),
-  coin_rate: Joi.string().required(),
-  description: Joi.string().optional(),
-});
+// const coinRateSchema = Joi.object({
+//   company_id: Joi.number().integer().required(),
+//   coin_rate: Joi.string().required(),
+//   description: Joi.string().optional(),
+// });
 
-exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
-  // Step 1: Validate the request body
-  try {
-    await coinRateSchema.validateAsync(req.body, {
-      abortEarly: false,
-      allowUnknown: true,
-    });
-  } catch (error) {
-    return next(
-      new ErrorHandler(
-        error.details.map((d) => d.message), // Map validation errors
-        400
-      )
-    );
-  }
+// exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
+//   // Step 1: Validate the request body
+//   try {
+//     await coinRateSchema.validateAsync(req.body, {
+//       abortEarly: false,
+//       allowUnknown: true,
+//     });
+//   } catch (error) {
+//     return next(
+//       new ErrorHandler(
+//         error.details.map((d) => d.message), // Map validation errors
+//         400
+//       )
+//     );
+//   }
 
-  // Step 2: Extract company_id from request body
-  const companyId = req.body.company_id;
+//   // Step 2: Extract company_id from request body
+//   const companyId = req.body.company_id;
 
-  // Step 3: Check if the company exists in the users table
-  const companyExists = await QueryModel.findOne("users", { id: companyId });
+//   // Step 3: Check if the company exists in the users table
+//   const companyExists = await QueryModel.findOne("users", { id: companyId });
 
-  if (!companyExists) {
-    return next(new ErrorHandler("Company not found.", 404));
-  }
+//   if (!companyExists) {
+//     return next(new ErrorHandler("Company not found.", 404));
+//   }
 
-  // Step 4: Prepare data for insertion into the company_data table
-  const insertData = {
-    company_id: companyId,
-    coin_rate: req.body.coin_rate,
-    description: req.body.description || "", // Optional description
-  };
+//   // Step 4: Prepare data for insertion into the company_data table
+//   const insertData = {
+//     company_id: companyId,
+//     coin_rate: req.body.coin_rate,
+//     description: req.body.description || "", // Optional description
+//   };
 
-  // Step 5: Insert the coin rate data into the company_data table
-  try {
-    const coinRate = await QueryModel.saveData(
-      "company_data",
-      insertData,
-      next
-    );
+//   // Step 5: Insert the coin rate data into the company_data table
+//   try {
+//     const coinRate = await QueryModel.saveData(
+//       "company_data",
+//       insertData,
+//       next
+//     );
 
-    // Success response
-    req.flash("msg_response", {
-      status: 200,
-      message: "Coin rate added successfully for the company.",
-    });
+//     // Success response
+//     req.flash("msg_response", {
+//       status: 200,
+//       message: "Coin rate added successfully for the company.",
+//     });
 
-    // Redirect to the users page after successful insert
-    res.redirect(`/admin/users`);
-  } catch (err) {
-    console.error("Error saving coin rate data:", err);
-    return next(new ErrorHandler("Error while saving coin rate data.", 500));
-  }
-});
+//     // Redirect to the users page after successful insert
+//     res.redirect(`/admin/users`);
+//   } catch (err) {
+//     console.error("Error saving coin rate data:", err);
+//     return next(new ErrorHandler("Error while saving coin rate data.", 500));
+//   }
+// });
 
-exports.submitCompanyForm = catchAsyncErrors(async (req, res, next) => {
-  const { coin_rate, description } = req.body; // Extract data from the request body
-  const companyId = req.params.id; // Get the company ID from the request parameters
+// exports.submitCompanyForm = catchAsyncErrors(async (req, res, next) => {
+//   const { coin_rate, description } = req.body; // Extract data from the request body
+//   const companyId = req.params.id; // Get the company ID from the request parameters
 
-  // Validate input (basic example; you can add more validation as needed)
-  if (!coin_rate || !description) {
-    return next(
-      new ErrorHandler("Coin rate and description are required", 400)
-    );
-  }
+//   // Validate input (basic example; you can add more validation as needed)
+//   if (!coin_rate || !description) {
+//     return next(
+//       new ErrorHandler("Coin rate and description are required", 400)
+//     );
+//   }
 
-  try {
-    // Check if the company data already exists
-    const existingCompanyDataQuery = await db.query(
-      "SELECT * FROM company_data WHERE company_id = ?",
-      [companyId]
-    );
+//   try {
+//     // Check if the company data already exists
+//     const existingCompanyDataQuery = await db.query(
+//       "SELECT * FROM company_data WHERE company_id = ?",
+//       [companyId]
+//     );
 
-    // If data exists, update the existing record
-    if (existingCompanyDataQuery[0].length > 0) {
-      await db.query(
-        "UPDATE company_data SET coin_rate = ?, description = ? WHERE company_id = ?",
-        [coin_rate, description, companyId]
-      );
+//     // If data exists, update the existing record
+//     if (existingCompanyDataQuery[0].length > 0) {
+//       await db.query(
+//         "UPDATE company_data SET coin_rate = ?, description = ? WHERE company_id = ?",
+//         [coin_rate, description, companyId]
+//       );
 
-      // Optionally, set a flash message or response for successful update
-      req.flash("msg_response", {
-        status: 200,
-        message: "Coin rate updated successfully for company ID: " + companyId,
-      });
-    } else {
-      // If data does not exist, insert a new record
-      const insertData = {
-        company_id: companyId,
-        coin_rate: coin_rate,
-        description: description,
-      };
+//       // Optionally, set a flash message or response for successful update
+//       req.flash("msg_response", {
+//         status: 200,
+//         message: "Coin rate updated successfully for company ID: " + companyId,
+//       });
+//     } else {
+//       // If data does not exist, insert a new record
+//       const insertData = {
+//         company_id: companyId,
+//         coin_rate: coin_rate,
+//         description: description,
+//       };
 
-      await db.query("INSERT INTO company_data SET ?", insertData);
+//       await db.query("INSERT INTO company_data SET ?", insertData);
 
-      // Optionally, set a flash message or response for successful insertion
-      req.flash("msg_response", {
-        status: 200,
-        message:
-          "Coin rate submitted successfully for company ID: " + companyId,
-      });
-    }
+//       // Optionally, set a flash message or response for successful insertion
+//       req.flash("msg_response", {
+//         status: 200,
+//         message:
+//           "Coin rate submitted successfully for company ID: " + companyId,
+//       });
+//     }
 
-    // Redirect back to the index page or another appropriate page
-    res.redirect("/admin/" + module_slug); // Change this to the appropriate redirection
-  } catch (error) {
-    console.error("Error while submitting company form:", error);
-    return next(
-      new ErrorHandler(
-        "An error occurred while submitting the company form",
-        500
-      )
-    );
-  }
-});
+//     // Redirect back to the index page or another appropriate page
+//     res.redirect("/admin/" + module_slug); // Change this to the appropriate redirection
+//   } catch (error) {
+//     console.error("Error while submitting company form:", error);
+//     return next(
+//       new ErrorHandler(
+//         "An error occurred while submitting the company form",
+//         500
+//       )
+//     );
+//   }
+// });
 
-exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
-  const companyId = req.params.id; // Get the company ID from the URL
+// exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
+//   const companyId = req.params.id; // Get the company ID from the URL
 
-  // Fetch the company details from the database
-  const companyDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-    companyId,
-  ]);
+//   // Fetch the company details from the database
+//   const companyDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+//     companyId,
+//   ]);
 
-  const company = companyDetail[0][0]; // Extract the company object from the result
+//   const company = companyDetail[0][0]; // Extract the company object from the result
 
-  // Check if the company exists
-  if (!company) {
-    return next(new ErrorHandler("Company not found", 404)); // Handle company not found
-  }
+//   // Check if the company exists
+//   if (!company) {
+//     return next(new ErrorHandler("Company not found", 404)); // Handle company not found
+//   }
 
-  // Fetch the existing company data from the company_data table
-  const companyDataQuery = await db.query(
-    "SELECT * FROM company_data WHERE company_id = ?",
-    [companyId]
-  );
+//   // Fetch the existing company data from the company_data table
+//   const companyDataQuery = await db.query(
+//     "SELECT * FROM company_data WHERE company_id = ?",
+//     [companyId]
+//   );
 
-  const companyData = companyDataQuery[0][0] || {}; // Get the company data or set to an empty object if not found
+//   const companyData = companyDataQuery[0][0] || {}; // Get the company data or set to an empty object if not found
 
-  // Render the company form view with the company details and existing company data
-  res.render(module_slug + "/company-form", {
-    layout: module_layout, // Assuming there's a layout file
-    title: "Submit Company Data",
-    companyId, // Pass the company ID to the form
-    company, // Pass the company object to the view
-    companyData, // Pass the existing company data (coin_rate, description)
-  });
-});
+//   // Render the company form view with the company details and existing company data
+//   res.render(module_slug + "/company-form", {
+//     layout: module_layout, // Assuming there's a layout file
+//     title: "Submit Company Data",
+//     companyId, // Pass the company ID to the form
+//     company, // Pass the company object to the view
+//     companyData, // Pass the existing company data (coin_rate, description)
+//   });
+// });
 
 ///////////////////////////////////////////////
 
@@ -998,7 +1150,12 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
     console.log("Query result:", result);
 
     // Check if the result has the correct structure
-    if (!result || !result[0] || !Array.isArray(result[0]) || result[0].length === 0) {
+    if (
+      !result ||
+      !result[0] ||
+      !Array.isArray(result[0]) ||
+      result[0].length === 0
+    ) {
       console.log(`User with ID ${userId} not found in database.`);
       return res.status(404).send("User not found");
     }
@@ -1095,3 +1252,125 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
 
   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
 });
+
+exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
+
+  try {
+    // Fetch the coin_earn value from the quest table
+    const [questData] = await db.query(
+      `SELECT coin_earn FROM quest WHERE id = ?`,
+      [quest_id]
+    );
+
+    // Check if the quest exists
+    if (questData.length === 0) {
+      return next(new ErrorHandler("Quest not found", 404));
+    }
+
+    const coinEarned = questData[0].coin_earn;
+
+    // Check if the quest has a positive coin_earn value
+    if (coinEarned <= 0) {
+      return next(
+        new ErrorHandler("Coin earn value must be greater than zero.", 400)
+      );
+    }
+
+    // Update the pending_coin in usercoin_audit based on coinEarned
+    const result = await db.query(
+      `UPDATE usercoin_audit 
+       SET pending_coin = pending_coin + ?, 
+           quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [coinEarned, quest_id]
+    );
+
+    // Check if the update affected any rows
+    if (result.affectedRows === 0) {
+      return next(
+        new ErrorHandler(
+          "No matching quest found or screenshot already processed",
+          404
+        )
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Quest approved, pending coins updated successfully.",
+    });
+  } catch (error) {
+    console.error("Database update error:", error); // Log specific error for troubleshooting
+    return next(
+      new ErrorHandler("Approval process failed: " + error.message, 500)
+    );
+  }
+});
+
+exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
+
+  try {
+    // Remove the quest screenshot only from the usercoin_audit table
+    await db.query(
+      `UPDATE usercoin_audit 
+       SET quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [quest_id]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Quest disapproved, screenshot removed.",
+    });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Disapproval process failed", 500));
+  }
+});
+
+exports.renderTreeView = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        user_data.id AS user_data_id, 
+        user_data.user_id, 
+        users.user_name, 
+        user_data.parent_id, 
+        user_data.leftchild_id, 
+        user_data.rightchild_id
+      FROM user_data
+      JOIN users ON user_data.user_id = users.id
+    `;
+
+    const [rows] = await mysqlPool.query(query);
+    const userTree = buildUserTree(rows);
+
+    res.render("tree_view", { userTree: JSON.stringify(userTree) });
+  } catch (error) {
+    console.error("Error rendering users view:", error);
+    res.status(500).send("Error rendering users view");
+  }
+};
+
+function buildUserTree(users) {
+  const userMap = {};
+  users.forEach((user) => {
+    userMap[user.user_id] = { ...user, children: [] };
+  });
+
+  const roots = [];
+  users.forEach((user) => {
+    if (user.parent_id === null) {
+      roots.push(userMap[user.user_id]);
+    } else {
+      const parent = userMap[user.parent_id];
+      if (parent) {
+        parent.children.push(userMap[user.user_id]);
+      }
+    }
+  });
+
+  return roots;
+}

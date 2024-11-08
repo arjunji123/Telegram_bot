@@ -1,4 +1,4 @@
-<% if(user && user.user_type==='admin' ) { %> <!-- Check if user is admin -->
+<% if(userty && userty==='admin' ) { %> <!-- Check if user is admin -->
     <div class="left-side-menu">
 
         <div class="h-100" data-simplebar>
@@ -80,6 +80,7 @@
                             </ul>
                         </div>
                     </li>
+
                     <li>
                         <a href="#quests" data-bs-toggle="collapse">
                             <i class="mdi mdi-file-multiple-outline"></i>
@@ -98,20 +99,33 @@
                         </div>
                     </li>
 
+
+                    <li>
+                        <a href="#testimonials" data-bs-toggle="collapse">
+                            <i class="fe-users"></i>
+                            <span> Tasks History </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <div class="collapse" id="testimonials">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="/admin/testimonials">Tasks History</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
                     <li>
                         <a href="#services" data-bs-toggle="collapse">
                             <i class="mdi mdi-file-multiple-outline"></i>
-                            <span> Services </span>
+                            <span> Companies </span>
                             <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="services">
                             <ul class="nav-second-level">
                                 <li>
-                                    <a href="/admin/services">All Services</a>
+                                    <a href="/admin/services">All Companies</a>
                                 </li>
-                                <li>
-                                    <a href="/admin/services">Add New</a>
-                                </li>
+
                             </ul>
                         </div>
                     </li>
@@ -192,15 +206,15 @@
                         <li class="menu-title mt-2">Apps</li>
 
                         <li>
-                            <a href="#services" data-bs-toggle="collapse">
+                            <a href="#faqs" data-bs-toggle="collapse">
                                 <i class="mdi mdi-file-multiple-outline"></i>
-                                <span> Services </span>
+                                <span> Withdrawal Req. </span>
                                 <span class="menu-arrow"></span>
                             </a>
-                            <div class="collapse" id="services">
+                            <div class="collapse" id="faqs">
                                 <ul class="nav-second-level">
                                     <li>
-                                        <a href="/admin/services">Withdrawal</a>
+                                        <a href="/admin/faqs">Withdrawal</a>
                                     </li>
 
                                 </ul>
