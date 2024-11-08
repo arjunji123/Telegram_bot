@@ -84,6 +84,5 @@ app.use("/api/v1", faqs);
 app.use("/api/v1", testimonials);
 // app.use("/api/v1", withdrwals);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 app.use(errorMiddleware);
 module.exports = app;
