@@ -40,6 +40,9 @@ const {
   editUserForm,
   updateUserRecord,
   deleteRecord,
+  approveQuest,
+  disapproveQuest,
+  renderTreeView,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -57,6 +60,7 @@ const {
   transferCoins,
   uploadQuestScreenshotApi,
   createSellTransaction,
+  getQuestHistory,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -95,14 +99,7 @@ router
 
 // Route for updating user status
 router.post("/users/update-status", updateUserStatus);
-// router
-//   .route("/coin-rate/add")
-//   .post(isAuthenticatedUser, authorizeRoles("admin"), addCoinRate);
-// Route for showing form and submitting data
-// router
-//   .route("/" + module_slug + "/company-form/:id")
-//   .get(isAuthenticatedUser, authorizeRoles("admin"), showCompanyForm)
-//   .post(isAuthenticatedUser, authorizeRoles("admin"), submitCompanyForm);
+
 router
   .route("/" + module_slug + "/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleUser);
@@ -116,6 +113,11 @@ router
 router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
+
+router.post("/approve-quest/:quest_id", approveQuest);
+router.post("/disapprove-quest/:quest_id", disapproveQuest);
+router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
+router.get("/user-tree", isAuthenticatedUser, renderTreeView);
 /*******REST API*******/
 
 router.route("/api-register").post(registerUserApi);
@@ -148,10 +150,9 @@ router.post(
 router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
 router.post(
-  "/quest-screenshot/:id",
-  // This should come before the upload handler
-  upload.single("screenshot"),
+  "/upload-quest-screenshot/:quest_id",
+  upload.array("screenshot", 5),
   uploadQuestScreenshotApi
 );
-router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
+router.get("/quest-history", isApiAuthenticatedUser, getQuestHistory);
 module.exports = router;

@@ -1227,3 +1227,125 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
 
   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
 });
+
+exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
+
+  try {
+    // Fetch the coin_earn value from the quest table
+    const [questData] = await db.query(
+      `SELECT coin_earn FROM quest WHERE id = ?`,
+      [quest_id]
+    );
+
+    // Check if the quest exists
+    if (questData.length === 0) {
+      return next(new ErrorHandler("Quest not found", 404));
+    }
+
+    const coinEarned = questData[0].coin_earn;
+
+    // Check if the quest has a positive coin_earn value
+    if (coinEarned <= 0) {
+      return next(
+        new ErrorHandler("Coin earn value must be greater than zero.", 400)
+      );
+    }
+
+    // Update the pending_coin in usercoin_audit based on coinEarned
+    const result = await db.query(
+      `UPDATE usercoin_audit 
+       SET pending_coin = pending_coin + ?, 
+           quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [coinEarned, quest_id]
+    );
+
+    // Check if the update affected any rows
+    if (result.affectedRows === 0) {
+      return next(
+        new ErrorHandler(
+          "No matching quest found or screenshot already processed",
+          404
+        )
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Quest approved, pending coins updated successfully.",
+    });
+  } catch (error) {
+    console.error("Database update error:", error); // Log specific error for troubleshooting
+    return next(
+      new ErrorHandler("Approval process failed: " + error.message, 500)
+    );
+  }
+});
+
+exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
+
+  try {
+    // Remove the quest screenshot only from the usercoin_audit table
+    await db.query(
+      `UPDATE usercoin_audit 
+       SET quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [quest_id]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Quest disapproved, screenshot removed.",
+    });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Disapproval process failed", 500));
+  }
+});
+
+exports.renderTreeView = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        user_data.id AS user_data_id, 
+        user_data.user_id, 
+        users.user_name, 
+        user_data.parent_id, 
+        user_data.leftchild_id, 
+        user_data.rightchild_id
+      FROM user_data
+      JOIN users ON user_data.user_id = users.id
+    `;
+
+    const [rows] = await mysqlPool.query(query);
+    const userTree = buildUserTree(rows);
+
+    res.render("tree_view", { userTree: JSON.stringify(userTree) });
+  } catch (error) {
+    console.error("Error rendering users view:", error);
+    res.status(500).send("Error rendering users view");
+  }
+};
+
+function buildUserTree(users) {
+  const userMap = {};
+  users.forEach((user) => {
+    userMap[user.user_id] = { ...user, children: [] };
+  });
+
+  const roots = [];
+  users.forEach((user) => {
+    if (user.parent_id === null) {
+      roots.push(userMap[user.user_id]);
+    } else {
+      const parent = userMap[user.parent_id];
+      if (parent) {
+        parent.children.push(userMap[user.user_id]);
+      }
+    }
+  });
+
+  return roots;
+}
