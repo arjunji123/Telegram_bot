@@ -1,6 +1,7 @@
 //creating token and saving in cookie
 const sendToken = (user, token, statusCode, res) => {
   //const token = token;
+  console.log(user.user_type);
 
   const options = {
     expires: new Date(

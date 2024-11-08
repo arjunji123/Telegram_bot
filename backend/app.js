@@ -8,7 +8,8 @@ const cors = require("cors");
 const flash = require("connect-flash");
 const expressLayouts = require("express-ejs-layouts");
 const errorMiddleware = require("./middleware/error");
-
+const { LocalStorage } = require("node-localstorage");
+const localStorage = new LocalStorage("./scratch");
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -34,7 +35,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   session({
-    cookie: { maxAge: 60000 },
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
     secret: "woot",
     resave: false,
     httpOnly: true,
@@ -44,7 +48,9 @@ app.use(
 
 app.use(flash());
 app.use((req, res, next) => {
+  const userType = localStorage.getItem("user_type_n");
   res.locals.user = req.session.user;
+  res.locals.userty = userType;
   next();
 });
 
@@ -56,6 +62,7 @@ const user = require("./routes/userRoute");
 const settings = require("./routes/settingRoute");
 const faqs = require("./routes/faqRoute");
 const testimonials = require("./routes/testimonialRoute");
+// const withdrwals = require("./routes/withdrwalRoute");
 
 app.use("/admin", user);
 app.use("/admin", blogs);
@@ -66,6 +73,8 @@ app.use("/admin", settings);
 app.use("/admin", faqs);
 app.use("/admin", testimonials);
 
+// app.use("/admin", withdrwals);
+
 app.use("/api/v1", user);
 app.use("/api/v1", blogs);
 app.use("/api/v1", services);
@@ -73,6 +82,7 @@ app.use("/api/v1", quests);
 app.use("/api/v1", settings);
 app.use("/api/v1", faqs);
 app.use("/api/v1", testimonials);
+// app.use("/api/v1", withdrwals);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(errorMiddleware);

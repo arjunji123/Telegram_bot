@@ -41,7 +41,6 @@ const module_edit_text = "Edit";
 const module_slug = "users";
 const module_layout = "layouts/main";
 
-
 const insertSchema = Joi.object({
   user_name: Joi.string().required().max(255),
   email: Joi.string().required(),

@@ -34,8 +34,8 @@ const {
   createRecord,
   updateUserStatus,
   // addCoinRate,
-  showCompanyForm,
-  submitCompanyForm,
+  // showCompanyForm,
+  // submitCompanyForm,
   getSingleUser,
   editUserForm,
   updateUserRecord,
@@ -55,6 +55,8 @@ const {
   getAllCompaniesApi,
   getUserReferralCode,
   transferCoins,
+  uploadQuestScreenshotApi,
+  createSellTransaction,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -97,10 +99,10 @@ router.post("/users/update-status", updateUserStatus);
 //   .route("/coin-rate/add")
 //   .post(isAuthenticatedUser, authorizeRoles("admin"), addCoinRate);
 // Route for showing form and submitting data
-router
-  .route("/" + module_slug + "/company-form/:id")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), showCompanyForm)
-  .post(isAuthenticatedUser, authorizeRoles("admin"), submitCompanyForm);
+// router
+//   .route("/" + module_slug + "/company-form/:id")
+//   .get(isAuthenticatedUser, authorizeRoles("admin"), showCompanyForm)
+//   .post(isAuthenticatedUser, authorizeRoles("admin"), submitCompanyForm);
 router
   .route("/" + module_slug + "/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleUser);
@@ -145,4 +147,11 @@ router.post(
 );
 router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
+router.post(
+  "/quest-screenshot/:id",
+  // This should come before the upload handler
+  upload.single("screenshot"),
+  uploadQuestScreenshotApi
+);
+router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
 module.exports = router;

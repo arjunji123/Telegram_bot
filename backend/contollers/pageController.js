@@ -167,15 +167,28 @@ exports.editForm = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Blog not found", 404));
   }
 
-  // Log the original value of end_date
-  console.log("Original End Date:", blog.end_date);
+  // Handle start_date formatting
+  console.log("Original Start Date:", blog.start_date);
+  if (blog.start_date) {
+    const startDate = new Date(blog.start_date);
+    if (!isNaN(startDate.getTime())) {
+      const utcOffset = startDate.getTimezoneOffset();
+      const localStartDate = new Date(
+        startDate.getTime() - utcOffset * 60 * 1000
+      );
+      blog.start_date = localStartDate.toISOString().slice(0, 16);
+    } else {
+      console.error("Invalid date:", blog.start_date);
+      blog.start_date = ""; // Handle invalid date
+    }
+  }
+  console.log("Formatted Start Date:", blog.start_date);
 
-  // Ensure end_date is a valid date and format it
+  // Handle end_date formatting
+  console.log("Original End Date:", blog.end_date);
   if (blog.end_date) {
     const endDate = new Date(blog.end_date);
-
     if (!isNaN(endDate.getTime())) {
-      // Convert to local time format if needed
       const utcOffset = endDate.getTimezoneOffset();
       const localEndDate = new Date(endDate.getTime() - utcOffset * 60 * 1000);
       blog.end_date = localEndDate.toISOString().slice(0, 16);
@@ -184,8 +197,6 @@ exports.editForm = catchAsyncErrors(async (req, res, next) => {
       blog.end_date = ""; // Handle invalid date
     }
   }
-
-  // Log the formatted end_date
   console.log("Formatted End Date:", blog.end_date);
 
   res.render(module_slug + "/edit", {
@@ -195,6 +206,7 @@ exports.editForm = catchAsyncErrors(async (req, res, next) => {
     module_slug,
   });
 });
+
 exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
   const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
@@ -203,7 +215,8 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     req.body.image = req.file.filename;
   }
 
-  // Log the incoming end_date
+  // Log the incoming dates
+  console.log("Incoming Start Date:", req.body.start_date);
   console.log("Incoming End Date:", req.body.end_date);
 
   // Sanitize the description to remove HTML tags
@@ -211,11 +224,13 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     allowedTags: [], // No tags allowed
     allowedAttributes: {}, // No attributes allowed
   });
+
   const updateData = {
     quest_name: req.body.quest_name,
     quest_type: req.body.quest_type,
-    activity: req.body.activity, // New field for activity
+    activity: req.body.activity,
     quest_url: req.body.quest_url,
+    start_date: req.body.start_date, // New field for start date
     end_date: req.body.end_date, // New field for end date
     date_created: date_created,
     image: req.body.image,
@@ -300,34 +315,41 @@ exports.getSingleRecord = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Blog not found", 404)); // Handle not found error
   }
 
-  // Log the original value of end_date
+  // Handle start_date formatting
+  console.log("Original Start Date:", blog.start_date);
+  if (blog.start_date) {
+    const startDate = new Date(blog.start_date);
+    if (!isNaN(startDate.getTime())) {
+      blog.start_date = moment(startDate)
+        .tz("Your_Time_Zone") // Replace 'Your_Time_Zone' with the actual timezone, e.g., 'Asia/Kolkata'
+        .format("YYYY-MM-DDTHH:mm");
+    } else {
+      console.error("Invalid date:", blog.start_date);
+      blog.start_date = ""; // Handle invalid date
+    }
+  }
+  console.log("Formatted Start Date:", blog.start_date);
+
+  // Handle end_date formatting
   console.log("Original End Date:", blog.end_date);
-
-  // Format end_date if it exists
   if (blog.end_date) {
-    // Create a date object from end_date
     const endDate = new Date(blog.end_date);
-
-    // Check if endDate is valid
     if (!isNaN(endDate.getTime())) {
-      // Format to 'YYYY-MM-DDTHH:mm' for datetime-local input
-      // Convert to local timezone (e.g., 'Asia/Kolkata') before formatting
       blog.end_date = moment(endDate)
-        .tz("Your_Time_Zone")
-        .format("YYYY-MM-DDTHH:mm"); // Change 'Your_Time_Zone' accordingly
+        .tz("Your_Time_Zone") // Replace 'Your_Time_Zone' with the actual timezone, e.g., 'Asia/Kolkata'
+        .format("YYYY-MM-DDTHH:mm");
     } else {
       console.error("Invalid date:", blog.end_date);
       blog.end_date = ""; // Handle invalid date
     }
   }
-
-  // Log the formatted end_date
   console.log("Formatted End Date:", blog.end_date);
 
   res.render(module_slug + "/detail", {
     layout: module_layout,
     title: module_single_title,
     blog,
+    module_slug,
   });
 });
 
@@ -643,53 +665,30 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
           error: `Insufficient pending coins in user_data. At least ${reduceCoinRate} coins are required.`,
         });
       }
-
       // Step 3: Deduct coins from user_data table
       await db.query(
         "UPDATE user_data SET pending_coin = pending_coin - ?, coins = coins + ? WHERE user_id = ?",
         [reduceCoinRate, reduceCoinRate, user_id]
       );
 
-      // Step 4: Transfer coins from usercoin_audit table
-      let coinsToTransfer = reduceCoinRate; // Use the reduceCoinRate for transfer
-      const auditRows = await db.query(
-        "SELECT * FROM usercoin_audit WHERE user_id = ? ORDER BY id ASC",
-        [user_id]
+      // Step 4: Calculate the updated pending coins and earn coins
+      const updatedPendingCoins = userPendingCoins - reduceCoinRate; // Updated pending coins after deduction
+      const earnCoins = reduceCoinRate; // Earn coins is the reduceCoinRate that is transferred
+
+      // Insert a new row into usercoin_audit with the updated values
+      await db.query(
+        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin) VALUES (?, ?, ?)",
+        [user_id, updatedPendingCoins, earnCoins]
       );
 
-      for (let i = 0; i < auditRows[0].length; i++) {
-        const row = auditRows[0][i];
-        if (coinsToTransfer <= 0) break;
-
-        if (row.pending_coin > 0) {
-          const transferAmount = Math.min(coinsToTransfer, row.pending_coin);
-
-          // Update the row to transfer coins
-          await db.query(
-            "UPDATE usercoin_audit SET pending_coin = pending_coin - ?, earn_coin = earn_coin + ? WHERE id = ?",
-            [transferAmount, transferAmount, row.id]
-          );
-
-          coinsToTransfer -= transferAmount;
-        }
-      }
-
-      // If there are still coins left to transfer, it means not enough pending coins were found
-      if (coinsToTransfer > 0) {
-        return res.status(400).json({
-          success: false,
-          error:
-            "Insufficient pending coins in usercoin_audit to complete the transfer.",
-        });
-      }
-
-      // Step 5: Fetch updated values
+      // Step 5: Fetch updated values for response
       const updatedPendingCoinsResult = await db.query(
         "SELECT pending_coin FROM user_data WHERE user_id = ?",
         [user_id]
       );
 
-      const updatedPendingCoins = updatedPendingCoinsResult[0][0].pending_coin;
+      const finalUpdatedPendingCoins =
+        updatedPendingCoinsResult[0][0].pending_coin;
 
       const updatedTotalCoinsResult = await db.query(
         "SELECT SUM(coins) AS totalEarnCoins FROM user_data WHERE user_id = ?",
