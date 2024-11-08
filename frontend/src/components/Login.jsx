@@ -21,15 +21,16 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors(''); // Clear previous error message
-
     try {
       await dispatch(login({ mobile, password }));
-      // setLoggedIn(true);
-      toast.success("Login successfull ! "); // Show success toast
+      toast.success("Login successful!"); // Show success toast
       setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
     } catch (error) {
-      toast.error("Invalid mobile number or password");
-      setErrors('Login failed: ' + error.message);
+      const backendError = error.error || "Your account is deactivated. Please contact support.";
+      setErrors(backendError); // Set error message from backend response
+      toast.error(backendError); // Show backend error in toast
+      console.log("Error:", backendError);
+      
     }
   };
 
@@ -121,7 +122,7 @@ function Login() {
         <div className="bg-[#111113] py-4 sm:py-6 text-center rounded-b-2xl">
           <p className="text-xs sm:text-sm text-[#909090]">
             New to Unitrade? 
-            <a href="/" className="text-white font-semibold hover:underline ml-1">
+            <a href="/signup" className="text-white font-semibold hover:underline ml-1">
               Create an Account
             </a>
           </p>
