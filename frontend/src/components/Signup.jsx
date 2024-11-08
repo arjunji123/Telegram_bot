@@ -62,8 +62,8 @@ function Signup() {
     if (!values.password) {
       toast.error("Password is required");
       return false;
-    } else if (values.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    } else if (values.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return false;
     }
 
