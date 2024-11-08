@@ -6,8 +6,8 @@ const TransactionHistory = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-black text-white min-h-screen flex justify-center font-poppins">
-      <div className="w-full max-w-lg flex flex-col px-4">
+    <div className="bg-white min-h-screen flex justify-center font-poppins">
+      <div className=" bg-black text-white w-full max-w-lg flex flex-col px-4">
         
         {/* Header with Back Button */}
         <div className="flex items-center justify-between py-4">

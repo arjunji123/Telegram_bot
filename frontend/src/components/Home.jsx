@@ -137,10 +137,10 @@ function Home() {
       {/* Pending Coin Display - Updated Style */}
       <div className="absolute bottom-20  w-full px-4">
            {/* Pending Coin Display */}
-           <div className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
-              <p className="text-xl font-extrabold font-poppins text-[#f5eded]">
+           <div className="w-10/12 py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
+              <p className="text-xl font-extrabold font-poppins ">
                 Pending Coin
-                <span className="pl-2 text-2xl">
+                <span className="pl-2 text-xl  font-extrabold">
                   {pendingCoin ? pendingCoin.pending_coin : ""}
                 </span>
               </p>
