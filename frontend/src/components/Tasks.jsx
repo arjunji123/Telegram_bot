@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
-import { FaXTwitter, FaInstagram } from "react-icons/fa6";
-import { FaYoutube, FaTelegramPlane } from "react-icons/fa";
 import { AiFillCaretRight } from "react-icons/ai";
 import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
@@ -170,54 +168,7 @@ function Tasks() {
       [task]: Date.now(),
     });
   };
-  // const handleCheckFollowButtonClick = async (task, questId) => {
-  //   try {
-  //     const tokenData = localStorage.getItem("user");
-  //     if (!tokenData) {
-  //       throw new Error("No token data found in localStorage");
-  //     }
-
-  //     const parsedTokenData = JSON.parse(tokenData);
-  //     const token = parsedTokenData.token;
-
-  //     if (!token) {
-  //       throw new Error("Token not found");
-  //     }
-
-  //     const response = await fetch(
-  //       `${BACKEND_URL}/api/v1/api-quests/complete-quest`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify({ quest_id: questId }),
-  //       }
-  //     );
-
-  //     if (!response.ok) {
-  //       throw new Error(`Error: ${response.status} ${response.statusText}`);
-  //     }
-
-  //     // Mark the task as completed and save the state in localStorage
-  //     setHasFollowed((prev) => {
-  //       const updatedState = {
-  //         ...prev,
-  //         [task]: true,
-  //       };
-  //       localStorage.setItem("hasFollowed", JSON.stringify(updatedState));
-  //       return updatedState;
-  //     });
-
-  //     alert("Follow Task Completed!");
-  //   } catch (error) {
-  //     console.error("Error completing follow quest:", error);
-  //     alert("Error completing follow quest: " + error.message);
-  //   }
-  // };
-
-  // Handle submit click
+  
   const handleSubmit = async (task, questId) => {
     console.log("questIdquestId", questId);
   
@@ -410,21 +361,12 @@ function Tasks() {
                           )}
                         {!hasFollowed[social.taskKey] &&
                           followed[social.taskKey] && (
-                            <button
-                              // onClick={() =>
-                              //   handleCheckFollowButtonClick(
-                              //     social.taskKey,
-                              //     social.questId
-                              //   )
-                              // }
-                    
+                            <button                  
                               onClick={() =>
                                 togglePopup(
                                     social.taskKey,
                                     social.questId,                                   
-                                  )
-                                 
-                                  
+                                  )                                 
                                 }
                               className={`w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold ${hasFollowed[social.taskKey]
                                   ? "bg-gray-400 cursor-not-allowed"

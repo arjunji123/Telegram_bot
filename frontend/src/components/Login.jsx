@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import Validation from "./LoginValidation";
 import "../Styles/LoginDesign.css";
 import { toast, ToastContainer } from "react-toastify"; // Import react-toastify components
 import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
@@ -9,7 +8,7 @@ import { logo } from '../images';
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/actions/authActions';
 
-function Login({ setLoggedIn }) {
+function Login() {
   const dispatch = useDispatch();
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +24,7 @@ function Login({ setLoggedIn }) {
 
     try {
       await dispatch(login({ mobile, password }));
-      setLoggedIn(true);
+      // setLoggedIn(true);
       toast.success("Login successfull ! "); // Show success toast
       setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
     } catch (error) {

@@ -64,7 +64,7 @@ const CustomSwiper = ({ banners, followed, togglePopup,
               <h1 className="text-black text-base font-bold ">
                 {banner.quest_name}
               </h1>
-              <p className="text-[#423d3d] text-xs font-bold">+{banner.points} BP</p>
+              <p className="text-[#423d3d] text-xs font-bold">+{banner.coin_earn} Coin</p>
             </div>
             <div className="flex justify-between">
               {completedTasks[taskKey] ? (

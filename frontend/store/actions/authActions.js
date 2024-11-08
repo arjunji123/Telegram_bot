@@ -29,7 +29,7 @@ const removeToken = () => {
 
 
 // Centralized function to store user data in localStorage
-const storeUserData = (user) => {
+export const storeUserData = (user) => {
   localStorage.setItem('user', JSON.stringify(user));
 };
 
