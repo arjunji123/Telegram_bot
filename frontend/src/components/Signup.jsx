@@ -6,8 +6,10 @@ import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast noti
 import "../Styles/LoginDesign.css";
 import { logo } from '../images';
 import { BACKEND_URL } from '../config';
+import Loader from '../components/Loader';
 
 function Signup() {
+  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({
     user_name: "",
     email: "",
@@ -15,7 +17,7 @@ function Signup() {
     confirmPassword: "",
     mobile: "",
     upi_id: "",
-    referral_by: "02010C",
+    referral_by: "UNITRADE1",
     user_type: "user",
   });
 
@@ -83,7 +85,7 @@ function Signup() {
     
     const isValid = validateForm(values);
     if (!isValid) return; // Exit if validation fails
-  
+    setLoading(true);
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/api-register`,
@@ -110,7 +112,10 @@ function Signup() {
       }
     }
   };
-  
+  if (loading) {
+    return <Loader />;
+  }
+
 
   return (
     <div className="bg-white flex justify-center items-center min-h-screen overflow-y-auto ">

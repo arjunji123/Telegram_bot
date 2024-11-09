@@ -1,37 +1,27 @@
+import {  fetcherPost } from '../fetcher';  
+import { BACKEND_URL } from '../../src/config';
+import { toast } from "react-toastify";
 
-import axios from 'axios';
-
-// Action Types
-export const REQUEST = 'REQUEST';
-export const SUCCESS = 'SUCCESS';
-export const FAILURE = 'FAILURE';
+export const SELL_COINS_REQUEST = "SELL_COINS_REQUEST";
+export const SELL_COINS_SUCCESS = "SELL_COINS_SUCCESS";
+export const SELL_COINS_FAILURE = "SELL_COINS_FAILURE";
 
 // Generic action creator for POST requests
-const apiPost = (url, data) => {
-    return async (dispatch) => {
-        dispatch({ type: REQUEST });
-
-        try {
-            const response = await axios.post(url, data);
-            dispatch({ type: SUCCESS, payload: response.data });
-        } catch (error) {
-            dispatch({ type: FAILURE, payload: error.message });
-        }
-    };
-};
-
-// Action creator for receiving money
-export const receiveMoney = (id, toAddress, fromAddress, amount) => {
-    return apiPost('/api/receive-money', { id, toAddress, fromAddress, amount });
-};
-
-// Another example API call
-export const sendMoney = (id, toAddress, fromAddress, amount) => {
-    return apiPost('/api/send-money', { id, toAddress, fromAddress, amount });
-};
-
-export const sellMoney = (user_id, company_id, sellData) => {
-    return apiPost('/api/send-money', {    user_id,
-        company_id,
-        ...sellData, });
-};
+export const sellCoins = (transactionData) => async (dispatch) => {
+    dispatch({ type: SELL_COINS_REQUEST });
+    try {
+      // Call the fetcherPost function for the transfer coins API
+      const response = await fetcherPost(`${BACKEND_URL}/api/v1/sell-coin`, transactionData);
+  
+      console.log("Sell coin successful:", response);
+      dispatch({ type: SELL_COINS_SUCCESS, payload: response });
+      toast.success("Coin transaction completed successfully!");
+    } catch (error) {
+      console.error("Share failed:", error.message);
+      dispatch({
+        type: SELL_COINS_FAILURE,
+        payload: error.message,
+      });
+      toast.error("Failed Transaction!");
+    }
+  };

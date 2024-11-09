@@ -1,9 +1,37 @@
+import React, { useState, useEffect } from "react";
 import { BsArrowLeft } from 'react-icons/bs';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
+import {  fetchHistory  } from "../../store/actions/homeActions";
+import { useDispatch, useSelector } from "react-redux";
+import Loader from '../components/Loader';
 
 const TransactionHistory = () => {
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+ // Retrieve history data and loading state from Redux store
+ const historyData = useSelector((state) => state.apiData.data);
+ const transactions = historyData && historyData.history && historyData.history.data 
+console.log(transactions);
+
+useEffect(() => {
+  // Fetch user and coin data on component mount
+  const fetchData = async () => {
+    try {
+      await dispatch(fetchHistory());
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false); // Set loading to false after fetching data
+    }
+  };
+  fetchData();
+}, [dispatch]);
+
+if (loading) {
+  return <Loader />;
+}
 
   return (
     <div className="bg-white min-h-screen flex justify-center font-poppins">
@@ -20,32 +48,33 @@ const TransactionHistory = () => {
         {/* Scrollable Transaction List */}
         <div className="flex-grow overflow-y-auto py-4">
           {/* Sample Data by Date */}
-          {[
-            { date: 'Nov 7, 2024', transactions: [200, 150, 300] },
-            { date: 'Nov 6, 2024', transactions: [100, 250] },
-            { date: 'Nov 5, 2024', transactions: [50, 120, 300] },
-          ].map((section, index) => (
+          {transactions.length > 0 ? (
+              transactions.map((transaction, index) => (
             <div key={index} className="mb-6">
               {/* Date Label */}
-              <p className="text-sm font-semibold text-gray-400 mb-3">{section.date}</p>
+              <p className="text-sm font-semibold text-gray-400 mb-3">
+                    {transaction.date_entered ? new Date(transaction.date_entered).toLocaleDateString() : "No Date"}
+                  </p>
               {/* Transaction Items as Simple Rows */}
-              {section.transactions.map((amount, idx) => (
-                <div key={idx} className="flex items-center justify-between py-3 ">
+                <div  className="flex items-center justify-between py-3 ">
                   <div className="flex items-center space-x-3">
                     <img
                       className="w-8 h-8"
                       src="/src/Img/rupees.png"
                       alt="Transaction icon"
                     />
-                    <h3 className="text-sm font-semibold">Receive from daily rewards</h3>
-                  </div>
-                  <p className={`text-sm font-medium ${amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {amount > 0 ? `+ ${amount} Coins` : `${amount} Coins`}
-                  </p>
+                     <h3 className="text-sm font-semibold capitalize">      {transaction.type }</h3>
+                  
+                        </div>
+                        <p className={`text-sm font-medium ${transaction.pending_coin > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {transaction.pending_coin > 0 ? `+ ${transaction.pending_coin} Coins` : `${transaction.earn_coin} Coins`}
+                    </p>
                 </div>
-              ))}
             </div>
-          ))}
+           ))
+          ) : (
+            <p className="text-center text-gray-400">No transactions found.</p>
+          )}
         </div>
         
         {/* Footer */}

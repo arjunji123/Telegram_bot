@@ -7,22 +7,27 @@ import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
 import { logo } from "../images";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/actions/authActions";
+import Loader from '../components/Loader';
 
 function Login() {
   const dispatch = useDispatch();
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors(''); // Clear previous error message
+    setLoading(true); // Show loader when upload starts
     try {
       await dispatch(login({ mobile, password }));
-      toast.success("Login successful!"); // Show success toast
-      setTimeout(() => navigate("/home"), 2000); // Navigate after delay to allow toast to show
+      toast.success("Login successful!");
+      setTimeout(() => {
+        setLoading(false); // Hide loader after success
+        navigate("/home");
+      }, 2000); // Show success toast
     } catch (error) {
       const backendError = error.error || "Your account is deactivated. Please contact support.";
       setErrors(backendError); // Set error message from backend response

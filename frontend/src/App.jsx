@@ -8,7 +8,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
-import Preloader from "./components/Preloader"; // Import the Preloader component
+// import Preloader from "./components/Preloader"; // Import the Preloader component
 import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
 import History from "./components/History";
@@ -21,23 +21,10 @@ import AuthListener from "./components/AuthListener"; // Import AuthListener
 
 store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate a loading delay
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  }, []);
-
-  if (loading) {
-    return <Preloader />;
-  }
 
   return (
     <Provider store={store}>
       {" "}
-      {/* Wrap entire app with Redux provider */}
       <BrowserRouter>
         <AuthListener /> {/* Listen for localStorage changes */}
         <Routes>

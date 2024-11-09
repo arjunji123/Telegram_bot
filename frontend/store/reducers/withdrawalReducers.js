@@ -1,23 +1,42 @@
 // reducer.js
-import { REQUEST, SUCCESS, FAILURE } from '../actions/withdrawalActions';
+import { SELL_COINS_SUCCESS, SELL_COINS_FAILURE, SELL_COINS_REQUEST } from '../actions/withdrawalActions';
 
 const initialState = {
+    data: {},
     loading: false,
-    data: null,
     error: null,
-};
+    success: false,
+  };
 
 const withdrawalReducers = (state = initialState, action) => {
     switch (action.type) {
-        case REQUEST:
-            return { ...state, loading: true, error: null };
-        case SUCCESS:
-            return { ...state, loading: false, data: action.payload };
-        case FAILURE:
-            return { ...state, loading: false, error: action.payload };
+        case SELL_COINS_REQUEST:
+          return {
+            ...state,
+            loading: true,
+            error: null,
+            success: false,
+          };
+        case SELL_COINS_SUCCESS:
+          return {
+            ...state,
+            loading: false,
+            success: true,
+            data: {
+              ...state.data,
+              sellCoins: action.payload,
+            },
+          };
+        case SELL_COINS_FAILURE:
+          return {
+            ...state,
+            loading: false,
+            error: action.payload,
+            success: false,
+          };
         default:
-            return state;
-    }
+          return state;
+      }
 };
 
 export default withdrawalReducers;

@@ -11,8 +11,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchAPIData } from "../../store/actions/homeActions";
 import { FaCopy } from 'react-icons/fa'; // Make sure to install react-icons
 import QRCode from "qrcode";
+import Loader from '../components/Loader';
 
 function Payment() {
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apisettings);
@@ -59,6 +61,7 @@ useEffect(() => {
 
   const handleUpload = async () => {
     if (screenshot) {
+      setLoading(true); // Show loader when upload starts
       try {
         const formData = new FormData();
         formData.append("pay_image", screenshot); // Append the screenshot
@@ -78,6 +81,7 @@ useEffect(() => {
         toast.success("Screenshot uploaded successfully!"); 
         
       setTimeout(() => {
+        setLoading(false); // Hide loader after success
         navigate("/login");
       }, 2000);
       } catch (err) {
@@ -102,9 +106,13 @@ useEffect(() => {
       console.error('Failed to copy: ', err);
     });
   };
+
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div className="bg-white flex justify-center items-center min-h-screen ">
-    <div className="w-full max-w-lg bg-black text-white  shadow-lg overflow-hidden">
+    <div className="w-full max-w-lg bg-black text-white  h-screen  shadow-lg overflow-hidden">
 
       {/* Toast Notification */}
       <ToastContainer
@@ -157,10 +165,11 @@ useEffect(() => {
           />
           <button
             onClick={handleUpload}
-            className="w-full py-3 bg-black text-white font-semibold text-sm rounded-lg hover:bg-white hover:text-black transition duration-200"
+            className="w-32 py-2 bg-white text-black font-semibold text-sm rounded-lg hover:bg-white hover:text-black transition duration-200"
           >
             Upload
           </button>
+          
         </div>
       </div>
 

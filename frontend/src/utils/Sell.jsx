@@ -1,13 +1,18 @@
 import React, {useState, useEffect  } from 'react';
 import { ImCross } from "react-icons/im";
+import { sellCoins } from '../../store/actions/withdrawalActions';
+import { useDispatch, useSelector } from 'react-redux';
 
-function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, userData}) {
+
+function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, userData, company_id}) {
     const [rupeeValue, setRupeeValue] = useState(0);
-    const [editableUpiId, setEditableUpiId] = useState(userData?.upi_id || "");
+    const upiId = userData?.upi_id; // Non-editable UPI ID
     const totalCoin = userData?.coins
+    const companyId = String(company_id); 
     const [coinAmount, setCoinAmount] = useState('');
     const [error, setError] = useState('');
   console.log(totalCoin);
+  const dispatch = useDispatch();
 
   const handleInputChange = (e) => {
     const inputValue = e.target.value;
@@ -23,10 +28,9 @@ function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, user
   };
 
     useEffect(() => {
-        const rupeesPerCoin = coinRate; // 1 coin = 0.85 rupees
-        const totalRupees = coinAmount * rupeesPerCoin;
-        setRupeeValue(totalRupees.toFixed(2)); // Set rupee value with 2 decimal points
-      }, [coinAmount]); 
+      const totalRupees = coinAmount * coinRate;
+      setRupeeValue(totalRupees.toFixed(2));
+  }, [coinAmount, coinRate]);
       // Run the effect whenever coinAmount changes
       const handleUpiChange = (e) => {
         setEditableUpiId(e.target.value);
@@ -34,8 +38,24 @@ function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, user
     };
 
     const handleSubmit = () => {
-        handleSellSubmit(editableUpiId, coinAmount); // Pass updated UPI ID to submit handler
-    };
+      if (!coinAmount || coinAmount > totalCoin) {
+          setError("Please enter a valid coin amount within your balance.");
+          return;
+      }
+
+      // Prepare the API payload
+      const payload = {
+          upi_id: upiId,
+          company_id: companyId,
+          tranction_coin: coinAmount,
+          transction_amount: rupeeValue,
+      };
+
+      // Dispatch the sellCoins action with the required fields
+      dispatch(sellCoins(payload))
+          .then(() => togglePopup()) // Close popup on successful action
+          .catch((err) => setError("Failed to sell coins. Please try again."));
+  };
 
   return (
     <div className="fixed inset-0 flex items-end justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50" onClick={togglePopup}>
@@ -68,8 +88,8 @@ function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, user
       <input
         type="text"
         name="address"
-        value={editableUpiId} 
-         onChange={handleUpiChange}
+        value={upiId}
+        readOnly
         placeholder="Enter UPI ID for QR code"
         className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
       />

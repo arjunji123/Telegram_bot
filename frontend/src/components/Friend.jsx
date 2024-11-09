@@ -9,9 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 import { FRONTEND_URL } from '../config';
+import Loader from '../components/Loader';
 
 function Friend() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
   const apiData = useSelector((state) => state.apiData.data);
  const refferalData = apiData?.reffral?.data || null;
  const referral_code = refferalData?.referral_code
@@ -19,16 +21,26 @@ function Friend() {
   recipientReferralCode: '',
   amount: ''
 });
-const { success, error, loading } = useSelector((state) => ({
+const { success, error } = useSelector((state) => ({
   success: state.coinData.success,
   error: state.coinData.error,
   loading: state.coinData.loading,
 }));
 
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
+
   useEffect(() => {
     // Fetch user and coin data on component mount
-    dispatch(fetchReffralData());
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchReffralData());
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false); // Set loading to false if there's an error
+      }
+    };
+    fetchData();
   }, [dispatch]);
   const signupLink = `${FRONTEND_URL}/signup?referral_code=${refferalData?.referral_code}`;
 
@@ -90,7 +102,9 @@ const { success, error, loading } = useSelector((state) => ({
   };
 
 
-
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
 

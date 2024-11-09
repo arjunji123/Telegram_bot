@@ -12,13 +12,15 @@ import Sell from "../utils/Sell";
 import History from "../utils/History";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAPIData, fetchMeData } from '../../store/actions/homeActions';
-import { receiveMoney, sendMoney, sellMoney } from '../../store/actions/withdrawalActions';
 import { shareCoins } from "../../store/actions/coinActions";
 import ShareCoin from "../utils/ShareCoin";
 import { toast, ToastContainer } from "react-toastify"; 
+import Loader from '../components/Loader';
+
 
 function Withdrawal() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
   const [showReceivePopup, setShowReceivePopup] = useState(false);
@@ -27,6 +29,7 @@ function Withdrawal() {
   const [showWithdrawal, setShowWithdrawalPopup] = useState(false);
   const [sharePopup, setSharePopup] = useState(false);
   const [selectedCoinRate, setSelectedCoinRate] = useState(null); 
+  const [company_id, setCompany_id] = useState(null); 
   const toggleSharePopup = () => {
     setSharePopup(!sharePopup);
   };
@@ -51,16 +54,24 @@ const [sellData, setSellData] = useState({
   coin_rate: "",
 });
   const dispatch = useDispatch();
-  const { loading, data, error } = useSelector((state) => state.moneyData);
+  const {  data, error } = useSelector((state) => state.moneyData);
   const apiCompanies = useSelector((state) => state.apiData.data.apicompanies);
   const apiData = useSelector((state) => state.apiData.data);
   const userData = apiData && apiData.me && apiData.me.data  || null;
 // console.log('apiCompanies', apiCompanies)
-  useEffect(() => {
-    dispatch(fetchAPIData('apiCompanies'));
-    dispatch(fetchMeData());
-  }, [dispatch]);
-
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      await dispatch(fetchAPIData('apiCompanies'));
+      await dispatch(fetchMeData());
+      setLoading(false);  // Set loading to false once data is fetched
+    } catch (error) {
+      setLoading(false);  // Set loading to false in case of an error
+      console.error("Error fetching data", error);
+    }
+  };
+  fetchData();
+}, [dispatch]);
   const handleIconClick = (index) => {
     setActiveIndex(index);
     // Close all pop-ups when clicking a different icon
@@ -88,8 +99,9 @@ const [sellData, setSellData] = useState({
   const togglePopup = () => {
     setShowPopup(!showPopup);
   };
-  const handleSellClick = (coinRate) => {
+  const handleSellClick = (coinRate, company_id) => {
     setSelectedCoinRate(coinRate); // Set the selected coin rate
+    setCompany_id(company_id); // Set the selected coin rate
     togglePopup(); // Open the popup
   };
   const toggleWithdrawalPopup = () => {
@@ -174,7 +186,10 @@ const handleSellSubmit = (e) => {
 };
 
   return (
-    <div className="bg-white flex justify-center min-h-screen font-poppins">
+
+    <>
+     {loading && <Loader />}  {/* Show loader if loading state is true */}
+      <div className="bg-white flex justify-center min-h-screen font-poppins">
             <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -266,7 +281,7 @@ const handleSellSubmit = (e) => {
     
                     <button
                       className="leading-none px-2 py-1 text-xs rounded-md bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
-                      onClick={() => handleSellClick(company.coin_rate)}
+                      onClick={() => handleSellClick(company.coin_rate, company.company_id)}
                     >
                       <AiFillCaretDown size={16} /> {/* Reduced icon size */}
                       <span className="ml-1">Sell</span>
@@ -288,7 +303,7 @@ const handleSellSubmit = (e) => {
       }
       {
         showPopup && <Sell togglePopup={togglePopup} handleSellChange={handleSellChange} handleSellSubmit={handleSellSubmit}
-        coinRate={selectedCoinRate} userData={userData} />
+        coinRate={selectedCoinRate} userData={userData} company_id={company_id} />
       }
        {
         sharePopup && <ShareCoin
@@ -303,6 +318,8 @@ const handleSellSubmit = (e) => {
         showHistoryPopup && <History closePopups={closePopups}  />
       }
     </div>
+    </>
+  
 
 
 

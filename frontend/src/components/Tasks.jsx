@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
-import { AiFillCaretRight } from "react-icons/ai";
+import Loader from '../components/Loader';
 import { FaRegCheckCircle } from "react-icons/fa";
 import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
@@ -16,6 +16,7 @@ function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
   const apiQuests = apiData?.quests || [];
+  const [loading, setLoading] = useState(true);
   const [completedTasks, setCompletedTasks] = useState({});
   const [watchTimes, setWatchTimes] = useState({});
   const [videoDurations, setVideoDurations] = useState({});
@@ -37,12 +38,32 @@ function Tasks() {
     setScreenshot(e.target.files[0]); // Capture screenshot
   };
 
+  // useEffect(() => {
+  //   const storedCompletedTasks = localStorage.getItem("completedTasks");
+  //   if (storedCompletedTasks) {
+  //     setCompletedTasks(JSON.parse(storedCompletedTasks));
+  //   }
+  //   dispatch(fetchAPIData("apiQuests"));
+  // }, [dispatch]);
   useEffect(() => {
-    const storedCompletedTasks = localStorage.getItem("completedTasks");
-    if (storedCompletedTasks) {
-      setCompletedTasks(JSON.parse(storedCompletedTasks));
-    }
-    dispatch(fetchAPIData("apiQuests"));
+    const fetchData = async () => {
+      try {
+        // Step 1: Retrieve completed tasks from localStorage
+        const storedCompletedTasks = localStorage.getItem("completedTasks");
+        if (storedCompletedTasks) {
+          setCompletedTasks(JSON.parse(storedCompletedTasks)); // Set tasks in state
+        }
+
+        await dispatch(fetchAPIData("apiQuests")); // Additional API call (if needed)
+
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false); // Set loading to false in case of an error
+      }
+    };
+
+    fetchData();
   }, [dispatch]);
   const bannerQuests = apiQuests && apiQuests.filter(quest => quest.quest_type === "banner");
   const nonBannerQuests = apiQuests.filter(quest => quest.quest_type === "non-banner");
@@ -251,7 +272,9 @@ function Tasks() {
   };
   
 
-
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div className="bg-white flex justify-center min-h-screen font-poppins">
       <ToastContainer
@@ -262,7 +285,7 @@ function Tasks() {
         pauseOnHover
         draggable
         theme="dark"
-      />      <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
+      />      <div className="w-full bg-black text-white flex flex-col max-w-lg   ">
         <div className="flex-grow mb-4 relative z-0">
           <div className=" px-2 py-6 h-full z-10">
             <Logo />
@@ -285,7 +308,7 @@ function Tasks() {
               {/* Reduced heading size */}
               COIN QUESTS 0/10
             </h1>
-            <>
+            <div className="overflow-y-auto max-h-[70vh] mb-2">
               <div className="mt-4">
                 {rows &&
                   rows.map((row, index) => (
@@ -294,7 +317,7 @@ function Tasks() {
                       className="flex items-center justify-between bg-black py-2 px-4 font-poppins"
                     >
                       <div className="flex items-center">
-                        <img className="w-12 h-12 mr-4" src={row.icon} alt="" />
+                        <img className="w-8 h-8 mr-4" src={row.icon} alt="" />
 
                         <div>
                           <h3 className="text-sm capitalize  text-white font-bold">{row.title}</h3>
@@ -341,7 +364,7 @@ function Tasks() {
                     <div key={index}>
                       <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
                         <div className="flex items-center">
-                          <img className="w-12 h-12 mr-4" src={social.icon} alt="" />
+                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
                           <div>
                           <h3 className="text-sm capitalize  text-white font-bold">{social.title}</h3>
                           <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
@@ -391,7 +414,7 @@ function Tasks() {
                     </div>
                   ))}
               </div>
-            </>
+            </div>
 
           </div>
         </div>

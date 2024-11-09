@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 import { useNavigate } from "react-router-dom";
+import Loader from '../components/Loader';
 
 function Home() {
   const navigate = useNavigate();
@@ -16,16 +17,24 @@ function Home() {
   const apiData = useSelector((state) => state.apiData.data);
   const userData = apiData?.me?.data || null;
   const pendingCoin = apiData?.coin?.data || null;
-  
   const [coins, setCoins] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   const handleNavigate = () => {
     navigate('/Profile');
   };
   useEffect(() => {
     // Fetch user and coin data on component mount
-    dispatch(fetchCoinData());
-    dispatch(fetchMeData());
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchCoinData());
+        await dispatch(fetchMeData());
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false); // Set loading to false if there's an error
+      }
+    };
+    fetchData();
   }, [dispatch]);
   
   const handleClick = () => {
@@ -57,7 +66,10 @@ function Home() {
         toast.error("Coin transfer failed.");
       });
   };
-
+  // Show loader until loading state is false
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div className="bg-white flex justify-center">
     <ToastContainer
@@ -146,7 +158,7 @@ function Home() {
               </p>
             </div>
       </div>
-  
+    
       {/* Footer */}
       <Footer />
     </div>
