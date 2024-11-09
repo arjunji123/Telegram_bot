@@ -51,7 +51,8 @@
                                         <%= user.user_type %>
                                     </td>
                                     <td>
-                                        <%= user.status===1 ? 'Active' : 'Inactive' %>
+                                        <%= parseInt(user.status)===1 ? 'Active' : 'Inactive' %>
+
                                     </td>
 
 

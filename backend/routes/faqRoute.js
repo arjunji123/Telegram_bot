@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { getAllRecords } = require("../contollers/serviceController");
+const { getAllRecords } = require("../contollers/companyController");
 const {
   isAuthenticatedUser,
   authorizeRoles,
@@ -13,7 +13,7 @@ const router = express.Router();
 var Storage = multer.diskStorage({
   destination: function (req, file, callback) {
     console.log(file);
-    callback(null, "./uploads/services");
+    callback(null, "./uploads/companies");
   },
   filename: function (req, file, callback) {
     console.log(file);
@@ -46,7 +46,7 @@ const {
   // editUserForm,
   // updateUserRecord,
   // deleteRecord,
-} = require("../contollers/serviceController");
+} = require("../contollers/companyController");
 var upload = multer({ storage: Storage });
 // router.post("/users/update-status", updateUserStatus);
 // router
