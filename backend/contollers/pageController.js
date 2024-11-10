@@ -519,6 +519,10 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
 
     // Begin a transaction
     await db.query("START TRANSACTION");
+    const date_created = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
 
     // Insert into usercoin_audit
     const insertAuditData = {
@@ -529,7 +533,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       coin_operation: "cr",
       type: "quest",
       status: "completed",
-      date_entered: new Date(),
+      date_entered: date_created,
     };
     console.log("Insert data for usercoin_audit:", insertAuditData);
 

@@ -563,6 +563,7 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
+
 exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   // Check if a file was uploaded
   if (!req.file) {
@@ -1196,3 +1197,45 @@ exports.getQuestHistory = async (req, res) => {
     });
   }
 };
+
+////////////////////////////////////
+
+// API to get user history (coins operation, status, pending, etc.)
+exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
+  // Get the user_id from the logged-in user's session (JWT token)
+  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+  console.log("Fetching user history for user:", user_id);
+
+  try {
+    // Query to get the user's coin operation history
+    const result = await db.query(
+      `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered
+       FROM usercoin_audit
+       WHERE user_id = ?
+       ORDER BY date_entered DESC`,
+      [user_id]
+    );
+
+    // If no history is found, send a default response
+    if (result[0].length === 0) {
+      return res.status(404).json({
+        success: true,
+        message: "No history found for the user",
+        data: [],
+      });
+    }
+
+    console.log("User history fetched:", result[0]);
+
+    // Respond with the user history data
+    res.status(200).json({
+      success: true,
+      message: "User history fetched successfully.",
+      data: result[0], // Sending the entire result set
+    });
+  } catch (error) {
+    console.error("Error fetching user history:", error);
+    return next(new ErrorHandler("Database query failed", 500));
+  }
+});

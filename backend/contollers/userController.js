@@ -16,6 +16,8 @@ const pool = require("../config/mysql_database"); // Assuming you're using MySQL
 const { LocalStorage } = require("node-localstorage");
 const localStorage = new LocalStorage("./scratch");
 const { v4: uuidv4 } = require("uuid");
+const mysqlPool = require("../config/mysql_database"); // Adjust the path if necessary
+
 // const pool = require('../config/db');  // Assuming you're using MySQL pool
 const {
   findAvailableParentByReferral,
@@ -1243,14 +1245,51 @@ exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
 ///////////////////////////////////////////////
 
 exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
-  await QueryModel.findByIdAndDelete(table_name, req.params.id, next);
+  const userId = req.params.id; // Get the user ID from the request parameters
 
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully deleted " + module_single_title,
-  });
+  if (!userId) {
+    return next(new ErrorHandler("User ID is required", 400));
+  }
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  const deleteUserQuery = `
+    DELETE FROM users WHERE id = ?
+  `;
+
+  const deleteUserDataQuery = `
+    DELETE FROM user_data WHERE user_id = ?
+  `;
+
+  try {
+    // Delete from the users table
+    const deleteUserResult = await mysqlPool.query(deleteUserQuery, [userId]);
+
+    console.log("Delete user result:", deleteUserResult); // Log for debugging
+
+    if (deleteUserResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Delete from the user_data table using the same userId as user_id
+    const deleteUserDataResult = await mysqlPool.query(deleteUserDataQuery, [
+      userId,
+    ]);
+
+    console.log("Delete user data result:", deleteUserDataResult); // Log for debugging
+
+    if (deleteUserDataResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("User data not found", 404));
+    }
+
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully deleted " + module_single_title,
+    });
+
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (error) {
+    console.error("Error in deleting user and user data:", error); // Log the full error for debugging
+    return next(new ErrorHandler("An error occurred while deleting data", 500));
+  }
 });
 
 exports.approveQuest = catchAsyncErrors(async (req, res, next) => {

@@ -2,11 +2,11 @@ const Joi = require("joi");
 
 const table_name = "users";
 
-const module_title = "Services";
+const module_title = "Companies";
 const module_single_title = "Service";
 const module_add_text = "Add";
 const module_edit_text = "Edit";
-const module_slug = "services";
+const module_slug = "companies";
 const module_layout = "layouts/main";
 
 const insertSchema = Joi.object({

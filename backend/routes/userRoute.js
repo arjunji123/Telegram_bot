@@ -55,6 +55,12 @@ const {
   getAllCompaniesApi,
   getUserReferralCode,
   transferCoins,
+
+  uploadQuestScreenshotApi,
+  createSellTransaction,
+  getQuestHistory,
+  getUserHistory,
+
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -151,4 +157,5 @@ router.post(
   uploadQuestScreenshotApi
 );
 router.get("/quest-history", isApiAuthenticatedUser, getQuestHistory);
+router.get("/user-history", isApiAuthenticatedUser, getUserHistory);
 module.exports = router;

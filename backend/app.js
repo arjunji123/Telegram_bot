@@ -10,18 +10,19 @@ const expressLayouts = require("express-ejs-layouts");
 const errorMiddleware = require("./middleware/error");
 const { LocalStorage } = require("node-localstorage");
 const localStorage = new LocalStorage("./scratch");
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
 // app.use(
 //   cors({
-//     origin: "https://telegram-1xbvue0d9-arjuns-projects-e072bddd.vercel.app",
+//     origin: "http://localhost:5173",
 //     credentials: true,
 //   })
 // );
+app.use(
+  cors({
+    origin:
+      "https://telegram-nokjjpkge-arjuns-projects-e072bddd.vercel.app/signup",
+    credentials: true,
+  })
+);
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
@@ -57,7 +58,7 @@ app.use((req, res, next) => {
 const blogs = require("./routes/blogRoute");
 const quests = require("./routes/pageRoute");
 // const coins = require("./routes/coinRoute");
-const services = require("./routes/serviceRoute");
+const companies = require("./routes/companyRoute");
 const user = require("./routes/userRoute");
 const settings = require("./routes/settingRoute");
 const faqs = require("./routes/faqRoute");
@@ -66,7 +67,7 @@ const testimonials = require("./routes/testimonialRoute");
 
 app.use("/admin", user);
 app.use("/admin", blogs);
-app.use("/admin", services);
+app.use("/admin", companies);
 app.use("/admin", quests);
 // app.use("/admin", coins);
 app.use("/admin", settings);
@@ -77,7 +78,7 @@ app.use("/admin", testimonials);
 
 app.use("/api/v1", user);
 app.use("/api/v1", blogs);
-app.use("/api/v1", services);
+app.use("/api/v1", companies);
 app.use("/api/v1", quests);
 app.use("/api/v1", settings);
 app.use("/api/v1", faqs);
