@@ -18,7 +18,8 @@ const localStorage = new LocalStorage("./scratch");
 // );
 app.use(
   cors({
-    origin: "https://telegram-1xbvue0d9-arjuns-projects-e072bddd.vercel.app",
+    origin:
+      "https://telegram-nokjjpkge-arjuns-projects-e072bddd.vercel.app/signup",
     credentials: true,
   })
 );
