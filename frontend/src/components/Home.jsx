@@ -2,152 +2,168 @@ import React, { useState, useEffect } from "react";
 import "../Styles/Tasks.css";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
+import { BsPersonCircle } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMeData, fetchCoinData } from "../../store/actions/homeActions";
+import { fetchMeData, fetchCoinData, transferCoins, fetchReffralData } from "../../store/actions/homeActions";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 import { useNavigate } from "react-router-dom";
-import { BACKEND_URL } from "../config";
+import Loader from '../components/Loader';
 
 function Home() {
-  const [firstName, setFirstName] = useState("");
-  const [progress, setProgress] = useState(0);
-  const [pendingCoins, setPendingCoins] = useState(0);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data);
-  const userData = (apiData && apiData.me && apiData.me.data) || null;
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(fetchCoinData());
-    dispatch(fetchMeData());
-  }, [dispatch]);
-
-  useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      const firstName = tg.initDataUnsafe?.user?.first_name;
-      setFirstName(firstName);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userData) {
-      setPendingCoins(userData.pending_coin); // Initialize pending coins from user data
-    }
-  }, [userData]);
-
-  const handleProfileClick = () => {
-    navigate("/profile");
+  const userData = apiData?.me?.data || null;
+  const pendingCoin = apiData?.coin?.data || null;
+  const [coins, setCoins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const handleNavigate = () => {
+    navigate('/Profile');
   };
-
-  const handleImageClick = async () => {
-    if (progress < 100 && pendingCoins >= 5) {
-      setProgress((prev) => prev + 20);
-      const updatedPendingCoins = pendingCoins - 5; // Deduct coins to be transferred
-
+  useEffect(() => {
+    // Fetch user and coin data on component mount
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
-        const response = await fetch(`${BACKEND_URL}/api/v1/transfer-coins`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Include token in Authorization header
-          },
-          body: JSON.stringify({ coinsToTransfer: 5 }), // Sending amount of coins
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          setPendingCoins(updatedPendingCoins); // Update pending coins state after successful transfer
-        } else {
-          console.error(
-            "Failed to transfer coins:",
-            data.message || "Unknown error"
-          );
-        }
+        await dispatch(fetchCoinData());
+        await dispatch(fetchMeData());
+        setLoading(false); // Set loading to false after data is fetched
       } catch (error) {
-        console.error("Error transferring coins:", error);
+        console.error('Error fetching data:', error);
+        setLoading(false); // Set loading to false if there's an error
       }
-    } else {
-      console.log("Insufficient coins or maximum progress reached.");
+    };
+    fetchData();
+  }, [dispatch]);
+  
+  const handleClick = () => {
+    if (pendingCoin?.pending_coin === 0) {
+      // Show message if there are no coins to transfer
+      toast.warn("You have no coins.");
+      return;
     }
-
-    // Trigger vibration effect for mobile devices
-    if (navigator.vibrate) {
-      navigator.vibrate(50); // Vibrate for 50 milliseconds
-    }
+    
+    // Dispatch coin transfer action
+    dispatch(transferCoins())
+      .then(() => {
+        // Animate coins on successful transfer
+        const newCoins = Array.from({ length: 10 }, (_, i) => ({
+          id: Date.now() + i,
+          x: (Math.random() - 0.5) * 500,
+          y: (Math.random() - 0.5) * 500,
+          rotate: Math.random() * 360, 
+        }));
+        setCoins(newCoins);
+        // Remove coins after animation
+        setTimeout(() => setCoins([]), 2500);
+              // Re-fetch data to update userData and pendingCoin without hard refresh
+      dispatch(fetchCoinData());
+      dispatch(fetchMeData());
+      })
+      .catch((error) => {
+        // Show error message if transfer fails
+        toast.error("Coin transfer failed.");
+      });
   };
-
+  // Show loader until loading state is false
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div className="bg-white flex justify-center">
-      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
-        <div className="flex-grow relative z-0">
-          <div className="px-4 py-6 space-y-6">
-            {/* Logo */}
-            <Logo />
-            {/* User Information */}
-            <div
-              className="absolute top-0 left-4 flex items-center space-x-2 cursor-pointer"
-              onClick={handleProfileClick}
-            >
-              <img
-                src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
-                alt="User Avatar"
-                className="rounded-full w-8 h-8 object-cover"
-              />
-              <p className="text-sm font-bold capitalize">
-                {userData ? userData.user_name : "Neeraj Singh"}
-              </p>
-            </div>
+    <ToastContainer
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      closeOnClick
+      pauseOnHover
+      draggable
+      theme="dark"
+    />
+    <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
+      <div className="flex-grow relative z-0">
+        <div className="px-4 py-6 space-y-6">
+          <Logo />
+          <div onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
+            <BsPersonCircle size={28} className="mt-1" />
+            <p className="text-2xl font-extrabold capitalize">
+              {userData ? userData.user_name : ""}
+            </p>
+          </div>
+  
+          {/* User Balance */}
+          <div className="flex justify-center space-x-1 text-3xl font-extrabold font-sans">
+            <p>U</p>
+            <p>{userData ? userData.coins : ""}</p>
+          </div>
+  
+          {/* Coin Button and Image */}
+          <div className="coin-animation-container my-6 relative">
+            <motion.div
+           whileHover={{ scale: 1.05 }}
+           whileTap={{ scale: 0.95 }}
 
-            {/* User Balance */}
-            <div className="flex justify-center space-x-1 text-4xl font-extrabold font-sans mt-8">
-              <p>U</p>
-              <p>{userData ? userData.coins : "700,0000"}</p>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="progress-container flex justify-center mt-4">
-              <div
-                className="progress-bar-container w-full h-4 bg-gray-700 rounded-full"
-                style={{ maxWidth: "80%" }}
-              >
-                <div
-                  className="progress-bar h-full rounded-full"
-                  style={{
-                    width: `${progress}%`,
-                    background: "linear-gradient(90deg, #FF9F43, #FFC107)",
-                    transition: "width 0.5s ease-in-out",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Profile Picture */}
-            <div
-              className="px-4 my-6 cursor-pointer flex justify-center"
-              onClick={handleImageClick}
+              className="coin-btn"
+              onClick={handleClick}
             >
               <img
                 src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
                 alt="Main Character"
-                className="rounded-full w-56 h-56 object-cover"
+                className="character-img"
               />
-            </div>
-
-            {/* Pending Coins */}
-            <div className="w-8/12 border-2 border-[#f5eded] rounded-xl h-16 mx-auto flex justify-center items-center cursor-pointer">
-              <p className="text-xl font-extrabold font-poppins text-[#f5eded]">
-                Pending Coin
-                <span className="pl-2 text-2xl">{pendingCoins}</span>
-              </p>
+            </motion.div>
+  
+            {/* Hamster-style Coin Animation */}
+            <div className="coins-container flex justify-center items-center">
+            <AnimatePresence>
+                  {coins.map((coin) => (
+                    <motion.div
+                      key={coin.id}
+                      className="coin"
+                      initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
+                      animate={{
+                        opacity: 1,
+                        x: coin.x,
+                        y: coin.y,
+                        rotate: [coin.rotate, coin.rotate + 360],
+                        scale: [1, 1.3, 1],
+                        filter: "grayscale(100%)", // Grayscale for black-and-white effect
+                      }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      transition={{ duration: 2, ease: "easeOut" }}
+                    >
+                    <img
+                      src="src/images/dollar-coin.png"
+                      alt="Hamster Coin"
+                      className="coin-image w-6 h-6"
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
         </div>
-        {/* Footer */}
-        <Footer />
       </div>
+  
+      {/* Pending Coin Display - Updated Style */}
+      <div className="absolute bottom-20  w-full px-4">
+           {/* Pending Coin Display */}
+           <div className="w-10/12 py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
+              <p className="text-xl font-extrabold font-poppins ">
+                Pending Coin
+                <span className="pl-2 text-xl  font-extrabold">
+                  {pendingCoin ? pendingCoin.pending_coin : ""}
+                </span>
+              </p>
+            </div>
+      </div>
+    
+      {/* Footer */}
+      <Footer />
     </div>
+  </div>
+  
   );
 }
 

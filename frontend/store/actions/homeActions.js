@@ -1,6 +1,8 @@
 import { fetchData, API_URLS } from '../utils/home';
-import { fetcherGet } from '../fetcher';  
+import { fetcherGet , fetcherPost } from '../fetcher';  
 import { BACKEND_URL } from '../../src/config';
+import { toast } from "react-toastify";
+
 // Action to set the data
 export const setAPIData = (apiName, data) => ({
   type: `SET_${apiName.toUpperCase()}_DATA`,
@@ -39,6 +41,20 @@ export const FETCH_ME_FAILURE = 'FETCH_ME_FAILURE';
 export const FETCH_COIN_REQUEST = 'FETCH_COIN_REQUEST';
 export const SET_COIN_DATA  = 'SET_COIN_DATA';
 export const FETCH_COIN_FAILURE = 'FETCH_COIN_FAILURE';
+
+export const FETCH_REFFRAL_REQUEST = 'FETCH_REFFRAL_REQUEST';
+export const SET_REFFRAL_DATA  = 'SET_REFFRAL_DATA';
+export const FETCH_REFFRAL_FAILURE = 'FETCH_REFFRAL_FAILURE';
+
+export const FETCH_HISTORY_REQUEST = 'FETCH_HISTORY_REQUEST';
+export const SET_HISTORY_DATA  = 'SET_HISTORY_DATA';
+export const FETCH_HISTORY_FAILURE = 'FETCH_HISTORY_FAILURE';
+
+export const TRANSFER_COINS_REQUEST = "TRANSFER_COINS_REQUEST";
+export const TRANSFER_COINS_SUCCESS = "TRANSFER_COINS_SUCCESS";
+export const TRANSFER_COINS_FAILURE = "TRANSFER_COINS_FAILURE";
+
+
 
 // Fetch User Request Action
 const fetchMeRequest = () => {
@@ -85,22 +101,6 @@ const fetchCoinFailure = (error) => {
   };
 };
 
-// Async Action to fetch user data using the fetcher
-// export const fetchMeData = () => {
-//   return async (dispatch) => {
-//     dispatch(fetchMeRequest());
-
-//     try {
-//       // Use fetcher to make the API call
-//       const data = await fetcherGet(`${BACKEND_URL}/api/v1/api-me`);
-//       // Dispatch success action with the data
-//       dispatch(fetchMeSuccess(data));
-//     } catch (error) {
-//       // Dispatch failure action if fetcher throws an error
-//       dispatch(fetchMeFailure(error.message));
-//     }
-//   };
-// };
 export const fetchMeData = () => async (dispatch) => {
   dispatch(fetchMeRequest());
   
@@ -121,3 +121,49 @@ export const fetchCoinData = () => async (dispatch) => {
     dispatch(fetchCoinFailure(error.message));
   }
 };
+
+export const fetchReffralData = () => async (dispatch) => {
+  dispatch({type: FETCH_REFFRAL_REQUEST});
+  
+  try {
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/referral-code`);
+    dispatch({ type: SET_REFFRAL_DATA, payload: data });
+  } catch (error) {
+    dispatch({
+      type: FETCH_REFFRAL_FAILURE,
+      payload: error.message,
+    });
+  }
+};
+export const fetchHistory = () => async (dispatch) => {
+  dispatch({type: FETCH_HISTORY_REQUEST});
+  
+  try {
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/user-history`);
+    dispatch({ type: SET_HISTORY_DATA, payload: data });
+  } catch (error) {
+    dispatch({
+      type: FETCH_HISTORY_FAILURE,
+      payload: error.message,
+    });
+  }
+};
+
+export const transferCoins = (coinData) => async (dispatch) => {
+  try {
+    // Call the fetcherPost function for the transfer coins API
+    const response = await fetcherPost(`${BACKEND_URL}/api/v1/transfer-coins`, coinData);
+
+    console.log("Transfer successful:", response);
+    dispatch({ type: TRANSFER_COINS_SUCCESS, payload: response });
+    toast.success("Coins transferred successfully!");
+  } catch (error) {
+    console.error("Transfer failed:", error.message);
+    dispatch({
+      type: TRANSFER_COINS_FAILURE,
+      payload: error.message,
+    });
+    toast.error("Failed to transfer coins.");
+  }
+};
+
