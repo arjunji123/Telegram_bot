@@ -563,6 +563,7 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
+
 exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   // Check if a file was uploaded
   if (!req.file) {
