@@ -40,9 +40,6 @@ const {
   editUserForm,
   updateUserRecord,
   deleteRecord,
-  approveQuest,
-  disapproveQuest,
-  renderTreeView,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -58,10 +55,12 @@ const {
   getAllCompaniesApi,
   getUserReferralCode,
   transferCoins,
+
   uploadQuestScreenshotApi,
   createSellTransaction,
   getQuestHistory,
   getUserHistory,
+
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -114,11 +113,6 @@ router
 router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
-
-router.post("/approve-quest/:quest_id", approveQuest);
-router.post("/disapprove-quest/:quest_id", disapproveQuest);
-router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
-router.get("/user-tree", isAuthenticatedUser, renderTreeView);
 /*******REST API*******/
 
 router.route("/api-register").post(registerUserApi);
@@ -149,6 +143,13 @@ router.post(
   uploadScreenshotApi
 );
 router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
+
+
+// Update this line in your route
+router.post('/upload-quest-screenshot/:quest_id', upload.array('screenshot', 5), uploadQuestScreenshotApi);
+router.post('/approve-quest/:quest_id', approveQuest);
+router.post('/disapprove-quest/:quest_id', disapproveQuest);
+
 
 router.post(
   "/upload-quest-screenshot/:quest_id",
