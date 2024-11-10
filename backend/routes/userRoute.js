@@ -34,8 +34,12 @@ const {
   createRecord,
   updateUserStatus,
   // addCoinRate,
-  showCompanyForm,
-  submitCompanyForm,
+  // showCompanyForm,
+  // submitCompanyForm,
+  getSingleUser,
+  editUserForm,
+  updateUserRecord,
+  deleteRecord,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -49,6 +53,8 @@ const {
   uploadScreenshotApi,
   getCompanyDetailApi,
   getAllCompaniesApi,
+  getUserReferralCode,
+  transferCoins,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -87,15 +93,20 @@ router
 
 // Route for updating user status
 router.post("/users/update-status", updateUserStatus);
-// router
-//   .route("/coin-rate/add")
-//   .post(isAuthenticatedUser, authorizeRoles("admin"), addCoinRate);
-// Route for showing form and submitting data
-router
-  .route("/" + module_slug + "/company-form/:id")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), showCompanyForm)
-  .post(isAuthenticatedUser, authorizeRoles("admin"), submitCompanyForm);
 
+router
+  .route("/" + module_slug + "/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleUser);
+router
+  .route("/" + module_slug + "/edit/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), editUserForm);
+
+router
+  .route("/" + module_slug + "/update/:id")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), updateUserRecord);
+router
+  .route("/" + module_slug + "/delete/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
 /*******REST API*******/
 
 router.route("/api-register").post(registerUserApi);
@@ -111,6 +122,8 @@ router.route("/api-logout").get(logoutApi);
 router.route("/api-me").get(isApiAuthenticatedUser, getUserDetailApi);
 router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
+
+router.route("/referral-code").get(isApiAuthenticatedUser, getUserReferralCode);
 router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
@@ -123,5 +136,19 @@ router.post(
   upload.single("pay_image"),
   uploadScreenshotApi
 );
+router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
+
+// Update this line in your route
+router.post('/upload-quest-screenshot/:quest_id', upload.array('screenshot', 5), uploadQuestScreenshotApi);
+router.post('/approve-quest/:quest_id', approveQuest);
+router.post('/disapprove-quest/:quest_id', disapproveQuest);
+
+
+router.post(
+  "/upload-quest-screenshot/:quest_id",
+  upload.array("screenshot", 5),
+  uploadQuestScreenshotApi
+);
+router.get("/quest-history", isApiAuthenticatedUser, getQuestHistory);
 module.exports = router;

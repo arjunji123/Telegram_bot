@@ -1,59 +1,53 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Friend from "./components/Friend";
-import Footer from "./components/Footer";
+import { loadUserFromLocalStorage } from "../store/actions/authActions";
 import Home from "./components/Home";
 import Tasks from "./components/Tasks";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Preloader from "./components/Preloader"; // Import the Preloader component
+import PrivateRoute from "./components/PrivateRoute";
+import PublicRoute from "./components/PublicRoute";
+// import Preloader from "./components/Preloader"; // Import the Preloader component
 import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
+import History from "./components/History";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import { Provider } from 'react-redux';
-import store from '../store/store';
+import { Provider } from "react-redux";
+import store from "../store/store";
+import Profile from "./components/Profile";
+import AuthListener from "./components/AuthListener"; // Import AuthListener
 
-
+store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate a loading delay (2 seconds)
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  }, []);
-
-  if (loading) {
-    return <Preloader />; // Show preloader while loading
-  }
 
   return (
-    <Provider store={store}> {/* Wrap entire app with Redux provider */}
-
+    <Provider store={store}>
+      {" "}
       <BrowserRouter>
+        <AuthListener /> {/* Listen for localStorage changes */}
         <Routes>
+          {/* Redirect root path ("/") to login */}
+          <Route path="/" element={<Navigate to="/signup" />} />
           {/* Public Routes */}
-          <Route path="/login" element={<Login setLoggedIn={setLoggedIn} />} />
-          <Route path="/" element={<Signup />} />
-          <Route path="/payment/:id" element={<Payment />} />
-
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/payment/:id" element={<Payment />} />
+          </Route>
           {/* Protected Routes */}
-          {/* <Route element={<ProtectedRoute loggedIn={loggedIn} />}> */}
+          <Route element={<PrivateRoute />}>
             <Route path="/home" element={<Home />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/friend" element={<Friend />} />
             <Route path="/withdrawal" element={<Withdrawal />} />
-          {/* </Route> */}
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/history" element={<History />} />
+          </Route>
         </Routes>
-
-        {/* Conditionally render Footer */}
-        {/* {loggedIn && <Footer />} */}
       </BrowserRouter>
-      </Provider>
+    </Provider>
   );
 }
 

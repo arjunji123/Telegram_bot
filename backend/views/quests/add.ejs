@@ -6,7 +6,6 @@
                     <%= title %>
                 </h4>
 
-
                 <div class="row">
                     <div class="col-lg-12">
                         <form method="post" action="/admin/<%= module_slug %>/add" enctype="multipart/form-data">
@@ -18,14 +17,44 @@
                                             value="">
                                     </div>
                                 </div>
+
                                 <div class="col-lg-6 float-left">
                                     <div class="mb-3">
-                                        <label for="simpleinput" class="form-label">Quest Type</label>
-                                        <input type="text" id="simpleinput" name="quest_type" class="form-control"
-                                            value="">
+                                        <label for="quest_type" class="form-label">Quest Type</label>
+                                        <select id="quest_type" name="quest_type" class="form-control">
+                                            <option value="banner">Banner</option>
+                                            <option value="non-banner">Non-Banner</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 float-left">
+                                    <div class="mb-3">
+                                        <label for="activity" class="form-label">Activity</label>
+                                        <select id="activity" name="activity" class="form-control">
+                                            <option value="watch">Watch</option>
+                                            <option value="follow">Follow</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Start Date Field -->
+                                <div class="col-lg-6 float-left">
+                                    <div class="mb-3">
+                                        <label for="start_date" class="form-label">Start Date</label>
+                                        <input type="datetime-local" id="start_date" name="start_date"
+                                            class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 float-left">
+                                    <div class="mb-3">
+                                        <label for="end_date" class="form-label">End Date</label>
+                                        <input type="datetime-local" id="end_date" name="end_date" class="form-control">
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-lg-6 float-left">
                                     <div class="mb-3">
@@ -42,7 +71,6 @@
                                     </div>
                                 </div>
                             </div>
-
 
                             <div class="row">
                                 <div class="col-lg-6 float-left">
@@ -61,7 +89,6 @@
                                 </div>
                             </div>
 
-
                             <div class="row">
                                 <div class="col-lg-12 float-left">
                                     <div class="mb-3">
@@ -73,20 +100,16 @@
                                     </div>
                                 </div>
                             </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-4 float-left"><button class="btn btn-primary" type="submit">Submit</button>
-                        </div>
 
-                    </div>
-                    </form>
-                </div> <!-- end col -->
-
-
-            </div>
-            <!-- end row-->
-
-        </div> <!-- end card-body -->
-    </div> <!-- end card -->
-</div><!-- end col -->
+                            <div class="row">
+                                <div class="col-lg-4 float-left">
+                                    <button class="btn btn-primary" type="submit">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div> <!-- end col -->
+                </div> <!-- end row-->
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div> <!-- end col -->
 </div>

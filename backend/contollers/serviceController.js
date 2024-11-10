@@ -5,6 +5,7 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFeatures = require("../utils/apiFeatures");
 const db = require("../config/mysql_database");
 const Joi = require("joi");
+const bcrypt = require("bcryptjs");
 
 const table_name = Model.table_name;
 const module_title = Model.module_title;
@@ -13,24 +14,53 @@ const module_add_text = Model.module_add_text;
 const module_edit_text = Model.module_edit_text;
 const module_slug = Model.module_slug;
 const module_layout = Model.module_layout;
-
-exports.addFrom = catchAsyncErrors(async (req, res, next) => {
-  res.render(module_slug + "/add", {
-    layout: module_layout,
-    title: module_single_title + " " + module_add_text,
-    module_slug,
-  });
+const sellTransactionSchema = Joi.object({
+  company_id: Joi.string().required(),
+  transaction_coin: Joi.string().required(),
+  transaction_rate: Joi.number().required(),
+  transaction_amount: Joi.number().required(),
 });
 
-//create a new blog
+exports.allUsers = catchAsyncErrors(async (req, res, next) => {
+  try {
+    // Fetch user data from the users table where user_type is 'company'
+    const users = await db.query(
+      `SELECT 
+          u.id,
+          u.user_name,
+          u.email,
+          u.mobile,
+          DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
+          u.user_type,
+          u.status  
+       FROM users u
+       WHERE u.user_type = ?`, // Fetch only where user_type is 'company'
+      ["company"] // Directly passing the value 'company'
+    );
+
+    // Render the response with the fetched user data
+    res.render(module_slug + "/index", {
+      layout: module_layout,
+      title: module_single_title + " " + module_add_text,
+      module_slug,
+      users, // Pass the users array directly
+      originalUrl: req.originalUrl, // Pass the original URL here
+    });
+  } catch (error) {
+    // Handle any potential errors
+    console.error("Error fetching users:", error);
+    return next(new ErrorHandler("Error while fetching user data.", 500));
+  }
+});
+
 exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   try {
+    // Validate the request body with Joi schema
     await Model.insertSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
     });
   } catch (error) {
-    // Joi validation failed, send 400 Bad Request with error details
     return next(
       new ErrorHandler(
         error.details.map((d) => d.message),
@@ -39,90 +69,322 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     );
   }
 
-  const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
-
-  const updatedSlug = req.body.slug || generateSlug(req.body.title);
+  const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
   if (req.file) {
     req.body.image = req.file.filename;
   }
 
+  // Prepare data for insertion into the user table
   const insertData = {
-    title: req.body.title,
-    slug: updatedSlug,
-    description: req.body.description,
-    meta_title: req.body.meta_title,
-    meta_keyword: req.body.meta_keyword,
-    meta_description: req.body.meta_description,
+    user_name: req.body.user_name,
+    email: req.body.email,
+    mobile: req.body.mobile,
+    password: await bcrypt.hash(req.body.password, 10),
     status: req.body.status,
-    image: req.body.image,
-    // // created_at: created_at,
-    //  updated_at: created_at,
-    user_id: req.user.id,
+    date_created: date_created,
+    user_type: "company", // Set user_type to "company"
+    date_modified: date_created,
   };
 
-  const blog = await QueryModel.saveData(table_name, insertData, next);
+  try {
+    // Insert the user data into the database
+    const user = await QueryModel.saveData(table_name, insertData, next);
+    console.log(user);
 
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully added " + module_single_title,
-  });
+    // Prepare data for company_data table
+    const companyInsertData = {
+      company_id: user.id, // Assuming this is the ID of the newly created user
+      coin_rate: req.body.coin_rate, // From the request body
+      description: req.body.description, // From the request body
+    };
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+    // Insert company-specific data into company_data table
+    await QueryModel.saveData("company_data", companyInsertData, next);
+
+    // Success response
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully added " + module_single_title,
+    });
+
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (err) {
+    console.error("Error saving data:", err);
+    return next(new ErrorHandler("Error while saving user data.", 500));
+  }
 });
 
-exports.editForm = catchAsyncErrors(async (req, res, next) => {
-  const blog = await QueryModel.findById(table_name, req.params.id, next);
+// Joi schema for validation
+const coinRateSchema = Joi.object({
+  company_id: Joi.number().integer().required(),
+  coin_rate: Joi.string().required(),
+  description: Joi.string().optional(),
+});
 
-  if (!blog) {
-    return;
+exports.addFrom = catchAsyncErrors(async (req, res, next) => {
+  res.render(module_slug + "/add", {
+    layout: module_layout,
+    title: module_single_title + " " + module_add_text,
+    module_slug,
+  });
+});
+exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
+  // Step 1: Validate the request body
+  try {
+    await coinRateSchema.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
+  } catch (error) {
+    return next(
+      new ErrorHandler(
+        error.details.map((d) => d.message), // Map validation errors
+        400
+      )
+    );
   }
+
+  // Step 2: Extract company_id from request body
+  const companyId = req.body.company_id;
+
+  // Step 3: Check if the company exists in the users table
+  const companyExists = await QueryModel.findOne("users", { id: companyId });
+
+  if (!companyExists) {
+    return next(new ErrorHandler("Company not found.", 404));
+  }
+
+  // Step 4: Prepare data for insertion into the company_data table
+  const insertData = {
+    company_id: companyId,
+    coin_rate: req.body.coin_rate,
+    description: req.body.description || "", // Optional description
+  };
+
+  // Step 5: Insert the coin rate data into the company_data table
+  try {
+    const coinRate = await QueryModel.saveData(
+      "company_data",
+      insertData,
+      next
+    );
+
+    // Success response
+    req.flash("msg_response", {
+      status: 200,
+      message: "Coin rate added successfully for the company.",
+    });
+
+    // Redirect to the users page after successful insert
+    res.redirect(`/admin/users`);
+  } catch (err) {
+    console.error("Error saving coin rate data:", err);
+    return next(new ErrorHandler("Error while saving coin rate data.", 500));
+  }
+});
+
+// exports.submitCompanyForm = catchAsyncErrors(async (req, res, next) => {
+//   const { coin_rate, description } = req.body; // Extract data from the request body
+//   const companyId = req.params.id; // Get the company ID from the request parameters
+
+//   // Validate input (basic example; you can add more validation as needed)
+//   if (!coin_rate || !description) {
+//     return next(
+//       new ErrorHandler("Coin rate and description are required", 400)
+//     );
+//   }
+
+//   try {
+//     // Check if the company data already exists
+//     const existingCompanyDataQuery = await db.query(
+//       "SELECT * FROM company_data WHERE company_id = ?",
+//       [companyId]
+//     );
+
+//     // If data exists, update the existing record
+//     if (existingCompanyDataQuery[0].length > 0) {
+//       await db.query(
+//         "UPDATE company_data SET coin_rate = ?, description = ? WHERE company_id = ?",
+//         [coin_rate, description, companyId]
+//       );
+
+//       // Optionally, set a flash message or response for successful update
+//       req.flash("msg_response", {
+//         status: 200,
+//         message: "Coin rate updated successfully for company ID: " + companyId,
+//       });
+//     } else {
+//       // If data does not exist, insert a new record
+//       const insertData = {
+//         company_id: companyId,
+//         coin_rate: coin_rate,
+//         description: description,
+//       };
+
+//       await db.query("INSERT INTO company_data SET ?", insertData);
+
+//       // Optionally, set a flash message or response for successful insertion
+//       req.flash("msg_response", {
+//         status: 200,
+//         message:
+//           "Coin rate submitted successfully for company ID: " + companyId,
+//       });
+//     }
+
+//     // Redirect back to the index page or another appropriate page
+//     res.redirect("/admin/" + module_slug); // Change this to the appropriate redirection
+//   } catch (error) {
+//     console.error("Error while submitting company form:", error);
+//     return next(
+//       new ErrorHandler(
+//         "An error occurred while submitting the company form",
+//         500
+//       )
+//     );
+//   }
+// });
+
+// exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
+//   const companyId = req.params.id; // Get the company ID from the URL
+
+//   // Fetch the company details from the database
+//   const companyDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+//     companyId,
+//   ]);
+
+//   const company = companyDetail[0][0]; // Extract the company object from the result
+
+//   // Check if the company exists
+//   if (!company) {
+//     return next(new ErrorHandler("Company not found", 404)); // Handle company not found
+//   }
+
+//   // Fetch the existing company data from the company_data table
+//   const companyDataQuery = await db.query(
+//     "SELECT * FROM company_data WHERE company_id = ?",
+//     [companyId]
+//   );
+
+//   const companyData = companyDataQuery[0][0] || {}; // Get the company data or set to an empty object if not found
+
+//   // Render the company form view with the company details and existing company data
+//   res.render(module_slug + "/company-form", {
+//     layout: module_layout, // Assuming there's a layout file
+//     title: "Submit Company Data",
+//     companyId, // Pass the company ID to the form
+//     company, // Pass the company object to the view
+//     companyData, // Pass the existing company data (coin_rate, description)
+//   });
+// });
+
+///////////////////////////////////////////////
+
+// API to get a single user record
+
+exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
+  const userId = req.params.id; // Get user ID from request parameters
+  console.log("Fetching user with ID:", userId); // Log user ID
+
+  try {
+    // Use a parameterized query to avoid SQL injection
+    const query = `
+      SELECT
+        u.*,
+        ud.parent_id,
+        ud.leftchild_id,
+        ud.rightchild_id,
+        ud.referral_by,
+        ud.coins,
+        ud.pending_coin,
+        ud.upi_id
+      FROM
+        users u
+      LEFT JOIN
+        user_data ud ON u.id = ud.user_id
+      WHERE
+        u.id = ${userId}
+    `;
+    console.log("Executing query:", query);
+    const result = await pool.query(query, [userId]);
+    console.log("Query result:", result);
+
+    // Check if the result has the correct structure
+    if (
+      !result ||
+      !result[0] ||
+      !Array.isArray(result[0]) ||
+      result[0].length === 0
+    ) {
+      console.log(`User with ID ${userId} not found in database.`);
+      return res.status(404).send("User not found");
+    }
+    // Get the user data from the result
+    const user = result[0][0]; // The user object
+    console.log("User data retrieved:", user);
+    // Check if user object is defined
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    // Render the user detail page with the user data
+    res.render(module_slug + "/detail", {
+      layout: module_layout,
+      title: module_single_title,
+      user,
+    });
+  } catch (error) {
+    console.error("Database query error:", error); // Log the detailed error
+    return res.status(500).send("Server Error: " + error.message); // Return error message
+  }
+});
+
+////////////////////
+
+exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
+  const user = await QueryModel.findById(table_name, req.params.id, next);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
   res.render(module_slug + "/edit", {
     layout: module_layout,
     title: module_single_title + " " + module_edit_text,
-    blog,
+    user, // Pass the user details to the view
     module_slug,
   });
 });
 
-exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
-  const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+////////////////////////////
 
-  const updatedSlug = req.body.slug || generateSlug(req.body.title);
-
-  req.body.image = req.body.old_image;
-  if (req.file) {
-    req.body.image = req.file.filename;
-  }
-
+exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
   const updateData = {
-    title: req.body.title,
-    slug: updatedSlug,
-    description: req.body.description,
-    meta_title: req.body.meta_title,
-    meta_keyword: req.body.meta_keyword,
-    meta_description: req.body.meta_description,
-    image: req.body.image,
+    user_name: req.body.user_name,
+    email: req.body.email,
     status: req.body.status,
-    // created_at: created_at,
-    updated_at: created_at,
-    user_id: req.user.id,
   };
 
-  const blog = await QueryModel.findByIdAndUpdateData(
+  // Call your function to update the user in the database
+  const user = await QueryModel.findByIdAndUpdateData(
     table_name,
     req.params.id,
     updateData,
     next
   );
 
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
   req.flash("msg_response", {
     status: 200,
-    message: "Successfully updated " + module_single_title,
+    message: "Successfully updated user details.",
   });
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`); // Redirect to the index page
 });
+
+///////////////////////////////////////////////
 
 exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
   await QueryModel.findByIdAndDelete(table_name, req.params.id, next);
@@ -135,149 +397,164 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
 });
 
-exports.getAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 1;
-  const page = parseInt(req.query.page) || 1;
-  const searchQuery = req.query.search || "";
-  const filterQuery = req.query.filter || "";
-  // Calculate offset for pagination
-  const offset = (page - 1) * resultPerPage;
+// Sell API function with validation and structured data insertion
+// Sell API function
 
+// exports.createSellTransaction = catchAsyncErrors(async (req, res, next) => {
+//   try {
+//     // Log the incoming request body for debugging
+//     console.log("Request Body:", req.body);
+
+//     // Validate incoming request body against the schema
+//     await sellTransactionSchema.validateAsync(req.body, {
+//       abortEarly: false, // Continue validation after the first error
+//       allowUnknown: true, // Allow unknown fields
+//     });
+
+//     // Assume user_id is extracted from session or token
+//     const user_id = req.user?.id; // Use optional chaining to avoid undefined errors
+
+//     if (!user_id) {
+//       return next(new ErrorHandler("User ID is required", 401)); // Handle missing user_id
+//     }
+
+//     // Create a new transaction object
+//     const newTransaction = new sellTransactionSchema({
+//       user_id,
+//       ...req.body, // Spread validated request body properties
+//       date_created: new Date(), // Set current date
+//       status: "unapproved", // Set initial status if needed
+//     });
+
+//     // Save the transaction to the database
+//     const savedTransaction = await newTransaction.save();
+//     console.log("Saved Transaction:", savedTransaction); // Log the saved transaction
+
+//     // Respond with success message and transaction data
+//     res.status(201).json({
+//       success: true,
+//       message: "Transaction created successfully!",
+//       data: savedTransaction,
+//     });
+//   } catch (error) {
+//     console.error("Error creating sell transaction:", error); // Log the complete error object
+
+//     if (error.isJoi) {
+//       // Handle Joi validation errors
+//       return next(
+//         new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
+//       );
+//     }
+
+//     // Handle Mongoose validation or other database errors
+//     if (error.name === "ValidationError") {
+//       return next(new ErrorHandler("Validation error: " + error.message, 400));
+//     }
+
+//     // Handle other types of errors
+//     return next(
+//       new ErrorHandler("Failed to create transaction: " + error.message, 500)
+//     );
+//   }
+// });
+
+exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
   try {
-    // Count total blogs
-    const totalBlogsResult = await db.query(
-      "SELECT COUNT(*) as count FROM " + table_name
-    );
-    const totalBlogs = totalBlogsResult[0][0].count;
-
-    // Fetch blogs with pagination and filtering
-    // const blogs = await db.query('SELECT * FROM blogs  LIMIT ? OFFSET ?', [resultPerPage, offset]);
-    const blogs = await db.query(
-      "SELECT * FROM " + table_name + " order by id desc"
+    // Fetch all users where user_type is 'company' and join with company_data to get additional details
+    const companiesQuery = await db.query(
+      `SELECT u.id AS company_id, u.user_name AS company_name, 
+              c.coin_rate, c.description 
+       FROM users u 
+       LEFT JOIN company_data c ON u.id = c.company_id 
+       WHERE u.user_type = 'company'`
     );
 
-    /*res.status(200).json({
-            success: true,
-            totalBlogs,
-            resultPerPage,
-            page,
-            blogs
-        });*/
-    const message = req.flash("msg_response");
+    console.log("Companies query result:", companiesQuery);
 
-    res.render(module_slug + "/index", {
-      layout: module_layout,
-      title: module_title,
-      blogs,
-      message,
-      module_slug,
-    });
-  } catch (error) {
-    return next(new ErrorHandler("Database query failed", 500));
-  }
-});
+    // If no companies are found
+    if (companiesQuery[0].length === 0) {
+      return next(new ErrorHandler("No companies found", 404));
+    }
 
-exports.getSingleRecord = catchAsyncErrors(async (req, res, next) => {
-  const blog = await QueryModel.findById(table_name, req.params.id, next);
-
-  if (!blog) {
-    return;
-  }
-  res.render(module_slug + "/detail", {
-    layout: module_layout,
-    title: module_single_title,
-    blog,
-  });
-});
-
-exports.deleteImage = catchAsyncErrors(async (req, res, next) => {
-  const updateData = {
-    image: "",
-  };
-
-  const blog = await QueryModel.findByIdAndUpdateData(
-    table_name,
-    req.params.id,
-    updateData,
-    next
-  );
-
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully updated " + module_single_title,
-  });
-
-  res.redirect(
-    `/${process.env.ADMIN_PREFIX}/${module_slug}/edit/${req.params.id}`
-  );
-});
-
-function generateSlug(title) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9 -]/g, "") // Remove invalid characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+$/g, ""); // Remove trailing hyphens
-}
-
-exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 1;
-  const page = parseInt(req.query.page) || 1;
-  const searchQuery = req.query.search || "";
-  const filterQuery = req.query.filter || "";
-  // Calculate offset for pagination
-  const offset = (page - 1) * resultPerPage;
-
-  try {
-    // Count total blogs
-    const totalBlogsResult = await db.query(
-      "SELECT COUNT(*) as count FROM " + table_name
-    );
-    const totalBlogs = totalBlogsResult[0][0].count;
-
-    // Fetch blogs with pagination and filtering
-    const [blog_records] = await db.query(
-      "SELECT * FROM " + table_name + " order by id desc"
-    );
-
-    // Filter or process rows if needed
-    const blogs = blog_records.map((row) => ({
-      id: row.id,
-      title: row.title,
-      slug: row.slug,
-      image:
-        process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + row.image,
+    // Map the results to a structured array of companies
+    const companies = companiesQuery[0].map((company) => ({
+      company_id: company.company_id,
+      company_name: company.company_name,
+      coin_rate: company.coin_rate || 0, // Set to 0 if null
+      description: company.description || "", // Set to an empty string if null
     }));
 
+    // Send the response with the list of companies
     res.status(200).json({
       success: true,
-      totalBlogs,
-      resultPerPage,
-      page,
-      blogs,
+      data: companies,
     });
   } catch (error) {
-    return next(new ErrorHandler("Database query failed", 500));
+    console.error("Error fetching companies:", error);
+    return next(
+      new ErrorHandler("An error occurred while fetching companies", 500)
+    );
   }
 });
 
-exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
-  let blog = await QueryModel.findBySpecific(
-    table_name,
-    "slug",
-    req.params.slug,
-    next
-  );
+exports.getCompanyDetailApi = catchAsyncErrors(async (req, res, next) => {
+  try {
+    // Fetch the company ID from the request, assuming it's passed as a parameter
+    const companyId = req.params.id;
 
-  if (!blog) {
-    return next(new ErrorHandler("Record not found", 500));
+    // Log the companyId to verify it
+    console.log("Company ID being fetched:", companyId);
+
+    // Check if companyId is undefined or null
+    if (!companyId) {
+      return next(new ErrorHandler("Company ID is missing", 400));
+    }
+
+    // Fetch user details from the 'users' table where user_type is 'company'
+    const userQuery = await db.query(
+      "SELECT user_name FROM users WHERE id = ? AND user_type = 'company'",
+      [companyId]
+    );
+
+    console.log("User query result:", userQuery);
+
+    // If the user doesn't exist or is not a company
+    if (userQuery[0].length === 0) {
+      return next(new ErrorHandler("Company user not found", 404));
+    }
+
+    const user = userQuery[0][0]; // Extract user details
+
+    // Fetch company data from the 'company_data' table using the companyId
+    const companyDataQuery = await db.query(
+      "SELECT coin_rate, description FROM company_data WHERE company_id = ?",
+      [companyId]
+    );
+
+    console.log("Company data query result:", companyDataQuery);
+
+    // If company data doesn't exist
+    if (companyDataQuery[0].length === 0) {
+      return next(new ErrorHandler("Company data not found", 404));
+    }
+
+    const companyData = companyDataQuery[0][0]; // Extract company data details
+
+    // Construct the response object with all the necessary details
+    const companyProfile = {
+      company_name: user.user_name,
+      coin_rate: companyData.coin_rate || 0, // If coin_rate is null, set to 0
+      description: companyData.description || "", // If description is null, set to an empty string
+    };
+
+    // Send the response with the company's profile
+    res.status(200).json({
+      data: companyProfile,
+    });
+  } catch (error) {
+    console.error("Error fetching company profile:", error);
+    return next(
+      new ErrorHandler("An error occurred while fetching company profile", 500)
+    );
   }
-  blog.image =
-    process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + blog.image;
-
-  res.status(200).json({
-    success: true,
-    blog,
-  });
 });

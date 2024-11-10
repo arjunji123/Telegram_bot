@@ -8,218 +8,272 @@ const crypto = require("crypto");
 const db = require("../config/mysql_database");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
+const QueryModel = require("../models/queryModel");
+const { log } = require("console");
 
 const registerSchema = Joi.object({
-  user_name: Joi.string().required().max(50),
-  email: Joi.string().email().required().max(255),
+  user_name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  mobile: Joi.string().length(10).required(), // Assuming mobile is a 10-digit number
   password: Joi.string().min(8).required(),
-  referral_code: Joi.string().optional(), // User might enter a referral code
+  user_type: Joi.string().valid("user", "admin").required(), // Adjust as needed
+  referral_by: Joi.string().optional(), // If this field is optional
 });
 
-const generateReferralCode = (length = 8) => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let referralCode = "";
-  for (let i = 0; i < length; i++) {
-    referralCode += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+// const generateReferralCode = (length = 8) => {
+//   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+//   let referralCode = "UNITRADE"; // Prefix the referral code with "UNITRADE"
+//   for (let i = 0; i < length; i++) {
+//     referralCode += chars.charAt(Math.floor(Math.random() * chars.length));
+//   }
+//   return referralCode;
+// };
+const generateReferralCode = (userId) => {
+  const referralCode = `UNITRADE${userId}`; // Prefix "UNITRADE" with the user's user_id
   return referralCode;
 };
 
 // Register a user
-// exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
-//   const { user_name, mobile, email, password } = req.body;
-//   const hashedPassword = await bcrypt.hash(password, 10);
-//   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
-//   const updated_at = new Date().toISOString().slice(0, 19).replace("T", " ");
-
-//   try {
-//     await registerSchema.validateAsync(req.body, {
-//       abortEarly: false,
-//       allowUnknown: true,
-//     });
-//   } catch (error) {
-//     // Joi validation failed, send 400 Bad Request with error details
-//     return next(
-//       new ErrorHandler(
-//         error.details.map((d) => d.message),
-//         400
-//       )
-//     );
-//   }
-
-//   // Check if email or mobile number already exists
-//   const existingEmail = await db.query("SELECT * FROM users WHERE email = ?", [
-//     email,
-//   ]);
-//   const existingMobile = await db.query(
-//     "SELECT * FROM users WHERE mobile = ?",
-//     [mobile]
-//   );
-
-//   if (existingEmail[0].length > 0) {
-//     // If email already exists, send a 400 Bad Request response
-//     return next(new ErrorHandler("Email already exists", 400));
-//   }
-
-//   if (existingMobile[0].length > 0) {
-//     // If mobile number already exists, send a 400 Bad Request response
-//     return next(new ErrorHandler("Mobile number already exists", 400));
-//   }
-
-//   // Generate a unique referral code for the new user
-//   const referral_code = crypto.randomBytes(4).toString("hex");
-
-//   // Check if the referral code exists
-//   let refferal_id = null;
-//   if (referralCode) {
-//     const referrer = await db.query(
-//       "SELECT * FROM users WHERE referral_code = ?",
-//       [referralCode]
-//     );
-//     if (referrer[0].length > 0) {
-//       refferal_id = referralCode;
-//     } else {
-//       return next(new ErrorHandler("Invalid referral code", 400));
-//     }
-//   }
-
-//   // Proceed with user creation if both email and mobile number do not exist
-
-//   const userData = {
-//     user_name,
-//     mobile,
-//     email,
-//     password: hashedPassword,
-//     user_type,
-//     // referral_code,
-//     // refferal_id,
-//     created_at,
-//     updated_at,
-//   };
-//   const userInsert = await db.query("INSERT INTO users SET ?", userData);
-
-//   // Get the ID of the last inserted row
-//   const lastInsertId = userInsert[0].insertId;
-
-//   // Fetch the latest inserted user data using the ID
-//   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-//     lastInsertId,
-//   ]);
-//   const user = userDetail[0][0];
-//   // Assuming `user` is the object returned from MySQL query
-//   const token = User.generateToken(user.id); // Adjust as per your user object structure
-
-//   sendToken(user, token, 201, res);
-// });
-// Function to generate a unique referral code
-
-// Register a user
-// Register a user
 exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
-  const {
-    user_name,
-    mobile,
-    email,
-    password,
-    upi_id,
-    user_type,
-    referral_by, // This is the referral code provided by the new user
-  } = req.body;
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
-  const date_modified = new Date().toISOString().slice(0, 19).replace("T", " ");
-
+  // Validate request body with Joi schema
   try {
-    // Validate the request body with Joi schema
     await registerSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
     });
   } catch (error) {
-    return next(
-      new ErrorHandler(
-        error.details.map((d) => d.message),
-        400
-      )
-    );
+    const errorMessages = error.details
+      ? error.details.map((d) => d.message)
+      : ["Validation failed"];
+    return res.status(400).json({ success: false, error: errorMessages });
   }
 
-  // Check if email or mobile number already exists
-  const existingEmail = await db.query("SELECT * FROM users WHERE email = ?", [
-    email,
-  ]);
-  const existingMobile = await db.query(
-    "SELECT * FROM users WHERE mobile = ?",
-    [mobile]
-  );
+  const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
+  if (req.file) req.body.image = req.file.filename;
+  // Check if email, mobile, or UPI ID already exists
+  const { email, mobile } = req.body;
+  const existingUserQuery = `
+  SELECT email, mobile FROM users WHERE email = ? OR mobile = ?
+`;
+  const [existingUserRows] = await db.query(existingUserQuery, [email, mobile]);
 
-  if (existingEmail[0].length > 0) {
-    return next(new ErrorHandler("Email already exists", 400));
-  }
-
-  if (existingMobile[0].length > 0) {
-    return next(new ErrorHandler("Mobile number already exists", 400));
-  }
-
-  let parentId = null; // This will hold the ID of the user whose referral code was used
-  let referralBy = null; // This will hold the referral code of the user who sent the referral code
-
-  // If a referral code is provided, find the parent user
-  if (referral_by) {
-    const [parentRows] = await db.query(
-      "SELECT id, referral_code FROM user_data WHERE referral_code = ?",
-      [referral_by]
-    );
-
-    if (parentRows.length > 0) {
-      parentId = parentRows[0].id; // Set parentId to the user with this referral code
-      referralBy = parentRows[0].referral_code; // Set referralBy to the parent's referral code
-    } else {
-      return next(new ErrorHandler("Invalid referral code", 400));
+  if (existingUserRows.length > 0) {
+    const existingUser = existingUserRows[0];
+    if (existingUser.email === email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email already exists",
+      });
+    }
+    if (existingUser.mobile === mobile) {
+      return res.status(400).json({
+        success: false,
+        error: "Mobile number already exists",
+      });
     }
   }
 
-  // Generate a unique referral code for the new user
-  const newReferralCode = generateReferralCode(); // Implement this function to generate a unique referral code
-
-  // Prepare user data for users table
-  const userData = {
-    user_name,
-    mobile,
-    email,
-    password: hashedPassword,
-    user_type,
-    date_created,
-    date_modified,
+  const insertData = {
+    user_name: req.body.user_name,
+    email: req.body.email,
+    mobile: req.body.mobile,
+    password: await bcrypt.hash(req.body.password, 10),
+    date_created: dateCreated,
     status: "0",
+    user_type: req.body.user_type,
+    date_modified: dateCreated,
   };
 
-  // Prepare user-specific data for user_data table
-  const userData2 = {
-    referral_code: newReferralCode, // Save the generated referral code for the new user
-    upi_id,
-    parent_id: parentId || null, // Set parent_id to the parentId if available
-    referral_by: referralBy || null, // Store the parent's referral code as referral_by
+  // User Data Model for insertion
+  const UserDataModel = {
+    async create(userData) {
+      const query = `
+        INSERT INTO user_data (user_id, upi_id, referral_by, referral_code, parent_id, leftchild_id, rightchild_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      const result = await db.query(query, [
+        userData.user_id,
+        userData.upi_id,
+        userData.referral_by,
+        userData.referral_code,
+        userData.parent_id,
+        userData.leftchild_id,
+        userData.rightchild_id,
+      ]);
+      return result;
+    },
+    async updateData(table, data, condition) {
+      const query = `UPDATE ${table} SET ? WHERE ?`;
+      const result = await db.query(query, [data, condition]);
+      return result;
+    },
   };
 
-  // Insert user into the users table
-  const userInsert = await db.query("INSERT INTO users SET ?", userData);
-  const lastInsertId = userInsert[0].insertId;
+  // Function to check if a user has both children
+  async function hasBothChildren(userId) {
+    const query = `SELECT leftchild_id, rightchild_id FROM user_data WHERE user_id = ?`;
+    const [rows] = await db.query(query, [userId]);
+    const user = rows[0];
+    return user && user.leftchild_id !== null && user.rightchild_id !== null;
+  }
 
-  // Insert additional user data into the user_data table
-  userData2.user_id = lastInsertId; // Assuming user_id is a foreign key in user_data table
-  await db.query("INSERT INTO user_data SET ?", userData2);
+  // Main function to find the available parent
+  async function findAvailableParent(referralCode = null) {
+    // If a referral code is provided, check for the user associated with it
+    if (referralCode) {
+      const userQuery = `SELECT user_id as parent_id FROM user_data WHERE referral_code = ?`;
+      const [userRows] = await db.query(userQuery, [referralCode]);
+      const currentUser = userRows[0];
 
-  // Fetch the newly inserted user for token generation
-  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-    lastInsertId,
-  ]);
-  const user = userDetail[0][0];
+      if (currentUser) {
+        // Attempt to find an available spot in the referred user's subtree
+        const result = await findAvailableSpotInSubtree(currentUser.parent_id);
+        if (result) {
+          return result;
+        }
+        console.log("Referred user's subtree is fully occupied.");
+      } else {
+        console.log("No user found for the given referral code.");
+      }
+    }
 
-  // Generate token and send response
-  const token = User.generateToken(user.id); // Adjust based on your User model
-  sendToken(user, token, 201, res);
+    // If referral is not provided, or the referred user's subtree is fully occupied, find the next available parent
+    const rootQuery = `SELECT user_id FROM user_data WHERE parent_id IS NULL`;
+    const [rootRows] = await db.query(rootQuery);
+    const root = rootRows[0];
+
+    if (!root) return null;
+
+    const queue = [root.user_id];
+    while (queue.length > 0) {
+      const currentParentId = queue.shift();
+      const parentQuery = `SELECT leftchild_id, rightchild_id FROM user_data WHERE user_id = ?`;
+      const [parentRows] = await db.query(parentQuery, [currentParentId]);
+
+      if (!parentRows.length) continue;
+
+      const parent = parentRows[0];
+
+      // Check for available child position
+      if (parent.leftchild_id === null) {
+        return { parentId: currentParentId, position: "leftchild_id" };
+      }
+      if (parent.rightchild_id === null) {
+        return { parentId: currentParentId, position: "rightchild_id" };
+      }
+
+      queue.push(parent.leftchild_id);
+      queue.push(parent.rightchild_id);
+    }
+
+    console.log("No available parent found");
+    return null;
+  }
+
+  // Helper function to find an available spot in the subtree
+  async function findAvailableSpotInSubtree(userId) {
+    const queue = [userId];
+    while (queue.length > 0) {
+      const currentUserId = queue.shift();
+      const childQuery = `SELECT leftchild_id, rightchild_id FROM user_data WHERE user_id = ?`;
+      const [childRows] = await db.query(childQuery, [currentUserId]);
+
+      if (!childRows.length) continue;
+
+      const user = childRows[0];
+
+      // Check for available child positions
+      if (user.leftchild_id === null) {
+        return { parentId: currentUserId, position: "leftchild_id" };
+      }
+      if (user.rightchild_id === null) {
+        return { parentId: currentUserId, position: "rightchild_id" };
+      }
+
+      queue.push(user.leftchild_id);
+      queue.push(user.rightchild_id);
+    }
+
+    return null; // No available spot found
+  }
+
+  // Main logic for user registration
+  const referralBy = req.body.referral_by;
+  let parentId = null;
+  let position = null;
+
+  // Find an available parent based on the referral code or next available parent
+  if (referralBy) {
+    const parentInfo = await findAvailableParent(referralBy);
+    if (parentInfo) {
+      parentId = parentInfo.parentId;
+      position = parentInfo.position;
+    } else {
+      const nextParentInfo = await findAvailableParent();
+      if (nextParentInfo) {
+        parentId = nextParentInfo.parentId;
+        position = nextParentInfo.position;
+      }
+    }
+  } else {
+    const nextParentInfo = await findAvailableParent();
+    if (nextParentInfo) {
+      parentId = nextParentInfo.parentId;
+      position = nextParentInfo.position;
+    }
+  }
+
+  try {
+    // Insert user data into the users table
+    const user = await QueryModel.saveData("users", insertData); // Assuming QueryModel.saveData is a valid method
+    const userId = user.id; // Use `insertId` directly if it’s the ID of the newly created user
+    const referralCode = generateReferralCode(userId);
+
+    // Prepare additional data for the user_data table
+    const insertData2 = {
+      user_id: userId,
+      upi_id: req.body.upi_id,
+      referral_by: referralBy,
+      referral_code: req.body.referral_code || referralCode,
+      parent_id: parentId,
+      leftchild_id: null,
+      rightchild_id: null,
+    };
+
+    // Insert additional user data into user_data table
+    const newUserData = await UserDataModel.create(insertData2);
+    if (!newUserData) {
+      return res
+        .status(500)
+        .json({ success: false, error: "Error inserting user data" });
+    }
+
+    // Update parent record with the new child ID if parentId and position are set
+    if (parentId && position) {
+      const updateData = { [position]: userId };
+      await UserDataModel.updateData("user_data", updateData, {
+        user_id: parentId,
+      });
+    }
+
+    // Fetch the newly inserted user to generate the token
+    const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+      userId,
+    ]);
+    const newUser = userDetail[0][0]; // Assuming this returns the correct user object
+
+    // Generate token for the new user
+    const token = User.generateToken(newUser.id); // Adjust based on your User model
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: newUser,
+    });
+    return;
+  } catch (error) {
+    console.error("Error during user registration:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -248,8 +302,12 @@ exports.loginUserApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Invalid mobile number or password", 400));
   }
 
-  // Check if the user status is active (1)
-  if (user.status === 0) {
+  // Debugging: Log user to check the values
+  console.log(user); // Add this to check the user data being fetched
+
+  // Ensure status is a number and check if the user is active
+  if (parseInt(user.status) === 0) {
+    // parseInt to ensure we compare number values
     return next(
       new ErrorHandler(
         "Your account is deactivated. Please contact support.",
@@ -398,19 +456,21 @@ exports.resetPasswordApi = catchAsyncErrors(async (req, res, next) => {
   sendToken(user, token, 201, res);
 });
 
-// get user detail
-// exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
-//   console.log(req.user);
-//   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-//     req.user.id,
-//   ]);
-//   const user = userDetail[0][0];
+//////////////////////////////////////////
 
-//   res.status(200).json({
-//     success: true,
-//     user,
-//   });
-// });
+// get user detail
+exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
+  console.log(req.user);
+  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+    req.user.id,
+  ]);
+  const user = userDetail[0][0];
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
 
 // update user password
 exports.updatePasswordApi = catchAsyncErrors(async (req, res, next) => {
@@ -463,7 +523,7 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   if (!req.file) {
     return next(new ErrorHandler("No file uploaded", 400));
   }
-console.log("asdf",req.file);
+  console.log("asdf", req.file);
 
   // Get the uploaded file's filename
   const pay_image = req.file.filename;
@@ -478,7 +538,7 @@ console.log("asdf",req.file);
   // Update the user data in the database
   try {
     const result = await db.query(
-      "UPDATE user_data SET pay_image = ? WHERE id = ?",
+      "UPDATE user_data SET pay_image = ? WHERE user_id = ?",
       [
         pay_image, // Store the filename in the database
         user_id, // Use the user_id from the route parameter
@@ -500,6 +560,50 @@ console.log("asdf",req.file);
     });
   } catch (error) {
     console.error("Database update error:", error); // Log the error for debugging
+    return next(new ErrorHandler("Database update failed", 500));
+  }
+});
+exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  // Check if a file was uploaded
+  if (!req.file) {
+    return next(new ErrorHandler("No file uploaded", 400));
+  }
+
+  // Log uploaded file information for debugging
+  console.log("Uploaded file:", req.file);
+
+  // Get the uploaded file's filename
+  const quest_screenshot = req.file.filename;
+
+  // Get quest ID from route parameters
+  const quest_id = req.params.id;
+
+  // Debugging: Log quest ID and image filename
+  console.log(`Quest ID from params: ${quest_id}`);
+  console.log(`Screenshot Filename: ${quest_screenshot}`);
+
+  // Update the quest data in the database
+  try {
+    const result = await db.query(
+      "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
+      [quest_screenshot, quest_id]
+    );
+
+    // Check if any rows were affected
+    if (result.affectedRows === 0) {
+      return next(
+        new ErrorHandler("No quest found with the provided quest ID", 404)
+      );
+    }
+
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message: "Screenshots uploaded successfully",
+      quest_screenshot, // Optionally return the filename
+    });
+  } catch (error) {
+    console.error("Database update error:", error);
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
@@ -640,7 +744,7 @@ exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
       `SELECT u.id AS company_id, u.user_name AS company_name, 
               c.coin_rate, c.description 
        FROM users u 
-       LEFT JOIN company_data c ON u.id = c.company_id 
+       INNER JOIN company_data c ON u.id = c.company_id 
        WHERE u.user_type = 'company'`
     );
 
@@ -671,3 +775,424 @@ exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+
+////////////////////////////////////////
+
+
+
+// testing 
+exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  // Check if files were uploaded
+  if (!req.files || req.files.length === 0) {
+    return next(new ErrorHandler("No files uploaded", 400));
+  }
+
+  // Map each uploaded file to get the filename
+  const quest_screenshots = req.files.map(file => file.filename); 
+  const quest_id = req.params.quest_id;
+
+  try {
+    // Convert filenames array to JSON for storage in the database
+    const updateResult = await db.query(
+      "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
+      [JSON.stringify(quest_screenshots), quest_id]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      return next(new ErrorHandler("No quest found with the provided quest ID", 404));
+    }
+
+    res.status(200).json({ success: true, message: "Screenshots uploaded successfully" });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Database update failed", 500));
+  }
+});
+
+
+
+
+exports.getUserReferralCode = catchAsyncErrors(async (req, res, next) => {
+  // Get the user_id from the logged-in user's session
+  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+  console.log("Fetching referral code for user:", user_id);
+
+  try {
+    // Query to get the referral code for the user
+    const result = await db.query(
+      "SELECT referral_code FROM user_data WHERE user_id = ?",
+      [user_id]
+    );
+
+    const referralCode = result[0][0]?.referral_code || null; // If no referral code is found, default to null
+
+    console.log("Referral code fetched:", referralCode);
+
+    // Respond with the referral code
+    res.status(200).json({
+      success: true,
+      message: "Referral code fetched successfully.",
+      data: {
+        user_id,
+        referral_code: referralCode,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching referral code:", error);
+    return next(new ErrorHandler("Database query failed", 500));
+  }
+});
+
+//////////////////////////////////////
+
+// exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
+//   const { amount, recipientReferralCode } = req.body;
+//   const senderId = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+//   try {
+//     // Validate input
+//     if (!amount || !recipientReferralCode) {
+//       return next(
+//         new ErrorHandler("Amount and recipient referral code are required", 400)
+//       );
+//     }
+
+//     if (amount <= 0) {
+//       return next(new ErrorHandler("Amount must be greater than 0", 400));
+//     }
+
+//     // Step 1: Fetch sender's coins
+//     const senderCoinsQuery = await db.query(
+//       "SELECT coins FROM user_data WHERE user_id = ?",
+//       [senderId]
+//     );
+
+//     const senderCoins = senderCoinsQuery[0][0]?.coins || 0;
+
+//     // Check if the sender has enough coins
+//     if (senderCoins < amount) {
+//       return next(new ErrorHandler("Insufficient coins to transfer", 400));
+//     }
+
+//     // Step 2: Fetch recipient's user ID based on the referral code from user_data table
+//     const recipientQuery = await db.query(
+//       "SELECT user_id FROM user_data WHERE referral_code = ?", // Fetching from 'user_data' table
+//       [recipientReferralCode]
+//     );
+
+//     const recipient = recipientQuery[0][0];
+
+//     if (!recipient) {
+//       return next(new ErrorHandler("Recipient not found", 404));
+//     }
+
+//     const recipientId = recipient.user_id; // Correctly getting the recipient ID
+
+//     // Step 3: Update sender's coins by deducting the transferred amount
+//     await db.query("UPDATE user_data SET coins = coins - ? WHERE user_id = ?", [
+//       amount,
+//       senderId,
+//     ]);
+
+//     // Step 4: Update recipient's pending coins by adding the transferred amount
+//     const updateRecipientQuery = await db.query(
+//       "UPDATE user_data SET pending_coin = pending_coin + ? WHERE user_id = ?",
+//       [amount, recipientId]
+//     );
+
+//     // Check if the update was successful
+//     if (updateRecipientQuery[0].affectedRows === 0) {
+//       return next(new ErrorHandler("Failed to update recipient's coins", 500));
+//     }
+
+//     // Step 5: Respond with success
+//     res.status(200).json({
+//       success: true,
+//       message: `${amount} coins successfully transferred to user with referral code ${recipientReferralCode}.`,
+//     });
+//   } catch (error) {
+//     console.error("Error transferring coins:", error);
+//     return next(
+//       new ErrorHandler("An error occurred while transferring coins", 500)
+//     );
+//   }
+// });
+exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
+  const { amount, recipientReferralCode } = req.body;
+  const senderId = req.user.id; // Sender's user ID
+
+  try {
+    // Input validation
+    if (!amount || !recipientReferralCode) {
+      return next(
+        new ErrorHandler("Amount and recipient referral code are required", 400)
+      );
+    }
+
+    if (amount <= 0) {
+      return next(new ErrorHandler("Amount must be greater than 0", 400));
+    }
+
+    // Step 1: Fetch sender's coins
+    const senderCoinsQuery = await db.query(
+      "SELECT coins FROM user_data WHERE user_id = ?",
+      [senderId]
+    );
+    const senderCoins = senderCoinsQuery[0][0]?.coins || 0;
+
+    // Check if the sender has enough coins
+    if (senderCoins < amount) {
+      return next(new ErrorHandler("Insufficient coins to transfer", 400));
+    }
+
+    // Step 2: Fetch recipient's user ID based on referral code
+    const recipientQuery = await db.query(
+      "SELECT user_id FROM user_data WHERE referral_code = ?",
+      [recipientReferralCode]
+    );
+    const recipient = recipientQuery[0][0];
+
+    if (!recipient) {
+      return next(new ErrorHandler("Recipient not found", 404));
+    }
+
+    const recipientId = recipient.user_id;
+
+    // Step 3: Begin a transaction
+    await db.query("START TRANSACTION");
+
+    // Step 4: Update sender's coins by deducting the amount
+    const senderUpdateResult = await db.query(
+      "UPDATE user_data SET coins = coins - ? WHERE user_id = ?",
+      [amount, senderId]
+    );
+    console.log("Sender Update Result:", senderUpdateResult);
+
+    // Step 5: Update recipient's pending coins
+    const recipientUpdateResult = await db.query(
+      "UPDATE user_data SET pending_coin = pending_coin + ? WHERE user_id = ?",
+      [amount, recipientId]
+    );
+    console.log("Recipient Update Result:", recipientUpdateResult);
+
+    // Check if the updates were successful
+    if (
+      senderUpdateResult[0].affectedRows === 0 ||
+      recipientUpdateResult[0].affectedRows === 0
+    ) {
+      await db.query("ROLLBACK"); // Rollback transaction if any update fails
+      return next(
+        new ErrorHandler("Failed to update sender or recipient's coins", 500)
+      );
+    }
+
+    // Step 6: Insert entries into usercoin_audit table with status 'completed'
+    const currentTime = new Date();
+
+    // Entry 1: Sender's transaction
+    const senderAuditResult = await db.query(
+      "INSERT INTO usercoin_audit (user_id, pending_coin, transaction_id, date_entered, coin_operation, description, earn_coin, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        senderId,
+        0, // Sender's pending_coin as 0
+        recipientId, // Recipient ID as transaction_id
+        currentTime,
+        "cr", // Sender's coin_operation "cr"
+        "Amount send", // Description
+        amount, // earn_coin set to transferred amount
+        "transfer",
+        "completed", // Status set to 'completed'
+      ]
+    );
+    console.log("Sender Audit Result:", senderAuditResult);
+
+    // Entry 2: Recipient's transaction
+    const recipientAuditResult = await db.query(
+      "INSERT INTO usercoin_audit (user_id, pending_coin, transaction_id, date_entered, coin_operation, description, earn_coin, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        recipientId,
+        amount, // Recipient's pending_coin as received amount
+        senderId, // Sender ID as transaction_id
+        currentTime,
+        "dr", // Recipient's coin_operation "dr"
+        "Receive amount", // Description
+        0, // earn_coin set to 0
+        "transfer",
+        "completed", // Status set to 'completed'
+      ]
+    );
+    console.log("Recipient Audit Result:", recipientAuditResult);
+
+    // Step 7: Commit the transaction
+    await db.query("COMMIT");
+
+    // Step 8: Respond with success
+    res.status(200).json({
+      success: true,
+      message: `${amount} coins successfully transferred to user with referral code ${recipientReferralCode}.`,
+    });
+  } catch (error) {
+    // Rollback transaction in case of error
+    await db.query("ROLLBACK");
+    console.error("Error transferring coins:", error);
+    return next(
+      new ErrorHandler("An error occurred while transferring coins", 500)
+    );
+  }
+});
+
+/////////////////////////////////////
+
+const sellTransactionSchema = Joi.object({
+  company_id: Joi.string().required(), // Company ID to identify the company
+  tranction_coin: Joi.number().positive().required(), // Number of coins being sold, should be positive
+  transctionRate: Joi.number()
+    .positive()
+    .error(new Error('"tranction_rate" must be a valid positive number')),
+  transction_amount: Joi.number().positive().required(), // Total transaction amount, should be positive
+  // user_id: Joi.string().required(), // User ID for who is making the transaction
+  // date_created: Joi.date().default(() => new Date()), // Auto-populated date (ensure it's a function)
+  status: Joi.string().valid("approved", "unapproved").default("unapproved"), // Status of the transaction
+});
+////////////////
+
+exports.createSellTransaction = async (req, res, next) => {
+  try {
+    // Log the incoming request body for debugging
+    console.log("Request Body:", req.body);
+
+    // Validate incoming request body against the schema (if you are using Joi, for example)
+    await sellTransactionSchema.validateAsync(req.body, {
+      abortEarly: false, // Continue validation after the first error
+      allowUnknown: true, // Allow unknown fields
+    });
+
+    // Extract user ID (assume it's retrieved from session or token)
+    const user_id = req.user?.id; // Optional chaining for safety
+    if (!user_id) {
+      return next(new ErrorHandler("User ID is required", 401)); // Handle missing user ID
+    }
+    // Retrieve company data from the database
+    const companyData = await db.query(
+      "SELECT * FROM company_data WHERE company_id = ?",
+      [req.body.company_id]
+    );
+
+    console.log("Company Data:", companyData); // Log company data
+
+    // Check if companyData is returned correctly
+    if (!companyData || companyData.length === 0) {
+      return next(
+        new ErrorHandler("Company not found or invalid company ID", 404)
+      ); // Handle invalid company
+    }
+
+    // Ensure coin_rate is a valid number
+    // const transctionRate = parseFloat(companyData[0].coin_rate);
+    const transctionRate = parseFloat(companyData[0][0].coin_rate);
+
+    console.log("Transaction Rate:", transctionRate); // Log the transaction rate
+
+    if (isNaN(transctionRate)) {
+      return next(
+        new ErrorHandler('"tranction_rate" must be a valid number', 400)
+      ); // Handle if coin_rate is not a number
+    }
+
+    // Add this validated transaction rate to the request or next logic
+    req.body.tranction_rate = transctionRate; // Ensure this field is set
+
+    const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+    // Insert the transaction into the database
+    const result = await db.query(
+      "INSERT INTO user_transction (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) VALUES (?, ?, ?, ?, ?, NOW(),?)",
+      [
+        user_id,
+        req.body.company_id,
+        req.body.tranction_coin,
+        transctionRate, // Ensure this field is set,
+        req.body.transction_amount,
+
+        "unapproved",
+      ]
+    );
+
+    console.log("Transaction Created:", result); // Log the inserted transaction data
+
+    // Respond with success message and transaction data
+    res.status(201).json({
+      success: true,
+      message: "Transaction created successfully!",
+      // data: result, // You can send back the result of the insertion or any relevant data
+    });
+  } catch (error) {
+    console.error("Error creating sell transaction:", error); // Log the error object
+
+    if (error.isJoi) {
+      // Handle Joi validation errors
+      return next(
+        new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
+      );
+    }
+
+    // Handle other types of errors (e.g., database errors)
+    return next(
+      new ErrorHandler("Failed to create transaction: " + error.message, 500)
+    );
+  }
+};
+
+exports.getQuestHistory = async (req, res) => {
+  try {
+    const userId = req.user.id; // Assuming the user ID is in the request
+
+    // Step 1: Get all quests and their completion status in one query using LEFT JOIN
+    const questHistoryQuery = `
+      SELECT 
+        q.id AS quest_id, 
+        q.quest_name, 
+        q.status, 
+        q.coin_earn, 
+        IFNULL(uca.status, 'not_completed') AS completion_status
+      FROM quest q
+      LEFT JOIN usercoin_audit uca 
+        ON q.id = uca.quest_id 
+        AND uca.user_id = ? 
+        AND uca.status = 'completed' 
+        AND uca.deleted = 0
+      WHERE q.deleted = 0;
+    `;
+
+    // Step 2: Fetch quest history using db.query
+    const [questHistory] = await db.query(questHistoryQuery, [userId]);
+
+    // Step 3: Process the data to return the response
+    const formattedQuestHistory = questHistory.map((quest) => {
+      return {
+        quest_name: quest.quest_name,
+        quest_id: quest.quest_id,
+        status:
+          quest.completion_status === "completed"
+            ? "completed"
+            : "not_completed",
+        coin_earn: quest.coin_earn,
+      };
+    });
+
+    // Step 4: Return the response with quest history
+    return res.status(200).json({
+      success: true,
+      message: "Quest history fetched successfully.",
+      data: formattedQuestHistory,
+    });
+  } catch (error) {
+    console.error("Error fetching quest history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching quest history.",
+      error: error.message,
+    });
+  }
+};

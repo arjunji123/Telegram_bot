@@ -1,344 +1,437 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
-import { FaXTwitter, FaInstagram } from "react-icons/fa6";
-import { FaYoutube, FaTelegramPlane } from "react-icons/fa";
-import { AiFillCaretRight } from "react-icons/ai";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.css';
+import Loader from '../components/Loader';
+import { FaRegCheckCircle } from "react-icons/fa";
+import Follow from "../utils/Follow";
+import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAPIData } from '../../store/actions/homeActions';
-import { BACKEND_URL } from '../config';
-import Cookies from 'js-cookie';
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAPIData } from "../../store/actions/homeActions";
+import { BACKEND_URL } from "../config";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
+import axios from "axios";
 
 function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
   const apiQuests = apiData?.quests || [];
-  useEffect(() => {
-    dispatch(fetchAPIData('apiQuests'));
-  }, [dispatch]);
-
-
-  // Filter the quests based on type (Watch and Follow)
-  const videoQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Watch");
-  const socialQuests = apiQuests && apiQuests.filter((quest) => quest.quest_type === "Follow");
-
-
-
-  // Mapping API Data to rows (video quests)
-  const rows = videoQuests && videoQuests.map((quest, index) => ({
-    icon: <FaYoutube size={24} color="white" className="mr-4" />,
-    title: quest.quest_name,
-    videoUrl: quest.quest_url,
-    taskKey: `task${index + 1}`, // Unique keys
-    questId: quest.quest_id, // Add quest_id here
-  }));
-
-  // Mapping API Data to socials (follow quests)
-  const socials = socialQuests && socialQuests.map((quest, index) => {
-    let icon = null;
-    if (quest.quest_name.toLowerCase().includes("youtube")) {
-      icon = <FaYoutube size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("telegram")) {
-      icon = <FaTelegramPlane size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("x")) {
-      icon = <FaXTwitter size={24} color="white" className="mr-4" />;
-    } else if (quest.quest_name.toLowerCase().includes("instagram")) {
-      icon = <FaInstagram size={24} color="white" className="mr-4" />;
-    }
-
-    return {
-      icon,
-      title: quest.quest_name,
-      socialUrl: quest.quest_url,
-      taskKey: `task${index + 1}`, // Unique keys
-      questId: quest.quest_id, // Add quest_id here
-    };
-  });
-  const [watchTimes, setWatchTimes] = useState({
-    task1: null,
-    task2: null,
-  });
-  const [hasWatched, setHasWatched] = useState({
-    task1: false,
-    task2: false,
-  });
-  const [isVideoWatched, setIsVideoWatched] = useState({
-    task1: false,
-    task2: false,
-  });
-
-  const handleWatchButtonClick = (task) => {
-    setWatchTimes({
-      ...watchTimes,
-      [task]: Date.now(),
-    });
-    setIsVideoWatched({
-      ...isVideoWatched,
-      [task]: true,
-    });
-  };
+  const [loading, setLoading] = useState(true);
+  const [completedTasks, setCompletedTasks] = useState({});
+  const [watchTimes, setWatchTimes] = useState({});
+  const [videoDurations, setVideoDurations] = useState({});
+  const [hasWatched, setHasWatched] = useState({});
+  const [isVideoWatched, setIsVideoWatched] = useState({});
   const [followed, setFollowed] = useState({});
   const [hasFollowed, setHasFollowed] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [screenshot, setScreenshot] = useState(null);
+  const [activeTaskKey, setActiveTaskKey] = useState(null);
+  const [activeQuestId, setActiveQuestId] = useState(null);
+  const togglePopup = (taskKey, questId) => {
+    setShowPopup(!showPopup);
+    setActiveTaskKey(taskKey);
+    setActiveQuestId(questId);
+  };
+  const handleFileChange = (e) => {
+    setScreenshot(e.target.files[0]); // Capture screenshot
+  };
+
+  // useEffect(() => {
+  //   const storedCompletedTasks = localStorage.getItem("completedTasks");
+  //   if (storedCompletedTasks) {
+  //     setCompletedTasks(JSON.parse(storedCompletedTasks));
+  //   }
+  //   dispatch(fetchAPIData("apiQuests"));
+  // }, [dispatch]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Step 1: Retrieve completed tasks from localStorage
+        const storedCompletedTasks = localStorage.getItem("completedTasks");
+        if (storedCompletedTasks) {
+          setCompletedTasks(JSON.parse(storedCompletedTasks)); // Set tasks in state
+        }
+
+        await dispatch(fetchAPIData("apiQuests")); // Additional API call (if needed)
+
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false); // Set loading to false in case of an error
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
+  const bannerQuests = apiQuests && apiQuests.filter(quest => quest.quest_type === "banner");
+  const nonBannerQuests = apiQuests.filter(quest => quest.quest_type === "non-banner");
+
+    const rows = nonBannerQuests.filter((quest) => quest.activity === "watch").map((quest, index) => ({
+      taskKey: `task${quest.quest_id}`, // Unique keys
+      questId: quest.quest_id, // Add quest_id here
+      title: quest.quest_name,
+      icon: quest.image,
+      videoUrl: quest.quest_url,
+      coin: quest.coin_earn
+    }));
+  const handleWatchButtonClick = async (task, videoUrl) => {
+    console.log("taskKeytaskKey", task);
+    
+    try {
+      setWatchTimes(prev => ({ ...prev, [task]: Date.now() }));
+      setIsVideoWatched(prev => ({ ...prev, [task]: true }));
+      console.log("videoUrl:", videoUrl);
+      // Ensure the videoUrl is valid
+      const url = new URL(videoUrl);
+      const videoId = url.searchParams.get("v");
+
+      if (!videoId) {
+        throw new Error("Invalid YouTube URL");
+      }
+
+      // Fetch the duration from YouTube API
+      const duration = await fetchVideoDuration(videoId);
+      setVideoDurations(prev => ({ ...prev, [task]: duration }));
+    } catch (error) {
+      console.error("Error handling video URL:", error);
+      // Optional: Show an error message to the user
+    }
+  };
+
+  const API_KEY = 'AIzaSyCNdfiNQIQ2H_-BN4vvddtlHBAbjsAwRTU';
+  const fetchVideoDuration = async (videoId) => {
+
+
+    try {
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${API_KEY}`);
+      const data = await response.json();
+      if (data.items.length > 0) {
+        const duration = data.items[0].contentDetails.duration;
+        return convertDurationToSeconds(duration);
+      }
+      throw new Error("Video not found");
+    } catch (error) {
+      toast(`Error fetching video duration: ${error.message}`);
+      return 0; // Default duration to 0 on error
+    }
+  };
+
+
+  const convertDurationToSeconds = (duration) => {
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    const hours = (parseInt(match[1]) || 0) * 3600;
+    const minutes = (parseInt(match[2]) || 0) * 60;
+    const seconds = parseInt(match[3]) || 0;
+    return hours + minutes + seconds;
+  };
+
+  const handleCheckButtonClick = (task, questId) => {
+    console.log("questId", questId);
+    
+    const currentTime = Date.now();
+    const watchStartTime = watchTimes[task];
+    const timeSpent = (currentTime - watchStartTime) / 1000;
+
+    // Check against the video duration
+    const requiredDuration = videoDurations[task] || 0;
+
+    if (timeSpent >= requiredDuration) {
+      completeQuest(questId, task);
+    } else {
+      const remainingTime = requiredDuration - timeSpent;
+      toast(`You need to watch the video for ${remainingTime.toFixed(2)} more seconds.`);
+      setIsVideoWatched(prev => ({ ...prev, [task]: false }));
+    }
+  };
+
+  const completeQuest = async (questId, task) => {
+    // console.log("questIdquestId",questId);
+    
+    try {
+      const tokenData = localStorage.getItem("user");
+      if (!tokenData) throw new Error("No token data found in localStorage");
+
+      const parsedTokenData = JSON.parse(tokenData);
+      const token = parsedTokenData.token;
+
+      const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quest_id: questId }),
+      });
+
+      if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
+
+      setHasWatched(prev => ({ ...prev, [task]: true }));
+      setCompletedTasks(prev => ({ ...prev, [task]: true }));
+      localStorage.setItem("completedTasks", JSON.stringify({ ...completedTasks, [task]: true }));
+
+      toast("Task Completed!");
+    } catch (error) {
+      toast.error(`Error completing task: ${error.message}`);
+      console.error("Error completing quest:", error);
+    }
+  };
+  const socials = nonBannerQuests.filter((quest) => quest.activity === "follow").map((quest, index) => ({
+    taskKey: `task${quest.quest_id}`, // Unique keys
+    questId: quest.quest_id,
+    title: quest.quest_name,
+    icon: quest.image,
+    socialUrl: quest.quest_url,
+    coin: quest.coin_earn
+  }));
+
   const handleFollowButtonClick = (task) => {
     setFollowed({
       ...followed,
       [task]: Date.now(),
     });
   };
-  const handleCheckButtonClick = async (task, questId) => {
-    const currentTime = Date.now();
-    const watchStartTime = watchTimes[task];
-    const timeSpent = (currentTime - watchStartTime) / 1000;
-
-    if (timeSpent >= 10) {
-      try {
-        const tokenData = localStorage.getItem('user');
-        if (!tokenData) {
-          throw new Error('No token data found in localStorage');
-        }
-    
-        const parsedTokenData = JSON.parse(tokenData);
-        const token = parsedTokenData.token;
-    
-        if (!token) {
-          throw new Error('Token not found');
-        }
-        const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,  
-          },
-          body: JSON.stringify({ quest_id: questId }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Error: ${response.status} - ${response.statusText}\nDetails: ${errorText}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          setHasWatched({
-            ...hasWatched,
-            [task]: true,
-          });
-          alert("Task Completed!");
-        } else {
-          const text = await response.text();
-          throw new Error(`Expected JSON but received non-JSON response. Here is the response: ${text}`);
-        }
-      } catch (err) {
-        alert(`Error completing task: ${err.message}`);
-        console.error('Error completing quest:', err);
-      }
-    } else {
-      alert("You have not watched the video for at least 10 seconds.");
-      setIsVideoWatched({
-        ...isVideoWatched,
-        [task]: false,
-      });
+  
+  const handleSubmit = async (task, questId) => {
+    console.log("questIdquestId", questId);
+  
+    // Basic validations
+    if (!screenshot) {
+      toast('Please upload a screenshot!');
+      return;
     }
-  };
-
-
-  const handleCheckFollowButtonClick = async (task, questId) => {
+  
+    if (!questId) {
+      toast('Quest ID is required!');
+      return;
+    }
+  
+    if (!task) {
+      toast('Task ID is required!');
+      return;
+    }
+  
     try {
-      const tokenData = localStorage.getItem('user');
+      setIsUploading(true);
+  
+      // 1. Upload the screenshot
+      const formData = new FormData();
+      formData.append('screenshot', screenshot);
+  
+      await axios.post(`${BACKEND_URL}/api/v1/upload-quest-screenshot/${questId}`, formData);
+  
+      // 2. Complete the follow quest (your function logic)
+      const tokenData = localStorage.getItem("user");
       if (!tokenData) {
-        throw new Error('No token data found in localStorage');
+        throw new Error("No token data found in localStorage");
       }
   
       const parsedTokenData = JSON.parse(tokenData);
       const token = parsedTokenData.token;
   
       if (!token) {
-        throw new Error('Token not found');
+        throw new Error("Token not found");
       }
-
+  
+      // Completing the quest API call
       const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ quest_id: questId }),
+        body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
       });
-
+  
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
-
-      setHasFollowed({
-        ...hasFollowed,
-        [task]: true,
+  
+      // Mark the task as completed and update localStorage
+      setHasFollowed((prev) => {
+        const updatedState = {
+          ...prev,
+          [task]: true, // Save follow status per task
+        };
+        localStorage.setItem("hasFollowed", JSON.stringify(updatedState)); // Update localStorage
+        return updatedState;
       });
-      alert("Follow Task Completed!");
-
+  
+      // Mark as completed and update UI
+      setFollowed(true);
+      setShowPopup(false); // Close the pop-up
+      toast("Follow Task Completed!");
+  
     } catch (error) {
-      console.error('Error completing follow quest:', error);
-      alert('Error completing follow quest: ' + error.message);
+      console.error("Error completing follow quest:", error);
+      toast.error("Error completing follow quest: " + error.message);
+    } finally {
+      setIsUploading(false); // Set uploading state to false
     }
   };
+  
 
+  if (loading) {
+    return <Loader />;
+  }
   return (
-    <div className="bg-white flex justify-center min-h-screen">
-      <div className="w-full bg-black text-white flex flex-col max-w-lg  overflow-y-auto ">
+    <div className="bg-white flex justify-center min-h-screen font-poppins">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />      <div className="w-full bg-black text-white flex flex-col max-w-lg   ">
         <div className="flex-grow mb-4 relative z-0">
           <div className=" px-2 py-6 h-full z-10">
             <Logo />
-            <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
-            {/* Sliding Banner */}
-            <Swiper
-              spaceBetween={20}
-              slidesPerView={1}
-              pagination={{ clickable: true }}
-              className="rounded-lg shadow-lg overflow-hidden mb-4"
-            >
-              <SwiperSlide>
-                <div className="bg-gradient-to-r from-[#c7c7c1] to-[#dbdbd1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
-                  <div className="flex items-center">
-                    <img
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlrWcBG3SebWTLiMtYf1YBzrZ-dyD9B2LHqiJScut64HP7qbEj0oAJw-JHiCkf9HD2NHI&usqp=CAU" // Replace with your logo path
-                      alt="Logo"
-                      className="h-10 w-10 rounded-full shadow-md" // Logo styling
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <h1 className="text-black text-base font-bold ">MemeFi Quest Round 1</h1>
-                    <p className="text-[#423d3d] text-xs font-bold">+999 BP</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
-                      Open
-                    </button>
-                    <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
-                      0/3
-                    </button>
-                  </div>
-
-                </div>
-              </SwiperSlide>
-              <SwiperSlide>
-                <div className="bg-gradient-to-r from-[#d4afd1] to-[#f3d6f1] w-full p-3 space-y-2 rounded-lg shadow-lg ">
-                  <div className="flex items-center">
-                    <img
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv1DD_viUEoD_ag_IWy3twGYvW18quZRC8sA&s" // Replace with your logo path
-                      alt="Logo"
-                      className="h-10 w-10 rounded-full shadow-md" // Logo styling
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <h1 className="text-black text-base font-bold ">Subscribe to Blum Telegram </h1>
-                    <p className="text-[#423d3d] text-xs font-bold">+90 BP</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <button className="bg-black text-white py-1 px-[10px] rounded-full text-[13px] font-semibold shadow-lg active:border-white border transition duration-300">
-                      Start
-                    </button>
-                    {/* <button className=" bg-transparent  border-[#665f5f] text-[#2b2727] py-1 px-[25px] rounded-full text-[13px] font-bold shadow-lg border-2 transition duration-300">
-                  0/3
-                </button> */}
-                  </div>
-
-                </div>
-              </SwiperSlide>
-            </Swiper>
-            <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4"> {/* Reduced heading size */}
+            <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">
+              EARN
+            </p>
+            {/* Banner Quests (using CustomSwiper) */}
+            {bannerQuests.length > 0 && <CustomSwiper banners={bannerQuests} 
+            completedTasks= {completedTasks}
+            isVideoWatched= {  isVideoWatched}
+            hasFollowed= {  hasFollowed}
+            handleWatchButtonClick= {  handleWatchButtonClick}
+            handleCheckButtonClick= {  handleCheckButtonClick}
+            handleFollowButtonClick= {  handleFollowButtonClick}
+            followed = {followed}
+            togglePopup = {togglePopup}
+            />}
+            <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">
+              {" "}
+              {/* Reduced heading size */}
               COIN QUESTS 0/10
             </h1>
+            <div className="overflow-y-auto max-h-[70vh] mb-2">
+              <div className="mt-4">
+                {rows &&
+                  rows.map((row, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-black py-2 px-4 font-poppins"
+                    >
+                      <div className="flex items-center">
+                        <img className="w-8 h-8 mr-4" src={row.icon} alt="" />
 
-            <div className="mt-4 ">
-              {rows && rows.map((row, index) => (
-                <>
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-black py-3 px-4  font-poppins"
-                  >
-                    <div className="flex items-center ">
-                      {row.icon}
-                      <h3 className="text-sm uppercase ">{row.title}</h3>
+                        <div>
+                          <h3 className="text-sm capitalize  text-white font-bold">{row.title}</h3>
+                          <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
+                          </div>
+                      </div>
+
+                      {/* If task is completed, show 'Completed' message */}
+                      {completedTasks[row.taskKey] ? (
+                        <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
+                       <FaRegCheckCircle size={20} className="text-[#606060]"/>
+                        </p>
+                      ) : (
+                        <>
+                          {/* Render Watch and Check buttons based on task status */}
+                          {!isVideoWatched[row.taskKey] && (
+                            <a href={row.videoUrl} target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
+                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold" >
+                              <span className="">Watch</span>
+                            </a>
+                          )}
+
+                          {isVideoWatched[row.taskKey] && (
+                            <button
+                              onClick={() =>
+                                handleCheckButtonClick(row.taskKey, row.questId)
+                              }
+                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold"
+                            >
+                              Verify
+                            </button>
+                          )}
+                        </>
+                      )}
                     </div>
-                    {!hasWatched[row.taskKey] && !isVideoWatched[row.taskKey] && (
-                      <a
-                        href={row.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => handleWatchButtonClick(row.taskKey)}
-                        className="bg-white text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold"
-                      >
-                        <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
-                        <span className="uppercase">Watch</span>
-                      </a>
-                    )}
-                    {!hasWatched[row.taskKey] && isVideoWatched[row.taskKey] && (
-                      <button
-                        onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
-                        className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
-                      >
-                        Check
-                      </button>
-                    )}
-                    {hasWatched[row.taskKey] && (
-                      <p className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs uppercase font-bold">Completed</p>
-                    )}
-                  </div>
-                  <hr className="border-2 border-gray-50  w-2/3 mx-auto " /></>
-              ))}
+                  ))}
+                <hr className="border-2 border-gray-50 w-2/3 mx-auto " />
+              </div>
+              <div className="mt-4">
+                {socials &&
+                  socials.map((social, index) => (
+                    <div key={index}>
+                      <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
+                        <div className="flex items-center">
+                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
+                          <div>
+                          <h3 className="text-sm capitalize  text-white font-bold">{social.title}</h3>
+                          <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
+                          </div>
+                        
+                        </div>
+                        {/* Conditional rendering based on follow status */}
+                        {!hasFollowed[social.taskKey] &&
+                          !followed[social.taskKey] && (
+                            <a
+                              href={social.socialUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() =>
+                                handleFollowButtonClick(social.taskKey)
+                              }
+                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold"
+                            >
+                              <span className="">Follow</span>
+                            </a>
+                          )}
+                        {!hasFollowed[social.taskKey] &&
+                          followed[social.taskKey] && (
+                            <button                  
+                              onClick={() =>
+                                togglePopup(
+                                    social.taskKey,
+                                    social.questId,                                   
+                                  )                                 
+                                }
+                              className={`bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold ${hasFollowed[social.taskKey]
+                                  ? "bg-gray-400 cursor-not-allowed"
+                                  : "bg-[#282828]"
+                                }`}
+                              disabled={hasFollowed[social.taskKey]}
+                            >
+                              Verify
+                            </button>
+                          )}
+                        {hasFollowed[social.taskKey] && (
+                         <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
+                         <FaRegCheckCircle size={20} className="text-[#606060]"/>
+                          </p>
+                        )}
+                      </div>
+                      <hr className="border-2 border-white w-2/3 mx-auto" />
+                    </div>
+                  ))}
+              </div>
             </div>
 
-            <div className=" mt-4 ">
-              {socials && socials.map((social, index) => (
-                <>
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-black py-3 px-4 rounded-lg shadow-lg  "
-                  >
-                    <div className="flex items-center">
-                      {social.icon}
-                      <h3 className="text-sm uppercase">{social.title}</h3>
-                    </div>
-                    {!hasFollowed[social.taskKey] && !followed[social.taskKey] && (
-                    <a
-                      href={social.socialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleFollowButtonClick(social.taskKey)}
-                      className="bg-white text-black px-2 py-1 font-mono rounded-full w-20 flex justify-center text-xs font-bold"
-                    >
-                      <span><AiFillCaretRight size={18} /></span> {/* Adjusted icon size */}
-                      <span className="uppercase">Follow</span>
-                    </a>
-                     )}
-                       {!hasFollowed[social.taskKey] && followed[social.taskKey] && (
-                    <button
-                      onClick={() => handleCheckFollowButtonClick(social.taskKey, social.questId)}
-                      className="bg-blue-500 w-20 flex justify-center py-1 font-mono rounded-full text-sm uppercase font-bold"
-                    >
-                      Check
-                    </button>
-                  )}
-                  {hasFollowed[social.taskKey] && (
-                    <span className="bg-green-500 text-black w-20 flex justify-center py-1 font-mono rounded-full text-xs font-bold">
-                      Completed
-                    </span>
-                  )}
-                  </div>
-                  <hr className="border-2 border-white w-2/3 mx-auto " /></>
-
-              ))}
-
-
-            </div>
           </div>
         </div>
       </div>
       <Footer />
-    </div>
+      {showPopup && (
+  <Follow
+    togglePopup={() => togglePopup(null, null)}  // Pass correct taskKey and questId here if necessary
+    handleSubmit={handleSubmit}
+    handleFileChange={handleFileChange}
+    isUploading={isUploading}
+    task={activeTaskKey} // Pass task to handleSubmit
+    questId={activeQuestId} // Pass questId to handleSubmit
+  />
+)}
 
+    </div>
   );
 }
 

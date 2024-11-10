@@ -1,4 +1,3 @@
-
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -6,56 +5,97 @@
                 <div class="row page_top_bar">
                     <div class="col-12">
                         <div class="col-6 heading float-left">
-                            <h4 class="mt-0 header-title"><%= title %></h4>
+                            <h4 class="mt-0 header-title">Companies</h4>
                         </div>
                         <div class="col-6 btns float-left text-right">
-                            <a class="btn btn-primary" href="/admin/<%= module_slug %>/add">Add New</a>
+                            <a class="btn btn-primary" href="/admin/<%= module_slug %>/add">Add Company</a>
                         </div>
                     </div>
                 </div>
-                
 
                 <table id="responsive-datatable" class="table table-bordered table-bordered dt-responsive nowrap">
                     <thead>
-                    <tr>
-                        <th>S.No.</th>
-                        <th>Title</th>
-                        <th>Slug</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-
-
-                    <tbody>
-                    <% let serialNumber = 1; %>
-                    <% blogs[0].forEach(function(blog) { %>
                         <tr>
-                            <td><%= serialNumber++ %></td>
-                            <td><%= blog.title %></td>
-                            <td><%= blog.slug %></td>
-                            <td class="status_box">
-                                <%  if(blog.status == 1){ %>
-                                  <span class="btn btn-success rounded-pill waves-effect waves-light">Active</span>
-                               <% }else{ %> 
-                                <span class="btn btn-danger rounded-pill waves-effect waves-light">Inactive</span>
-                                <% } %>
-                               <!-- <div class="switchery-toggle">
-                                    <input type="checkbox" id="switchd" class="toogle_checkbox" value="0" /><label for="switch">Status</label>
-                                </div>-->
-                            </td>
-                            <td class="action_box"><a href="/admin/<%= module_slug %>/<%= blog.id %>"><i class="fe-eye"></i></a> <a href="/admin/<%= module_slug %>/edit/<%= blog.id %>"><i class="fe-edit"></i></a>  <a href="/admin/<%= module_slug %>/delete/<%= blog.id %>"><i class="fe-trash-2"></i></a></td>
+                            <th>S.No.</th>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                            <th>Created</th>
+                            <th>User Type</th>
+                            <th>Status</th>
+
+
+                            <th>View</th> <!-- New View Column -->
                         </tr>
-                    <% }); %> 
-                    
-                    
+                    </thead>
+                    <tbody>
+                        <% let serialNumber=1; %>
+                            <% users[0].forEach(user=> { %>
+                                <tr id="user-row-<%= user.id %>">
+                                    <td>
+                                        <%= serialNumber++ %>
+                                    </td>
+                                    <td>
+                                        <%= user.user_name %>
+                                    </td>
+                                    <td>
+                                        <%= user.mobile %>
+                                    </td>
+                                    <td>
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <%= user.date_created %>
+                                    </td>
+                                    <td>
+                                        <%= user.user_type %>
+                                    </td>
+                                    <td>
+                                        <%= user.status===1 ? 'Active' : 'Inactive' %>
+                                    </td>
+
+
+
+                                    <td class="action_box"><a href="/admin/<%= module_slug %>/<%= user.id %>"><i
+                                                class="fe-eye"></i></a> <a
+                                            href="/admin/<%= module_slug %>/edit/<%= user.id %>"><i
+                                                class="fe-edit"></i></a> <a
+                                            href="/admin/<%= module_slug %>/delete/<%= user.id %>"><i
+                                                class="fe-trash-2"></i></a></td>
+                                </tr>
+                                <% }); %>
                     </tbody>
                 </table>
             </div>
         </div>
-       
     </div>
-</div> <!-- end row -->
+</div>
 
-        
+<!-- Modal for viewing images -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Image Screenshot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Screenshot" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
 
+<script>
+    $(document).ready(function () {
+        // Show modal with the clicked image
+        $('.view-image').click(function () {
+            var imageUrl = $(this).data('image');
+            $('#modalImage').attr('src', imageUrl);
+            $('#imageModal').modal('show');
+        });
+    });
+</script>

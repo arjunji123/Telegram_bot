@@ -19,17 +19,50 @@
                             </div>
                             <div class="col-lg-6 float-left">
                                 <div class="mb-3">
-                                    <label for="simpleinput" class="form-label">Quest Type</label>
-                                    <input type="text" id="simpleinput" name="quest_type" class="form-control"
-                                        value="<%= blog.quest_type %>" readOnly>
+                                    <label for="quest_type" class="form-label">Quest Type</label>
+                                    <select id="quest_type" name="quest_type" class="form-control" disabled>
+                                        <option value="banner" <%=blog.quest_type==='banner' ? 'selected' : '' %>>Banner
+                                        </option>
+                                        <option value="non-banner" <%=blog.quest_type==='non-banner' ? 'selected' : ''
+                                            %>>Non-Banner</option>
+                                    </select>
                                 </div>
                             </div>
+
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="activity" class="form-label">Activity</label>
+                                    <select id="activity" name="activity" class="form-control" disabled>
+                                        <option value="watch" <%=blog.activity==='watch' ? 'selected' : '' %>>Watch
+                                        </option>
+                                        <option value="follow" <%=blog.activity==='follow' ? 'selected' : '' %>>Follow
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label">Start Date</label>
+                                    <input type="datetime-local" id="start_date" name="start_date" class="form-control"
+                                        value="<%= blog.start_date ? blog.start_date : '' %>" disabled>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">End Date</label>
+                                    <input type="datetime-local" id="end_date" name="end_date" class="form-control"
+                                        value="<%= blog.end_date ? blog.end_date : '' %>" disabled>
+                                </div>
+                            </div>
+
+
+
                         </div>
 
                         <div class="row">
                             <div class="col-lg-12 float-left">
                                 <div class="mb-3">
-                                    <label for="simpleinput" class="form-label">MQuest URL</label>
+                                    <label for="simpleinput" class="form-label">Quest URL</label>
                                     <input type="text" id="simpleinput" name="quest_url" class="form-control"
                                         value="<%= blog.quest_url %>" readOnly>
                                 </div>
@@ -44,7 +77,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-lg-12 float-left">
                                 <div class="mb-3">
                                     <label for="simpleinput" class="form-label">Image</label>
@@ -52,7 +85,37 @@
                                         readOnly><%= blog.image %></textarea>
                                 </div>
                             </div>
+                        </div> -->
+
+
+                        <div class="row">
+                            <div class="col-lg-12 float-left">
+                                <div class="mb-3">
+                                    <label for="simpleinput" class="form-label">Image</label>
+                                    <!-- Text area to show image path -->
+                                    <textarea class="form-control" id="image" name="description"
+                                        readOnly><%= blog.image %></textarea>
+
+                                    <% if (blog.image) { %>
+                                        <img src="<%- '/uploads/' + module_slug + '/' + blog.image %>"
+                                            style="width:300px" /><br />
+                                        <input type="hidden" name="old_image" value="<%- blog.image %>">
+                                        <div class="delete_btn_box">
+                                            <a href="/admin/<%= module_slug %>/delete-image/<%= blog.id %>">Delete
+                                                Image</a>
+                                        </div>
+                                        <% } else { %>
+                                            <p>No image available</p>
+                                            <% } %>
+                                </div>
+                            </div>
                         </div>
+
+
+
+
+
+
 
                         <div class="row">
                             <div class="col-lg-12 float-left">

@@ -40,6 +40,7 @@ const module_add_text = "Add";
 const module_edit_text = "Edit";
 const module_slug = "users";
 const module_layout = "layouts/main";
+
 const insertSchema = Joi.object({
   user_name: Joi.string().required().max(255),
   email: Joi.string().required(),
@@ -50,6 +51,7 @@ module.exports = {
   getResetPasswordToken,
   table_name,
   table_name2,
+  table_name3,
   insertSchema,
   module_title,
   module_single_title,

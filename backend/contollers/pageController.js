@@ -5,6 +5,8 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFeatures = require("../utils/apiFeatures");
 const db = require("../config/mysql_database");
 const Joi = require("joi");
+const moment = require("moment-timezone");
+const sanitizeHtml = require("sanitize-html");
 
 const table_name = Model.table_name;
 const module_title = Model.module_title;
@@ -23,56 +25,180 @@ exports.addFrom = catchAsyncErrors(async (req, res, next) => {
 });
 
 //create a new blog
-exports.createRecord = catchAsyncErrors(async (req, res, next) => {
+// end data
+// exports.createRecord = async (req, res, next) => {
+//   try {
+//     // Validate input data
+//     await Model.insertSchema.validateAsync(req.body, {
+//       abortEarly: false,
+//       allowUnknown: true,
+//     });
+//   } catch (error) {
+//     return next(
+//       new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
+//     );
+//   }
+
+//   // Create the date in the desired timezone
+//   const date_created = moment()
+//     .tz("Your/Timezone")
+//     .format("YYYY-MM-DD HH:mm:ss");
+
+//   if (req.file) {
+//     req.body.image = req.file.filename;
+//   }
+
+//   // Sanitize the description to remove HTML tags
+//   const sanitizedDescription = sanitizeHtml(req.body.description, {
+//     allowedTags: [], // No tags allowed
+//     allowedAttributes: {}, // No attributes allowed
+//   });
+
+//   // Prepare the insert data with quest_type and activity names
+//   const insertData = {
+//     quest_name: req.body.quest_name,
+//     quest_type: req.body.quest_type === "banner" ? "banner" : "non-banner",
+//     activity: req.body.activity === "watch" ? "watch" : "follow",
+//     quest_url: req.body.quest_url,
+//     date_created: date_created,
+//     image: req.body.image,
+//     description: sanitizedDescription,
+//     status: req.body.status,
+//     coin_earn: req.body.coin_earn,
+//     end_date: req.body.end_date, // Assuming end_date is also passed in the request
+//   };
+
+//   console.log("Data to be inserted:", insertData); // Log the data to be inserted
+
+//   try {
+//     const blog = await QueryModel.saveData("quest", insertData);
+
+//     if (!blog) {
+//       return next(new ErrorHandler("Failed to add record", 500));
+//     }
+
+//     req.flash("msg_response", {
+//       status: 200,
+//       message: "Successfully added the quest.",
+//     });
+
+//     res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+//   } catch (error) {
+//     console.error("Error in createRecord:", error.message);
+//     return next(new ErrorHandler("An error occurred while saving data", 500));
+//   }
+// };
+
+exports.createRecord = async (req, res, next) => {
   try {
+    // Validate input data
     await Model.insertSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
     });
   } catch (error) {
-    // Joi validation failed, send 400 Bad Request with error details
     return next(
-      new ErrorHandler(
-        error.details.map((d) => d.message),
-        400
-      )
+      new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
     );
   }
 
-  const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
+  // Create the date in the desired timezone
+  const date_created = moment()
+    .tz("Your/Timezone")
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  // Parse and format start_date if provided in request
+  const start_date = req.body.start_date
+    ? moment(req.body.start_date)
+        .tz("Your/Timezone")
+        .format("YYYY-MM-DD HH:mm:ss")
+    : null;
 
   if (req.file) {
     req.body.image = req.file.filename;
   }
 
-  const insertData = {
-    quest_name: req.body.quest_name,
-    quest_type: req.body.quest_type,
-    quest_url: req.body.quest_url,
-    date_created: date_created,
-    // end_date:
-    image: req.body.image,
-    description: req.body.description,
-    status: req.body.status,
-    coin_earn: req.body.coin_earn,
-  };
-
-  const blog = await QueryModel.saveData(table_name, insertData, next);
-
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully added " + module_single_title,
+  // Sanitize the description to remove HTML tags
+  const sanitizedDescription = sanitizeHtml(req.body.description, {
+    allowedTags: [], // No tags allowed
+    allowedAttributes: {}, // No attributes allowed
   });
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
-});
+  // Prepare the insert data with quest_type and activity names
+  const insertData = {
+    quest_name: req.body.quest_name,
+    quest_type: req.body.quest_type === "banner" ? "banner" : "non-banner",
+    activity: req.body.activity === "watch" ? "watch" : "follow",
+    quest_url: req.body.quest_url,
+    date_created: date_created,
+    start_date: req.body.start_date, // New start_date field
+    image: req.body.image,
+    description: sanitizedDescription,
+    status: req.body.status,
+    coin_earn: req.body.coin_earn,
+    end_date: req.body.end_date, // Assuming end_date is also passed in the request
+  };
+
+  console.log("Data to be inserted:", insertData); // Log the data to be inserted
+
+  try {
+    const blog = await QueryModel.saveData("quest", insertData);
+
+    if (!blog) {
+      return next(new ErrorHandler("Failed to add record", 500));
+    }
+
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully added the quest.",
+    });
+
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (error) {
+    console.error("Error in createRecord:", error.message);
+    return next(new ErrorHandler("An error occurred while saving data", 500));
+  }
+};
 
 exports.editForm = catchAsyncErrors(async (req, res, next) => {
   const blog = await QueryModel.findById(table_name, req.params.id, next);
 
   if (!blog) {
-    return;
+    return next(new ErrorHandler("Blog not found", 404));
   }
+
+  // Handle start_date formatting
+  console.log("Original Start Date:", blog.start_date);
+  if (blog.start_date) {
+    const startDate = new Date(blog.start_date);
+    if (!isNaN(startDate.getTime())) {
+      const utcOffset = startDate.getTimezoneOffset();
+      const localStartDate = new Date(
+        startDate.getTime() - utcOffset * 60 * 1000
+      );
+      blog.start_date = localStartDate.toISOString().slice(0, 16);
+    } else {
+      console.error("Invalid date:", blog.start_date);
+      blog.start_date = ""; // Handle invalid date
+    }
+  }
+  console.log("Formatted Start Date:", blog.start_date);
+
+  // Handle end_date formatting
+  console.log("Original End Date:", blog.end_date);
+  if (blog.end_date) {
+    const endDate = new Date(blog.end_date);
+    if (!isNaN(endDate.getTime())) {
+      const utcOffset = endDate.getTimezoneOffset();
+      const localEndDate = new Date(endDate.getTime() - utcOffset * 60 * 1000);
+      blog.end_date = localEndDate.toISOString().slice(0, 16);
+    } else {
+      console.error("Invalid date:", blog.end_date);
+      blog.end_date = ""; // Handle invalid date
+    }
+  }
+  console.log("Formatted End Date:", blog.end_date);
+
   res.render(module_slug + "/edit", {
     layout: module_layout,
     title: module_single_title + " " + module_edit_text,
@@ -89,18 +215,31 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     req.body.image = req.file.filename;
   }
 
+  // Log the incoming dates
+  console.log("Incoming Start Date:", req.body.start_date);
+  console.log("Incoming End Date:", req.body.end_date);
+
+  // Sanitize the description to remove HTML tags
+  const sanitizedDescription = sanitizeHtml(req.body.description, {
+    allowedTags: [], // No tags allowed
+    allowedAttributes: {}, // No attributes allowed
+  });
+
   const updateData = {
     quest_name: req.body.quest_name,
     quest_type: req.body.quest_type,
+    activity: req.body.activity,
     quest_url: req.body.quest_url,
+    start_date: req.body.start_date, // New field for start date
+    end_date: req.body.end_date, // New field for end date
     date_created: date_created,
-    // end_date:
     image: req.body.image,
-    description: req.body.description,
+    description: sanitizedDescription,
     status: req.body.status,
     coin_earn: req.body.coin_earn,
   };
 
+  // Update the record in the database
   const blog = await QueryModel.findByIdAndUpdateData(
     table_name,
     req.params.id,
@@ -173,12 +312,44 @@ exports.getSingleRecord = catchAsyncErrors(async (req, res, next) => {
   const blog = await QueryModel.findById(table_name, req.params.id, next);
 
   if (!blog) {
-    return;
+    return next(new ErrorHandler("Blog not found", 404)); // Handle not found error
   }
+
+  // Handle start_date formatting
+  console.log("Original Start Date:", blog.start_date);
+  if (blog.start_date) {
+    const startDate = new Date(blog.start_date);
+    if (!isNaN(startDate.getTime())) {
+      blog.start_date = moment(startDate)
+        .tz("Your_Time_Zone") // Replace 'Your_Time_Zone' with the actual timezone, e.g., 'Asia/Kolkata'
+        .format("YYYY-MM-DDTHH:mm");
+    } else {
+      console.error("Invalid date:", blog.start_date);
+      blog.start_date = ""; // Handle invalid date
+    }
+  }
+  console.log("Formatted Start Date:", blog.start_date);
+
+  // Handle end_date formatting
+  console.log("Original End Date:", blog.end_date);
+  if (blog.end_date) {
+    const endDate = new Date(blog.end_date);
+    if (!isNaN(endDate.getTime())) {
+      blog.end_date = moment(endDate)
+        .tz("Your_Time_Zone") // Replace 'Your_Time_Zone' with the actual timezone, e.g., 'Asia/Kolkata'
+        .format("YYYY-MM-DDTHH:mm");
+    } else {
+      console.error("Invalid date:", blog.end_date);
+      blog.end_date = ""; // Handle invalid date
+    }
+  }
+  console.log("Formatted End Date:", blog.end_date);
+
   res.render(module_slug + "/detail", {
     layout: module_layout,
     title: module_single_title,
     blog,
+    module_slug,
   });
 });
 
@@ -214,40 +385,47 @@ function generateSlug(quest_name) {
 }
 
 exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 10;
-  const page = parseInt(req.query.page) || 1;
-  const searchQuery = req.query.search || "";
-  const filterQuery = req.query.filter || "";
+  const resultPerPage = 10; // Set number of records per page
+  const page = parseInt(req.query.page) || 1; // Current page from query parameters
+  const searchQuery = req.query.search || ""; // Search term from query parameters
 
   // Calculate offset for pagination
   const offset = (page - 1) * resultPerPage;
 
   try {
-    // Count total quests
+    // Count total quests with optional search filter
     const totalQuestsResult = await db.query(
-      "SELECT COUNT(*) as count FROM quest"
+      "SELECT COUNT(*) as count FROM quest WHERE quest_name LIKE ? OR description LIKE ?",
+      [`%${searchQuery}%`, `%${searchQuery}%`]
     );
     const totalQuests = totalQuestsResult[0][0].count;
 
-    // Fetch quests with pagination and filtering
+    // Fetch quests with pagination and filtering, including activity and end_date
     const [quest_records] = await db.query(
-      "SELECT id,quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest ORDER BY id DESC LIMIT ? OFFSET ?",
-      [resultPerPage, offset]
+      "SELECT id, quest_name, quest_type, activity,start_date, quest_url, date_created, end_date, description, status, coin_earn, image FROM quest WHERE quest_name LIKE ? OR description LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?",
+      [`%${searchQuery}%`, `%${searchQuery}%`, resultPerPage, offset]
     );
 
-    // Process rows if needed
+    // Process rows to structure the data correctly
     const quests = quest_records.map((row) => ({
       quest_id: row.id,
       quest_name: row.quest_name,
-      quest_type: row.quest_type,
+      quest_type: row.quest_type, // Directly use the quest_type from the database
+      activity: row.activity, // Ensure activity is fetched from the database
       quest_url: row.quest_url,
-      date_created: row.date_created,
+      date_created: row.date_created.toLocaleString(),
+      end_date: row.end_date.toLocaleString(), // Include end_date in the response
       description: row.description,
       status: row.status,
-      image: row.image,
+      image:
+        process.env.BACKEND_URL + "uploads/" + module_slug + "/" + row.image,
       coin_earn: row.coin_earn,
+      start_date: row.start_date
+        ? new Date(row.start_date).toLocaleString()
+        : null,
     }));
 
+    // Send the response
     res.status(200).json({
       success: true,
       totalQuests,
@@ -256,35 +434,48 @@ exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
       quests,
     });
   } catch (error) {
+    console.error("Error in apiGetAllRecords:", error.message);
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
 
 exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
-  // Assuming you're using a slug or an ID to find the specific record
-  const questId = req.params.id; // Change this if using a slug or another identifier
+  const questId = req.params.id; // Assuming quest ID is passed as a URL parameter
+  const userId = req.user.id; // Assuming user ID is available from the request object
 
-  // Fetching the specific quest record
-  const [quest_records] = await db.query(
-    "SELECT quest_name, quest_type, quest_url, date_created, description, status, coin_earn, image FROM quest WHERE id = ? LIMIT 1",
-    [questId]
-  );
+  try {
+    const [quest_records] = await db.query(
+      `
+      SELECT q.quest_name, q.quest_type, q.quest_url, q.date_created, q.description, q.status, q.coin_earn, q.image, 
+             COALESCE(u.status, 'not_completed') AS user_status
+      FROM quest q
+      LEFT JOIN usercoin_audit u ON u.quest_id = q.id AND u.user_id = ?
+      WHERE q.id = ?
+      LIMIT 1
+    `,
+      [userId, questId]
+    );
 
-  const quest = quest_records[0]; // Get the first (and should be the only) record
+    const quest = quest_records[0]; // Get the first (and should be the only) record
 
-  if (!quest) {
-    return next(new ErrorHandler("Record not found", 404)); // Changed status code to 404 for not found
+    if (!quest) {
+      return next(new ErrorHandler("Record not found", 404)); // Changed status code to 404 for not found
+    }
+
+    // Process the image URL
+    quest.image =
+      process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + quest.image;
+
+    res.status(200).json({
+      success: true,
+      quest,
+    });
+  } catch (error) {
+    console.error("Error fetching quest record:", error);
+    return next(new ErrorHandler("Database query failed", 500));
   }
-
-  // Process the image URL
-  quest.image =
-    process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + quest.image;
-
-  res.status(200).json({
-    success: true,
-    quest,
-  });
 });
+
 /////////////////
 exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
   // Get the user_id from the logged-in user's session
@@ -333,10 +524,11 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
     const insertAuditData = {
       user_id,
       quest_id: fetchedQuestId,
-      pending_coin: coinEarnValue,
+      //pending_coin: coinEarnValue,
+      pending_coin: "0",
       coin_operation: "cr",
       type: "quest",
-      status: "active",
+      status: "completed",
       date_entered: new Date(),
     };
     console.log("Insert data for usercoin_audit:", insertAuditData);
@@ -399,7 +591,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
         user_id,
         quest_id: fetchedQuestId,
         coin_earn: coinEarnValue,
-        status: "active",
+        status: "completed",
         date_entered: new Date(),
         updated_pending_coin: updatedPendingCoin,
       },
@@ -419,24 +611,23 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   console.log("Fetching pending coins for user:", user_id);
 
   try {
-    // Query to get the pending_coin from user_data for the user
-    const [result] = await db.query(
-      "SELECT pending_coin FROM user_data WHERE user_id = ?",
+    // Query to get the sum of pending coins for the user where the status is 'inactive'
+    const result = await db.query(
+      "SELECT pending_coin AS totalPendingCoins FROM user_data WHERE user_id = ?",
       [user_id]
     );
 
-    // Get the pending_coin value from the result, or default to 0 if not found
-    const pendingCoin = result[0]?.pending_coin || 0;
+    const totalPendingCoins = result[0][0].totalPendingCoins || 0; // If no coins are found, default to 0
 
-    console.log("Pending coins fetched from user_data:", pendingCoin);
+    console.log("Total pending coins fetched:", totalPendingCoins);
 
-    // Respond with the pending coins
+    // Respond with the total pending coins
     res.status(200).json({
       success: true,
       message: "Pending coins fetched successfully.",
       data: {
         user_id,
-        pending_coin: pendingCoin,
+        pending_coin: totalPendingCoins,
       },
     });
   } catch (error) {
@@ -444,141 +635,79 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
-
 //////////////////////////////////////
 
 exports.transferPendingCoinsToTotal = catchAsyncErrors(
   async (req, res, next) => {
-    const user_id = req.user.id; // Get the user ID from the session
-    console.log(
-      "Initiating transfer of 5 coins from pending to total for user:",
-      user_id
-    );
+    const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+
+    console.log("Transferring coins from pending to total for user:", user_id);
 
     try {
-      // Step 1: Get user data
-      const [userDataResult] = await db.query(
-        "SELECT pending_coin, coins FROM user_data WHERE user_id = ?",
+      // Step 1: Retrieve the reduce_coin_rate from settings table
+      const settingsResult = await db.query(
+        "SELECT reduce_coin_rate FROM settings LIMIT 1" // Assuming there's only one row in the settings table
+      );
+
+      const reduceCoinRate = settingsResult[0][0]?.reduce_coin_rate || 0;
+
+      // Step 2: Check if the user has enough pending coins in user_data table
+      const userPendingResult = await db.query(
+        "SELECT pending_coin FROM user_data WHERE user_id = ?",
         [user_id]
       );
 
-      if (!userDataResult.length) {
-        console.log("User not found:", user_id);
-        return res
-          .status(404)
-          .json({ success: false, error: "User not found" });
+      const userPendingCoins = userPendingResult[0][0]?.pending_coin || 0;
+
+      // Check if user has enough pending coins
+      if (userPendingCoins < reduceCoinRate) {
+        return res.status(400).json({
+          success: false,
+          error: `Insufficient pending coins in user_data. At least ${reduceCoinRate} coins are required.`,
+        });
       }
+      // Step 3: Deduct coins from user_data table
+      await db.query(
+        "UPDATE user_data SET pending_coin = pending_coin - ?, coins = coins + ? WHERE user_id = ?",
+        [reduceCoinRate, reduceCoinRate, user_id]
+      );
 
-      let remainingCoinsToTransfer = 5;
-      let { pending_coin: currentPendingCoin, coins: currentEarnCoin } =
-        userDataResult[0];
+      // Step 4: Calculate the updated pending coins and earn coins
+      const updatedPendingCoins = userPendingCoins - reduceCoinRate; // Updated pending coins after deduction
+      const earnCoins = reduceCoinRate; // Earn coins is the reduceCoinRate that is transferred
 
-      console.log("User Data Retrieved:", userDataResult[0]);
+      // Insert a new row into usercoin_audit with the updated values
+      await db.query(
+        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin) VALUES (?, ?, ?)",
+        [user_id, updatedPendingCoins, earnCoins]
+      );
 
-      // Step 2: Transfer coins from user_data
-      if (currentPendingCoin > 0) {
-        const coinsFromUserData = Math.min(
-          currentPendingCoin,
-          remainingCoinsToTransfer
-        );
-        const newPendingCoinUserData = currentPendingCoin - coinsFromUserData;
-        const newEarnCoinUserData = currentEarnCoin + coinsFromUserData;
-
-        const [updateUserDataResult] = await db.query(
-          "UPDATE user_data SET pending_coin = ?, coins = ? WHERE user_id = ?",
-          [newPendingCoinUserData, newEarnCoinUserData, user_id]
-        );
-
-        if (updateUserDataResult.affectedRows === 0) {
-          console.log("Failed to update user_data for user:", user_id);
-        } else {
-          console.log(
-            "User data updated. Coins deducted from user_data:",
-            coinsFromUserData
-          );
-        }
-
-        remainingCoinsToTransfer -= coinsFromUserData;
-      } else {
-        console.log(
-          "No pending coins available in user_data for user:",
-          user_id
-        );
-      }
-
-      // Step 3: Transfer coins from usercoin_audit
-      while (remainingCoinsToTransfer > 0) {
-        console.log(
-          "Attempting to transfer coins from usercoin_audit. Remaining coins:",
-          remainingCoinsToTransfer
-        );
-
-        const [auditResult] = await db.query(
-          "SELECT id, pending_coin, earn_coin FROM usercoin_audit WHERE user_id = ? AND pending_coin > 0 LIMIT 1",
-          [user_id]
-        );
-
-        console.log("Audit Result Retrieved:", auditResult); // Debugging line
-
-        if (!auditResult.length) {
-          console.log(
-            "No more pending coins available in usercoin_audit for user:",
-            user_id
-          );
-          break;
-        }
-
-        const {
-          id: auditId,
-          pending_coin: auditPendingCoin,
-          earn_coin: currentAuditEarnCoin,
-        } = auditResult[0];
-
-        const coinsToDeduct = Math.min(
-          auditPendingCoin,
-          remainingCoinsToTransfer
-        );
-        const newPendingCoin = auditPendingCoin - coinsToDeduct;
-        const newEarnCoin = currentAuditEarnCoin + coinsToDeduct;
-
-        try {
-          const [updateAuditResult] = await db.query(
-            "UPDATE usercoin_audit SET pending_coin = ?, earn_coin = ? WHERE id = ?",
-            [newPendingCoin, newEarnCoin, auditId]
-          );
-
-          console.log("Update Audit Result:", updateAuditResult); // Log to check affected rows
-
-          if (updateAuditResult.affectedRows === 0) {
-            console.log(
-              "Failed to update usercoin_audit for audit ID:",
-              auditId
-            );
-            break; // Exit if update fails
-          }
-
-          console.log(
-            `Successfully transferred ${coinsToDeduct} coins from usercoin_audit for audit ID: ${auditId}`
-          );
-          remainingCoinsToTransfer -= coinsToDeduct; // Reduce remaining coins
-        } catch (error) {
-          console.error("Error while updating usercoin_audit:", error);
-          break; // Exit on error
-        }
-      }
-
-      // Step 4: Respond with updated user_data
-      const [updatedUserData] = await db.query(
-        "SELECT user_id, pending_coin, coins FROM user_data WHERE user_id = ?",
+      // Step 5: Fetch updated values for response
+      const updatedPendingCoinsResult = await db.query(
+        "SELECT pending_coin FROM user_data WHERE user_id = ?",
         [user_id]
       );
 
-      console.log("Final User Data After Transfer:", updatedUserData[0]);
+      const finalUpdatedPendingCoins =
+        updatedPendingCoinsResult[0][0].pending_coin;
 
+      const updatedTotalCoinsResult = await db.query(
+        "SELECT SUM(coins) AS totalEarnCoins FROM user_data WHERE user_id = ?",
+        [user_id]
+      );
+
+      const updatedTotalCoins =
+        updatedTotalCoinsResult[0][0]?.totalEarnCoins || 0;
+
+      // Respond with the updated values
       res.status(200).json({
         success: true,
-        message: "Coins transferred successfully.",
-        data: updatedUserData[0],
+        message: `${reduceCoinRate} coins transferred from pending coins to total coins successfully.`,
+        data: {
+          user_id,
+          pending_coin: updatedPendingCoins,
+          coins: updatedTotalCoins,
+        },
       });
     } catch (error) {
       console.error("Error during coin transfer:", error);
@@ -586,3 +715,5 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
     }
   }
 );
+
+////////////////////////////////////////////////////////

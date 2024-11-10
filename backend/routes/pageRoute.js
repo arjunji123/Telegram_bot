@@ -15,7 +15,11 @@ const {
   getUserPendingCoins,
   transferPendingCoinsToTotal,
 } = require("../contollers/pageController");
-const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
+const {
+  isAuthenticatedUser,
+  authorizeRoles,
+  isApiAuthenticatedUser,
+} = require("../middleware/auth");
 const Model = require("../models/pageModel");
 const module_slug = Model.module_slug;
 const router = express.Router();
@@ -74,13 +78,12 @@ router.route("/api-" + module_slug + "").get(apiGetAllRecords);
 router.route("/api-" + module_slug + "/:id").get(apiGetSingleRecord);
 router
   .route("/api-" + module_slug + "/complete-quest")
-  .post(isAuthenticatedUser, completeQuest);
+  .post(isApiAuthenticatedUser, completeQuest);
 
 // GET route for fetching pending coins
-router.route("/pending-coins").get(isAuthenticatedUser, getUserPendingCoins);
-
+router.route("/pending-coins").get(isApiAuthenticatedUser, getUserPendingCoins);
 router
   .route("/transfer-coins")
-  .post(isAuthenticatedUser, transferPendingCoinsToTotal);
+  .post(isApiAuthenticatedUser, transferPendingCoinsToTotal);
 
 module.exports = router;

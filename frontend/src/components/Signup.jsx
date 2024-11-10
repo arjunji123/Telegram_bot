@@ -1,13 +1,15 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState , useEffect} from "react";
+import { Link, useNavigate, useLocation  } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
 import { logo } from '../images';
 import { BACKEND_URL } from '../config';
+import Loader from '../components/Loader';
 
 function Signup() {
+  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({
     user_name: "",
     email: "",
@@ -15,12 +17,23 @@ function Signup() {
     confirmPassword: "",
     mobile: "",
     upi_id: "",
-    referral_by: "02010C",
+    referral_by: "UNITRADE1",
     user_type: "user",
   });
 
   const navigate = useNavigate();
+  const location = useLocation(); // Use location to access the URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const referralCode = params.get('referral_code'); // Get the referral code from the URL
 
+    if (referralCode) {
+      setValues((prev) => ({
+        ...prev,
+        referral_by: referralCode, // Set the referral code into the state
+      }));
+    }
+  }, [location]);
   const handleInput = (e) => {
     setValues((prev) => ({
       ...prev,
@@ -51,8 +64,8 @@ function Signup() {
     if (!values.password) {
       toast.error("Password is required");
       return false;
-    } else if (values.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    } else if (values.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return false;
     }
 
@@ -72,7 +85,7 @@ function Signup() {
     
     const isValid = validateForm(values);
     if (!isValid) return; // Exit if validation fails
-  
+    setLoading(true);
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/api-register`,
@@ -99,7 +112,10 @@ function Signup() {
       }
     }
   };
-  
+  if (loading) {
+    return <Loader />;
+  }
+
 
   return (
     <div className="bg-white flex justify-center items-center min-h-screen overflow-y-auto ">
@@ -131,7 +147,7 @@ function Signup() {
                 value={values.user_name}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Name"
               />
             </div>
@@ -142,7 +158,7 @@ function Signup() {
                 value={values.mobile}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Mobile No."
               />
             </div>
@@ -156,7 +172,7 @@ function Signup() {
               value={values.email}
               onChange={handleInput}
               required
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Email"
             />
           </div>
@@ -170,7 +186,7 @@ function Signup() {
                 value={values.password}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Password"
               />
             </div>
@@ -181,7 +197,7 @@ function Signup() {
                 value={values.confirmPassword}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Confirm Password"
               />
             </div>
@@ -195,13 +211,13 @@ function Signup() {
               value={values.upi_id}
               onChange={handleInput}
               required
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="UPI ID"
             />
           </div>
 
           {/* Referral Input */}
-          {/* <div className="relative">
+          <div className="relative hidden">
             <input
               type="text"
               name="referral_by"
@@ -211,13 +227,13 @@ function Signup() {
               className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Referral By"
             />
-          </div> */}
+          </div> 
 
           {/* Submit Button */}
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-2 sm:py-4 border-white border-2 text-white font-semibold rounded-xl shadow-md hover:opacity-90 transform transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+              className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
             >
               Sign Up
             </button>
@@ -227,14 +243,14 @@ function Signup() {
       </div>
 
       {/* Footer Section */}
-      <div className="bg-[#111113] py-4 sm:py-6 text-center">
+      {/* <div className="bg-[#111113] py-4 sm:py-6 text-center">
         <p className="text-xs sm:text-sm text-[#909090]">
           Already have an account?
           <Link to="/login" className="text-white font-semibold hover:underline ml-1">
             Login
           </Link>
         </p>
-      </div>
+      </div> */}
     </div>
   </div>
   );
