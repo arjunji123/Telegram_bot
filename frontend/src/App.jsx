@@ -41,17 +41,16 @@ function App({ Component, pageProps }) {
     <Provider store={store}>
       {" "}
       <BrowserRouter>
-        <AuthListener /> {/* Listen for localStorage changes */}
+        <AuthListener /> {/ Listen for localStorage changes /}
         <Routes>
-          {/* Redirect root path ("/") to login */}
-          <Route path="/" element={<Navigate to="/signup" />} />
-          {/* Public Routes */}
+         
+          {/ Public Routes /}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<Signup />} />
             <Route path="/payment/:id" element={<Payment />} />
           </Route>
-          {/* Protected Routes */}
+          {/ Protected Routes /}
           <Route element={<PrivateRoute />}>
             <Route path="/home" element={<Home />} />
             <Route path="/tasks" element={<Tasks />} />

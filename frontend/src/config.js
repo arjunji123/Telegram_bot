@@ -3,4 +3,4 @@
 //  export const BACKEND_URL = "http://localhost:4000";
 
 export const FRONTEND_URL =
-  "https://telegram-1xbvue0d9-arjuns-projects-e072bddd.vercel.app";
+  "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app";

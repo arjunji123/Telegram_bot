@@ -51,12 +51,13 @@
                                         <%= user.user_type %>
                                     </td>
                                     <td>
-                                        <%= user.status===1 ? 'Active' : 'Inactive' %>
+                                        <%= parseInt(user.status)===1 ? 'Active' : 'Inactive' %>
                                     </td>
+
                                     <td>
                                         <% if (user.pay_image) { %>
                                             <button class="btn btn-info view-image"
-                                                data-image="http://localhost:4000/uploads/<%= user.pay_image %>">
+                                                data-image="https://telegram-bot-by30.onrender.com/uploads/<%= user.pay_image %>">
                                                 View Screenshot
                                             </button>
                                             <% } else { %>
@@ -64,25 +65,29 @@
                                                 <% } %>
                                     </td>
                                     <td>
-                                        <% if (user.user_type==='company' ) { %>
-                                            <a href="/admin/<%= module_slug %>/company-form/<%= user.id %>"
-                                                class="btn btn-primary">View</a>
-                                            <% } %>
+                                        <% if (parseInt(user.status)===1) { %>
+                                            <!-- Deactivate Form - shown only when user is active -->
+                                            <form action="/admin/users/update-status" method="POST"
+                                                style="display:inline;">
+                                                <input type="hidden" name="userId" value="<%= user.id %>">
+                                                <input type="hidden" name="status" value="0">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-toggle-off"></i> Deactivate
+                                                </button>
+                                            </form>
+                                            <% } else { %>
+                                                <!-- Activate Form - shown only when user is inactive -->
                                                 <form action="/admin/users/update-status" method="POST"
                                                     style="display:inline;">
                                                     <input type="hidden" name="userId" value="<%= user.id %>">
                                                     <input type="hidden" name="status" value="1">
-                                                    <button type="submit" class="btn btn-sm btn-success"
-                                                        <%=user.status===1 ? 'disabled' : '' %>>Activate</button>
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-toggle-on"></i> Activate
+                                                    </button>
                                                 </form>
-                                                <form action="/admin/users/update-status" method="POST"
-                                                    style="display:inline;">
-                                                    <input type="hidden" name="userId" value="<%= user.id %>">
-                                                    <input type="hidden" name="status" value="0">
-                                                    <button type="submit" class="btn btn-sm btn-danger"
-                                                        <%=user.status===0 ? 'disabled' : '' %>>Deactivate</button>
-                                                </form>
+                                                <% } %>
                                     </td>
+
 
                                     <td class="action_box"><a href="/admin/<%= module_slug %>/<%= user.id %>"><i
                                                 class="fe-eye"></i></a> <a

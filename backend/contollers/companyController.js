@@ -1,4 +1,4 @@
-const Model = require("../models/serviceModel");
+const Model = require("../models/companyModel");
 const QueryModel = require("../models/queryModel");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
@@ -6,6 +6,7 @@ const ApiFeatures = require("../utils/apiFeatures");
 const db = require("../config/mysql_database");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
+const mysqlPool = require("../config/mysql_database"); // Adjust the path if necessary
 
 const table_name = Model.table_name;
 const module_title = Model.module_title;
@@ -287,45 +288,39 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
   console.log("Fetching user with ID:", userId); // Log user ID
 
   try {
-    // Use a parameterized query to avoid SQL injection
+    // Parameterized query to avoid SQL injection
     const query = `
-      SELECT
-        u.*,
-        ud.parent_id,
-        ud.leftchild_id,
-        ud.rightchild_id,
-        ud.referral_by,
-        ud.coins,
-        ud.pending_coin,
-        ud.upi_id
-      FROM
-        users u
-      LEFT JOIN
-        user_data ud ON u.id = ud.user_id
-      WHERE
-        u.id = ${userId}
-    `;
+    SELECT
+      u.user_name,
+      u.email,
+      u.date_created,
+      u.user_type,
+      u.status,
+      u.mobile,
+      c.coin_rate,
+      c.description
+    FROM
+      users u
+    INNER JOIN
+      company_data c ON u.id = c.company_id  -- Join on the user id and company_id
+    WHERE
+      u.id = ?  -- Filter by user id (passed as userId)
+  `;
+
     console.log("Executing query:", query);
-    const result = await pool.query(query, [userId]);
+    const result = await mysqlPool.query(query, [userId]);
     console.log("Query result:", result);
 
     // Check if the result has the correct structure
-    if (
-      !result ||
-      !result[0] ||
-      !Array.isArray(result[0]) ||
-      result[0].length === 0
-    ) {
+    if (!result || result.length === 0) {
       console.log(`User with ID ${userId} not found in database.`);
       return res.status(404).send("User not found");
     }
+
     // Get the user data from the result
     const user = result[0][0]; // The user object
     console.log("User data retrieved:", user);
-    // Check if user object is defined
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
+
     // Render the user detail page with the user data
     res.render(module_slug + "/detail", {
       layout: module_layout,
@@ -341,60 +336,193 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
 ////////////////////
 
 exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
-  const user = await QueryModel.findById(table_name, req.params.id, next);
+  const userId = req.params.id; // Get user ID from request parameters
+  console.log("User ID:", userId); // Log the user ID for debugging
+
+  // Fetch the user data from the 'users' table by userId
+  const userQuery = `
+    SELECT
+      u.user_name,
+      u.email,
+      u.date_created,
+      u.user_type,
+      u.status,
+      u.mobile
+    FROM
+      users u
+    WHERE
+      u.id = ?
+  `;
+
+  // Execute the query to fetch the user data
+  const userResult = await mysqlPool.query(userQuery, [userId]);
+  const user = userResult[0][0]; // Get the user data
 
   if (!user) {
+    // Return an error if the user is not found
+    console.log("User not found");
     return next(new ErrorHandler("User not found", 404));
   }
 
+  // Log the user data for debugging
+  console.log("User Data:", user);
+
+  // Fetch the company data using the same user.id as company_id from the 'company_data' table
+  const companyQuery = `
+    SELECT
+      c.coin_rate,
+      c.description
+    FROM
+      company_data c
+    WHERE
+      c.company_id = ?
+  `;
+
+  // Execute the query to fetch the company data
+  const companyResult = await mysqlPool.query(companyQuery, [userId]); // user.id is used as company_id
+  const companyData = companyResult[0][0]; // Get the company data
+
+  if (!companyData) {
+    // Return an error if the company data is not found
+    console.log("Company data not found");
+    return next(new ErrorHandler("Company not found", 404));
+  }
+
+  // Log the company data for debugging
+  console.log("Company Data:", companyData);
+  console.log("user", user);
+
+  // Render the 'edit' view and pass the necessary data
   res.render(module_slug + "/edit", {
     layout: module_layout,
-    title: module_single_title + " " + module_edit_text,
+    title: module_single_title + " " + module_edit_text, // Title for the page
+    userId,
     user, // Pass the user details to the view
-    module_slug,
+    companyData, // Pass the company data to the view
+    module_slug, // Pass the module_slug to the view
   });
 });
 
 ////////////////////////////
 
+// The function to update the user and company details in the database
 exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
-  const updateData = {
-    user_name: req.body.user_name,
-    email: req.body.email,
-    status: req.body.status,
-  };
+  const userId = req.params.id; // Get user ID from the request parameters
 
-  // Call your function to update the user in the database
-  const user = await QueryModel.findByIdAndUpdateData(
-    table_name,
-    req.params.id,
-    updateData,
-    next
-  );
+  // Extract updated data from the request body with validation checks
+  const { user_name, email, status, coin_rate, description } = req.body;
 
-  if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+  if (
+    !user_name ||
+    !email ||
+    status === undefined ||
+    !coin_rate ||
+    !description
+  ) {
+    return next(new ErrorHandler("All fields are required", 400));
   }
 
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully updated user details.",
-  });
+  // Prepare the query for updating the `users` table
+  const updateUserQuery = `
+    UPDATE users
+    SET 
+      user_name = ?, 
+      email = ?, 
+      status = ?
+    WHERE 
+      id = ?
+  `;
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`); // Redirect to the index page
+  try {
+    // Execute the query to update user data
+    const updateUserResult = await mysqlPool.query(updateUserQuery, [
+      user_name,
+      email,
+      status,
+      userId,
+    ]);
+
+    // Check if any rows were affected in the `users` table
+    if (updateUserResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Prepare the query for updating the `company_data` table
+    const updateCompanyQuery = `
+      UPDATE company_data
+      SET 
+        coin_rate = ?, 
+        description = ?
+      WHERE 
+        company_id = ?
+    `;
+
+    // Execute the query to update company data
+    const updateCompanyResult = await mysqlPool.query(updateCompanyQuery, [
+      coin_rate,
+      description,
+      userId, // Use user ID as the company ID for consistency
+    ]);
+
+    // Check if any rows were affected in the `company_data` table
+    if (updateCompanyResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("Company data not found", 404));
+    }
+
+    // Send success response with a flash message
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully updated user and company details.",
+    });
+
+    // Redirect to the admin module page
+    res.redirect(`/admin/${module_slug}`);
+  } catch (error) {
+    console.error("Error in updating user and company data:", error);
+    return next(new ErrorHandler("An error occurred while updating data", 500));
+  }
 });
 
 ///////////////////////////////////////////////
 
 exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
-  await QueryModel.findByIdAndDelete(table_name, req.params.id, next);
+  const userId = req.params.id; // Get the user ID from the request parameters
 
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully deleted " + module_single_title,
-  });
+  const deleteUserQuery = `
+    DELETE FROM users WHERE id = ?
+  `;
 
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  const deleteCompanyQuery = `
+    DELETE FROM company_data WHERE company_id = ?
+  `;
+
+  try {
+    // Delete from the users table
+    const deleteUserResult = await mysqlPool.query(deleteUserQuery, [userId]);
+
+    if (deleteUserResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Delete from the company_data table using the same userId as company_id
+    const deleteCompanyResult = await mysqlPool.query(deleteCompanyQuery, [
+      userId,
+    ]);
+
+    if (deleteCompanyResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("Company data not found", 404));
+    }
+
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully deleted " + module_single_title,
+    });
+
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (error) {
+    console.error("Error in deleting user and company data:", error);
+    return next(new ErrorHandler("An error occurred while deleting data", 500));
+  }
 });
 
 // Sell API function with validation and structured data insertion
