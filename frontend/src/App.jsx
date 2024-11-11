@@ -18,10 +18,25 @@ import { Provider } from "react-redux";
 import store from "../store/store";
 import Profile from "./components/Profile";
 import AuthListener from "./components/AuthListener"; // Import AuthListener
+import Preloader from "./components/Preloader";
+
 
 store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Simulate loading time for preloader, or you can perform initial API calls here
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Adjust the time as needed
 
+    return () => clearTimeout(timer); // Cleanup the timer on unmount
+  }, []);
+
+  if (isLoading) {
+    return <Preloader />; // Show preloader while loading
+  }
   return (
     <Provider store={store}>
       {" "}

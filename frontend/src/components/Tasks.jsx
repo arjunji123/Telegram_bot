@@ -77,12 +77,10 @@ function Tasks() {
       coin: quest.coin_earn
     }));
   const handleWatchButtonClick = async (task, videoUrl) => {
-    console.log("taskKeytaskKey", task);
     
     try {
       setWatchTimes(prev => ({ ...prev, [task]: Date.now() }));
       setIsVideoWatched(prev => ({ ...prev, [task]: true }));
-      console.log("videoUrl:", videoUrl);
       // Ensure the videoUrl is valid
       const url = new URL(videoUrl);
       const videoId = url.searchParams.get("v");
@@ -128,8 +126,6 @@ function Tasks() {
   };
 
   const handleCheckButtonClick = (task, questId) => {
-    console.log("questId", questId);
-    
     const currentTime = Date.now();
     const watchStartTime = watchTimes[task];
     const timeSpent = (currentTime - watchStartTime) / 1000;
@@ -140,8 +136,15 @@ function Tasks() {
     if (timeSpent >= requiredDuration) {
       completeQuest(questId, task);
     } else {
-      const remainingTime = requiredDuration - timeSpent;
-      toast(`You need to watch the video for ${remainingTime.toFixed(2)} more seconds.`);
+      const remainingTime =  Math.max(requiredDuration - timeSpent, 0);
+  // Convert remaining time to minutes and seconds
+  const remainingMinutes = Math.floor(remainingTime / 60); // Get the minutes
+  const remainingSeconds = Math.floor(remainingTime % 60); // Get the seconds
+
+  // Format the time as 'minutes:seconds'
+  const formattedTime = `${remainingMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+      // console.log('formattedTime', formattedTime)
+    toast(`You need to watch the video for ${formattedTime} minute more.`);
       setIsVideoWatched(prev => ({ ...prev, [task]: false }));
     }
   };
@@ -325,35 +328,39 @@ function Tasks() {
                           </div>
                       </div>
 
-                      {/* If task is completed, show 'Completed' message */}
-                      {completedTasks[row.taskKey] ? (
-                        <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
-                       <FaRegCheckCircle size={20} className="text-[#606060]"/>
-                        </p>
-                      ) : (
-                        <>
-                          {/* Render Watch and Check buttons based on task status */}
-                          {!isVideoWatched[row.taskKey] && (
-                            <a href={row.videoUrl} target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
-                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold" >
-                              <span className="">Watch</span>
-                            </a>
-                          )}
+                  {/* If task is completed, show 'Completed' message */}
+{completedTasks[row.taskKey] ? (
+  <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
+    <FaRegCheckCircle size={20} className="text-[#606060]" />
+  </p>
+) : (
+  <>
+    {/* Render Watch button if the user has not started watching yet */}
+    {!watchTimes[row.taskKey] && (
+      <a
+        href={row.videoUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
+        className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+      >
+        <span>Watch</span>
+      </a>
+    )}
 
-                          {isVideoWatched[row.taskKey] && (
-                            <button
-                              onClick={() =>
-                                handleCheckButtonClick(row.taskKey, row.questId)
-                              }
-                              className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-sm font-bold"
-                            >
-                              Verify
-                            </button>
-                          )}
-                        </>
-                      )}
+    {/* Show Verify button only if the user has watched enough time */}
+    {watchTimes[row.taskKey] && (
+      <button
+        onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
+        className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+        disabled={false} // Make sure the button is not disabled until the time is complete
+      >
+        Verify
+      </button>
+    )}
+  </>
+)}
+
                     </div>
                   ))}
                 <hr className="border-2 border-gray-50 w-2/3 mx-auto " />

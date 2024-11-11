@@ -48,7 +48,7 @@ if (loading) {
         {/* Scrollable Transaction List */}
         <div className="flex-grow overflow-y-auto py-4">
           {/* Sample Data by Date */}
-          {transactions.length > 0 ? (
+          {transactions && transactions.length > 0 ? (
               transactions.map((transaction, index) => (
             <div key={index} className="mb-6">
               {/* Date Label */}

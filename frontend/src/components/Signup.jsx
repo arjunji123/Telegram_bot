@@ -243,14 +243,14 @@ function Signup() {
       </div>
 
       {/* Footer Section */}
-      {/* <div className="bg-[#111113] py-4 sm:py-6 text-center">
+     <div className="bg-[#111113] py-4 sm:py-6 text-center">
         <p className="text-xs sm:text-sm text-[#909090]">
           Already have an account?
           <Link to="/login" className="text-white font-semibold hover:underline ml-1">
             Login
           </Link>
         </p>
-      </div> */}
+      </div> 
     </div>
   </div>
   );

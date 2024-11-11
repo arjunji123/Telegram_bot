@@ -32,7 +32,7 @@ function Login() {
       const backendError = error.error || "Your account is deactivated. Please contact support.";
       setErrors(backendError); // Set error message from backend response
       toast.error(backendError); // Show backend error in toast
-      console.log("Error:", backendError);
+      // console.log("Error:", backendError);
       
     }
   };

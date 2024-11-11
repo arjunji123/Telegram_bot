@@ -228,17 +228,19 @@
 
 /* Main container for the loader with background blur */
 .loader-container {
-  position: fixed; /* Fixes the loader on the screen */
-  top: 0;
-  left: 0;
+  position: fixed;  /* Ensures the loader is fixed in place */
+  top: 50%;  /* Vertically center it */
+  left: 50%;  /* Horizontally center it */
+  transform: translate(-50%, -50%);  /* Ensure it is exactly in the center */
   width: 100%;
-  height: 100%;
+  max-width: 1024px;  /* This is equivalent to max-w-lg (adjust as needed) */
+  height: 100vh;  /* Full viewport height */
   display: flex;
   justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0.7); /* Dark background with transparency */
-  backdrop-filter: blur(10px); /* Apply background blur */
-  z-index: 9999; /* Ensures loader appears on top */
+  backdrop-filter: blur(10px);  /* Apply background blur */
+  z-index: 9999; /* Ensures loader is on top */
 }
 
 /* Loader style */

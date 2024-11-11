@@ -4,7 +4,7 @@ import hero from "../Img/hero.jpg";
 function Home() {
   return (
     <div className="bg-white flex justify-center">
-    <div className="w-full max-w-xl bg-black text-white min-h-screen font-bold flex flex-col">
+    <div className="w-full max-w-lg bg-black text-white min-h-screen font-bold flex flex-col">
   
       {/* Preloader Section */}
       <div className="flex-grow mt-4  relative  z-0">
