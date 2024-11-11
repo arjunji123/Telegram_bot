@@ -29,7 +29,7 @@ function App({ Component, pageProps }) {
         <AuthListener /> {/* Listen for localStorage changes */}
         <Routes>
           {/* Redirect root path ("/") to login */}
-          <Route path="/" element={<Navigate to="/signup" />} />
+          <Route path="/signup" element={<Navigate to="/signup" />} />
           {/* Public Routes */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
