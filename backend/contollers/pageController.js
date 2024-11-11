@@ -524,8 +524,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
     const insertAuditData = {
       user_id,
       quest_id: fetchedQuestId,
-      //pending_coin: coinEarnValue,
-      pending_coin: "0",
+      pending_coin: coinEarnValue,
       coin_operation: "cr",
       type: "quest",
       status: "completed",

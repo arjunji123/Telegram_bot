@@ -421,7 +421,7 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
-  // Fetch user data along with quest_screenshot and pay_image using LEFT JOIN
+  // Fetch user data along with pay_image in a single query using LEFT JOIN
   const users = await db.query(
     `SELECT 
         u.id,
@@ -431,45 +431,20 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
         DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
         ud.pay_image,
         u.user_type,
-        qa.quest_screenshot,  -- Assuming quest_screenshot is in usercoin_audit table
-        qa.quest_id -- Make sure to include quest_id for approval/disapproval
+        u.status  
      FROM users u
      INNER JOIN user_data ud ON u.id = ud.user_id 
      WHERE u.user_type IN (?)`,
     ["user"]
   );
 
-  // Process each user's quest_screenshot field to ensure it's an array of images
-  users.forEach(user => {
-    if (user.quest_screenshot) {
-      try {
-        // Attempt to parse quest_screenshot as JSON array
-        user.quest_screenshot = JSON.parse(user.quest_screenshot);
-
-        // Ensure quest_screenshot is an array
-        if (!Array.isArray(user.quest_screenshot)) {
-          user.quest_screenshot = [user.quest_screenshot];
-        }
-      } catch (e) {
-        // Fallback to comma-separated string split if JSON parsing fails
-        // user.quest_screenshot = user.quest_screenshot.split(',');
-        user.quest_screenshot = user.quest_screenshot.split(',').map(img => img.trim());
-      
-      }
-    } else {
-      user.quest_screenshot = []; // Ensure it's an array even if empty
-    }
-  });
-
-  // Render the view with users data
   res.render(module_slug + "/index", {
     layout: module_layout,
-    title: `${module_single_title} ${module_add_text}`,
+    title: module_single_title + " " + module_add_text,
     module_slug,
     users, // Pass the users array directly
     originalUrl: req.originalUrl, // Pass the original URL here
   });
-  
 });
 
 exports.addFrom = catchAsyncErrors(async (req, res, next) => {
