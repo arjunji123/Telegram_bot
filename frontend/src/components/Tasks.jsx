@@ -295,7 +295,7 @@ function Tasks() {
             <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">
               EARN
             </p>
-            {/ Banner Quests (using CustomSwiper) /}
+          
             {bannerQuests.length > 0 && <CustomSwiper banners={bannerQuests} 
             completedTasks= {completedTasks}
             isVideoWatched= {  isVideoWatched}
@@ -308,7 +308,7 @@ function Tasks() {
             />}
             <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">
               {" "}
-              {/ Reduced heading size /}
+           
               COIN QUESTS 0/10
             </h1>
             <div className="overflow-y-auto max-h-[70vh] mb-2">
@@ -378,7 +378,7 @@ function Tasks() {
                           </div>
                         
                         </div>
-                        {/ Conditional rendering based on follow status /}
+                     
                         {!hasFollowed[social.taskKey] &&
                           !followed[social.taskKey] && (
                             <a

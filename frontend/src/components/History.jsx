@@ -37,7 +37,7 @@ if (loading) {
     <div className="bg-white min-h-screen flex justify-center font-poppins">
       <div className=" bg-black text-white w-full max-w-lg flex flex-col px-4">
         
-        {/ Header with Back Button /}
+
         <div className="flex items-center justify-between py-4">
           <button onClick={() => navigate(-1)} className="text-2xl text-white">
             <BsArrowLeft />
@@ -45,17 +45,17 @@ if (loading) {
           <h2 className="text-xl font-semibold text-center flex-grow">Transaction History</h2>
         </div>
         
-        {/ Scrollable Transaction List /}
+
         <div className="flex-grow overflow-y-auto py-4">
           {/* Sample Data by Date */}
           {transactions && transactions.length > 0 ? (
               transactions.map((transaction, index) => (
             <div key={index} className="mb-6">
-              {/ Date Label /}
+
               <p className="text-sm font-semibold text-gray-400 mb-3">
                     {transaction.date_entered ? new Date(transaction.date_entered).toLocaleDateString() : "No Date"}
                   </p>
-              {/ Transaction Items as Simple Rows /}
+
                 <div  className="flex items-center justify-between py-3 ">
                   <div className="flex items-center space-x-3">
                     <img
@@ -77,7 +77,7 @@ if (loading) {
           )}
         </div>
         
-        {/ Footer /}
+   
         <Footer />
       </div>
     </div>

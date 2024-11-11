@@ -41,16 +41,17 @@ function App({ Component, pageProps }) {
     <Provider store={store}>
       {" "}
       <BrowserRouter>
-        <AuthListener /> {/ Listen for localStorage changes /}
+        <AuthListener />
         <Routes>
-         
-          {/ Public Routes /}
+     
+          <Route path="/" element={<Navigate to="/signup" />} />
+
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Signup />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/payment/:id" element={<Payment />} />
           </Route>
-          {/ Protected Routes /}
+
           <Route element={<PrivateRoute />}>
             <Route path="/home" element={<Home />} />
             <Route path="/tasks" element={<Tasks />} />
