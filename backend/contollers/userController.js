@@ -1370,7 +1370,7 @@ exports.renderTreeView = async (req, res) => {
 
     const userTree = buildUserTree(rows);
     const filteredTree = filterSubTree(userTree, userId);
- res.render('users/tree_view', {
+ res.render('tree_view', {
       layout: module_layout,
       title: module_single_title,
       userTree: JSON.stringify(filteredTree),
