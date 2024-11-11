@@ -33,7 +33,7 @@ function App({ Component, pageProps }) {
           {/* Public Routes */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<Signup />} />
             <Route path="/payment/:id" element={<Payment />} />
           </Route>
           {/* Protected Routes */}
