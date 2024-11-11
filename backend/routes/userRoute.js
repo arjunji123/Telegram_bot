@@ -89,6 +89,9 @@ router.route("/password/update").post(isAuthenticatedUser, updatePassword);
 router.route("/me/update").post(isAuthenticatedUser, updateProfile);
 
 router.route("/users").get(isAuthenticatedUser, allUsers);
+  router.get('/user-tree-view/:userId', isAuthenticatedUser , renderTreeView);
+
+
 
 router
   .route("/" + module_slug + "/add")
