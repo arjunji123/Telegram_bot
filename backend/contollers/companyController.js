@@ -412,16 +412,6 @@ exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
   // Extract updated data from the request body with validation checks
   const { user_name, email, status, coin_rate, description } = req.body;
 
-  if (
-    !user_name ||
-    !email ||
-    status === undefined ||
-    !coin_rate ||
-    !description
-  ) {
-    return next(new ErrorHandler("All fields are required", 400));
-  }
-
   // Prepare the query for updating the `users` table
   const updateUserQuery = `
     UPDATE users
