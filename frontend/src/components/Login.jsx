@@ -136,7 +136,7 @@ function Login() {
         <div className="bg-[#111113] py-4 sm:py-6 text-center rounded-b-2xl">
           <p className="text-xs sm:text-sm text-[#909090]">
             New to Unitrade? 
-            <a href="/signup" className="text-white font-semibold hover:underline ml-1">
+            <a href="/" className="text-white font-semibold hover:underline ml-1">
               Create an Account
             </a>
           </p>
