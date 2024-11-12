@@ -16,14 +16,12 @@ const localStorage = new LocalStorage("./scratch");
 //     credentials: true,
 //   })
 // );
-app.use(
-  cors({
-    origin:
-   "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+ app.use(
+   cors({
+     origin: "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app/",
+     credentials: true,
+   })
+ );
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
