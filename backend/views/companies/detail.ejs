@@ -45,10 +45,11 @@
                             <div class="col-lg-6 float-left">
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status</label>
-                                    <input type="text" id="s" class="form-control" value="<%= parseInt(user.status) %>"
-                                        readOnly>
+                                    <input type="text" id="s" class="form-control"
+                                        value="<%= parseInt(user.status) === 1 ? 'Active' : 'Inactive' %>" readOnly>
                                 </div>
                             </div>
+
 
                             <div class="col-lg-6 float-left">
                                 <div class="mb-3">
