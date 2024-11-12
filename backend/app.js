@@ -22,7 +22,6 @@ const localStorage = new LocalStorage("./scratch");
      credentials: true,
    })
  );
-
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
