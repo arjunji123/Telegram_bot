@@ -44,7 +44,7 @@ function App({ Component, pageProps }) {
         <AuthListener />
         <Routes>
      
-          <Route path="/" element={<Navigate to="/signup" />} />
+          <Route path="/signup" element={<Navigate to="/signup" />} />
 
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
