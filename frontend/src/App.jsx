@@ -24,7 +24,8 @@ import Preloader from "./components/Preloader";
 store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
-  
+  const token = localStorage.getItem("user");
+
   useEffect(() => {
     // Simulate loading time for preloader, or you can perform initial API calls here
     const timer = setTimeout(() => {
@@ -48,7 +49,7 @@ function App({ Component, pageProps }) {
  */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Signup />} />
+            <Route path="/" element={token ? <Navigate to="/home" /> : <Signup />} />
             <Route path="/payment/:id" element={<Payment />} />
           </Route>
 
