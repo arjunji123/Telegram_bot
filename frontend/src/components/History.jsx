@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BsArrowLeft } from 'react-icons/bs';
+import { BsArrowLeft, BsCoin  } from 'react-icons/bs';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import {  fetchHistory  } from "../../store/actions/homeActions";
@@ -58,11 +58,12 @@ if (loading) {
 
                 <div  className="flex items-center justify-between py-3 ">
                   <div className="flex items-center space-x-3">
-                    <img
+                    {/* <img
                       className="w-8 h-8"
                       src="/src/Img/rupees.png"
                       alt="Transaction icon"
-                    />
+                    /> */}
+                    <BsCoin size={30}  className="text-white"/>
                      <h3 className="text-sm font-semibold capitalize">      {transaction.type }</h3>
                   
                         </div>

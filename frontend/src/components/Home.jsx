@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../Styles/Tasks.css";
 import Logo from "../utils/Logo";
 import Footer from "./Footer";
-import { BsPersonCircle } from "react-icons/bs";
+import { BsPersonCircle, BsCoin  } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMeData, fetchCoinData, transferCoins, fetchReffralData } from "../../store/actions/homeActions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -74,7 +74,7 @@ function Home() {
     <div className="bg-white flex justify-center">
     <ToastContainer
       position="top-right"
-      autoClose={5000}
+      autoClose={500}
       hideProgressBar={false}
       closeOnClick
       pauseOnHover
@@ -133,11 +133,12 @@ function Home() {
                       exit={{ opacity: 0, scale: 0.5 }}
                       transition={{ duration: 2, ease: "easeOut" }}
                     >
-                    <img
+                    {/* <img
                       src="src/images/dollar-coin.png"
                       alt="Hamster Coin"
                       className="coin-image w-6 h-6"
-                    />
+                    /> */}
+                    <BsCoin size={2} className="coin-image" />
                   </motion.div>
                 ))}
               </AnimatePresence>

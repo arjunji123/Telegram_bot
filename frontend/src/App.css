@@ -202,8 +202,8 @@
 }
 
 .coin-image {
-  width: 40px; /* Adjust size to your coin image */
-  height: 40px; /* Adjust size to your coin image */
+  width: 20px; /* Adjust size to your coin image */
+  height: 20px; /* Adjust size to your coin image */
   transition: transform 0.5s ease-in-out;
   will-change: transform;
 }
