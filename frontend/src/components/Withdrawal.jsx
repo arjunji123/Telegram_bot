@@ -59,19 +59,19 @@ const [sellData, setSellData] = useState({
   const apiData = useSelector((state) => state.apiData.data);
   const userData = apiData && apiData.me && apiData.me.data  || null;
 // console.log('apiCompanies', apiCompanies)
-// useEffect(() => {
-//   const fetchData = async () => {
-//     try {
-//       await dispatch(fetchAPIData('apiCompanies'));
-//       await dispatch(fetchMeData());
-//       setLoading(false);  // Set loading to false once data is fetched
-//     } catch (error) {
-//       setLoading(false);  // Set loading to false in case of an error
-//       console.error("Error fetching data", error);
-//     }
-//   };
-//   fetchData();
-// }, [dispatch]);
+ useEffect(() => {
+   const fetchData = async () => {
+     try {
+       await dispatch(fetchAPIData('apiCompanies'));
+       await dispatch(fetchMeData());
+       setLoading(false); 
+     } catch (error) {
+       setLoading(false);   
+       console.error("Error fetching data", error);
+     }
+   };
+   fetchData();
+ }, [dispatch]);
 
   const handleIconClick = (index) => {
     setActiveIndex(index);
@@ -192,6 +192,7 @@ const handleSellSubmit = (e) => {
   return (
 
     <>
+
       <div className="bg-white flex justify-center min-h-screen font-poppins">
             <ToastContainer
         position="top-right"
