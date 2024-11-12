@@ -463,6 +463,288 @@ exports.addFrom = catchAsyncErrors(async (req, res, next) => {
 function generateReferralCode() {
   return crypto.randomBytes(3).toString("hex").toUpperCase(); // Generates a random 6-character referral code
 }
+// exports.createRecord = catchAsyncErrors(async (req, res, next) => {
+//   // Validate request body with Joi schema
+//   try {
+//     await Model.insertSchema.validateAsync(req.body, {
+//       abortEarly: false,
+//       allowUnknown: true,
+//     });
+//   } catch (error) {
+//     return res
+//       .status(400)
+//       .json({ success: false, error: error.details.map((d) => d.message) });
+//   }
+
+//   const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
+//   if (req.file) req.body.image = req.file.filename;
+
+//   const insertData = {
+//     user_name: req.body.user_name,
+//     email: req.body.email,
+//     mobile: req.body.mobile,
+//     password: await bcrypt.hash(req.body.password, 10),
+//     status: req.body.status,
+//     date_created: dateCreated,
+//     user_type: "user",
+//     date_modified: dateCreated,
+//   };
+
+//   // Integrated UserDataModel
+//   const UserDataModel = {
+//     async create(userData) {
+//       const query = `
+//         INSERT INTO user_data (user_id, upi_id, referral_by, referral_code, parent_id, leftchild_id, rightchild_id)
+//         VALUES (?, ?, ?, ?, ?, ?, ?)`;
+//       const result = await db.query(query, [
+//         userData.user_id,
+//         userData.upi_id,
+//         userData.referral_by,
+//         userData.referral_code,
+//         userData.parent_id,
+//         userData.leftchild_id,
+//         userData.rightchild_id,
+//       ]);
+//       return result;
+//     },
+//     async updateData(table, data, condition) {
+//       const query = `UPDATE ${table} SET ? WHERE ?`;
+//       const result = await db.query(query, [data, condition]);
+//       return result;
+//     },
+//   };
+
+//   // Function to check if a user has both children
+//   async function hasBothChildren(userId) {
+//     const query = `SELECT leftchild_id, rightchild_id FROM user_data WHERE user_id = ?`;
+//     const [rows] = await db.query(query, [userId]);
+//     const user = rows[0];
+//     return user && user.leftchild_id !== null && user.rightchild_id !== null;
+//   }
+
+//   // Main function to find the available parent
+//   async function findAvailableParent(referralCode = null) {
+//     if (referralCode) {
+//       console.log("Searching for parent using referral code:", referralCode);
+//       const userQuery = `SELECT user_id as parent_id FROM user_data WHERE referral_code = ?`;
+//       const [userRows] = await db.query(userQuery, [referralCode]);
+
+//       let currentUser = userRows[0];
+//       if (currentUser) {
+//         const userId = currentUser.parent_id;
+//         // Attempt to find an available spot in the referred user's subtree
+//         const result = await findAvailableSpotInSubtree(userId);
+//         if (result) {
+//           return result;
+//         }
+//         console.log("Referred user's subtree is fully occupied.");
+//       } else {
+//         console.log("No user found for the given referral code.");
+//       }
+//     }
+
+//     // If referral is not provided, or referred user's subtree is fully occupied, find the next available parent
+//     console.log("Finding the next available parent");
+//     const rootQuery = `SELECT user_id FROM user_data WHERE parent_id IS NULL`;
+//     const [rootRows] = await db.query(rootQuery);
+//     const root = rootRows[0];
+
+//     if (!root) return null;
+
+//     // Use a queue to perform level-order traversal
+//     const queue = [root.user_id];
+//     while (queue.length > 0) {
+//       const currentParentId = queue.shift();
+//       const parentQuery = `SELECT leftchild_id, rightchild_id FROM user_data WHERE user_id = ?`;
+//       const [parentRows] = await db.query(parentQuery, [currentParentId]);
+
+//       if (!parentRows.length) continue;
+
+//       const parent = parentRows[0];
+
+//       // Check if the left child position is available
+//       if (parent.leftchild_id === null) {
+//         return {
+//           parentId: currentParentId,
+//           position: "leftchild_id",
+//         };
+//       }
+
+//       // Check if the right child position is available
+//       if (parent.rightchild_id === null) {
+//         return {
+//           parentId: currentParentId,
+//           position: "rightchild_id",
+//         };
+//       }
+
+//       // If both left and right children exist, add them to the queue for further level-order checking
+//       queue.push(parent.leftchild_id);
+//       queue.push(parent.rightchild_id);
+//     }
+
+//     console.log("No available parent found");
+//     return null;
+//   }
+
+//   // Helper function to find an available spot in the subtree
+//   async function findAvailableSpotInSubtree(userId) {
+//     const queue = [userId];
+
+//     while (queue.length > 0) {
+//       const currentUserId = queue.shift();
+//       const childQuery = `SELECT leftchild_id, rightchild_id FROM user_data WHERE user_id = ?`;
+//       const [childRows] = await db.query(childQuery, [currentUserId]);
+
+//       if (!childRows.length) continue;
+
+//       const user = childRows[0];
+
+//       // First, check if the left child is available
+//       if (user.leftchild_id === null) {
+//         return {
+//           parentId: currentUserId,
+//           position: "leftchild_id",
+//         };
+//       }
+
+//       // Then, check if the right child is available
+//       if (user.rightchild_id === null) {
+//         return {
+//           parentId: currentUserId,
+//           position: "rightchild_id",
+//         };
+//       }
+
+//       // If both left and right children are filled, add them to the queue for further checking
+//       queue.push(user.leftchild_id);
+//       queue.push(user.rightchild_id);
+//     }
+
+//     // If no available spot is found
+//     return null;
+//   }
+
+//   // Main function to handle parent selection logic
+//   const referralBy = req.body.referral_by;
+//   let parentId = null;
+//   let position = null;
+
+//   if (referralBy) {
+//     const parentInfo = await findAvailableParent(referralBy);
+//     if (parentInfo) {
+//       parentId = parentInfo.parentId;
+//       position = parentInfo.position;
+//       console.log("Referral parent found:", parentId);
+//     } else {
+//       console.log(
+//         "Referral parent not available, finding next available parent."
+//       );
+//       const nextParentInfo = await findAvailableParent();
+//       if (nextParentInfo) {
+//         parentId = nextParentInfo.parentId;
+//         position = nextParentInfo.position;
+//       }
+//     }
+//   } else {
+//     console.log("No referral provided, finding next available parent.");
+//     const nextParentInfo = await findAvailableParent();
+//     if (nextParentInfo) {
+//       parentId = nextParentInfo.parentId;
+//       position = nextParentInfo.position;
+//     }
+//   }
+
+//   // Log parentId and position for debugging
+//   console.log("Parent ID found:", parentId);
+//   console.log("Position determined:", position);
+
+//   try {
+//     const user = await QueryModel.saveData("users", insertData); // Ensure the table name is correct
+
+//     const insertData2 = {
+//       user_id: user.id,
+//       upi_id: req.body.upi,
+//       referral_by: referralBy,
+//       referral_code: req.body.referral_code || generateReferralCode(),
+//       parent_id: parentId,
+//       leftchild_id: null,
+//       rightchild_id: null,
+//     };
+
+//     // Log insertData2 for debugging
+//     console.log("Inserting user data:", insertData2);
+
+//     const newUserData = await UserDataModel.create(insertData2);
+//     if (!newUserData) {
+//       return res
+//         .status(500)
+//         .json({ success: false, error: "Error inserting user data" });
+//     }
+
+//     // After creating the new user, insert an entry in the usercoin_audit table
+//     if (req.body.pending_coin === 100) {
+//       try {
+//         const auditData = {
+//           user_id: user.id,
+//           pending_coin: 100,
+//           type: "self",
+//           status: "completed",
+//           coin_operation: "cr",
+//           date_created: dateCreated,
+//         };
+
+//         const auditQuery = `
+//       INSERT INTO usercoin_audit (user_id, pending_coin, type, status, coin_operation, date_created)
+//       VALUES (?, ?, ?, ?, ?, ?)
+//     `;
+
+//         const auditResult = await db.query(auditQuery, [
+//           auditData.user_id,
+//           auditData.pending_coin,
+//           auditData.type,
+//           auditData.status,
+//           auditData.coin_operation,
+//           auditData.date_created,
+//         ]);
+
+//         console.log("Audit record inserted:", auditResult);
+//       } catch (error) {
+//         console.error("Error inserting audit record:", error);
+//       }
+//     }
+//     // Update parent record with new child ID
+//     if (parentId && position) {
+//       const updateData = { [position]: user.id };
+//       await UserDataModel.updateData("user_data", updateData, {
+//         user_id: parentId,
+//       });
+//     }
+
+//     // Check if request is for JSON response or redirect
+//     if (req.headers.accept && req.headers.accept.includes("application/json")) {
+//       // Send JSON response for API requests
+//       return res
+//         .status(201)
+//         .json({ success: true, message: "User created successfully." });
+//     } else {
+//       // Redirect for form submissions
+//       const redirectUrl = req.body.redirect || "/admin/users"; // Default redirect URL
+//       return res.redirect(redirectUrl);
+//     }
+//   } catch (error) {
+//     console.error("Error during user creation:", error); // Log the error for debugging
+
+//     if (req.headers.accept && req.headers.accept.includes("application/json")) {
+//       // Send JSON error response for API requests
+//       return res.status(500).json({ success: false, error: error.message });
+//     } else {
+//       // Redirect to error page for form submissions
+//       req.flash("error", "Internal Server Error"); // Optional flash message
+//       return res.redirect("/admin/error"); // Redirect to error page
+//     }
+//   }
+// });
 exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   // Validate request body with Joi schema
   try {
@@ -493,8 +775,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   // Integrated UserDataModel
   const UserDataModel = {
     async create(userData) {
-      const query = `
-        INSERT INTO user_data (user_id, upi_id, referral_by, referral_code, parent_id, leftchild_id, rightchild_id)
+      const query = `INSERT INTO user_data (user_id, upi_id, referral_by, referral_code, parent_id, leftchild_id, rightchild_id)
         VALUES (?, ?, ?, ?, ?, ?, ?)`;
       const result = await db.query(query, [
         userData.user_id,
@@ -682,37 +963,6 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
         .json({ success: false, error: "Error inserting user data" });
     }
 
-    // After creating the new user, insert an entry in the usercoin_audit table
-    if (req.body.pending_coin === 100) {
-      try {
-        const auditData = {
-          user_id: user.id,
-          pending_coin: 100,
-          type: "self",
-          status: "completed",
-          coin_operation: "cr",
-          date_created: dateCreated,
-        };
-
-        const auditQuery = `
-      INSERT INTO usercoin_audit (user_id, pending_coin, type, status, coin_operation, date_created)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-        const auditResult = await db.query(auditQuery, [
-          auditData.user_id,
-          auditData.pending_coin,
-          auditData.type,
-          auditData.status,
-          auditData.coin_operation,
-          auditData.date_created,
-        ]);
-
-        console.log("Audit record inserted:", auditResult);
-      } catch (error) {
-        console.error("Error inserting audit record:", error);
-      }
-    }
     // Update parent record with new child ID
     if (parentId && position) {
       const updateData = { [position]: user.id };
@@ -745,7 +995,6 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     }
   }
 });
-
 ////////////////////////////////////////////
 ///////////////////////////////////////////
 
@@ -793,7 +1042,7 @@ async function distributeCoins(userId) {
   const COIN_REFERRAL_BONUS = 100; // Coins added to activated user
   const COIN_PARENT_ADDITION = 10; // Coins added to the direct parent
   const COIN_ANCESTOR_ADDITION = 5; // Coins added to each ancestor
-  const FIXED_COINS = 40; // Total coins available for distribution
+  const FIXED_COINS = 95; // Total coins available for distribution
 
   try {
     // Step 1: Fetch the user's current pending coin amount
@@ -1098,6 +1347,7 @@ exports.findById = async (table_name, id) => {
 ///////////////////////////////////////////////
 
 // API to get a single user record
+
 exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
   const userId = req.params.id; // Get user ID from request parameters
   console.log("Fetching user with ID:", userId); // Log user ID
@@ -1153,6 +1403,7 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
     return res.status(500).send("Server Error: " + error.message); // Return error message
   }
 });
+
 // exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
 //   // Find the user by ID using the Mongoose model
 //   const user = await QueryModel.findById(table_name, req.params.id, next);
@@ -1172,47 +1423,146 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
 ////////////////////
 
 exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
-  const user = await QueryModel.findById(table_name, req.params.id, next);
+  const userId = req.params.id; // Get user ID from request parameters
+  console.log("User ID:", userId); // Log the user ID for debugging
+
+  // Fetch the user data from the 'users' table by userId
+  const userQuery = `
+    SELECT
+      u.user_name,
+      u.email,
+      u.date_created,
+      u.user_type,
+      u.status,
+      u.mobile
+    FROM
+      users u
+    WHERE
+      u.id = ?
+  `;
+
+  // Execute the query to fetch the user data
+  const userResult = await mysqlPool.query(userQuery, [userId]);
+  const user = userResult[0][0]; // Get the user data
 
   if (!user) {
+    // Return an error if the user is not found
+    console.log("User not found");
     return next(new ErrorHandler("User not found", 404));
   }
 
+  // Log the user data for debugging
+  console.log("User Data:", user);
+
+  // Fetch the user-specific data from the 'user_data' table
+  const userDataQuery = `
+    SELECT
+      ud.referral_code,
+      ud.upi_id,
+      ud.parent_id
+    FROM
+      user_data ud
+    WHERE
+      ud.user_id = ?
+  `;
+
+  // Execute the query to fetch the user-specific data
+  const userDataResult = await mysqlPool.query(userDataQuery, [userId]);
+  const userData = userDataResult[0][0]; // Get the user data
+
+  if (!userData) {
+    // Log if the user data is not found but don't throw an error if not mandatory
+    console.log("User data not found");
+  } else {
+    // Log the user data for debugging
+    console.log("User Data from user_data Table:", userData);
+  }
+
+  // Render the 'edit' view and pass the necessary data
   res.render(module_slug + "/edit", {
     layout: module_layout,
-    title: module_single_title + " " + module_edit_text,
+    title: module_single_title + " " + module_edit_text, // Title for the page
+    userId,
     user, // Pass the user details to the view
-    module_slug,
+    userData, // Pass the user-specific data to the view
+    module_slug, // Pass the module_slug to the view
   });
 });
 
 ////////////////////////////
 
 exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
-  const updateData = {
-    user_name: req.body.user_name,
-    email: req.body.email,
-    status: req.body.status,
-  };
+  const userId = req.params.id; // Get user ID from request parameters
 
-  // Call your function to update the user in the database
-  const user = await QueryModel.findByIdAndUpdateData(
-    table_name,
-    req.params.id,
-    updateData,
-    next
-  );
+  // Extract data from the request body
+  const { user_name, email, status, referral_code, upi_id, parent_id } =
+    req.body;
 
-  if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+  // Log incoming data for debugging
+  console.log("Incoming Data:", req.body);
+
+  // Check if any required fields are missing or have null values
+
+  // Update data in 'users' table
+  const updateUserQuery = `
+    UPDATE users
+    SET 
+      user_name = ?, 
+      email = ?, 
+      status = ?
+    WHERE 
+      id = ?
+  `;
+
+  try {
+    // Check if user exists before updating
+    const userUpdateResult = await mysqlPool.query(updateUserQuery, [
+      user_name,
+      email,
+      status,
+      userId,
+    ]);
+
+    if (userUpdateResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Update data in 'user_data' table
+    const updateUserDataQuery = `
+      UPDATE user_data
+      SET 
+        referral_code = ?, 
+        upi_id = ?, 
+        parent_id = ?
+      WHERE 
+        user_id = ?
+    `;
+
+    const userDataUpdateResult = await mysqlPool.query(updateUserDataQuery, [
+      referral_code,
+      upi_id,
+      parent_id,
+      userId,
+    ]);
+
+    if (userDataUpdateResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("User data not found", 404));
+    }
+
+    // Flash success message
+    req.flash("msg_response", {
+      status: 200,
+      message: "Successfully updated user details and user data.",
+    });
+
+    // Redirect to the users listing page (index page)
+    res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  } catch (error) {
+    console.error("Error while updating user:", error);
+    return next(
+      new ErrorHandler("An error occurred while updating the user", 500)
+    );
   }
-
-  req.flash("msg_response", {
-    status: 200,
-    message: "Successfully updated user details.",
-  });
-
-  res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`); // Redirect to the index page
 });
 
 ///////////////////////////////////////////////
@@ -1342,10 +1692,8 @@ exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-
 exports.renderTreeView = async (req, res) => {
   try {
-    const { userId } = req.params; // Assume userId is passed as a route parameter
     const query = `
       SELECT 
         user_data.id AS user_data_id, 
@@ -1359,62 +1707,32 @@ exports.renderTreeView = async (req, res) => {
     `;
 
     const [rows] = await mysqlPool.query(query);
-    console.log("Fetched rows:", rows);
-
-    if (!rows || rows.length === 0) {
-      console.log("No user data found.");
-      return res.status(404).send("No user data found.");
-    }
-
     const userTree = buildUserTree(rows);
-    const filteredTree = filterSubTree(userTree, userId);
- res.render('tree_view', {
-      layout: module_layout,
-      title: module_single_title,
-      userTree: JSON.stringify(filteredTree),
-  });  } catch (error) {
-    console.error("Error rendering user tree view:", error);
-    res.status(500).send("Error rendering user tree view");
+
+    res.render("tree_view", { userTree: JSON.stringify(userTree) });
+  } catch (error) {
+    console.error("Error rendering users view:", error);
+    res.status(500).send("Error rendering users view");
   }
 };
 
 function buildUserTree(users) {
   const userMap = {};
-
-  users.forEach(user => {
+  users.forEach((user) => {
     userMap[user.user_id] = { ...user, children: [] };
   });
 
-  users.forEach(user => {
+  const roots = [];
+  users.forEach((user) => {
     if (user.parent_id === null) {
-      userMap[user.user_id].isRoot = true;
+      roots.push(userMap[user.user_id]);
     } else {
       const parent = userMap[user.parent_id];
       if (parent) {
         parent.children.push(userMap[user.user_id]);
-      } else {
-        console.warn(`Parent with ID ${user.parent_id} not found for user ${user.user_id}`);
       }
     }
   });
 
-  return Object.values(userMap).filter(user => user.isRoot);
-}
-
-function filterSubTree(userTree, userId) {
-  let targetNode = null;
-
-  function findNode(node) {
-    if (node.user_id == userId) {
-      targetNode = node;
-      return true;
-    }
-    for (const child of node.children) {
-      if (findNode(child)) return true;
-    }
-    return false;
-  }
-
-  userTree.forEach(root => findNode(root));
-  return targetNode ? [targetNode] : [];
+  return roots;
 }
