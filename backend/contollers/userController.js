@@ -1098,7 +1098,6 @@ exports.findById = async (table_name, id) => {
 ///////////////////////////////////////////////
 
 // API to get a single user record
-
 exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
   const userId = req.params.id; // Get user ID from request parameters
   console.log("Fetching user with ID:", userId); // Log user ID
@@ -1110,7 +1109,7 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
         u.*,
         ud.parent_id,
         ud.leftchild_id,
-        ud.rightchild_id,
+       ud.referral_code,
         ud.referral_by,
         ud.coins,
         ud.pending_coin,
@@ -1154,7 +1153,6 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
     return res.status(500).send("Server Error: " + error.message); // Return error message
   }
 });
-
 // exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
 //   // Find the user by ID using the Mongoose model
 //   const user = await QueryModel.findById(table_name, req.params.id, next);
