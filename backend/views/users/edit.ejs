@@ -8,7 +8,7 @@
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <form method="post" action="/admin/<%= module_slug %>/update/<%= user.id %>"
+                        <form method="post" action="/admin/<%= module_slug %>/update/<%= userId %>"
                             enctype="application/x-www-form-urlencoded">
                             <div class="row">
                                 <div class="col-lg-6 float-left">
@@ -25,28 +25,34 @@
                                             value="<%= user.email %>">
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <!-- <div class="col-lg-6 float-left">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
-                                        <label for="pendingCoins" class="form-label">Pending Coins</label>
-                                        <input type="text" id="pendingCoins" name="pending_coins" class="form-control"
-                                            value="<%= user.pending_coins %>">
-                                    </div>
-                                </div> -->
-                                <div class="col-lg-6 float-left">
-                                    <div class="mb-3">
-                                        <label for="status" class="form-label">Status</label>
-                                        <select class="form-control" name="status">
-                                            <option value="1" <% if (user.status===1) { %> selected <% } %>
-                                                    >Active</option>
-                                            <option value="0" <% if (user.status===0) { %> selected <% } %>
-                                                    >Inactive</option>
-                                        </select>
+                                        <label for="referral_code" class="form-label">Referral Code</label>
+                                        <input type="text" id="referral_code" class="form-control"
+                                            value="<%= userData.referral_code %>">
                                     </div>
                                 </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="upi_id" class="form-label">UPI ID</label>
+                                        <input type="text" id="upi_id" class="form-control"
+                                            value="<%= userData.upi_id %>">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="parent_id" class="form-label">Parent ID</label>
+                                        <input type="text" id="parent_id" class="form-control"
+                                            value="<%= userData.parent_id %>">
+                                    </div>
+                                </div>
+
+
                             </div>
+
+
 
 
                             <div class="row">
