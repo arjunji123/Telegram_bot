@@ -67,11 +67,13 @@
                                         readOnly>
                                 </div>
                             </div>
-                            <div class="col-lg-6 float-left">
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Company Description</label>
-                                    <textarea class="form-control" id="description"
-                                        readOnly><%= user.description %></textarea>
+                            <div class="row">
+                                <div class="col-lg-12 float-left">
+                                    <div class="mb-3">
+                                        <label for="simpleinput" class="form-label">Desc</label>
+                                        <textarea class="form-control" id="editor" readOnly
+                                            name="description"><%= user.description %></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
