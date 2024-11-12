@@ -19,7 +19,7 @@ const localStorage = new LocalStorage("./scratch");
 app.use(
   cors({
     origin:
-      "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
+   "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   })
