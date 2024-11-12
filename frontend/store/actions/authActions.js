@@ -16,9 +16,10 @@ const setToken = (token) => {
 };
 
 
-// Token ko get karna
-const token = Cookies.get('token');
-console.log(token);  
+// Get token from cookies
+const getToken = () => {
+  return Cookies.get('token');
+};
 
 
 // Remove token from cookies
@@ -122,3 +123,4 @@ export const loadUserFromLocalStorage = () => (dispatch) => {
     console.log('No user found in localStorage.');
   }
 };
+console.log('Token from cookies:', getToken());
