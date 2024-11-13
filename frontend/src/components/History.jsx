@@ -15,6 +15,18 @@ const TransactionHistory = () => {
  const transactions = historyData && historyData.history && historyData.history.data 
 console.log(transactions);
 
+const groupTransactionsByDate = (transactions) => {
+  return transactions.reduce((acc, transaction) => {
+    const date = new Date(transaction.date_entered).toLocaleDateString();
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(transaction);
+    return acc;
+  }, {});
+};
+const groupedTransactions = groupTransactionsByDate(transactions);
+
 useEffect(() => {
   // Fetch user and coin data on component mount
   const fetchData = async () => {
@@ -45,18 +57,17 @@ if (loading) {
           <h2 className="text-xl font-semibold text-center flex-grow">Transaction History</h2>
         </div>
         
-
+      
         <div className="flex-grow overflow-y-auto py-4">
           {/* Sample Data by Date */}
-          {transactions && transactions.length > 0 ? (
-              transactions.map((transaction, index) => (
-            <div key={index} className="mb-6">
+          {Object.keys(groupedTransactions).length > 0 ? (
+        Object.keys(groupedTransactions).map((date) => (
+            <div key={date} className="mb-6">
 
               <p className="text-sm font-semibold text-gray-400 mb-3">
-                    {transaction.date_entered ? new Date(transaction.date_entered).toLocaleDateString() : "No Date"}
-                  </p>
-
-                <div  className="flex items-center justify-between py-3 ">
+              {date}                  </p>
+              {groupedTransactions[date].map((transaction, index) => (
+                <div key={index} className="flex items-center justify-between py-3 ">
                   <div className="flex items-center space-x-3">
                     {/* <img
                       className="w-8 h-8"
@@ -71,7 +82,8 @@ if (loading) {
                       {transaction.pending_coin > 0 ? `+ ${transaction.pending_coin} Coins` : `${transaction.earn_coin} Coins`}
                     </p>
                 </div>
-            </div>
+                     ))}
+            </div> 
            ))
           ) : (
             <p className="text-center text-gray-400">No transactions found.</p>
