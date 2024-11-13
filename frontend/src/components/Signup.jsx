@@ -118,7 +118,7 @@ function Signup() {
 
 
   return (
-    <div className="bg-white flex justify-center items-center min-h-screen overflow-y-auto ">
+    <div className="bg-black flex justify-center items-center min-h-screen overflow-y-auto ">
     <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl ">
       
       {/* Logo and Welcome Section */}
