@@ -266,7 +266,10 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     res.status(201).json({
       success: true,
       token,
-      user: newUser,
+    user: {
+        ...newUser,
+        referral_by: insertData2.referral_by, // Include referral_by in the response
+      },
     });
     return;
   } catch (error) {
