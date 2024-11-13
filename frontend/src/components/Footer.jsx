@@ -4,8 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { IoHome, IoLogOutOutline } from "react-icons/io5";
 import { TbUsersGroup } from "react-icons/tb";
 import earn from '../images/earn.png'; // Ensure the path is correct
+import { logout } from "../../store/actions/authActions"
+import { useDispatch } from 'react-redux'; // Import useDispatch
 
 function Footer() {
+  const dispatch = useDispatch(); // Initialize useDispatch
   const navigate = useNavigate();
   const location = useLocation(); // To get the current path
   const [activePage, setActivePage] = useState('home'); // State to track the active page
@@ -25,7 +28,7 @@ function Footer() {
   }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem("userData"); // Clear user data from local storage
+    dispatch(logout()); // Dispatch the logout action
     navigate("/login"); // Redirect to the login page
   };
 
@@ -93,7 +96,7 @@ function Footer() {
         <span className={`text-xs mt-1 ${activePage === 'withdrawal' ? 'font-bold' : 'opacity-50'}`}>Wallet</span>
       </Link>
     </div>
-    {/* <div className="text-center text-white w-1/5">
+  <div className="text-center text-white w-1/5">
       <div
         className="flex flex-col items-center cursor-pointer"
         onClick={handleLogout}
@@ -101,7 +104,7 @@ function Footer() {
         <IoLogOutOutline size={28} className={`transition-opacity duration-200 ${activePage === 'logout' ? 'opacity-100' : 'opacity-50'}`} />
         <span className={`text-xs mt-1 ${activePage === 'logout' ? 'font-bold' : 'opacity-50'}`}>Logout</span>
       </div>
-    </div> */}
+    </div>
   </div>
   );
 }
