@@ -519,31 +519,42 @@ exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
-  // Check if a file was uploaded
-  if (!req.file) {
-    return next(new ErrorHandler("No file uploaded", 400));
-  }
-  console.log("asdf", req.file);
-
-  // Get the uploaded file's filename
-  const pay_image = req.file.filename;
-
   // Get user ID from route parameters
-  const user_id = req.params.id; // Now getting ID from the route parameter
+  const user_id = req.params.id;
 
-  // Debugging: Log user ID and image filename
+  // Get UTR number and transaction ID from request body
+  const { utr_no, transaction_id } = req.body;
+
+  // Check if `utr_no` and `transaction_id` are provided
+  if (!utr_no || !transaction_id) {
+    return next(
+      new ErrorHandler("UTR number and transaction ID are required", 400)
+    );
+  }
+
+  // Get the uploaded file's filename, if present
+  let pay_image = req.file ? req.file.filename : null;
+
+  // Debugging: Log user ID, image filename (if present), UTR number, and transaction ID
   console.log(`User ID from params: ${user_id}`);
-  console.log(`Image Filename: ${pay_image}`);
+  console.log(`Image Filename: ${pay_image || "No file uploaded"}`);
+  console.log(`UTR Number: ${utr_no}`);
+  console.log(`Transaction ID: ${transaction_id}`);
 
   // Update the user data in the database
   try {
-    const result = await db.query(
-      "UPDATE user_data SET pay_image = ? WHERE user_id = ?",
-      [
-        pay_image, // Store the filename in the database
-        user_id, // Use the user_id from the route parameter
-      ]
-    );
+    // Prepare the query and data based on whether `pay_image` is present
+    let query = "UPDATE user_data SET utr_no = ?, transaction_id = ?";
+    let data = [utr_no, transaction_id, user_id];
+
+    if (pay_image) {
+      query += ", pay_image = ?";
+      data.splice(2, 0, pay_image); // Insert `pay_image` before `user_id`
+    }
+
+    query += " WHERE user_id = ?";
+
+    const result = await db.query(query, data);
 
     // Check if any rows were affected
     if (result.affectedRows === 0) {
@@ -555,8 +566,13 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
     // Send a success response back to the client
     res.status(200).json({
       success: true,
-      message: "Screenshot uploaded successfully",
-      pay_image, // Optionally return the filename
+      message: "Data updated successfully",
+      data: {
+        user_id,
+        pay_image: pay_image || "No image uploaded", // Optional in response
+        utr_no,
+        transaction_id,
+      },
     });
   } catch (error) {
     console.error("Database update error:", error); // Log the error for debugging
