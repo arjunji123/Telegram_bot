@@ -194,25 +194,18 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
 
     return null; // No available spot found
   }
-
   // Main logic for user registration
-  const referralBy = req.body.referral_by;
-  let parentId = null;
-  let position = null;
+  // Main logic for user registration
+  // Main logic for user registration
+let referralBy = req.body.referral_by; // Use 'let' to allow reassignment
+let parentId = null;
+let position = null;
 
-  // Find an available parent based on the referral code or next available parent
-  if (referralBy) {
-    const parentInfo = await findAvailableParent(referralBy);
-    if (parentInfo) {
-      parentId = parentInfo.parentId;
-      position = parentInfo.position;
-    } else {
-      const nextParentInfo = await findAvailableParent();
-      if (nextParentInfo) {
-        parentId = nextParentInfo.parentId;
-        position = nextParentInfo.position;
-      }
-    }
+if (referralBy) {
+  const parentInfo = await findAvailableParent(referralBy);
+  if (parentInfo) {
+    parentId = parentInfo.parentId;
+    position = parentInfo.position;
   } else {
     const nextParentInfo = await findAvailableParent();
     if (nextParentInfo) {
@@ -220,62 +213,72 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       position = nextParentInfo.position;
     }
   }
+} else {
+  // If referralBy is not provided, fetch the referral_code of the user where user_id = 2
+  const defaultUser = await db.query("SELECT referral_code FROM user_data WHERE user_id = ?", [2]);
+  const referralCode = defaultUser[0]?.[0]?.referral_code || null;
 
-  try {
-    // Insert user data into the users table
-    const user = await QueryModel.saveData("users", insertData); // Assuming QueryModel.saveData is a valid method
-    const userId = user.id; // Use `insertId` directly if it’s the ID of the newly created user
-    const referralCode = generateReferralCode(userId);
-
-    // Prepare additional data for the user_data table
-    const insertData2 = {
-      user_id: userId,
-      upi_id: req.body.upi_id,
-      referral_by: referralBy,
-      referral_code: req.body.referral_code || referralCode,
-      parent_id: parentId,
-      leftchild_id: null,
-      rightchild_id: null,
-    };
-
-    // Insert additional user data into user_data table
-    const newUserData = await UserDataModel.create(insertData2);
-    if (!newUserData) {
-      return res
-        .status(500)
-        .json({ success: false, error: "Error inserting user data" });
-    }
-
-    // Update parent record with the new child ID if parentId and position are set
-    if (parentId && position) {
-      const updateData = { [position]: userId };
-      await UserDataModel.updateData("user_data", updateData, {
-        user_id: parentId,
-      });
-    }
-
-    // Fetch the newly inserted user to generate the token
-    const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-      userId,
-    ]);
-    const newUser = userDetail[0][0]; // Assuming this returns the correct user object
-
-    // Generate token for the new user
-    const token = User.generateToken(newUser.id); // Adjust based on your User model
-
-    res.status(201).json({
-      success: true,
-      token,
-    user: {
-        ...newUser,
-        referral_by: insertData2.referral_by, // Include referral_by in the response
-      },
-    });
-    return;
-  } catch (error) {
-    console.error("Error during user registration:", error);
-    return res.status(500).json({ success: false, error: error.message });
+  const nextParentInfo = await findAvailableParent();
+  if (nextParentInfo) {
+    parentId = nextParentInfo.parentId;
+    position = nextParentInfo.position;
   }
+
+  referralBy = referralCode; // Set the referralBy to the referral_code of user_id = 2
+}
+
+try {
+  // Insert user data into the users table
+  const user = await QueryModel.saveData("users", insertData);
+  const userId = user.id;
+  const generatedReferralCode = generateReferralCode(userId);
+
+  // Prepare additional data for the user_data table
+  const insertData2 = {
+    user_id: userId,
+    upi_id: req.body.upi_id,
+    referral_by: referralBy,
+    referral_code: req.body.referral_code || generatedReferralCode,
+    parent_id: parentId,
+    leftchild_id: null,
+    rightchild_id: null,
+  };
+
+  // Insert additional user data into user_data table
+  const newUserData = await UserDataModel.create(insertData2);
+  if (!newUserData) {
+    return res.status(500).json({ success: false, error: "Error inserting user data" });
+  }
+
+  // Update parent record with the new child ID if parentId and position are set
+  if (parentId && position) {
+    const updateData = { [position]: userId };
+    await UserDataModel.updateData("user_data", updateData, {
+      user_id: parentId,
+    });
+  }
+
+  // Fetch the newly inserted user to generate the token
+  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
+  const newUser = userDetail[0][0];
+
+  // Generate token for the new user
+  const token = User.generateToken(newUser.id);
+
+  res.status(201).json({
+    success: true,
+    token,
+    user: {
+      ...newUser,
+      referral_by: referralBy, // Include referral_by in the response (it will have the referral_code of user_id = 2)
+    },
+  });
+  return;
+} catch (error) {
+  console.error("Error during user registration:", error);
+  return res.status(500).json({ success: false, error: error.message });
+}
+
 });
 ////////////////////////////////////////////////////////////////////////////////////////////
 
