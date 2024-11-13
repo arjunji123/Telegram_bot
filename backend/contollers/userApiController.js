@@ -256,7 +256,7 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     }
 
     // Fetch the newly inserted user to generate the token
-    const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+    const userDetail = await db.query("SELECT * FROM user_data WHERE user_id = ?", [
       userId,
     ]);
     const newUser = userDetail[0][0]; // Assuming this returns the correct user object
