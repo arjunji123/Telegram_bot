@@ -16,6 +16,9 @@ const TransactionHistory = () => {
 console.log(transactions);
 
 const groupTransactionsByDate = (transactions) => {
+  if (!transactions || transactions.length === 0) {
+    return {}; // Return empty object if transactions is empty or undefined
+  }
   return transactions.reduce((acc, transaction) => {
     const date = new Date(transaction.date_entered).toLocaleDateString();
     if (!acc[date]) {
@@ -25,7 +28,7 @@ const groupTransactionsByDate = (transactions) => {
     return acc;
   }, {});
 };
-const groupedTransactions = groupTransactionsByDate(transactions);
+const groupedTransactions = groupTransactionsByDate(transactions || []);
 
 useEffect(() => {
   // Fetch user and coin data on component mount
