@@ -33,7 +33,6 @@ const generateReferralCode = (userId) => {
   return referralCode;
 };
 
-// Register a user
 exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   // Validate request body with Joi schema
   try {
@@ -256,7 +255,7 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     }
 
     // Fetch the newly inserted user to generate the token
-    const userDetail = await db.query("SELECT * FROM user_data WHERE user_id = ?", [
+    const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
       userId,
     ]);
     const newUser = userDetail[0][0]; // Assuming this returns the correct user object
@@ -275,7 +274,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 });
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Login user
