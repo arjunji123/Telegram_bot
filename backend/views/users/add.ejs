@@ -2,26 +2,26 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="header-title">Company Add</h4>
+                <h4 class="header-title">
+                    <%= title %>
+                </h4>
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <form id="companyForm" method="post" action="/admin/<%= module_slug %>/add"
+                        <form method="post" action="/admin/<%= module_slug %>/add"
                             enctype="application/x-www-form-urlencoded">
                             <div class="row">
                                 <div class="col-lg-6 float-left">
                                     <div class="mb-3">
-                                        <label for="user_name" class="form-label">Name</label>
-                                        <input type="text" id="user_name" name="user_name" class="form-control"
+                                        <label for="simpleinput" class="form-label">Name</label>
+                                        <input type="text" id="simpleinput" name="user_name" class="form-control"
                                             value="">
-                                        <small class="text-danger" id="nameError"></small>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 float-left">
                                     <div class="mb-3">
-                                        <label for="mobile" class="form-label">Mobile No.</label>
-                                        <input type="text" id="mobile" name="mobile" class="form-control" value="">
-                                        <small class="text-danger" id="mobileError"></small>
+                                        <label for="simpleinput" class="form-label">Mobile No.</label>
+                                        <input type="text" id="simpleinput" name="mobile" class="form-control" value="">
                                     </div>
                                 </div>
                             </div>
@@ -29,34 +29,8 @@
                             <div class="row">
                                 <div class="col-lg-6 float-left">
                                     <div class="mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="text" id="email" name="email" class="form-control">
-                                        <small class="text-danger" id="emailError"></small>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 float-left">
-                                    <div class="mb-3">
-                                        <label for="password" class="form-label">Password</label>
-                                        <input type="text" id="password" name="password" class="form-control" value="">
-                                        <small class="text-danger" id="passwordError"></small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-6 float-left">
-                                    <div class="mb-3">
-                                        <label for="upi" class="form-label">UPI id</label>
-                                        <input type="text" id="upi" name="upi" class="form-control" value="">
-                                        <small class="text-danger" id="upiError"></small>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 float-left">
-                                    <div class="mb-3">
-                                        <label for="coin_rate" class="form-label">Coin Rate</label>
-                                        <input type="text" id="coin_rate" name="coin_rate" class="form-control"
-                                            value="">
-                                        <small class="text-danger" id="coinRateError"></small>
+                                        <label for="simpleinput" class="form-label">Email</label>
+                                        <input type="text" id="simpleinput" name="email" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -64,8 +38,9 @@
                             <div class="row">
                                 <div class="col-lg-12 float-left">
                                     <div class="mb-3">
-                                        <label for="simpleinput" class="form-label">Desc</label>
-                                        <textarea class="form-control" id="editor" name="description"></textarea>
+                                        <label for="simpleinput" class="form-label">Password</label>
+                                        <input type="text" id="simpleinput" name="password" class="form-control"
+                                            value="">
                                     </div>
                                 </div>
                             </div>
@@ -73,8 +48,27 @@
                             <div class="row">
                                 <div class="col-lg-12 float-left">
                                     <div class="mb-3">
-                                        <label for="status" class="form-label">Status</label>
-                                        <select class="form-control" name="status" id="status">
+                                        <label for="simpleinput" class="form-label">UPI id</label>
+                                        <input type="text" id="simpleinput" name="upi" class="form-control" value="">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-12 float-left">
+                                    <div class="mb-3">
+                                        <label for="simpleinput" class="form-label">Referral By</label>
+                                        <input type="text" id="simpleinput" name="referral_by" class="form-control"
+                                            value="">
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-lg-12 float-left">
+                                    <div class="mb-3">
+                                        <label for="simpleinput" class="form-label">Status</label>
+                                        <select class="form-control" name="status">
                                             <option value="1">Active</option>
                                             <option value="0">Inactive</option>
                                         </select>
@@ -88,64 +82,10 @@
                                 </div>
                             </div>
                         </form>
-                    </div>
+                    </div> <!-- end col -->
                 </div>
-            </div>
-        </div>
-    </div>
+                <!-- end row-->
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div><!-- end col -->
 </div>
-
-<script>
-    document.getElementById('companyForm').addEventListener('submit', function (event) {
-        let isValid = true;
-
-        // Clear previous error messages
-        document.querySelectorAll('.text-danger').forEach(error => error.textContent = '');
-
-        // Name validation
-        const userName = document.getElementById('user_name').value.trim();
-        if (!userName) {
-            document.getElementById('nameError').textContent = 'Name is required.';
-            isValid = false;
-        }
-
-        // Mobile validation
-        const mobile = document.getElementById('mobile').value.trim();
-        if (!/^\d{10}$/.test(mobile)) {
-            document.getElementById('mobileError').textContent = 'Enter a valid 10-digit mobile number.';
-            isValid = false;
-        }
-
-        // Email validation
-        const email = document.getElementById('email').value.trim();
-        if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-            document.getElementById('emailError').textContent = 'Enter a valid email address.';
-            isValid = false;
-        }
-
-        // Password validation
-        const password = document.getElementById('password').value.trim();
-        if (password.length < 6) {
-            document.getElementById('passwordError').textContent = 'Password must be at least 6 characters.';
-            isValid = false;
-        }
-
-        // UPI ID validation
-        const upi = document.getElementById('upi').value.trim();
-        if (upi && !/^[\w\.\-]+@[\w\.\-]+$/.test(upi)) {
-            document.getElementById('upiError').textContent = 'Enter a valid UPI ID (e.g., user@bank).';
-            isValid = false;
-        }
-
-        // Coin Rate validation
-        const coinRate = document.getElementById('coin_rate').value.trim();
-        if (isNaN(coinRate) || coinRate <= 0) {
-            document.getElementById('coinRateError').textContent = 'Coin Rate must be a positive number.';
-            isValid = false;
-        }
-
-        if (!isValid) {
-            event.preventDefault();
-        }
-    });
-</script>
