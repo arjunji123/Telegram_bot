@@ -17,7 +17,7 @@ function Signup() {
     confirmPassword: "",
     mobile: "",
     upi_id: "",
-    referral_by: "UNITRADE1",
+    referral_by: "",
     user_type: "user",
   });
 
