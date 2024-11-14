@@ -514,7 +514,7 @@ exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
   const userId = req.user.id;
 
   // Extract fields from the request body
-  const { user_name, email, mobile, upi_id } = req.body;
+  const { user_name, email, upi_id } = req.body;
 
   // Get the uploaded file's filename, if present
   let userPhotoFilename = req.file ? req.file.filename : null;
@@ -525,9 +525,9 @@ exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
   console.log(`Name: ${user_name}, Email: ${email}, UPI ID: ${upi_id}`);
 
   try {
-    // Update the users table for user_name, email, and mobile
+    // Update the users table for user_name, email, and 
     await db.query(
-      "UPDATE users SET user_name = ?, email = ?, WHERE id = ?",
+      "UPDATE users SET user_name = ?, email = ? WHERE id = ?",
       [user_name, email, userId]
     );
 
