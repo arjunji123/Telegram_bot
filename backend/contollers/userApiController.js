@@ -522,13 +522,13 @@ exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
   // Debugging: Log user ID, user photo filename, and other fields
   console.log(`User ID: ${userId}`);
   console.log(`User Photo Filename: ${userPhotoFilename || "No file uploaded"}`);
-  console.log(`Name: ${user_name}, Email: ${email}, Mobile: ${mobile}, UPI ID: ${upi_id}`);
+  console.log(`Name: ${user_name}, Email: ${email}, UPI ID: ${upi_id}`);
 
   try {
     // Update the users table for user_name, email, and mobile
     await db.query(
-      "UPDATE users SET user_name = ?, email = ?, mobile = ? WHERE id = ?",
-      [user_name, email, mobile, userId]
+      "UPDATE users SET user_name = ?, email = ?, WHERE id = ?",
+      [user_name, email, userId]
     );
 
     // Prepare the user_data table update query and data
@@ -558,7 +558,6 @@ exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
         user_id: userId,
         user_name,
         email,
-        mobile,
         upi_id,
         user_photo: userPhotoFilename || "No image uploaded", // Optional in response
       },
