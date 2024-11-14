@@ -511,15 +511,62 @@ exports.updatePasswordApi = catchAsyncErrors(async (req, res, next) => {
 
 // update user profile
 exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
-  await db.query("UPDATE users SET user_name = ? , email = ? WHERE id = ?", [
-    req.body.user_name,
-    req.body.email,
-    req.user.id,
-  ]);
+  const userId = req.user.id;
 
-  res.status(200).json({
-    success: true,
-  });
+  // Extract fields from the request body
+  const { user_name, email, mobile, upi_id } = req.body;
+
+  // Get the uploaded file's filename, if present
+  let userPhotoFilename = req.file ? req.file.filename : null;
+
+  // Debugging: Log user ID, user photo filename, and other fields
+  console.log(`User ID: ${userId}`);
+  console.log(`User Photo Filename: ${userPhotoFilename || "No file uploaded"}`);
+  console.log(`Name: ${user_name}, Email: ${email}, Mobile: ${mobile}, UPI ID: ${upi_id}`);
+
+  try {
+    // Update the users table for user_name, email, and mobile
+    await db.query(
+      "UPDATE users SET user_name = ?, email = ?, mobile = ? WHERE id = ?",
+      [user_name, email, mobile, userId]
+    );
+
+    // Prepare the user_data table update query and data
+    let query = "UPDATE user_data SET upi_id = ?";
+    let data = [upi_id, userId];
+
+    if (userPhotoFilename) {
+      query += ", user_photo = ?";
+      data.splice(1, 0, userPhotoFilename); // Insert `user_photo` before `user_id`
+    }
+
+    query += " WHERE user_id = ?";
+
+    // Execute the user_data table update query
+    const result = await db.query(query, data);
+
+    // Check if any rows were affected
+    if (result.affectedRows === 0) {
+      return next(new ErrorHandler("No user found with the provided user ID", 404));
+    }
+
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        user_id: userId,
+        user_name,
+        email,
+        mobile,
+        upi_id,
+        user_photo: userPhotoFilename || "No image uploaded", // Optional in response
+      },
+    });
+  } catch (error) {
+    console.error("Database update error:", error); // Log the error for debugging
+    return next(new ErrorHandler("Database update failed", 500));
+  }
 });
 
 exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
