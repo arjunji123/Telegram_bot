@@ -5,9 +5,7 @@
                 <div class="row page_top_bar">
                     <div class="col-12">
                         <div class="col-6 heading float-left">
-                            <h4 class="mt-0 header-title">
-                                <%= title %>
-                            </h4>
+                            <h4 class="mt-0 header-title">Quest Entries</h4>
                         </div>
                         <div class="col-6 btns float-left text-right">
                             <a class="btn btn-primary" href="/admin/<%= module_slug %>/add">Add New</a>
@@ -15,60 +13,87 @@
                     </div>
                 </div>
 
-
                 <table id="responsive-datatable" class="table table-bordered table-bordered dt-responsive nowrap">
                     <thead>
                         <tr>
                             <th>S.No.</th>
-                            <th>User Id</th>
+                            <th>User ID</th>
                             <th>User Name</th>
-                            <th>Task Name</th>
-                            <th>Task Id</th>
+                            <th>Task Name</th> <!-- This now corresponds to quest_name -->
+                            <th>Task ID</th>
                             <th>Screenshot</th>
                             <th>Earn Coins</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
-
-
                     <tbody>
-                        <% let serialNumber=1; %>
-                            <% blogs[0].forEach(function(blog) { %>
-                                <tr>
-                                    <td>
-                                        <%= serialNumber++ %>
-                                    </td>
-                                    <td>
-                                        <%= blog.title %>
-                                    </td>
-                                    <td>
-                                        <%= blog.designation %>
-                                    </td>
-                                    <td class="status_box">
-                                        <% if(blog.status==1){ %>
-                                            <span
-                                                class="btn btn-success rounded-pill waves-effect waves-light">Active</span>
-                                            <% }else{ %>
-                                                <span
-                                                    class="btn btn-danger rounded-pill waves-effect waves-light">Inactive</span>
-                                                <% } %>
-                                                    <!-- <div class="switchery-toggle">
-                                    <input type="checkbox" id="switchd" class="toogle_checkbox" value="0" /><label for="switch">Status</label>
-                                </div>-->
-                                    </td>
-                                    <td class="action_box"><a href="/admin/<%= module_slug %>/<%= blog.id %>"><i
-                                                class="fe-eye"></i></a> <a
-                                            href="/admin/<%= module_slug %>/edit/<%= blog.id %>"><i
-                                                class="fe-edit"></i></a> <a
-                                            href="/admin/<%= module_slug %>/delete/<%= blog.id %>"><i
-                                                class="fe-trash-2"></i></a></td>
-                                </tr>
-                                <% }); %>
-
-
+                        <% let serialNumber = 1; %>
+                        <% questEntries[0].forEach(entry => { %>
+                            <tr id="quest-row-<%= entry.id %>">
+                                <td><%= serialNumber++ %></td>
+                                <td><%= entry.user_id %></td>
+                                <td><%= entry.user_name || 'Unknown User' %></td>
+                                <td><%= entry.quest_name || 'Unknown Task' %></td> <!-- This will now display quest_name -->
+                                <td><%= entry.quest_id %></td>
+                                <td>
+                                    <% if (entry.quest_screenshot) { %>
+                                        <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
+                                            <button class="btn btn-info view-image"
+                                                data-image="https://telegram-bot-by30.onrender.com/uploads/<%= screenshot %>">
+                                                View Screenshot
+                                            </button>
+                                        <% }) %>
+                                    <% } else { %>
+                                        No screenshot uploaded
+                                    <% } %>
+                                </td>
+                                <td><%= entry.earn_coin %></td>
+                                <td>
+                                    <% if (entry.status === 'completed') { %>
+                                        <span class="btn btn-success rounded-pill">Completed</span>
+                                    <% } else { %>
+                                        <span class="btn btn-danger rounded-pill">Pending</span>
+                                    <% } %>
+                                </td>
+                                <td class="action_box">
+                                    <a href="/admin/<%= module_slug %>/<%= entry.id %>"><i class="fe-eye"></i></a>
+                                    <a href="/admin/<%= module_slug %>/edit/<%= entry.id %>"><i class="fe-edit"></i></a>
+                                    <a href="/admin/<%= module_slug %>/delete/<%= entry.id %>"><i class="fe-trash-2"></i></a>
+                                </td>
+                            </tr>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>
         </div>
-
     </div>
-</div> <!-- end row -->
+</div>
+
+<!-- Modal for viewing images -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Image Screenshot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Screenshot" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Show modal with the clicked image
+        $('.view-image').click(function () {
+            var imageUrl = $(this).data('image');
+            $('#modalImage').attr('src', imageUrl);
+            $('#imageModal').modal('show');
+        });
+    });
+</script>
