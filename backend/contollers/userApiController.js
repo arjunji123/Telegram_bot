@@ -629,46 +629,28 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
-
 exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
-  // Check if a file was uploaded
-  if (!req.file) {
-    return next(new ErrorHandler("No file uploaded", 400));
+  // Check if files were uploaded
+  if (!req.files || req.files.length === 0) {
+    return next(new ErrorHandler("No files uploaded", 400));
   }
 
-  // Log uploaded file information for debugging
-  console.log("Uploaded file:", req.file);
+  // Map each uploaded file to get the filename
+  const quest_screenshots = req.files.map(file => file.filename); 
+  const quest_id = req.params.quest_id;
 
-  // Get the uploaded file's filename
-  const quest_screenshot = req.file.filename;
-
-  // Get quest ID from route parameters
-  const quest_id = req.params.id;
-
-  // Debugging: Log quest ID and image filename
-  console.log(`Quest ID from params: ${quest_id}`);
-  console.log(`Screenshot Filename: ${quest_screenshot}`);
-
-  // Update the quest data in the database
   try {
-    const result = await db.query(
+    // Convert filenames array to JSON for storage in the database
+    const updateResult = await db.query(
       "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
-      [quest_screenshot, quest_id]
+      [JSON.stringify(quest_screenshots), quest_id]
     );
 
-    // Check if any rows were affected
-    if (result.affectedRows === 0) {
-      return next(
-        new ErrorHandler("No quest found with the provided quest ID", 404)
-      );
+    if (updateResult.affectedRows === 0) {
+      return next(new ErrorHandler("No quest found with the provided quest ID", 404));
     }
 
-    // Send a success response back to the client
-    res.status(200).json({
-      success: true,
-      message: "Screenshots uploaded successfully",
-      quest_screenshot, // Optionally return the filename
-    });
+    res.status(200).json({ success: true, message: "Screenshots uploaded successfully" });
   } catch (error) {
     console.error("Database update error:", error);
     return next(new ErrorHandler("Database update failed", 500));
