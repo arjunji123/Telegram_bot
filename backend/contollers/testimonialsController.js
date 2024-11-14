@@ -19,12 +19,12 @@ exports.getAllRecords = catchAsyncErrors(async (req, res) => {
   try {
     // const query = `SELECT * FROM usercoin_audit WHERE type = 'quest'`;
     const query = `
-    SELECT qa.*, q.quest_name, u.user_name
-    FROM usercoin_audit qa
-    JOIN users u ON qa.user_id = u.id
-    LEFT JOIN quest q ON qa.quest_id = q.id
-    WHERE qa.type = 'quest'
-  `;
+  SELECT qa.*, q.quest_name, q.quest_type, q.activity, u.user_name
+  FROM usercoin_audit qa
+  JOIN users u ON qa.user_id = u.id
+  LEFT JOIN quest q ON qa.quest_id = q.id
+  WHERE qa.type = 'quest'
+`;
   
     const questEntries = await db.query(query);
     // console.log("Quest Entries:", questEntries);
