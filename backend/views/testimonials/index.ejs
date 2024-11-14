@@ -1,3 +1,4 @@
+<!-- Quest Entries Table -->
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -13,14 +14,16 @@
                     </div>
                 </div>
 
-                <table id="responsive-datatable" class="table table-bordered table-bordered dt-responsive nowrap">
+                <table id="responsive-datatable" class="table table-bordered dt-responsive nowrap">
                     <thead>
                         <tr>
                             <th>S.No.</th>
                             <th>User ID</th>
                             <th>User Name</th>
-                            <th>Task Name</th> <!-- This now corresponds to quest_name -->
+                            <th>Task Name</th>
                             <th>Task ID</th>
+                            <th>Quest Type</th>
+                            <th>Activity</th>
                             <th>Screenshot</th>
                             <th>Earn Coins</th>
                             <th>Status</th>
@@ -34,13 +37,25 @@
                                 <td><%= serialNumber++ %></td>
                                 <td><%= entry.user_id %></td>
                                 <td><%= entry.user_name || 'Unknown User' %></td>
-                                <td><%= entry.quest_name || 'Unknown Task' %></td> <!-- This will now display quest_name -->
+                                <td><%= entry.quest_name || 'Unknown Task' %></td>
                                 <td><%= entry.quest_id %></td>
+                                <td><%= entry.quest_type || 'N/A' %></td>
+                                <td><%= entry.activity || 'N/A' %></td>
+                                <!-- <td>
+                                    <% if (entry.quest_screenshot) { %>
+                                        <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
+                                            <button class="btn btn-info view-image" data-image="/uploads/<%= screenshot %>">
+                                                View Screenshot
+                                            </button>
+                                        <% }) %>
+                                    <% } else { %>
+                                        No screenshot uploaded
+                                    <% } %>
+                                </td> -->
                                 <td>
                                     <% if (entry.quest_screenshot) { %>
                                         <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
-                                            <button class="btn btn-info view-image"
-                                                data-image="https://telegram-bot-by30.onrender.com/uploads/<%= screenshot %>">
+                                            <button class="btn btn-info view-quest-image" data-image="/uploads/<%= screenshot %>" data-quest-id="<%= entry.quest_id %>">
                                                 View Screenshot
                                             </button>
                                         <% }) %>
@@ -70,12 +85,36 @@
     </div>
 </div>
 
-<!-- Modal for viewing images -->
+
+<!-- Modal for Quest Screenshots with Approve/Disapprove actions -->
+<div class="modal fade" id="questImageModal" tabindex="-1" role="dialog" aria-labelledby="questImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="questImageModalLabel">Quest Screenshot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="questModalImage" src="" alt="Quest Screenshot" class="img-fluid" />
+            </div>
+            <div class="modal-footer">
+                <!-- Approve and Disapprove buttons -->
+                <button type="button" class="btn btn-success" id="approveBtn">Approve</button>
+                <button type="button" class="btn btn-danger" id="disapproveBtn">Disapprove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Image View Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="imageModalLabel">Image Screenshot</h5>
+                <h5 class="modal-title" id="imageModalLabel">Screenshot</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -88,12 +127,50 @@
 </div>
 
 <script>
-    $(document).ready(function () {
-        // Show modal with the clicked image
-        $('.view-image').click(function () {
-            var imageUrl = $(this).data('image');
-            $('#modalImage').attr('src', imageUrl);
-            $('#imageModal').modal('show');
+  
+        $(document).ready(function () {
+    // Quest image modal display with approve/disapprove actions
+    $('.view-quest-image').click(function () {
+        var imageUrl = $(this).data('image');
+        var questId = $(this).data('quest-id');
+        console.log("Opening modal for quest ID:", questId);  // Debugging output
+        $('#questModalImage').attr('src', imageUrl);
+        $('#questImageModal').modal('show');
+        $('#approveBtn, #disapproveBtn').data('quest-id', questId);
+    });
+
+    // Approve action
+    $('#approveBtn').click(function () {
+        var questId = $(this).data('quest-id');
+        console.log("Approving quest ID:", questId);  // Debugging output
+        $.post(`/api/v1/approve-quest/${questId}`, function (response) {
+            alert(response.message);
+            $('#questImageModal').modal('hide');
+            location.reload();
+        }).fail(function (xhr) {
+            alert("Error: " + xhr.responseText);
         });
     });
+
+    // Disapprove action
+    $('#disapproveBtn').click(function () {
+        var questId = $(this).data('quest-id');
+        console.log("Disapproving quest ID:", questId);  // Debugging output
+        $.post(`/api/v1/disapprove-quest/${questId}`, function (response) {
+            alert(response.message);
+            $('#questImageModal').modal('hide');
+            location.reload();
+        }).fail(function (xhr) {
+            alert("Error: " + xhr.responseText);
+        });
+    });
+
+    // General image view modal
+    $('.view-image').click(function () {
+        var imageUrl = $(this).data('image');
+        $('#modalImage').attr('src', imageUrl);
+        $('#imageModal').modal('show');
+    });
+});
+
 </script>
