@@ -143,7 +143,7 @@ router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
 
-router.route("/api-me/update").put(isApiAuthenticatedUser, updateProfileApi);
+router.route("/api-me/update").put(isApiAuthenticatedUser, upload.single('user_photo'), updateProfileApi);
 
 router.post(
   "/upload-screenshot/:id",
