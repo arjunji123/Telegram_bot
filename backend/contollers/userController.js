@@ -741,7 +741,7 @@ async function distributeCoins(userId, performedByUserId) {
   const COIN_REFERRAL_BONUS = 100; 
   const COIN_PARENT_ADDITION = 10;
   const COIN_ANCESTOR_ADDITION = 5;
-  const FIXED_COINS = 40;
+  const FIXED_COINS = 100;
 
   try {
     const userCoinsData = await QueryModel.getData(
