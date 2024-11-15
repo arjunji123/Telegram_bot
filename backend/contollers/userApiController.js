@@ -1159,7 +1159,7 @@ exports.getQuestHistory = async (req, res) => {
       end_date: moment(quest.end_date).format("MM/DD/YYYY, h:mm:ss A"),
       description: quest.description,
       status: quest.completion_status === "completed" ? "completed" : "not_completed",
-      image: quest.image,
+      image: process.env.BACKEND_URL + "uploads/" + module_slug + "/" + quest.image,
       coin_earn: parseFloat(quest.coin_earn).toFixed(2),
     }));
 
@@ -1181,8 +1181,6 @@ exports.getQuestHistory = async (req, res) => {
     });
   }
 };
-
-
 
 ////////////////////////////////////
 // API to get user history (coins operation, status, pending, etc.)
