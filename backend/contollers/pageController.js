@@ -628,8 +628,8 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Quest not found", 404));
     }
 
-    const { id: fetchedQuestId, coin_earn: coinEarn, activity, quest_name: fetchedQuestName } = questResult[0];
-    console.log("Quest ID, Coin Earn, Activity, Quest Name:", { fetchedQuestId, coinEarn, activity, fetchedQuestName });
+    const { id: fetchedQuestId, coin_earn: coinEarn, activity, quest_name: questName } = questResult[0];
+    console.log("Quest ID, Coin Earn, Activity, Quest Name:", { fetchedQuestId, coinEarn, activity, questName });
 
     const coinEarnValue = Math.floor(parseFloat(coinEarn));
     if (isNaN(coinEarnValue) || coinEarnValue < 0) {
@@ -663,6 +663,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
     const insertAuditData = {
       user_id,
       quest_id: fetchedQuestId,
+      title:questName,
       pending_coin: pendingCoinValue, // Either coinEarnValue or 0 based on activity
       coin_operation: "cr",
       type: "quest",
@@ -691,7 +692,7 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       data: {
         user_id,
         quest_id: fetchedQuestId,
-        quest_name: fetchedQuestName,  // Return the quest name in the response
+        title: questName,  // Return the quest name in the response
         coin_earn: coinEarnValue,
         status: status,  // Return the status in the response
         date_entered: new Date(),
