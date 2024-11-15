@@ -384,60 +384,151 @@ function generateSlug(quest_name) {
     .replace(/-+$/g, ""); // Remove trailing hyphens
 }
 
-exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 10; // Set number of records per page
-  const page = parseInt(req.query.page) || 1; // Current page from query parameters
-  const searchQuery = req.query.search || ""; // Search term from query parameters
+// exports.apiGetAllRecords = catchAsyncErrors(async (req, res, next) => {
+//   const resultPerPage = 10; // Set number of records per page
+//   const page = parseInt(req.query.page) || 1; // Current page from query parameters
+//   const searchQuery = req.query.search || ""; // Search term from query parameters
 
-  // Calculate offset for pagination
-  const offset = (page - 1) * resultPerPage;
+//   // Calculate offset for pagination
+//   const offset = (page - 1) * resultPerPage;
 
+//   try {
+//     // Count total quests with optional search filter
+//     const totalQuestsResult = await db.query(
+//       "SELECT COUNT(*) as count FROM quest WHERE quest_name LIKE ? OR description LIKE ?",
+//       [`%${searchQuery}%`, `%${searchQuery}%`]
+//     );
+//     const totalQuests = totalQuestsResult[0][0].count;
+
+//     // Fetch quests with pagination and filtering, including activity and end_date
+//     const [quest_records] = await db.query(
+//       "SELECT id, quest_name, quest_type, activity,start_date, quest_url, date_created, end_date, description, status, coin_earn, image FROM quest WHERE quest_name LIKE ? OR description LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?",
+//       [`%${searchQuery}%`, `%${searchQuery}%`, resultPerPage, offset]
+//     );
+
+//     // Process rows to structure the data correctly
+//     const quests = quest_records.map((row) => ({
+//       quest_id: row.id,
+//       quest_name: row.quest_name,
+//       quest_type: row.quest_type, // Directly use the quest_type from the database
+//       activity: row.activity, // Ensure activity is fetched from the database
+//       quest_url: row.quest_url,
+//       date_created: row.date_created.toLocaleString(),
+//       end_date: row.end_date.toLocaleString(), // Include end_date in the response
+//       description: row.description,
+//       status: row.status,
+//       image:
+//         process.env.BACKEND_URL + "uploads/" + module_slug + "/" + row.image,
+//       coin_earn: row.coin_earn,
+//       start_date: row.start_date
+//         ? new Date(row.start_date).toLocaleString()
+//         : null,
+//     }));
+
+//     // Send the response
+//     res.status(200).json({
+//       success: true,
+//       totalQuests,
+//       resultPerPage,
+//       page,
+//       quests,
+//     });
+//   } catch (error) {
+//     console.error("Error in apiGetAllRecords:", error.message);
+//     return next(new ErrorHandler("Database query failed", 500));
+//   }
+// });
+
+
+exports.getQuestHistory = async (req, res) => {
   try {
-    // Count total quests with optional search filter
-    const totalQuestsResult = await db.query(
-      "SELECT COUNT(*) as count FROM quest WHERE quest_name LIKE ? OR description LIKE ?",
-      [`%${searchQuery}%`, `%${searchQuery}%`]
-    );
-    const totalQuests = totalQuestsResult[0][0].count;
+    const userId = req.user.id; // Assuming the user ID is available in req.user
 
-    // Fetch quests with pagination and filtering, including activity and end_date
-    const [quest_records] = await db.query(
-      "SELECT id, quest_name, quest_type, activity,start_date, quest_url, date_created, end_date, description, status, coin_earn, image FROM quest WHERE quest_name LIKE ? OR description LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?",
-      [`%${searchQuery}%`, `%${searchQuery}%`, resultPerPage, offset]
-    );
+    // Pagination parameters
+    const resultPerPage = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const offset = (page - 1) * resultPerPage;
 
-    // Process rows to structure the data correctly
-    const quests = quest_records.map((row) => ({
-      quest_id: row.id,
-      quest_name: row.quest_name,
-      quest_type: row.quest_type, // Directly use the quest_type from the database
-      activity: row.activity, // Ensure activity is fetched from the database
-      quest_url: row.quest_url,
-      date_created: row.date_created.toLocaleString(),
-      end_date: row.end_date.toLocaleString(), // Include end_date in the response
-      description: row.description,
-      status: row.status,
-      image:
-        process.env.BACKEND_URL + "uploads/" + module_slug + "/" + row.image,
-      coin_earn: row.coin_earn,
-      start_date: row.start_date
-        ? new Date(row.start_date).toLocaleString()
-        : null,
+    // Query to fetch quest data with user-specific completion status
+    const questHistoryQuery = `
+      SELECT 
+        q.id AS quest_id,
+        q.quest_name,
+        q.quest_type,
+        CASE 
+          WHEN q.activity = 'watch' THEN 'watch'
+          WHEN q.activity = 'follow' THEN 'follow'
+          ELSE 'unknown'
+        END AS activity,
+        q.quest_url,
+        q.date_created,
+        q.start_date,
+        q.end_date,
+        q.description,
+        q.status,
+        q.image,
+        q.coin_earn,
+        IFNULL(uca.status, 'not_completed') AS completion_status
+      FROM quest q
+      LEFT JOIN usercoin_audit uca 
+        ON q.id = uca.quest_id 
+        AND uca.user_id = ? 
+        AND uca.status = 'completed' 
+        AND uca.deleted = 0
+      WHERE q.deleted = 0
+      LIMIT ? OFFSET ?;
+    `;
+
+    // Execute the query to fetch paginated quests
+    const [questHistory] = await db.query(questHistoryQuery, [
+      userId,
+      resultPerPage,
+      offset,
+    ]);
+
+    // Query to get total quest count for pagination
+    const totalQuestQuery = `
+      SELECT COUNT(*) AS totalQuests 
+      FROM quest 
+      WHERE deleted = 0;
+    `;
+    const [totalQuestResult] = await db.query(totalQuestQuery);
+    const totalQuests = totalQuestResult[0].totalQuests;
+
+    // Format quest data
+    const formattedQuests = questHistory.map((quest) => ({
+      quest_id: quest.quest_id,
+      quest_name: quest.quest_name,
+      quest_type: quest.quest_type,
+      activity: quest.activity,
+      quest_url: quest.quest_url,
+      date_created: moment(quest.date_created).format("MM/DD/YYYY, h:mm:ss A"),
+      start_date: moment(quest.start_date).format("MM/DD/YYYY, h:mm:ss A"),
+      end_date: moment(quest.end_date).format("MM/DD/YYYY, h:mm:ss A"),
+      description: quest.description,
+      status: quest.completion_status === "completed" ? "completed" : "not_completed",
+      image: process.env.BACKEND_URL + "uploads/" + module_slug + "/" + quest.image,
+      coin_earn: parseFloat(quest.coin_earn).toFixed(2),
     }));
 
-    // Send the response
-    res.status(200).json({
+    // Construct response
+    return res.status(200).json({
       success: true,
+      message: "Quest history fetched successfully.",
       totalQuests,
       resultPerPage,
       page,
-      quests,
+      quests: formattedQuests,
     });
   } catch (error) {
-    console.error("Error in apiGetAllRecords:", error.message);
-    return next(new ErrorHandler("Database query failed", 500));
+    console.error("Error fetching quest history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching quest history.",
+      error: error.message,
+    });
   }
-});
+};
 
 exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
   const questId = req.params.id; // Assuming quest ID is passed as a URL parameter
@@ -605,6 +696,85 @@ exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
 //     return next(new ErrorHandler("Database query failed", 500));
 //   }
 // });
+
+
+// exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
+//   const user_id = req.user.id;
+//   const { quest_id } = req.body;
+
+//   console.log("Received request to complete quest:", { user_id, quest_id });
+
+//   if (!quest_id) {
+//     console.log("Validation failed: Missing quest_id");
+//     return next(new ErrorHandler("Quest ID is required", 400));
+//   }
+
+//   try {
+//     const [questResult] = await db.query(
+//       "SELECT id, coin_earn FROM quest WHERE id = ?",
+//       [quest_id]
+//     );
+
+//     if (questResult.length === 0) {
+//       console.log("Quest not found for quest_id:", quest_id);
+//       return next(new ErrorHandler("Quest not found", 404));
+//     }
+
+//     const { id: fetchedQuestId, coin_earn: coinEarn } = questResult[0];
+//     console.log("Quest ID and Coin Earn:", { fetchedQuestId, coinEarn });
+
+//     const coinEarnValue = Math.floor(parseFloat(coinEarn));
+//     if (isNaN(coinEarnValue) || coinEarnValue < 0) {
+//       console.error("Coin earn value is NaN or negative, cannot update user_data");
+//       return next(new ErrorHandler("Invalid coin earn value", 400));
+//     }
+
+//     await db.query("START TRANSACTION");
+//     const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+//     // Insert into usercoin_audit without updating pending_coin in user_data
+//     const insertAuditData = {
+//       user_id,
+//       quest_id: fetchedQuestId,
+//       pending_coin: 0, // Set to 0 since we do not want to add any coins to pending_coin
+//       coin_operation: "cr",
+//       type: "quest",
+//       status: "completed",
+//       date_entered: date_created,
+//     };
+//     console.log("Insert data for usercoin_audit:", insertAuditData);
+
+//     const [insertAuditResult] = await db.query(
+//       "INSERT INTO usercoin_audit SET ?",
+//       insertAuditData
+//     );
+//     if (insertAuditResult.affectedRows === 0) {
+//       await db.query("ROLLBACK");
+//       console.error("Failed to insert into usercoin_audit");
+//       return next(new ErrorHandler("Failed to complete quest", 500));
+//     }
+
+//     // Commit the transaction without updating user_data
+//     await db.query("COMMIT");
+
+//     res.status(200).json({
+//       success: true,
+//       message: `Quest completed successfully. ${coinEarnValue} coins recorded in audit log.`,
+//       data: {
+//         user_id,
+//         quest_id: fetchedQuestId,
+//         coin_earn: coinEarnValue,
+//         status: "completed",
+//         date_entered: new Date(),
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error during quest completion:", error);
+//     await db.query("ROLLBACK");
+//     return next(new ErrorHandler("Database query failed", 500));
+//   }
+// });
+
 exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
   const user_id = req.user.id;
   const { quest_id } = req.body;
@@ -628,46 +798,36 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Quest not found", 404));
     }
 
-    const {
-      id: fetchedQuestId,
-      coin_earn: coinEarn,
-      activity,
-      quest_name: questTitle,
-    } = questResult[0];
-    console.log("Quest ID, Coin Earn, Activity, Quest Name:", {
-      fetchedQuestId,
-      coinEarn,
-      activity,
-      questTitle,
-    });
+    const { id: fetchedQuestId, coin_earn: coinEarn, activity, quest_name: fetchedQuestName } = questResult[0];
+    console.log("Quest ID, Coin Earn, Activity, Quest Name:", { fetchedQuestId, coinEarn, activity, fetchedQuestName });
 
     const coinEarnValue = Math.floor(parseFloat(coinEarn));
     if (isNaN(coinEarnValue) || coinEarnValue < 0) {
-      console.error(
-        "Coin earn value is NaN or negative, cannot update user_data"
-      );
+      console.error("Coin earn value is NaN or negative, cannot update user_data");
       return next(new ErrorHandler("Invalid coin earn value", 400));
     }
 
     // Determine pending_coin based on activity type
     let pendingCoinValue = coinEarnValue; // Default value for non-follow activity
-    let status = "completed"; // Default status for non-follow activity
+    let status = "completed";  // Default status for non-follow activity
 
     // Check if the activity is "follow" (activity = 2)
-    if (activity === "follow") {
-      // If activity is "follow"
-      pendingCoinValue = 0; // Set pending_coin to 0 for "follow"
-      status = "not completed"; // Set status to "not completed" for "follow"
+    if (activity === "follow") {  // If activity is "follow"
+      pendingCoinValue = 0;  // Set pending_coin to 0 for "follow"
+      status = "not completed";  // Set status to "not completed" for "follow"
     }
 
+    // Log the value of pendingCoinValue and status for debugging purposes
     console.log("Pending Coin Value Set To:", pendingCoinValue);
     console.log("Status Set To:", status);
 
+    // Check if the value is correctly set to 0 when activity is follow
+    if (activity === 2 && pendingCoinValue !== 0) {
+      console.error("Unexpected pendingCoinValue when activity is 'follow':", pendingCoinValue);
+    }
+
     await db.query("START TRANSACTION");
-    const date_created = new Date()
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
+    const date_created = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     // Insert into usercoin_audit with the determined pending_coin value and status
     const insertAuditData = {
@@ -676,11 +836,9 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       pending_coin: pendingCoinValue, // Either coinEarnValue or 0 based on activity
       coin_operation: "cr",
       type: "quest",
-      title: questTitle,
-      status: status, // Use the dynamically set status
+      status: status,  // Use the dynamically set status
       date_entered: date_created,
     };
-
     console.log("Insert data for usercoin_audit:", insertAuditData);
 
     const [insertAuditResult] = await db.query(
@@ -694,30 +852,18 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Failed to complete quest", 500));
     }
 
-    // Update pending_coin in user_data table
-    const [updateUserDataResult] = await db.query(
-      "UPDATE user_data SET pending_coin = pending_coin + ? WHERE user_id = ?",
-      [pendingCoinValue, user_id]
-    );
-
-    if (updateUserDataResult.affectedRows === 0) {
-      await db.query("ROLLBACK");
-      console.error("Failed to update pending_coin in user_data");
-      return next(new ErrorHandler("Failed to update user data", 500));
-    }
-
     // Commit the transaction
     await db.query("COMMIT");
 
     res.status(200).json({
       success: true,
-      message: `Quest completed successfully. ${coinEarnValue} coins recorded in audit log and user data updated.`,
+      message: `Quest completed successfully. ${coinEarnValue} coins recorded in audit log.`,
       data: {
         user_id,
         quest_id: fetchedQuestId,
-        title: questTitle, // Return the quest name in the response
+        quest_name: fetchedQuestName,  // Return the quest name in the response
         coin_earn: coinEarnValue,
-        status: status, // Return the status in the response
+        status: status,  // Return the status in the response
         date_entered: new Date(),
       },
     });
@@ -727,6 +873,11 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
+
+
+
+
+
 ////////////////////////////////////////////
 exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   // Get the user_id from the logged-in user's session
@@ -760,6 +911,7 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   }
 });
 //////////////////////////////////////
+
 exports.transferPendingCoinsToTotal = catchAsyncErrors(
   async (req, res, next) => {
     const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
@@ -800,18 +952,9 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
       const earnCoins = reduceCoinRate; // Earn coins is the reduceCoinRate that is transferred
 
       // Insert a new row into usercoin_audit with the updated values
-      // Prepare date_created for insertion
-      // Prepare date_created for insertion
-      const date_created = new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace("T", " ");
-      const type = "tap"; // or any other value for 'type'
-
-      // Insert query including date_entered and type
       await db.query(
-        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin, date_entered, type) VALUES (?, ?, ?, ?, ?)",
-        [user_id, updatedPendingCoins, earnCoins, date_created, type]
+        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin) VALUES (?, ?, ?)",
+        [user_id, updatedPendingCoins, earnCoins]
       );
 
       // Step 5: Fetch updated values for response
@@ -847,6 +990,5 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
     }
   }
 );
-
 
 ////////////////////////////////////////////////////////
