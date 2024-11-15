@@ -174,7 +174,7 @@ export const transferCoins = (coinData) => async (dispatch) => {
 
     console.log("Transfer successful:", response);
     dispatch({ type: TRANSFER_COINS_SUCCESS, payload: response });
-    toast.success("Coins transferred successfully!");
+    // toast.success("Coins transferred successfully!");
   } catch (error) {
     console.error("Transfer failed:", error.message);
     dispatch({

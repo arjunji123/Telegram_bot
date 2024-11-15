@@ -13,91 +13,7 @@
   box-shadow: 0 -26px 20px rgba(243, 186, 47, 0.3);
 }
 
-/* Define the keyframes for the blinking animation */
-@keyframes blink {
-  0% {
-    opacity: 1;
-  }
 
-  50% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Apply the animation to the dot class */
-.dot {
-  width: 6px;
-  height: 6px;
-  background-color: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  animation: blink 1s infinite;
-}
-
-/* Apply the animation to the dot class */
-.dot {
-  width: 6px;
-  height: 6px;
-  background-color: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  animation: blink 1s infinite;
-}
-
-
-
-
-@keyframes float {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
-}
-
-.invite-button {
-  background-color: #6200EA;
-  color: white;
-  padding: 20px 20px;
-  margin: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 30px;
-}
-
-.invite-button:hover {
-  background-color:#3700B3;
-}
-
-.invite-friend-box{position: absolute; bottom:50px;    width: 100%;}
-.invite-friend-box .invite-frng-btn-box{ width: 70%;
-  float: left;
-  margin-right: 2%;
-  margin-left: 2%;}
-  .invite-friend-box .invite-frng-btn-box button {    width: 100%;}
-.invite-friend-box .copy-referral-btn-box{width: 25%;
-  float: right;}
-
-.gift1{
-  float: left;
-  width: 100px;
-}
-
-.earn{
-  display: inline-block;
-}
 
 @keyframes coin-pop {
   0% {
@@ -325,4 +241,6 @@ canvas {
   top: 0;
   left: 0;
 }
+
+
 

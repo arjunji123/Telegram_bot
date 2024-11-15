@@ -4,9 +4,7 @@ import "swiper/swiper-bundle.css";
 import { FaRegCheckCircle } from "react-icons/fa";
 
 const CustomSwiper = ({ banners, followed, togglePopup,
-  completedTasks,
   isVideoWatched,
-  hasFollowed,
   handleWatchButtonClick,
   handleCheckButtonClick,
   handleFollowButtonClick,
@@ -43,7 +41,7 @@ const questId = banner.quest_id
               <p className="text-[#423d3d] text-xs font-bold">+ {parseInt(banner.coin_earn)} Coin</p>
             </div>
             <div className="flex justify-between">
-              {completedTasks[taskKey] ? (
+              {banner.status === "completed" ?  (
                   <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
                        <FaRegCheckCircle size={20} className="text-[#606060]"/>
                        </p>
@@ -71,7 +69,7 @@ const questId = banner.quest_id
                   )}
 
                   <div className="flex justify-between">
-                    {banner.activity === "follow" && !hasFollowed[taskKey] && !followed[taskKey] && (
+                    {banner.activity === "follow" && banner.status !== "completed" && !followed[taskKey] && (
                       <a
                         href={banner.quest_url}
                         target="_blank"
@@ -83,7 +81,7 @@ const questId = banner.quest_id
                       </a>
                     )}
 
-                    {banner.activity === "follow" && !hasFollowed[taskKey] && followed[taskKey] && (
+                    {banner.activity === "follow" &&  banner.status !== "completed"  && followed[taskKey] && (
                       <button
                       onClick={() =>
                         togglePopup(
@@ -91,22 +89,20 @@ const questId = banner.quest_id
                           questId,                                   
                           )                                 
                         }// Or replace with handleCheckFollowButtonClick if needed
-                        className={` text-white w-20 flex justify-center py-1.5  rounded-full text-sm font-bold ${hasFollowed[taskKey] ? "bg-gray-400 cursor-not-allowed" : "bg-[#282828]"
+                        className={` text-white w-20 flex justify-center py-1.5  rounded-full text-sm font-bold ${banner.status !== "completed"[taskKey] ? "bg-gray-400 cursor-not-allowed" : "bg-[#282828]"
                           }`}
-                        disabled={hasFollowed[taskKey]}
+                        disabled={banner.status !== "completed"[taskKey]}
                       >
                         Verify
                       </button>
                     )}
 
-                    {banner.activity === "follow" && hasFollowed[taskKey] && (
+                    {banner.activity === "follow" && banner.status === "completed" && (
                        <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
                        <FaRegCheckCircle size={20} className="text-[#606060]"/>
                        </p>
                     )}
                   </div>
-
-
 
 
                 </>

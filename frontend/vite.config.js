@@ -7,7 +7,7 @@ export default defineConfig({
    proxy: {
      // api: "https://unitradehubmybot.onrender.com/api/v1",
       'api': "https://telegram-bot-by30.onrender.com/api/v1",
-  changeOrigin: true,
+ changeOrigin: true,
    },
  },
  plugins: [react()],

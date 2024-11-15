@@ -15,3 +15,47 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+/* toast */
+
+
+.Toastify__toast {
+  margin: 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+
+.Toastify__toast--success {
+  background-color: #28a745;
+  color: #fff;
+
+}
+
+
+.Toastify__toast--error {
+  background-color: #dc3545;
+
+  color: #fff;
+
+}
+
+
+.Toastify__toast-body svg {
+  fill: #fff;
+
+}
+
+
+.Toastify__toast-body svg {
+  fill: #fff;
+}
+
+
+.Toastify__close-button {
+  color: #fff;
+}
+  
