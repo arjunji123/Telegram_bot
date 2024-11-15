@@ -1151,7 +1151,7 @@ exports.getQuestHistory = async (req, res) => {
     const formattedQuests = questHistory.map((quest) => ({
       quest_id: quest.quest_id,
       quest_name: quest.quest_name,
-      quest_type: quest.quest_type === "1" ? "banner" : "non-banner",
+      quest_type: quest.quest_type,
       activity: quest.activity,
       quest_url: quest.quest_url,
       date_created: moment(quest.date_created).format("MM/DD/YYYY, h:mm:ss A"),
