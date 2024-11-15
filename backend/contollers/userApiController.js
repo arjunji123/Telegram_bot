@@ -1252,7 +1252,6 @@ exports.getQuestHistory = async (req, res) => {
 
 
 ////////////////////////////////////
-
 // API to get user history (coins operation, status, pending, etc.)
 exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
   // Get the user_id from the logged-in user's session (JWT token)
@@ -1265,7 +1264,7 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
     const result = await db.query(
       `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered
        FROM usercoin_audit
-       WHERE user_id = ?
+       WHERE user_id = ? AND type != 'tap'
        ORDER BY date_entered DESC`,
       [user_id]
     );
