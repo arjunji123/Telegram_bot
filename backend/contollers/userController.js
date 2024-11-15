@@ -806,9 +806,9 @@ async function updatePendingCoins(
     if (coins === 100 && type === "self") {
       title = "Joining Coin";
     } else if ((coins === 5 || coins === 10) && type === "referral") {
-      title = "Through Referral";
+      title = "Referral Transaction";
     } else {
-      title = "Other Transaction";
+      title = "Referral Transaction";
     }
 
     // Retrieve current pending_coin value
