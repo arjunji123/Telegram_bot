@@ -1327,11 +1327,12 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
       );
     }
 
-    // Update the pending_coin in usercoin_audit based on coinEarned
+    // Update the pending_coin and status in usercoin_audit
     const result = await db.query(
       `UPDATE usercoin_audit 
        SET pending_coin = pending_coin + ?, 
-           quest_screenshot = NULL 
+           quest_screenshot = NULL,
+           status = 'completed'
        WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
       [coinEarned, quest_id]
     );
@@ -1348,7 +1349,7 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Quest approved, pending coins updated successfully.",
+      message: "Quest approved, pending coins updated, and status set to completed.",
     });
   } catch (error) {
     console.error("Database update error:", error); // Log specific error for troubleshooting
@@ -1357,6 +1358,7 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+
 
 exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
   const { quest_id } = req.params;
