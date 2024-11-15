@@ -715,7 +715,6 @@ exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
   }
 });
 //////////////////////////////////////
-
 exports.transferPendingCoinsToTotal = catchAsyncErrors(
   async (req, res, next) => {
     const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
@@ -756,9 +755,16 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
       const earnCoins = reduceCoinRate; // Earn coins is the reduceCoinRate that is transferred
 
       // Insert a new row into usercoin_audit with the updated values
+      // Prepare date_created for insertion
+      const date_created = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+
+      // Insert query including date_entered
       await db.query(
-        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin) VALUES (?, ?, ?)",
-        [user_id, updatedPendingCoins, earnCoins]
+        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin, date_entered) VALUES (?, ?, ?, ?)",
+        [user_id, updatedPendingCoins, earnCoins, date_created]
       );
 
       // Step 5: Fetch updated values for response
@@ -794,5 +800,6 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
     }
   }
 );
+
 
 ////////////////////////////////////////////////////////
