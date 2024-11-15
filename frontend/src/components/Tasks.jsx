@@ -6,7 +6,7 @@ import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAPIData } from "../../store/actions/homeActions";
+import { fetchAPIData , fetchQuestHistory} from "../../store/actions/homeActions";
 import { BACKEND_URL } from "../config";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
@@ -16,6 +16,10 @@ function Tasks() {
   const dispatch = useDispatch();
   const apiData = useSelector((state) => state.apiData.data.apiquests);
   const apiQuests = apiData?.quests || [];
+   // Retrieve history data and loading state from Redux store
+ const questHistory = useSelector((state) => state.apiData.data);
+ const quest = questHistory?.quest?.quests
+// console.log(quest);
   const [loading, setLoading] = useState(true);
   const [completedTasks, setCompletedTasks] = useState({});
   const [watchTimes, setWatchTimes] = useState({});
@@ -55,6 +59,7 @@ function Tasks() {
         }
 
         await dispatch(fetchAPIData("apiQuests")); // Additional API call (if needed)
+        await dispatch(fetchQuestHistory());
 
         setLoading(false); // Set loading to false after data is fetched
       } catch (error) {

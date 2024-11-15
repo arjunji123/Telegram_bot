@@ -1,4 +1,14 @@
 
+
+/* Custom class to hide scrollbar */
+.hide-scrollbar {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
 .top-glow {
   box-shadow: 0 -26px 20px rgba(243, 186, 47, 0.3);
 }
@@ -300,7 +310,7 @@
 
 
 
-
+/* animation of profile page */
 body {
   margin: 0;
   padding: 0;

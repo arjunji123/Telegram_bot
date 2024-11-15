@@ -61,7 +61,7 @@ if (loading) {
         </div>
         
       
-        <div className="flex-grow overflow-y-auto py-4">
+        <div className="flex-grow py-4 h-[400px] overflow-y-auto hide-scrollbar">
           {/* Sample Data by Date */}
           {Object.keys(groupedTransactions).length > 0 ? (
         Object.keys(groupedTransactions).map((date) => (
@@ -78,7 +78,7 @@ if (loading) {
                       alt="Transaction icon"
                     /> */}
                     <BsCoin size={30}  className="text-white"/>
-                     <h3 className="text-sm font-semibold capitalize">      {transaction.type }</h3>
+                     <h3 className="text-sm font-semibold capitalize">      {transaction.title }</h3>
                   
                         </div>
                         <p className={`text-sm font-medium ${transaction.pending_coin > 0 ? 'text-green-400' : 'text-red-400'}`}>

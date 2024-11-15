@@ -50,6 +50,10 @@ export const FETCH_HISTORY_REQUEST = 'FETCH_HISTORY_REQUEST';
 export const SET_HISTORY_DATA  = 'SET_HISTORY_DATA';
 export const FETCH_HISTORY_FAILURE = 'FETCH_HISTORY_FAILURE';
 
+export const FETCH_QUEST_HISTORY_REQUEST = 'FETCH_QUEST_HISTORY_REQUEST';
+export const SET_QUEST_HISTORY_DATA  = 'SET_QUEST_HISTORY_DATA';
+export const FETCH_QUEST_HISTORY_FAILURE = 'FETCH_QUEST_HISTORY_FAILURE';
+
 export const TRANSFER_COINS_REQUEST = "TRANSFER_COINS_REQUEST";
 export const TRANSFER_COINS_SUCCESS = "TRANSFER_COINS_SUCCESS";
 export const TRANSFER_COINS_FAILURE = "TRANSFER_COINS_FAILURE";
@@ -144,6 +148,20 @@ export const fetchHistory = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: FETCH_HISTORY_FAILURE,
+      payload: error.message,
+    });
+  }
+};
+
+export const fetchQuestHistory = () => async (dispatch) => {
+  dispatch({type: FETCH_QUEST_HISTORY_REQUEST});
+  
+  try {
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/quest-history`);
+    dispatch({ type: SET_QUEST_HISTORY_DATA, payload: data });
+  } catch (error) {
+    dispatch({
+      type: FETCH_QUEST_HISTORY_FAILURE,
       payload: error.message,
     });
   }

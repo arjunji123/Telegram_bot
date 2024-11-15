@@ -47,7 +47,7 @@ function App({ Component, pageProps }) {
      
         <Route
             path="/"
-            element={token ? <Navigate to="/home" /> : <Navigate to="/login" />}
+            element={!token ? <Navigate to="/signup" /> : <Navigate to="/home" />}
           />
 
           <Route element={<PublicRoute />}>

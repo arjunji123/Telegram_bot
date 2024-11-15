@@ -14,7 +14,7 @@ function Home() {
           <div
             className="bg-black flex justify-center items-center h-screen "
             style={{
-              backgroundImage: `url(${hero})`, // Full background image
+              // backgroundImage: `url(${hero})`, // Full background image
               backgroundSize: "cover", // Cover the entire screen
               backgroundPosition: "center", // Center the image
               backgroundRepeat: "no-repeat", // No repetition
@@ -23,7 +23,7 @@ function Home() {
             {/* Loader Div */}
             <div className="flex flex-col items-center justify-center">
               <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 animate-spin mb-4"></div>
-              <h1 className="text-xl font-semibold text-white" style={{ position: "absolute" }}>Loading...</h1>
+              {/* <h1 className="text-xl font-semibold text-white" style={{ position: "absolute" }}>Loading...</h1> */}
             </div>
           </div>
         </div>
