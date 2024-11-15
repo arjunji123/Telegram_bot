@@ -756,15 +756,17 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
 
       // Insert a new row into usercoin_audit with the updated values
       // Prepare date_created for insertion
+      // Prepare date_created for insertion
       const date_created = new Date()
         .toISOString()
         .slice(0, 19)
         .replace("T", " ");
+      const type = "tap"; // or any other value for 'type'
 
-      // Insert query including date_entered
+      // Insert query including date_entered and type
       await db.query(
-        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin, date_entered) VALUES (?, ?, ?, ?)",
-        [user_id, updatedPendingCoins, earnCoins, date_created]
+        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin, date_entered, type) VALUES (?, ?, ?, ?, ?)",
+        [user_id, updatedPendingCoins, earnCoins, date_created, type]
       );
 
       // Step 5: Fetch updated values for response
