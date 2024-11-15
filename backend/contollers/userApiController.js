@@ -1175,9 +1175,9 @@ exports.getQuestHistory = async (req, res) => {
         q.id AS quest_id,
         q.quest_name,
         q.quest_type,
-        CASE q.activity 
-          WHEN 1 THEN 'watch'
-          WHEN 2 THEN 'follow'
+        CASE 
+          WHEN q.activity = 'watch' THEN 'watch'
+          WHEN q.activity = 'follow' THEN 'follow'
           ELSE 'unknown'
         END AS activity,
         q.quest_url,
