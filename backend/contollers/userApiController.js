@@ -1163,11 +1163,13 @@ exports.getQuestHistory = async (req, res) => {
   try {
     const userId = req.user.id; // Assuming the user ID is in the request
 
-    // Step 1: Get all quests and their completion status in one query using LEFT JOIN
+    // Query to fetch quests along with quest_name, quest_type, image, and completion status
     const questHistoryQuery = `
       SELECT 
         q.id AS quest_id, 
         q.quest_name, 
+        q.quest_type, 
+        q.image, 
         q.status, 
         q.coin_earn, 
         IFNULL(uca.status, 'not_completed') AS completion_status
@@ -1180,23 +1182,20 @@ exports.getQuestHistory = async (req, res) => {
       WHERE q.deleted = 0;
     `;
 
-    // Step 2: Fetch quest history using db.query
+    // Execute the query
     const [questHistory] = await db.query(questHistoryQuery, [userId]);
 
-    // Step 3: Process the data to return the response
-    const formattedQuestHistory = questHistory.map((quest) => {
-      return {
-        quest_name: quest.quest_name,
-        quest_id: quest.quest_id,
-        status:
-          quest.completion_status === "completed"
-            ? "completed"
-            : "not_completed",
-        coin_earn: quest.coin_earn,
-      };
-    });
+    // Format the result
+    const formattedQuestHistory = questHistory.map((quest) => ({
+      quest_id: quest.quest_id,
+      quest_name: quest.quest_name,
+      quest_type: quest.quest_type,
+      image: quest.image,
+      status: quest.completion_status === "completed" ? "completed" : "not_completed",
+      coin_earn: quest.coin_earn,
+    }));
 
-    // Step 4: Return the response with quest history
+    // Send response
     return res.status(200).json({
       success: true,
       message: "Quest history fetched successfully.",
@@ -1211,6 +1210,7 @@ exports.getQuestHistory = async (req, res) => {
     });
   }
 };
+
 
 ////////////////////////////////////
 
