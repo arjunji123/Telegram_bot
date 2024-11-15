@@ -26,6 +26,7 @@ function Signup() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const referralCode = params.get('referral_code'); // Get the referral code from the URL
+console.log("params", referralCode);
 
     if (referralCode) {
       setValues((prev) => ({
@@ -84,6 +85,7 @@ function Signup() {
     e.preventDefault();
     
     const isValid = validateForm(values);
+    console.log('values', values);
     if (!isValid) return; // Exit if validation fails
     setLoading(true);
     try {
@@ -217,13 +219,12 @@ function Signup() {
           </div>
 
           {/* Referral Input */}
-          <div className="relative hidden">
+          <div className="relative ">
             <input
               type="text"
               name="referral_by"
               value={values.referral_by}
               onChange={handleInput}
-              disabled
               className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Referral By"
             />

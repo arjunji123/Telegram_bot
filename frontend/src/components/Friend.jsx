@@ -42,7 +42,7 @@ const { success, error } = useSelector((state) => ({
     };
     fetchData();
   }, [dispatch]);
-  const signupLink = `${FRONTEND_URL}/?referral_code=${refferalData?.referral_code}`;
+  const signupLink = `${FRONTEND_URL}/signup?referral_code=${refferalData?.referral_code}`;
 
   useEffect(() => {
     if (refferalData?.referral_code ) {
@@ -67,7 +67,7 @@ const { success, error } = useSelector((state) => ({
   const handleShareClick = () => {
     if (referral_code) {
       // Generate the signup link with the referral code
-      const signupLink = `${FRONTEND_URL}/?referral_code=${referral_code}`; // Replace with your actual signup page URL
+      const signupLink = `${FRONTEND_URL}/signup?referral_code=${referral_code}`; // Replace with your actual signup page URL
   
       // Create the message to share
       const message = `Join our app using this referral link: ${signupLink}`;
@@ -95,9 +95,9 @@ const { success, error } = useSelector((state) => ({
     // const referralCode = refferalData && refferalData.referral_code
     if (signupLink) {
       navigator.clipboard.writeText(signupLink);
-      toast("Referral link copied!");
+      // toast("Referral link copied!");
     } else {
-      toast("Referral link is not available yet.");
+      // toast("Referral link is not available yet.");
     }
   };
 
