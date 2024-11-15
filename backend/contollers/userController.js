@@ -801,6 +801,16 @@ async function updatePendingCoins(
   companyId = null
 ) {
   try {
+    // Determine the title based on the coin amount and type
+    let title = "";
+    if (coins === 100 && type === "self") {
+      title = "Joining Coin";
+    } else if ((coins === 5 || coins === 10) && type === "referral") {
+      title = "Through Referral";
+    } else {
+      title = "Other Transaction";
+    }
+
     // Retrieve current pending_coin value
     const userCoinsData = await QueryModel.getData(
       "user_data",
@@ -823,10 +833,11 @@ async function updatePendingCoins(
     await QueryModel.saveData("usercoin_audit", {
       user_id: userId,
       pending_coin: coins,
+      title: title, // Add the title field here
       quest_id: null,
       coin_operation: operation,
       description: description,
-      status: "active",
+      status: "completed",
       earn_coin: operation === "cr" ? 1 : 0,
       type: type,
       company_id: companyId,
