@@ -715,26 +715,6 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
 });
 ////////////////////////////////////////////
 ///////////////////////////////////////////
-
-// exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
-//   const userId = req.body.userId; // User ID ko request body se le
-//   const newStatus = req.body.status; // Naya status request body se le
-
-//   try {
-//     // SQL query to update user status
-//     await db.query(`UPDATE users SET status = ? WHERE id = ?`, [
-//       newStatus,
-//       userId,
-//     ]);
-
-//     // Redirect back to the original URL
-//     const redirectUrl = req.body.redirect || "/admin/users"; // Default redirect URL
-//     res.redirect(redirectUrl); // Redirect back
-//   } catch (error) {
-//     console.error("Error updating user status:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
 exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
   const userId = req.body.userId;
   const newStatus = req.body.status;
@@ -756,14 +736,14 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
     res.status(500).send("Internal Server Error");
   }
 });
-async function distributeCoins(userId) {
-  const COIN_REFERRAL_BONUS = 100; // Coins added to activated user
-  const COIN_PARENT_ADDITION = 10; // Coins added to the direct parent
-  const COIN_ANCESTOR_ADDITION = 5; // Coins added to each ancestor
-  const FIXED_COINS = 95; // Total coins available for distribution
+
+async function distributeCoins(userId, performedByUserId) {
+  const COIN_REFERRAL_BONUS = 100; 
+  const COIN_PARENT_ADDITION = 10;
+  const COIN_ANCESTOR_ADDITION = 5;
+  const FIXED_COINS = 40;
 
   try {
-    // Step 1: Fetch the user's current pending coin amount
     const userCoinsData = await QueryModel.getData(
       "user_data",
       { user_id: userId },
@@ -771,30 +751,16 @@ async function distributeCoins(userId) {
     );
     const currentPendingCoin = userCoinsData[0]?.pending_coin || 0;
 
-    // Step 2: Add referral bonus only if the user has a referrer and hasn't received it yet
-    if (
-      userCoinsData[0]?.referral_by &&
-      currentPendingCoin < COIN_REFERRAL_BONUS
-    ) {
-      const updatedUserCoins = currentPendingCoin + COIN_REFERRAL_BONUS;
-      await QueryModel.updateData(
-        "user_data",
-        { pending_coin: updatedUserCoins },
-        { user_id: userId }
-      );
-      console.info(
-        `Referral bonus of ${COIN_REFERRAL_BONUS} coins awarded to User ID: ${userId}`
-      );
+    if (userCoinsData[0]?.referral_by && currentPendingCoin < COIN_REFERRAL_BONUS) {
+      console.info(`Awarding referral bonus to User ID: ${userId}`);
+      await updatePendingCoins(userId, COIN_REFERRAL_BONUS, "cr", "Referral bonus added", "self", null, performedByUserId);
     } else {
-      console.info(
-        `User ID ${userId} already has referral bonus or no referrer. Skipping award.`
-      );
+      console.info(`Skipping referral bonus for User ID: ${userId}.`);
     }
 
-    // Step 3: Set up remaining coins and start distributing to parents and ancestors
     let remainingCoins = FIXED_COINS;
     let currentUserId = userId;
-    let isFirstParent = true; // Flag to check if it's the direct parent
+    let isFirstParent = true;
 
     while (remainingCoins > 0) {
       const parentData = await QueryModel.getData(
@@ -804,34 +770,21 @@ async function distributeCoins(userId) {
       );
       const parentId = parentData[0]?.parent_id;
 
-      // Break the loop if no more parents are found
       if (!parentId) break;
 
-      // Determine the amount of coins to add (10 for direct parent, 5 for ancestors)
-      const coinsToAdd = isFirstParent
-        ? COIN_PARENT_ADDITION
-        : COIN_ANCESTOR_ADDITION;
-      const actualCoinsToAdd =
-        remainingCoins >= coinsToAdd ? coinsToAdd : remainingCoins;
+      const coinsToAdd = isFirstParent ? COIN_PARENT_ADDITION : COIN_ANCESTOR_ADDITION;
+      const actualCoinsToAdd = remainingCoins >= coinsToAdd ? coinsToAdd : remainingCoins;
 
-      // Update pending coins for the current parent/ancestor
-      const parentCoinsData = await QueryModel.getData(
-        "user_data",
-        { user_id: parentId },
-        ["pending_coin"]
-      );
-      const updatedCoins =
-        (parentCoinsData[0]?.pending_coin || 0) + actualCoinsToAdd;
-      await QueryModel.updateData(
-        "user_data",
-        { pending_coin: updatedCoins },
-        { user_id: parentId }
-      );
-
-      // Deduct coins from remaining balance
+      await updatePendingCoins(parentId, actualCoinsToAdd, "cr", "Ancestor bonus added", "ancestor", null, performedByUserId);
       remainingCoins -= actualCoinsToAdd;
       currentUserId = parentId;
-      isFirstParent = false; // Set flag to false after the direct parent is processed
+      isFirstParent = false;
+    }
+
+    if (remainingCoins > 0) {
+      console.info(`Coin distribution incomplete. ${remainingCoins} coins left undistributed.`);
+    } else {
+      console.info(`Coin distribution complete.`);
     }
   } catch (error) {
     console.error("Error distributing coins:", error);
@@ -845,22 +798,28 @@ async function updatePendingCoins(
   operation = "cr",
   description = "",
   type = "self",
-  companyId = null,
-  performedByUserId = null
+  companyId = null
 ) {
   try {
-    if (!performedByUserId) {
-      performedByUserId = getCurrentUserId();
-    }
+    // Retrieve current pending_coin value
+    const userCoinsData = await QueryModel.getData(
+      "user_data",
+      { user_id: userId },
+      ["pending_coin"]
+    );
+    const currentPendingCoin = userCoinsData[0]?.pending_coin || 0;
 
-    // Update the pending coins for the user
+    // Calculate the updated total
+    const updatedPendingCoin = currentPendingCoin + coins;
+
+    // Update user_data with the new total
     await QueryModel.updateData(
       "user_data",
-      { pending_coin: coins },
-      { id: userId }
+      { pending_coin: updatedPendingCoin },
+      { user_id: userId }
     );
 
-    // Save a record in the usercoin_audit table
+    // Record the transaction in usercoin_audit
     await QueryModel.saveData("usercoin_audit", {
       user_id: userId,
       pending_coin: coins,
@@ -868,13 +827,13 @@ async function updatePendingCoins(
       coin_operation: operation,
       description: description,
       status: "active",
-      deleted: 0,
       earn_coin: operation === "cr" ? 1 : 0,
       type: type,
       company_id: companyId,
       date_entered: new Date(),
-      performed_by_user_id: performedByUserId,
     });
+
+    console.info(`Updated pending coins for User ID: ${userId}. Total Pending Coins: ${updatedPendingCoin}`);
   } catch (error) {
     console.error("Error in updatePendingCoins:", error.message);
   }
