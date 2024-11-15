@@ -60,7 +60,7 @@ const {
   transferCoins,
   uploadQuestScreenshotApi,
   createSellTransaction,
-  getQuestHistory,
+ 
   getUserHistory,
 } = require("../contollers/userApiController");
 const {
@@ -159,6 +159,6 @@ router.post(
   upload.array("screenshot", 5),
   uploadQuestScreenshotApi
 );
-router.get("/quest-history", isApiAuthenticatedUser, getQuestHistory);
+
 router.get("/user-history", isApiAuthenticatedUser, getUserHistory);
 module.exports = router;
