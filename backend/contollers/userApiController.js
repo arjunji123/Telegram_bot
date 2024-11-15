@@ -1190,9 +1190,9 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
   console.log("Fetching user history for user:", user_id);
 
   try {
-    // Query to get the user's coin operation history
+    // Query to get the user's coin operation history with the title, excluding 'tap' type
     const result = await db.query(
-      `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered
+      `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered, title
        FROM usercoin_audit
        WHERE user_id = ? AND type != 'tap'
        ORDER BY date_entered DESC`,
