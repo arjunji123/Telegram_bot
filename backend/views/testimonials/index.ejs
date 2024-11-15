@@ -55,7 +55,7 @@
                                 <td>
                                     <% if (entry.quest_screenshot) { %>
                                         <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
-                                            <button class="btn btn-info view-quest-image" data-image="/uploads/<%= screenshot %>" data-quest-id="<%= entry.quest_id %>">
+                                            <button class="btn btn-info view-quest-image" data-image="https://telegram-bot-by30.onrender.com/uploads/<%= screenshot %>" data-quest-id="<%= entry.quest_id %>">
                                                 View Screenshot
                                             </button>
                                         <% }) %>
