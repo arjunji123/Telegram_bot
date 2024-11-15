@@ -685,7 +685,13 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
 
     // Commit the transaction
     await db.query("COMMIT");
-
+    const [updatedPendingCoinResult] = await db.query(
+      "SELECT pending_coin FROM user_data WHERE user_id = ?",
+      [user_id]
+    );
+    const updatedPendingCoin = updatedPendingCoinResult[0]?.pending_coin || 0;
+    console.log("Updated pending_coin for user:", updatedPendingCoin);
+    
     res.status(200).json({
       success: true,
       message: `Quest completed successfully. ${coinEarnValue} coins recorded in audit log.`,
@@ -696,6 +702,8 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
         coin_earn: coinEarnValue,
         status: status,  // Return the status in the response
         date_entered: new Date(),
+                updated_pending_coin: updatedPendingCoin,
+
       },
     });
   } catch (error) {
