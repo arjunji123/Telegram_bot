@@ -1090,6 +1090,8 @@ exports.createSellTransaction = async (req, res, next) => {
   }
 };
 
+
+
 exports.getQuestHistory = async (req, res) => {
   try {
     const userId = req.user.id; // Assuming the user ID is available in req.user
@@ -1156,7 +1158,7 @@ exports.getQuestHistory = async (req, res) => {
       start_date: moment(quest.start_date).format("MM/DD/YYYY, h:mm:ss A"),
       end_date: moment(quest.end_date).format("MM/DD/YYYY, h:mm:ss A"),
       description: quest.description,
-      status: quest.status,
+      status: quest.completion_status === "completed" ? "completed" : "not_completed",
       image: quest.image,
       coin_earn: parseFloat(quest.coin_earn).toFixed(2),
     }));
@@ -1164,6 +1166,7 @@ exports.getQuestHistory = async (req, res) => {
     // Construct response
     return res.status(200).json({
       success: true,
+      message: "Quest history fetched successfully.",
       totalQuests,
       resultPerPage,
       page,
