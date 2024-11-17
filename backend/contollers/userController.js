@@ -775,7 +775,7 @@ async function distributeCoins(userId, performedByUserId) {
       const coinsToAdd = isFirstParent ? COIN_PARENT_ADDITION : COIN_ANCESTOR_ADDITION;
       const actualCoinsToAdd = remainingCoins >= coinsToAdd ? coinsToAdd : remainingCoins;
 
-      await updatePendingCoins(parentId, actualCoinsToAdd, "cr", "Ancestor bonus added", "ancestor", null, performedByUserId);
+      await updatePendingCoins(parentId, actualCoinsToAdd, "cr", "referral bonus added", "referral", null, performedByUserId);
       remainingCoins -= actualCoinsToAdd;
       currentUserId = parentId;
       isFirstParent = false;
