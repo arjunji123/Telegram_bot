@@ -55,7 +55,7 @@
                                 <td>
                                     <% if (entry.quest_screenshot) { %>
                                         <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
-                                            <button class="btn btn-info view-quest-image" data-image="https://telegram-bot-by30.onrender.com/uploads/<%= screenshot %>" data-quest-id="<%= entry.quest_id %>">
+                                            <button class="btn btn-info view-quest-image" data-image="/uploads/<%= screenshot %>" data-quest-id="<%= entry.quest_id %>">
                                                 View Screenshot
                                             </button>
                                         <% }) %>
@@ -153,17 +153,27 @@
     });
 
     // Disapprove action
-    $('#disapproveBtn').click(function () {
-        var questId = $(this).data('quest-id');
-        console.log("Disapproving quest ID:", questId);  // Debugging output
-        $.post(`/api/v1/disapprove-quest/${questId}`, function (response) {
+    // Disapprove action
+$('#disapproveBtn').click(function () {
+    const questId = $(this).data('quest-id');
+    console.log("Disapproving quest ID:", questId); // Debugging output
+
+    $.post(`/api/v1/disapprove-quest/${questId}`, function (response) {
+        if (response.success) {
             alert(response.message);
+
+            // Remove the corresponding image and reset the screenshot field in the UI
+            $(`#quest-row-${questId}`).find('td').eq(7).text("No screenshot uploaded"); // Reset screenshot field
             $('#questImageModal').modal('hide');
-            location.reload();
-        }).fail(function (xhr) {
-            alert("Error: " + xhr.responseText); 
-        });
+        } else {
+            alert("Error: " + response.message);
+        }
+    }).fail(function (xhr) {
+        alert("Error: " + xhr.responseText);
     });
+});
+
+
 
     // General image view modal
     $('.view-image').click(function () {
