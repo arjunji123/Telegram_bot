@@ -118,8 +118,9 @@ router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
 
-router.post("/approve-quest/:quest_id", approveQuest);
-router.post("/disapprove-quest/:quest_id", disapproveQuest);
+router.post('/approve-quest/:quest_id', isAuthenticatedUser, authorizeRoles("admin"), approveQuest);
+
+router.post('/approve-quest/:quest_id', isAuthenticatedUser, authorizeRoles("admin"), disapproveQuest);
 router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
 router.get("/user-tree", isAuthenticatedUser, renderTreeView);
 /*******REST API*******/
