@@ -630,28 +630,74 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
+// exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+//   // Check if files were uploaded
+//   if (!req.files || req.files.length === 0) {
+//     return next(new ErrorHandler("No files uploaded", 400));
+//   }
+
+//   // Map each uploaded file to get the filename
+//   const quest_screenshots = req.files.map(file => file.filename); 
+//   const quest_id = req.params.quest_id;
+
+//   try {
+//     // Convert filenames array to JSON for storage in the database
+//     const updateResult = await db.query(
+//       "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
+//       [JSON.stringify(quest_screenshots), quest_id]
+//     );
+
+//     if (updateResult.affectedRows === 0) {
+//       return next(new ErrorHandler("No quest found with the provided quest ID", 404));
+//     }
+
+//     res.status(200).json({ success: true, message: "Screenshots uploaded successfully" });
+//   } catch (error) {
+//     console.error("Database update error:", error);
+//     return next(new ErrorHandler("Database update failed", 500));
+//   }
+// });
+
 exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  const userId = req.user.id;  // Get the user ID from the request
+  
   // Check if files were uploaded
   if (!req.files || req.files.length === 0) {
     return next(new ErrorHandler("No files uploaded", 400));
   }
 
   // Map each uploaded file to get the filename
-  const quest_screenshots = req.files.map(file => file.filename); 
+  const quest_screenshots = req.files.map(file => file.filename);
   const quest_id = req.params.quest_id;
 
+  // Debugging: Log user ID, quest ID, and uploaded file details
+  console.log(`User ID: ${userId}`);
+  console.log(`Quest ID: ${quest_id}`);
+  console.log(`Uploaded Files: ${quest_screenshots.join(", ")}`);
+
   try {
-    // Convert filenames array to JSON for storage in the database
+    // Update the usercoin_audit table to store the screenshots and upload date
     const updateResult = await db.query(
-      "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW() WHERE quest_id = ?",
-      [JSON.stringify(quest_screenshots), quest_id]
+      "UPDATE usercoin_audit SET quest_screenshot = ?, screenshot_upload_date = NOW(),status = 'waiting' WHERE quest_id = ? AND user_id = ?",
+      [JSON.stringify(quest_screenshots), quest_id, userId]
     );
 
+    // Check if the update was successful
     if (updateResult.affectedRows === 0) {
-      return next(new ErrorHandler("No quest found with the provided quest ID", 404));
+      return next(new ErrorHandler("No quest found with the provided quest ID or user ID", 404));
     }
 
-    res.status(200).json({ success: true, message: "Screenshots uploaded successfully" });
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message: "Quest screenshots uploaded successfully",
+      data: {
+        quest_id,
+        user_id: userId,
+        quest_screenshots: quest_screenshots,
+        status: "waiting",
+      },
+    });
   } catch (error) {
     console.error("Database update error:", error);
     return next(new ErrorHandler("Database update failed", 500));
