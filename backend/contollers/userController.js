@@ -1382,8 +1382,10 @@ exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+
 exports.renderTreeView = async (req, res) => {
   try {
+    const { userId } = req.params; // Assume userId is passed as a route parameter
     const query = `
       SELECT 
         user_data.id AS user_data_id, 
@@ -1397,32 +1399,59 @@ exports.renderTreeView = async (req, res) => {
     `;
 
     const [rows] = await mysqlPool.query(query);
-    const userTree = buildUserTree(rows);
+    console.log("Fetched rows:", rows);
 
-    res.render("tree_view", { userTree: JSON.stringify(userTree) });
+    if (!rows || rows.length === 0) {
+      console.log("No user data found.");
+      return res.status(404).send("No user data found.");
+    }
+
+    const userTree = buildUserTree(rows);
+    const filteredTree = filterSubTree(userTree, userId);
+    res.render('tree_view', { userTree: JSON.stringify(filteredTree) });
   } catch (error) {
-    console.error("Error rendering users view:", error);
-    res.status(500).send("Error rendering users view");
+    console.error("Error rendering user tree view:", error);
+    res.status(500).send("Error rendering user tree view");
   }
 };
 
 function buildUserTree(users) {
   const userMap = {};
-  users.forEach((user) => {
+
+  users.forEach(user => {
     userMap[user.user_id] = { ...user, children: [] };
   });
 
-  const roots = [];
-  users.forEach((user) => {
+  users.forEach(user => {
     if (user.parent_id === null) {
-      roots.push(userMap[user.user_id]);
+      userMap[user.user_id].isRoot = true;
     } else {
       const parent = userMap[user.parent_id];
       if (parent) {
         parent.children.push(userMap[user.user_id]);
+      } else {
+        console.warn(`Parent with ID ${user.parent_id} not found for user ${user.user_id}`);
       }
     }
   });
 
-  return roots;
+  return Object.values(userMap).filter(user => user.isRoot);
+}
+
+function filterSubTree(userTree, userId) {
+  let targetNode = null;
+
+  function findNode(node) {
+    if (node.user_id == userId) {
+      targetNode = node;
+      return true;
+    }
+    for (const child of node.children) {
+      if (findNode(child)) return true;
+    }
+    return false;
+  }
+
+  userTree.forEach(root => findNode(root));
+  return targetNode ? [targetNode] : [];
 }
