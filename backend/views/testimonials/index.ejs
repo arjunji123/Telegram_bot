@@ -25,7 +25,7 @@
                             <th>Quest Type</th>
                             <th>Activity</th>
                             <th>Screenshot</th>
-                            <th>Earn Coins</th>
+                            <!-- <th>Earn Coins</th> -->
                             <th>Status</th>
                             <!-- <th>Actions</th> -->
                         </tr>
@@ -41,17 +41,7 @@
                                 <td><%= entry.quest_id %></td>
                                 <td><%= entry.quest_type || 'N/A' %></td>
                                 <td><%= entry.activity || 'N/A' %></td>
-                                <!-- <td>
-                                    <% if (entry.quest_screenshot) { %>
-                                        <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
-                                            <button class="btn btn-info view-image" data-image="/uploads/<%= screenshot %>">
-                                                View Screenshot
-                                            </button>
-                                        <% }) %>
-                                    <% } else { %>
-                                        No screenshot uploaded
-                                    <% } %>
-                                </td> -->
+                             
                                 <td>
                                     <% if (entry.quest_screenshot) { %>
                                         <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
@@ -63,12 +53,12 @@
                                         No screenshot uploaded
                                     <% } %>
                                 </td>
-                                <td><%= entry.earn_coin %></td>
+                                <!-- <td><%= entry.earn_coin %></td> -->
                                 <td>
                                     <% if (entry.status === 'completed') { %>
-                                        <span class="btn btn-success rounded-pill">Completed</span>
+                                        <span class="rounded-pill">Completed</span>
                                     <% } else { %>
-                                        <span class="btn btn-danger rounded-pill">Pending</span>
+                                        <span class="rounded-pill">Pending</span>
                                     <% } %>
                                 </td>
                                 <!-- <td class="action_box">
