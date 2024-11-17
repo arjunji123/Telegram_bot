@@ -1423,16 +1423,20 @@ exports.renderTreeView = async (req, res) => {
 function buildUserTree(users) {
   const userMap = {};
 
+  // Create a map of users
   users.forEach(user => {
     userMap[user.user_id] = { ...user, children: [] };
   });
 
+  // Build the tree structure
   users.forEach(user => {
     if (user.parent_id === null) {
       userMap[user.user_id].isRoot = true;
     } else {
       const parent = userMap[user.parent_id];
       if (parent) {
+        const relationship = user.user_id === parent.leftchild_id ? "left" : "right";
+        userMap[user.user_id].relationship = relationship; // Add relationship info
         parent.children.push(userMap[user.user_id]);
       } else {
         console.warn(`Parent with ID ${user.parent_id} not found for user ${user.user_id}`);
