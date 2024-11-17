@@ -1443,25 +1443,75 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+// exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
+//   const { quest_id } = req.params;
+
+//   try {
+//     // Remove the quest screenshot only from the usercoin_audit table
+//     await db.query(
+//       `UPDATE usercoin_audit 
+//        SET quest_screenshot = NULL 
+//        WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+//       [quest_id]
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Quest disapproved, screenshot removed.",
+//     });
+//   } catch (error) {
+//     console.error("Database update error:", error);
+//     return next(new ErrorHandler("Disapproval process failed", 500));
+//   }
+// });
+
+// Route to handle disapproval of a quest
 exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
-  const { quest_id } = req.params;
+  const { quest_id } = req.params; // Extract quest_id from URL parameters
+  console.log('Quest ID:', quest_id); // Log the quest ID
 
   try {
-    // Remove the quest screenshot only from the usercoin_audit table
-    await db.query(
-      `UPDATE usercoin_audit 
-       SET quest_screenshot = NULL 
-       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+    // Fetch the quest data and associated user data by joining quest and usercoin_audit tables
+    const [questData] = await db.query(
+      `SELECT uca.id AS audit_id, uca.quest_screenshot
+       FROM usercoin_audit uca
+       WHERE uca.quest_id = ? AND uca.quest_screenshot IS NOT NULL`,
       [quest_id]
     );
+    console.log('Fetched quest data:', questData); // Log fetched data
 
+    // Check if the quest exists and has a screenshot
+    if (questData.length === 0) {
+      console.log('No quest found with ID:', quest_id); // Log if no quest is found
+      return next(new ErrorHandler("Quest not found or no screenshot to remove.", 404));
+    }
+
+    const auditId = questData[0].audit_id;
+    console.log('Audit ID:', auditId); // Log audit_id
+
+    // Update the quest_screenshot field to NULL and set status to 'not_completed'
+    const result = await db.query(
+      `UPDATE usercoin_audit 
+       SET quest_screenshot = NULL, status = 'not_completed' 
+       WHERE id = ?`, 
+      [auditId] // Use audit_id to ensure only this row is updated
+    );
+    console.log('Update result for usercoin_audit:', result); // Log the update result
+
+    // Check if the update affected any rows
+    if (result.affectedRows === 0) {
+      console.log('No rows were updated for audit ID:', auditId); // Log if no rows were updated
+      return next(new ErrorHandler("Screenshot removal and status update failed.", 500));
+    }
+
+    // Respond with success
     res.status(200).json({
       success: true,
-      message: "Quest disapproved, screenshot removed.",
+      message: "Quest screenshot disapproved and status updated to 'not_completed'.",
     });
   } catch (error) {
-    console.error("Database update error:", error);
-    return next(new ErrorHandler("Disapproval process failed", 500));
+    console.error("Database update error:", error); // Log specific error for troubleshooting
+    return next(new ErrorHandler("Disapproval process failed: " + error.message, 500));
   }
 });
 
