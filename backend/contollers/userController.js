@@ -1303,42 +1303,111 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+// exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
+//   const { quest_id } = req.params;
+
+//   try {
+//     // Fetch the coin_earn value from the quest table
+//     const [questData] = await db.query(
+//       `SELECT coin_earn FROM quest WHERE id = ?`,
+//       [quest_id]
+//     );
+
+//     // Check if the quest exists
+//     if (questData.length === 0) {
+//       return next(new ErrorHandler("Quest not found", 404));
+//     }
+
+//     const coinEarned = questData[0].coin_earn;
+
+//     // Check if the quest has a positive coin_earn value
+//     if (coinEarned <= 0) {
+//       return next(
+//         new ErrorHandler("Coin earn value must be greater than zero.", 400)
+//       );
+//     }
+
+//     // Update the pending_coin and status in usercoin_audit
+//     const result = await db.query(
+//       `UPDATE usercoin_audit 
+//        SET pending_coin = pending_coin + ?, 
+//            quest_screenshot = NULL,
+//            status = 'completed'
+//        WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+//       [coinEarned, quest_id]
+//     );
+
+//     // Check if the update affected any rows
+//     if (result.affectedRows === 0) {
+//       return next(
+//         new ErrorHandler(
+//           "No matching quest found or screenshot already processed",
+//           404
+//         )
+//       );
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Quest approved, pending coins updated, and status set to completed.",
+//     });
+//   } catch (error) {
+//     console.error("Database update error:", error); // Log specific error for troubleshooting
+//     return next(
+//       new ErrorHandler("Approval process failed: " + error.message, 500)
+//     );
+//   }
+// });
+
 exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
-  const { quest_id } = req.params;
+  const { quest_id } = req.params; // Extract quest_id from URL parameters
+  console.log('Quest ID:', quest_id); // Log the quest ID
 
   try {
-    // Fetch the coin_earn value from the quest table
+    // Fetch the quest data and associated user data by joining quest and usercoin_audit tables
     const [questData] = await db.query(
-      `SELECT coin_earn FROM quest WHERE id = ?`,
+      `SELECT q.coin_earn, uca.user_id, uca.id AS audit_id
+       FROM quest q
+       JOIN usercoin_audit uca ON q.id = uca.quest_id
+       WHERE q.id = ? AND uca.quest_screenshot IS NOT NULL
+       FOR UPDATE`, // Lock the row for update
       [quest_id]
     );
+    console.log('Fetched quest data:', questData); // Log fetched data
 
     // Check if the quest exists
     if (questData.length === 0) {
+      console.log('No quest found with ID:', quest_id); // Log if no quest is found
       return next(new ErrorHandler("Quest not found", 404));
     }
 
-    const coinEarned = questData[0].coin_earn;
+    const quest = questData[0];
+    const coinEarned = parseFloat(quest.coin_earn); // Ensure coinEarned is a number
+    const auditId = quest.audit_id;
+    console.log('Coin earned from quest:', coinEarned); // Log coin earn value
 
     // Check if the quest has a positive coin_earn value
     if (coinEarned <= 0) {
+      console.log('Coin earned is less than or equal to zero'); // Log if coinEarned is invalid
       return next(
         new ErrorHandler("Coin earn value must be greater than zero.", 400)
       );
     }
 
-    // Update the pending_coin and status in usercoin_audit
+    // Update the pending_coin and status in usercoin_audit for the specific row
     const result = await db.query(
       `UPDATE usercoin_audit 
        SET pending_coin = pending_coin + ?, 
            quest_screenshot = NULL,
            status = 'completed'
-       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
-      [coinEarned, quest_id]
+       WHERE id = ? AND quest_screenshot IS NOT NULL`, 
+      [coinEarned, auditId] // Use audit_id to ensure only this row is updated
     );
+    console.log('Update result for usercoin_audit:', result); // Log the update result
 
     // Check if the update affected any rows
     if (result.affectedRows === 0) {
+      console.log('No rows were updated for audit ID:', auditId); // Log if no rows were updated
       return next(
         new ErrorHandler(
           "No matching quest found or screenshot already processed",
@@ -1347,9 +1416,23 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
       );
     }
 
+    // After the quest is approved, update the user's pending_coin in user_data.
+    const [userData] = await db.query(
+      `UPDATE user_data 
+       SET pending_coin = pending_coin + ? 
+       WHERE user_id = ?`, 
+      [coinEarned, quest.user_id] // Update only pending_coin
+    );
+
+    if (userData.affectedRows === 0) {
+      console.log('User not found for quest approval:', quest.user_id);
+      return next(new ErrorHandler("User not found for the approval", 404));
+    }
+
+    // Respond with success
     res.status(200).json({
       success: true,
-      message: "Quest approved, pending coins updated, and status set to completed.",
+      message: "Quest approved, pending coins updated in both usercoin_audit and user_data, and status set to completed.",
     });
   } catch (error) {
     console.error("Database update error:", error); // Log specific error for troubleshooting
