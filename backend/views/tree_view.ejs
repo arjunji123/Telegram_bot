@@ -91,7 +91,11 @@
             .attr("dy", 3)
             .attr("x", d => d.children ? -15 : 15)
             .style("text-anchor", d => d.children ? "end" : "start")
-            .text(d => `${d.data.user_name} (ID: ${d.data.user_id})`);
+            .text(d => {
+                const relationship = d.data.relationship ? ` (${d.data.relationship})` : '';
+                return `${d.data.user_name}${relationship}`;
+                // return `${d.data.user_name} (ID: ${d.data.user_id})${relationship}`;
+            });
 
         // Implement zoom and pan functionality
         const zoom = d3.zoom()
