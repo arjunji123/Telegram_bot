@@ -1408,7 +1408,12 @@ exports.renderTreeView = async (req, res) => {
 
     const userTree = buildUserTree(rows);
     const filteredTree = filterSubTree(userTree, userId);
-    res.render('tree_view', { userTree: JSON.stringify(filteredTree) });
+    // res.render('tree_view', { userTree: JSON.stringify(filteredTree) });
+    res.render('tree_view', {
+      layout: module_layout,
+      title: module_single_title,
+      userTree: JSON.stringify(filteredTree),
+  });
   } catch (error) {
     console.error("Error rendering user tree view:", error);
     res.status(500).send("Error rendering user tree view");
