@@ -158,6 +158,7 @@ router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
 router.post(
   "/upload-quest-screenshot/:quest_id",
+  isApiAuthenticatedUser,  // Add this middleware to ensure req.user is set
   upload.array("screenshot", 5),
   uploadQuestScreenshotApi
 );
