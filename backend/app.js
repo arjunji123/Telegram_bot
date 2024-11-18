@@ -18,6 +18,12 @@ const localStorage = new LocalStorage("./scratch");
 // );
  app.use(
    cors({
+     origin: "https://unitrade-bot.onrender.com",
+     credentials: true,
+   })
+ );
+ app.use(
+   cors({
      origin: "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
      credentials: true,
    })
