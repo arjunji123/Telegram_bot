@@ -763,7 +763,7 @@ exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
 
     if (activity === "follow") { // If activity is "follow"
       pendingCoinValue = 0;
-      status = "not_completed";
+      status = "waiting";
     }
 
     console.log("Pending Coin Value:", pendingCoinValue, "Status:", status);
