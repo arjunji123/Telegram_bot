@@ -1115,7 +1115,9 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
       coins: userData.coins || 0, // If coins are null, set to 0
       pending_coin: userData.pending_coin || 0, // If pending coins are null, set to 0
       upi_id: userData.upi_id || "", // If upi_id is null, set to an empty string
-      user_photo: userData.user_photo || null, // Include photo or null if not set
+      user_photo: userData.user_photo
+      ? `${process.env.BACKEND_URL}uploads/${userData.user_photo}`
+      : null, // Full URL for user photo or null if not set 
     };
 
     // Send the response with the user's profile
