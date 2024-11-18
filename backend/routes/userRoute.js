@@ -152,7 +152,6 @@ router.post(
   // This should come before the upload handler
   upload.single("pay_image"),
   uploadScreenshotApi,
-  isApiAuthenticatedUser
 );
 router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
