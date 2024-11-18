@@ -22,16 +22,16 @@ function Home() {
   const handleNavigate = () => {
     navigate('/Profile');
   };
-  useEffect(() => {
-    // Fetch user and coin data on component mount
-    const fetchData = async () => {
-      try {
-        await dispatch(fetchCoinData());
-        await dispatch(fetchMeData());
-        setLoading(false); // Set loading to false after data is fetched
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setLoading(false); // Set loading to false if there's an error
+useEffect(() => {
+  //   // Fetch user and coin data on component mount
+  const fetchData = async () => {
+    try {
+      await dispatch(fetchCoinData());
+      await dispatch(fetchMeData());
+      setLoading(false); // Set loading to false after data is fetched
+     } catch (error) {
+       console.error('Error fetching data:', error);
+       setLoading(false); // Set loading to false if there's an error
       }
     };
     fetchData();
@@ -67,9 +67,9 @@ function Home() {
       });
   };
   // Show loader until loading state is false
-  if (loading) {
-    return <Loader />;
-  }
+  // if (loading) {
+  //   return <Loader />;
+  // }
   return (
     <div className="bg-white flex justify-center">
     <ToastContainer
@@ -81,6 +81,11 @@ function Home() {
       draggable
       theme="dark"
     />
+    {loading && (
+         <Loader />
+    )
+    }
+
     <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
       <div className="flex-grow relative z-0">
         <div className="px-4 py-6 space-y-6">

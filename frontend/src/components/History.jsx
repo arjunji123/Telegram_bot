@@ -44,15 +44,18 @@ useEffect(() => {
   fetchData();
 }, [dispatch]);
 
-if (loading) {
-  return <Loader />;
-}
+// if (loading) {
+//   return <Loader />;
+// }
 
   return (
     <div className="bg-white min-h-screen flex justify-center font-poppins">
       <div className=" bg-black text-white w-full max-w-lg flex flex-col px-4">
         
-
+      {loading && (
+         <Loader />
+    )
+    }
         <div className="flex items-center justify-between py-4">
           <button onClick={() => navigate(-1)} className="text-2xl text-white">
             <BsArrowLeft />
@@ -62,36 +65,40 @@ if (loading) {
         
       
         <div className="flex-grow py-4 h-[400px] overflow-y-auto hide-scrollbar">
-          {/* Sample Data by Date */}
-          {Object.keys(groupedTransactions).length > 0 ? (
-        Object.keys(groupedTransactions).map((date) => (
-            <div key={date} className="mb-6">
+  {/* Sample Data by Date */}
+  {Object.keys(groupedTransactions).length > 0 ? (
+    Object.keys(groupedTransactions).map((date) => (
+      <div key={date} className="mb-6">
+        <p className="text-sm font-semibold text-gray-400 mb-3">
+          {date}
+        </p>
+        {groupedTransactions[date]
+          .filter((transaction) => transaction.pending_coin > 0) // Filter out transactions where pending_coin is 0
+          .map((transaction, index) => (
+            <div key={index} className="flex items-center justify-between py-3">
+              <div className="flex items-center space-x-3">
+                {/* <img
+                  className="w-8 h-8"
+                  src="/src/Img/rupees.png"
+                  alt="Transaction icon"
+                /> */}
+                <BsCoin size={30} className="text-white" />
+                <h3 className="text-sm font-semibold capitalize">
+                  {transaction.title}
+                </h3>
+              </div>
+              <p className="text-sm font-medium text-green-400">
+                + {transaction.pending_coin} Coins
+              </p>
+            </div>
+          ))}
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-400">No transactions found.</p>
+  )}
+</div>
 
-              <p className="text-sm font-semibold text-gray-400 mb-3">
-              {date}                  </p>
-              {groupedTransactions[date].map((transaction, index) => (
-                <div key={index} className="flex items-center justify-between py-3 ">
-                  <div className="flex items-center space-x-3">
-                    {/* <img
-                      className="w-8 h-8"
-                      src="/src/Img/rupees.png"
-                      alt="Transaction icon"
-                    /> */}
-                    <BsCoin size={30}  className="text-white"/>
-                     <h3 className="text-sm font-semibold capitalize">      {transaction.title }</h3>
-                  
-                        </div>
-                        <p className={`text-sm font-medium ${transaction.pending_coin > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {transaction.pending_coin > 0 ? `+ ${transaction.pending_coin} Coins` : `${transaction.earn_coin} Coins`}
-                    </p>
-                </div>
-                     ))}
-            </div> 
-           ))
-          ) : (
-            <p className="text-center text-gray-400">No transactions found.</p>
-          )}
-        </div>
         
    
         <Footer />

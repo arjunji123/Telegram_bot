@@ -1,12 +1,11 @@
+// Login.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import "../Styles/LoginDesign.css";
-import { toast, ToastContainer } from "react-toastify"; // Import react-toastify components
-import "react-toastify/dist/ReactToastify.css"; // Import the toastify CSS
-import { logo } from "../images";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/actions/authActions";
+import ToastNotification from "./Toast";
+import { logo } from "../images";
 import Loader from '../components/Loader';
 
 function Login() {
@@ -15,6 +14,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -23,17 +24,17 @@ function Login() {
     setLoading(true); // Show loader when upload starts
     try {
       await dispatch(login({ mobile, password }));
-      toast.success("Login successful!");
+      setToastMessage("Login successful!");
+      setShowToast(true);
       setTimeout(() => {
         setLoading(false); // Hide loader after success
         navigate("/home");
-      }, 2000); // Show success toast
+      }, 2000);
     } catch (error) {
       const backendError = error.error || "Your account is deactivated. Please contact support.";
       setErrors(backendError); // Set error message from backend response
-      toast.error(backendError); // Show backend error in toast
-      // console.log("Error:", backendError);
-      
+      setToastMessage(backendError);
+      setShowToast(true);
     }
   };
 
@@ -47,17 +48,8 @@ function Login() {
 
   return (
     <div className="bg-white flex justify-center items-center min-h-screen ">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="dark"
-      />
+      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />   
       <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden ">
-        {/* Header Section */}
         <div className="p-6 sm:p-10  shadow-lg relative">
           <div className="absolute top-0 left-0 w-full h-1 "></div>
           <div className="flex justify-center py-4 space-x-1">
@@ -84,10 +76,8 @@ function Login() {
             Log In
           </h2>
 
-          <form
-            onSubmit={handleLogin}
-            className="space-y-4 sm:space-y-6 px-2 sm:px-4"
-          >
+          <form onSubmit={handleLogin}
+            className="space-y-4 sm:space-y-6 px-2 sm:px-4" >
             <div className="relative">
               <input
                 type="text"

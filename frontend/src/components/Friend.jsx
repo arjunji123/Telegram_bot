@@ -102,9 +102,9 @@ const { success, error } = useSelector((state) => ({
   };
 
 
-  if (loading) {
-    return <Loader />;
-  }
+  // if (loading) {
+  //   return <Loader />;
+  // }
 
   return (
 
@@ -118,6 +118,10 @@ const { success, error } = useSelector((state) => ({
  draggable
  theme="dark"
 />
+{loading && (
+         <Loader />
+    )
+    }
 <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg overflow-y-auto px-4">
 <div className="flex-grow relative z-0 py-6">
  <Logo />

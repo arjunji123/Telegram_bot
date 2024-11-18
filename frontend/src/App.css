@@ -170,59 +170,79 @@
 }
 
 /* Loader style */
-.loader {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 8px solid transparent;
-  border-top: 8px solid #fff; /* White color for the top part */
-  border-left: 8px solid #fff; /* White left side to enhance spinning effect */
-  border-bottom: 8px solid #fff; /* White bottom part for more definition */
-  animation: spin 1.5s linear infinite; /* Spinning animation */
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); /* Strong glow effect */
-  transform-origin: center;
+/* Dark Theme Background */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8); /* Dark overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure loader is above other content */
 }
 
+/* Loader Styles */
+/* Dark Theme Background */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8); /* Dark background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-.loader:before {
-  content: "";
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent inner white circle */
+/* Circular Loader */
+.loader-circle {
+  border: 6px solid #f3f3f3; /* Light gray for outer circle */
+  border-top: 6px solid #3498db; /* Blue color for the top portion */
   border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1.5s linear infinite;
+}
+
+/* Inner circle to give a glowing effect */
+.loader-inner {
+  position: absolute;
+  border: 6px solid #fff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  animation: pulse 1.5s infinite ease-in-out; /* Inner pulsing effect */
+  margin-top: -15px;
+  margin-left: -15px;
+  animation: glow 1.5s ease-in-out infinite;
 }
 
-/* Keyframe animation for spinning effect */
+/* Spinner animation */
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Keyframe animation for inner pulsing effect */
-@keyframes pulse {
+/* Glowing effect animation */
+@keyframes glow {
   0% {
-    transform: scale(1);
-    opacity: 0.3;
+    box-shadow: 0 0 5px #3498db, 0 0 10px #3498db, 0 0 15px #3498db;
   }
   50% {
-    transform: scale(1.8);
-    opacity: 0.8;
+    box-shadow: 0 0 20px #3498db, 0 0 30px #3498db, 0 0 40px #3498db;
   }
   100% {
-    transform: scale(1);
-    opacity: 0.3;
+    box-shadow: 0 0 5px #3498db, 0 0 10px #3498db, 0 0 15px #3498db;
   }
 }
+
+
 
 
 

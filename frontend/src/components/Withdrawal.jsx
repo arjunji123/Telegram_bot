@@ -185,10 +185,10 @@ const handleSellSubmit = (e) => {
   
   dispatch(sellMoney(user_id, company_id, sellData));
 };
-  // Show loader until loading state is false
-  if (loading) {
-    return <Loader />;
-  }
+
+  // if (loading) {
+  //   return <Loader />;
+  // }
   return (
 
     <>
@@ -203,6 +203,10 @@ const handleSellSubmit = (e) => {
         draggable
         theme="dark"
       />
+      {loading && (
+         <Loader />
+    )
+    }
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
         <div className="flex-grow relative z-0 pt-6  pb-16">
           <Logo />

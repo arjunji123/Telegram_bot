@@ -120,9 +120,9 @@ function Payment() {
     });
   };
 
-  if (loading) {
-    return <Loader />;
-  }
+  // if (loading) {
+  //   return <Loader />;
+  // }
   return (
     <div className="bg-white flex justify-center items-center min-h-screen ">
     <div className="w-full max-w-lg bg-black text-white h-screen shadow-lg overflow-hidden">
@@ -137,7 +137,10 @@ function Payment() {
   draggable
   theme="dark"
 />
-
+{loading && (
+         <Loader />
+    )
+    }
 {/* Header */}
 <div className="flex items-center justify-center py-5 border-b border-white">
   <img src={logo} alt="logo" className="w-8 h-8 mr-2" />

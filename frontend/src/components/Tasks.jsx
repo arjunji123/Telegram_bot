@@ -183,7 +183,6 @@ function Tasks() {
       [task]: Date.now(),
     });
   };
-
   const handleSubmit = async (task, questId) => {
     console.log("questIdquestId", questId);
 
@@ -206,13 +205,7 @@ function Tasks() {
     try {
       setIsUploading(true);
 
-      // 1. Upload the screenshot
-      const formData = new FormData();
-      formData.append('screenshot', screenshot);
-
-      await axios.post(`${BACKEND_URL}/api/v1/upload-quest-screenshot/${questId}`, formData);
-
-      // 2. Complete the follow quest (your function logic)
+      // Retrieve the token from localStorage
       const tokenData = localStorage.getItem("user");
       if (!tokenData) {
         throw new Error("No token data found in localStorage");
@@ -225,19 +218,34 @@ function Tasks() {
         throw new Error("Token not found");
       }
 
-      // Completing the quest API call
-      const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
-      });
+      // 1. Upload the screenshot
+      const formData = new FormData();
+      formData.append('screenshot', screenshot);
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
+      await axios.post(
+        `${BACKEND_URL}/api/v1/upload-quest-screenshot/${questId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token here
+          },
+        }
+      );
+
+      // 2. Complete the follow quest (your function logic)
+      // const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
+      // });
+
+      // if (!response.ok) {
+      //   throw new Error(`Error: ${response.status} ${response.statusText}`);
+      // }
+
       // Mark as completed and update UI
       setFollowed(true);
       setShowPopup(false); // Close the pop-up
@@ -251,10 +259,77 @@ function Tasks() {
     }
   };
 
+  // const handleSubmit = async (task, questId) => {
+  //   console.log("questIdquestId", questId);
 
-  if (loading) {
-    return <Loader />;
-  }
+  //   // Basic validations
+  //   if (!screenshot) {
+  //     toast('Please upload a screenshot!');
+  //     return;
+  //   }
+
+  //   if (!questId) {
+  //     toast('Quest ID is required!');
+  //     return;
+  //   }
+
+  //   if (!task) {
+  //     toast('Task ID is required!');
+  //     return;
+  //   }
+
+  //   try {
+  //     setIsUploading(true);
+
+  //     // 1. Upload the screenshot
+  //     const formData = new FormData();
+  //     formData.append('screenshot', screenshot);
+
+  //     await axios.post(`${BACKEND_URL}/api/v1/upload-quest-screenshot/${questId}`, formData);
+
+  //     // 2. Complete the follow quest (your function logic)
+  //     const tokenData = localStorage.getItem("user");
+  //     if (!tokenData) {
+  //       throw new Error("No token data found in localStorage");
+  //     }
+
+  //     const parsedTokenData = JSON.parse(tokenData);
+  //     const token = parsedTokenData.token;
+
+  //     if (!token) {
+  //       throw new Error("Token not found");
+  //     }
+
+  //     // Completing the quest API call
+  //     const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`Error: ${response.status} ${response.statusText}`);
+  //     }
+  //     // Mark as completed and update UI
+  //     setFollowed(true);
+  //     setShowPopup(false); // Close the pop-up
+  //     toast("Follow Task Completed!");
+
+  //   } catch (error) {
+  //     console.error("Error completing follow quest:", error);
+  //     toast.error("Error completing follow quest: " + error.message);
+  //   } finally {
+  //     setIsUploading(false); // Set uploading state to false
+  //   }
+  // };
+
+
+  // if (loading) {
+  //   return <Loader />;
+  // }
   return (
     <div className="bg-white flex justify-center min-h-screen font-poppins">
       <ToastContainer
@@ -265,7 +340,12 @@ function Tasks() {
         pauseOnHover
         draggable
         theme="dark"
-      />      <div className="w-full bg-black text-white flex flex-col max-w-lg   ">
+      />
+      {loading && (
+        <Loader />
+      )
+      }
+      <div className="w-full bg-black text-white flex flex-col max-w-lg   ">
         <div className="flex-grow mb-4 relative z-0">
           <div className=" px-2 py-6 h-full z-10">
             <Logo />
@@ -273,7 +353,7 @@ function Tasks() {
               EARN
             </p>
 
-            {bannerQuests.length > 0 && <CustomSwiper banners={bannerQuests}
+            {bannerQuests && bannerQuests.length > 0 && <CustomSwiper banners={bannerQuests}
               isVideoWatched={isVideoWatched}
               handleWatchButtonClick={handleWatchButtonClick}
               handleCheckButtonClick={handleCheckButtonClick}
@@ -374,6 +454,12 @@ function Tasks() {
                           >
                             Verify
                           </button>
+                        )}
+                        {/* Render 'Waiting' message */}
+                        {social.status === "waiting" && (
+                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
+                            <span>Waiting</span>
+                          </p>
                         )}
                         {social.status === "completed" && (
                           <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
