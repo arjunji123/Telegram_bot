@@ -31,7 +31,8 @@ const localStorage = new LocalStorage("./scratch");
 
  app.use(
    cors({
-     origin: "https://unitrade-n8sy.onrender.com",
+     origin: "https://unitrade-bot.onrender.com",
+    
      credentials: true,
    })
  );
