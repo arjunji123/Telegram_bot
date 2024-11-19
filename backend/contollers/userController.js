@@ -1526,7 +1526,8 @@ exports.renderTreeView = async (req, res) => {
         users.user_name, 
         user_data.parent_id, 
         user_data.leftchild_id, 
-        user_data.rightchild_id
+        user_data.rightchild_id,
+        user_data.referral_by
       FROM user_data
       JOIN users ON user_data.user_id = users.id
     `;
