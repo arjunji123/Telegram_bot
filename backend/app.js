@@ -22,9 +22,16 @@ const localStorage = new LocalStorage("./scratch");
  //     credentials: true,
  //   })
  // );
+ // app.use(
+ //   cors({
+ //     origin: "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
+ //     credentials: true,
+ //   })
+ // );
+
  app.use(
    cors({
-     origin: "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
+     origin: "https://unitrade-n8sy.onrender.com",
      credentials: true,
    })
  );
