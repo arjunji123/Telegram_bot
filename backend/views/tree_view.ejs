@@ -87,14 +87,14 @@
             .attr("r", 10);
 
         // Add labels for each node
-        node.append("text")
+         node.append("text")
             .attr("dy", 3)
             .attr("x", d => d.children ? -15 : 15)
             .style("text-anchor", d => d.children ? "end" : "start")
             .text(d => {
                 const relationship = d.data.relationship ? ` (${d.data.relationship})` : '';
-                return `${d.data.user_name}${relationship}`;
-                // return `${d.data.user_name} (ID: ${d.data.user_id})${relationship}`;
+                const referralBy = d.data.referral_by ? ` [Referred by: ${d.data.referral_by}]` : '';
+                return `${d.data.user_name}${relationship}${referralBy}`;
             });
 
         // Implement zoom and pan functionality
