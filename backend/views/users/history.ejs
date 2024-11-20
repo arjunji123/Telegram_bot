@@ -1,0 +1,58 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4>User History - <%= userId %></h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>Quest Name</th>
+                            <th>Quest Type</th>
+                            <th>Activity</th>
+                            <th>Screenshot</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% let serialNumber = 1; %>
+                        <% userHistory.forEach(entry => { %>
+                            <tr>
+                                <td><%= serialNumber++ %></td>
+                                <td><%= entry.quest_name || 'Unknown Task' %></td>
+                                <td><%= entry.quest_type || 'N/A' %></td>
+                                <td><%= entry.activity || 'N/A' %></td>
+                                <td>
+                                    <% if (entry.quest_screenshot) { %>
+                                        <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
+                                            <button class="btn btn-info view-image" data-image="/uploads/<%= screenshot %>">
+                                                View Screenshot
+                                            </button>
+                                        <% }) %>
+                                    <% } else { %>
+                                        No screenshot uploaded
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (entry.status === 'completed') { %>
+                                        <span class="badge badge-success">Completed</span>
+                                    <% } else { %>
+                                        <span class="badge badge-warning">Pending</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('.view-image').click(function () {
+        const imageUrl = $(this).data('image');
+        $('#modalImage').attr('src', imageUrl);
+        $('#imageModal').modal('show');
+    });
+    
+</script>
