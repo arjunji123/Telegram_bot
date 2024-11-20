@@ -47,12 +47,12 @@ function App({ Component, pageProps }) {
      
         <Route
             path="/"
-            element={!token ? <Navigate to="/signup" /> : <Navigate to="/home" />}
+            element={!token ? <Navigate to="/" /> : <Navigate to="/home" />}
           />
 
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={token ? <Navigate to="/home" /> : <Signup />} />
+            <Route path="/" element={token ? <Navigate to="/home" /> : <Signup />} />
             <Route path="/payment/:id" element={<Payment />} />
           </Route>
 
