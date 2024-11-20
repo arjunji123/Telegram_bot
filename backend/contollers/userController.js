@@ -1598,3 +1598,45 @@ function filterSubTree(userTree, userId) {
   userTree.forEach(root => findNode(root));
   return targetNode ? [targetNode] : [];
 }
+
+
+
+
+exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
+  try {
+    console.log("Route hit successfully");
+    const userId = req.params.user_id;
+    console.log("User ID:", userId);
+
+    const query = `
+      SELECT qa.*, q.quest_name, q.quest_type, q.activity, u.user_name
+      FROM usercoin_audit qa
+      JOIN users u ON qa.user_id = u.id
+      LEFT JOIN quest q ON qa.quest_id = q.id
+      WHERE qa.user_id = ? AND qa.type = 'quest'
+    `;
+
+    const [userHistory] = await db.query(query, [userId]);
+
+    if (!userHistory.length) {
+      return res.render('users/history', {
+        layout: module_layout,
+        title: `User History - ${userId}`,
+        userId,
+        userHistory: [],
+        message: "No history available for this user."
+      });
+    }
+
+    res.render('users/history', {
+      layout: module_layout,
+      title: `User History - ${userId}`,
+      userId,
+      userHistory
+    });
+  } catch (error) {
+    console.error("Error fetching user history:", error);
+    res.status(500).send("Error fetching data");
+  }
+});
+
