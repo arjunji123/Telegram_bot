@@ -42,7 +42,7 @@ const { success, error } = useSelector((state) => ({
     };
     fetchData();
   }, [dispatch]);
-  const signupLink = `${FRONTEND_URL}/signup?startapp=${refferalData?.referral_code}`;
+  const signupLink = `${FRONTEND_URL}/signup?referral_code=${refferalData?.referral_code}`;
 
   useEffect(() => {
     if (refferalData?.referral_code ) {
