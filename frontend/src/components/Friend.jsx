@@ -64,32 +64,60 @@ const { success, error } = useSelector((state) => ({
 
 
   
+  // const handleShareClick = () => {
+  //   if (referral_code) {
+  //     // Generate the signup link with the referral code
+  //     const signupLink = `${FRONTEND_URL}/?referral_code=${referral_code}`; // Replace with your actual signup page URL
+  
+  //     // Create the message to share
+  //     const message = `Join our app using this referral link: ${signupLink}`;
+  //     const encodedMessage = encodeURIComponent(message);
+      
+  //     // Create the Telegram link
+  //     const telegramAppLink = `tg://msg?text=${encodedMessage}`;
+  //     // Fallback link for Telegram web
+  //     const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
+  
+  //     // Attempt to open the app link first
+  //     const opened = window.open(telegramAppLink, '_blank');
+  
+  //     // If the app link fails to open (opened is null), try the web link
+  //     if (!opened) {
+  //       window.open(telegramWebLink, '_blank');
+  //     }
+  //   } else {
+  //     toast.error("Referral link is not available yet."); // Use toast.error for better UX
+  //   }
+  // };
+  
   const handleShareClick = () => {
     if (referral_code) {
       // Generate the signup link with the referral code
       const signupLink = `${FRONTEND_URL}/?referral_code=${referral_code}`; // Replace with your actual signup page URL
   
-      // Create the message to share
+      // Encode the message for sharing
       const message = `Join our app using this referral link: ${signupLink}`;
       const encodedMessage = encodeURIComponent(message);
-      
-      // Create the Telegram link
-      const telegramAppLink = `tg://msg?text=${encodedMessage}`;
-      // Fallback link for Telegram web
-      const telegramWebLink = `https://telegram.me/share/url?url=${encodedMessage}`;
   
-      // Attempt to open the app link first
-      const opened = window.open(telegramAppLink, '_blank');
+      // Create Telegram deep links
+      const telegramAppLink = `tg://msg?text=${message}`;
+      const telegramWebLink = `https://telegram.me/share/url?url=${encodeURIComponent(signupLink)}&text=${encodedMessage}`;
   
-      // If the app link fails to open (opened is null), try the web link
-      if (!opened) {
-        window.open(telegramWebLink, '_blank');
+      // Try opening the Telegram app link
+      try {
+        const opened = window.open(telegramAppLink, "_blank");
+        if (!opened) {
+          // If the app doesn't open, fallback to Telegram web link
+          window.open(telegramWebLink, "_blank");
+        }
+      } catch (error) {
+        console.error("Error sharing via Telegram:", error);
+        window.open(telegramWebLink, "_blank");
       }
     } else {
       toast.error("Referral link is not available yet."); // Use toast.error for better UX
     }
   };
-  
   
   const handleCopyClick = () => {
     // const referralCode = refferalData && refferalData.referral_code
