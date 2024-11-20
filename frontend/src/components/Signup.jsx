@@ -65,10 +65,11 @@ console.log("params", params.get);
     if (!values.password) {
       toast.error("Password is required");
       return false;
-    } else if (values.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return false;
-    }
+    } 
+    // else if (values.password.length < 8) {
+    //   toast.error("Password must be at least 8 characters");
+    //   return false;
+    // }
 
     if (!values.confirmPassword) {
       toast.error("Confirm password is required");
@@ -81,23 +82,67 @@ console.log("params", params.get);
     return true; // Return true if all validations pass
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+    
+  //   const isValid = validateForm(values);
+  //   console.log('values', values);
+  //   if (!isValid) return; // Exit if validation fails
+  //   setLoading(true);
+  //   try {
+  //     const response = await axios.post(
+  //       `${BACKEND_URL}/api/v1/api-register`,
+  //       values
+  //     );
+  //     console.log("Server Response:", response);
+      
+  //     // Assuming the generated ID is in response.data.id
+  //     const userId = response.data.user.id;
+  // console.log('userId', userId)
+  //     toast.success("Registration successful!");
+  
+  //     setTimeout(() => {
+  //       // Redirect to the Payment page with the generated userId
+  //       navigate(`/payment/${userId}`);
+  //     }, 2000);
+  //   } catch (err) {
+  //     if (err.response && err.response.status === 400) {
+  //       const backendError = err.response.data.error;
+  //       toast.error(backendError); // Display the backend error message
+  //     } else {
+  //       console.log("Axios Error:", err);
+  //       toast.error("An error occurred during registration. Please try again.");
+  //     }
+  //   }
+  //   finally {
+  //     setLoading(false); // Hide loader after the request completes
+  //   }
+  // };
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const isValid = validateForm(values);
+  
+    const isValid = validateForm(values); // Assuming this is your form validation logic
     console.log('values', values);
-    if (!isValid) return; // Exit if validation fails
+  
+    if (!isValid) {
+      toast.error("Please fill out the required fields correctly.");
+      return; // Exit if validation fails
+    }
+  
     setLoading(true);
+  
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/api-register`,
         values
       );
+  
       console.log("Server Response:", response);
-      
-      // Assuming the generated ID is in response.data.id
-      const userId = response.data.user.id;
-  console.log('userId', userId)
+  
+      const userId = response.data.user.id; // Assuming the user ID is in the response
+      console.log('userId', userId);
+  
       toast.success("Registration successful!");
   
       setTimeout(() => {
@@ -105,19 +150,45 @@ console.log("params", params.get);
         navigate(`/payment/${userId}`);
       }, 2000);
     } catch (err) {
-      if (err.response && err.response.status === 400) {
-        const backendError = err.response.data.error;
-        toast.error(backendError); // Display the backend error message
+      setLoading(false); // Make sure to hide the loader in case of error
+  
+      if (err.response) {
+        // If the error is from the backend
+        if (err.response.data && !err.response.data.success) {
+          // Check if the error contains a specific message or an array of messages
+          const errorMessages = err.response.data.error;
+          
+          if (typeof errorMessages === 'string') {
+            // If the error is a string (e.g., "Mobile number already exists")
+            toast.error(errorMessages);
+          } else if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+            // If the error is an array of messages
+            toast.error(errorMessages[0]);
+          } else {
+            toast.error("An unknown error occurred.");
+          }
+        } else if (err.response.status === 404) {
+          // Handle 404 error (Not Found)
+          toast.error("Requested resource not found.");
+        } else if (err.response.status === 500) {
+          // Handle 500 error (Server Error)
+          toast.error("Server error occurred. Please try again later.");
+        } else {
+          // Handle other status codes (e.g., 401, 403)
+          const errorMessage = err.response.data.message || 'An unknown error occurred.';
+          toast.error(errorMessage);
+        }
       } else {
+        // Network or other errors (e.g., timeout, no internet)
         console.log("Axios Error:", err);
-        toast.error("An error occurred during registration. Please try again.");
+        toast.error("Network error. Please check your connection or try again later.");
       }
+    } finally {
+      setLoading(false); // Hide the loading spinner after the request completes
     }
   };
-  if (loading) {
-    return <Loader />;
-  }
-
+  
+  
 
   return (
     <div className="bg-black flex justify-center items-center min-h-screen overflow-y-auto ">
@@ -225,7 +296,7 @@ console.log("params", params.get);
               name="referral_by"
               value={values.referral_by}
               onChange={handleInput}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 uppercase bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Referral By"
             />
           </div> 
@@ -235,12 +306,36 @@ console.log("params", params.get);
             <button
               type="submit"
               className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+              disabled={loading} // Disable the button when loading
             >
-              Sign Up
+              
+              {loading ? (
+              <div className="flex justify-center items-center">
+                <div className="spinner"></div> {/* Custom spinner */}
+              </div>
+            ) : (
+              'Sign Up' // Normal button text
+            )}
             </button>
           </div>
 
         </form>
+       {/* CSS for Custom Spinner */}
+       <style jsx>{`
+        .spinner {
+          border: 4px solid #f3f3f3; /* Light background */
+          border-top: 4px solid #000000; /* Black color */
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
       </div>
 
       {/* Footer Section */}

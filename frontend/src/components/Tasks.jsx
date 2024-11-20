@@ -232,21 +232,6 @@ function Tasks() {
         }
       );
       dispatch(fetchQuestHistory());
-      // 2. Complete the follow quest (your function logic)
-      // const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error(`Error: ${response.status} ${response.statusText}`);
-      // }
-
-      // Mark as completed and update UI
       setFollowed(true);
       setShowPopup(false); // Close the pop-up
       toast("Follow Task Completed!");
@@ -259,77 +244,7 @@ function Tasks() {
     }
   };
 
-  // const handleSubmit = async (task, questId) => {
-  //   console.log("questIdquestId", questId);
 
-  //   // Basic validations
-  //   if (!screenshot) {
-  //     toast('Please upload a screenshot!');
-  //     return;
-  //   }
-
-  //   if (!questId) {
-  //     toast('Quest ID is required!');
-  //     return;
-  //   }
-
-  //   if (!task) {
-  //     toast('Task ID is required!');
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsUploading(true);
-
-  //     // 1. Upload the screenshot
-  //     const formData = new FormData();
-  //     formData.append('screenshot', screenshot);
-
-  //     await axios.post(`${BACKEND_URL}/api/v1/upload-quest-screenshot/${questId}`, formData);
-
-  //     // 2. Complete the follow quest (your function logic)
-  //     const tokenData = localStorage.getItem("user");
-  //     if (!tokenData) {
-  //       throw new Error("No token data found in localStorage");
-  //     }
-
-  //     const parsedTokenData = JSON.parse(tokenData);
-  //     const token = parsedTokenData.token;
-
-  //     if (!token) {
-  //       throw new Error("Token not found");
-  //     }
-
-  //     // Completing the quest API call
-  //     const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify({ quest_id: questId }), // Pass questId for completing the quest
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`Error: ${response.status} ${response.statusText}`);
-  //     }
-  //     // Mark as completed and update UI
-  //     setFollowed(true);
-  //     setShowPopup(false); // Close the pop-up
-  //     toast("Follow Task Completed!");
-
-  //   } catch (error) {
-  //     console.error("Error completing follow quest:", error);
-  //     toast.error("Error completing follow quest: " + error.message);
-  //   } finally {
-  //     setIsUploading(false); // Set uploading state to false
-  //   }
-  // };
-
-
-  // if (loading) {
-  //   return <Loader />;
-  // }
   return (
     <div className="bg-white flex justify-center min-h-screen font-poppins">
       <ToastContainer
@@ -364,9 +279,9 @@ function Tasks() {
             <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">
               {" "}
 
-              COIN QUESTS 0/10
+              COIN QUESTS
             </h1>
-            <div className="overflow-y-auto max-h-[70vh] mb-2">
+            <div className="overflow-y-auto max-h-[70vh] min-h-[70vh] mb-2 scrollbar-thin scrollbar-thumb-gray-500">
               <div className="mt-4">
                 {rows &&
                   rows.map((row, index) => (
@@ -376,10 +291,9 @@ function Tasks() {
                     >
                       <div className="flex items-center">
                         <img className="w-8 h-8 mr-4" src={row.icon} alt="" />
-
                         <div>
-                          <h3 className="text-sm capitalize  text-white font-bold">{row.title}</h3>
-                          <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
+                          <h3 className="text-sm capitalize text-white font-bold">{row.title}</h3>
+                          <p className="text-xs capitalize text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
                         </div>
                       </div>
 
@@ -408,18 +322,18 @@ function Tasks() {
                             <button
                               onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
                               className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                              disabled={false} // Make sure the button is not disabled until the time is complete
+                              disabled={false}
                             >
                               Verify
                             </button>
                           )}
                         </>
                       )}
-
                     </div>
                   ))}
                 <hr className="border-2 border-gray-50 w-2/3 mx-auto " />
               </div>
+
               <div className="mt-4">
                 {socials &&
                   socials.map((social, index) => (
@@ -428,11 +342,11 @@ function Tasks() {
                         <div className="flex items-center">
                           <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
                           <div>
-                            <h3 className="text-sm capitalize  text-white font-bold">{social.title}</h3>
-                            <p className="text-xs capitalize  text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
+                            <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
+                            <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
                           </div>
-
                         </div>
+
                         {social.status === "not_completed" && !followed[social.taskKey] && (
                           <a
                             href={social.socialUrl}
@@ -447,10 +361,7 @@ function Tasks() {
                         {social.status === "not_completed" && followed[social.taskKey] && (
                           <button
                             onClick={() => togglePopup(social.taskKey, social.questId)}
-                            className={`bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold ${social.status === "not_completed"[social.taskKey]
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-[#282828]"
-                              }`}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
                           >
                             Verify
                           </button>
@@ -466,13 +377,105 @@ function Tasks() {
                             <FaRegCheckCircle size={20} className="text-[#606060]" />
                           </p>
                         )}
+                      </div>
+                      <hr className="border-2 border-white w-2/3 mx-auto" />
+                    </div>
+                  ))}
+                {socials &&
+                  socials.map((social, index) => (
+                    <div key={index}>
+                      <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
+                        <div className="flex items-center">
+                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
+                          <div>
+                            <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
+                            <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
+                          </div>
+                        </div>
 
+                        {social.status === "not_completed" && !followed[social.taskKey] && (
+                          <a
+                            href={social.socialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleFollowButtonClick(social.taskKey)}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                          >
+                            <span>Follow</span>
+                          </a>
+                        )}
+                        {social.status === "not_completed" && followed[social.taskKey] && (
+                          <button
+                            onClick={() => togglePopup(social.taskKey, social.questId)}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                          >
+                            Verify
+                          </button>
+                        )}
+                        {/* Render 'Waiting' message */}
+                        {social.status === "waiting" && (
+                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
+                            <span>Waiting</span>
+                          </p>
+                        )}
+                        {social.status === "completed" && (
+                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
+                            <FaRegCheckCircle size={20} className="text-[#606060]" />
+                          </p>
+                        )}
+                      </div>
+                      <hr className="border-2 border-white w-2/3 mx-auto" />
+                    </div>
+                  ))}
+                {socials &&
+                  socials.map((social, index) => (
+                    <div key={index}>
+                      <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
+                        <div className="flex items-center">
+                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
+                          <div>
+                            <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
+                            <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
+                          </div>
+                        </div>
+
+                        {social.status === "not_completed" && !followed[social.taskKey] && (
+                          <a
+                            href={social.socialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleFollowButtonClick(social.taskKey)}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                          >
+                            <span>Follow</span>
+                          </a>
+                        )}
+                        {social.status === "not_completed" && followed[social.taskKey] && (
+                          <button
+                            onClick={() => togglePopup(social.taskKey, social.questId)}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                          >
+                            Verify
+                          </button>
+                        )}
+                        {/* Render 'Waiting' message */}
+                        {social.status === "waiting" && (
+                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
+                            <span>Waiting</span>
+                          </p>
+                        )}
+                        {social.status === "completed" && (
+                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
+                            <FaRegCheckCircle size={20} className="text-[#606060]" />
+                          </p>
+                        )}
                       </div>
                       <hr className="border-2 border-white w-2/3 mx-auto" />
                     </div>
                   ))}
               </div>
             </div>
+
 
           </div>
         </div>

@@ -43,32 +43,53 @@ const getUserDataFromLocalStorage = () => {
 // Login action
 export const login = (credentials) => async (dispatch) => {
   try {
-    console.log('Logging in with:', credentials); // Log credentials for debugging
+    // Make the API request to the backend
     const response = await fetcher.post(`${BACKEND_URL}/api/v1/api-login`, credentials);
 
-    console.log('API response:', response); // Log API response
-
+    // If successful and token received, proceed as usual
     if (response?.token) {
-      setToken(response.token); // Store the token in cookies
-      const userData = { token: response.token, ...response }; // Create user data object
+      setToken(response.token); // Store the token in cookies or localStorage
+      const userData = { token: response.token, ...response };
       storeUserData(userData); // Save user data in localStorage
-      setToken(userData)
       dispatch({
         type: LOGIN_SUCCESS,
         payload: userData,
       });
     } else {
-      throw new Error('Token not received from the server.');
+      // Handle case where token is not returned, throw an error with the message
+      throw new Error(response?.error || "Token not received from the server.");
     }
   } catch (error) {
-    console.error('Login failed:', error.message); // Log error
+    // Check if the error message is an object or a string
+    let errorMessage = "An unknown error occurred."; // Default error message
+
+    // If the error is an object (from backend response), access the error message
+    if (error?.message && error.message.includes("Invalid mobile number or password")) {
+      // Error message is in the string, so we extract it
+      errorMessage = JSON.parse(error.message)?.error || error.message;
+    } 
+    else if (error?.message && error.message.includes("Your account is deactivated. Please contact support.")) {
+       // Error message is in the string, so we extract it
+       errorMessage = JSON.parse(error.message)?.error || error.message;
+    }
+    else if (error?.message) {
+      errorMessage = error.message; // Use the error message from the catch block
+    }
+
+    // Log the error for debugging
+    console.error("Login failed:", errorMessage);
+
+    // Dispatch the error message to Redux store
     dispatch({
       type: LOGIN_FAILURE,
-      payload: error.message,
+      payload: errorMessage, // Send only the error message to the store
     });
-    throw error; // Rethrow error to allow handling in components
+
+    // Throw only the error message for handling in the component
+    throw new Error(errorMessage); // Pass only the error message to the component
   }
 };
+
 
 // Signup action
 export const signUp = (credentials) => async (dispatch) => {

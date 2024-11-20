@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsArrowLeft, BsPencil, BsFillSaveFill } from "react-icons/bs";
 import { useDropzone } from "react-dropzone";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMeData } from "../../store/actions/homeActions";
- import { updateUserProfile  } from "../../store/actions/userActions";
- import ToastNotification from "./Toast";
+import { updateUserProfile } from "../../store/actions/userActions";
+import ToastNotification from "./Toast";
 
 function Profile() {
   const navigate = useNavigate();
@@ -20,11 +20,12 @@ function Profile() {
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [formData, setFormData] = useState({
-    user_name: '',
-    email: '',
-    upi_id: '',
-    user_photo: '', 
+    user_name: "",
+    email: "",
+    upi_id: "",
+    user_photo: "",
   });
+
   useEffect(() => {
     dispatch(fetchMeData());
   }, [dispatch]);
@@ -32,13 +33,14 @@ function Profile() {
   useEffect(() => {
     if (userData) {
       setFormData({
-        user_name: userData.user_name || '',
-        email: userData.email || '',
-        upi_id: userData.upi_id || '',
-        user_photo: userData.user_photo || '',
+        user_name: userData.user_name || "",
+        email: userData.email || "",
+        upi_id: userData.upi_id || "",
+        user_photo: userData.user_photo || "",
       });
     }
   }, [userData]);
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".gif"] },
     onDrop: (acceptedFiles) => {
@@ -54,59 +56,53 @@ function Profile() {
   });
 
   const handleUpdateProfile = async () => {
-    setLoading(true); 
+    setLoading(true);
     const updatedFormData = new FormData();
-  
+
     for (const key in formData) {
-      if (formData[key] && key !== 'user_photo') {
+      if (formData[key] && key !== "user_photo") {
         updatedFormData.append(key, formData[key]);
       }
     }
-  
+
     if (image && image instanceof File) {
-      updatedFormData.append('user_photo', image);
+      updatedFormData.append("user_photo", image);
     }
-  
+
     // Check the contents of FormData before dispatching
     console.log("Final FormData to be sent:");
     for (let [key, value] of updatedFormData.entries()) {
       console.log(key, value);
     }
-   // Simulate a delay (e.g., making an API call)
- 
-   try {
-    // Await the async actions (API call)
-    await dispatch(updateUserProfile(updatedFormData));
-    dispatch(fetchMeData());
 
-    setToastMessage("Profile updated successfully!");
-    setShowToast(true);
-    // alert("Profile updated successfully!");
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    setShowToast(true);
-    setToastMessage("There was an error updating your profile.");
-  } finally {
-    setLoading(false); // Hide loader after the request completes
-  }
+    try {
+      // Await the async actions (API call)
+      await dispatch(updateUserProfile(updatedFormData));
+      dispatch(fetchMeData());
+
+      setToastMessage("Profile updated successfully!");
+      setShowToast(true);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setShowToast(true);
+      setToastMessage("There was an error updating your profile.");
+    } finally {
+      setLoading(false); // Hide loader after the request completes
+    }
   };
-  
-  
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
-      ...formData,  // This should be formData, not setFormData
+      ...formData,
       [name]: value,
     });
-    console.log('Updated FormData', formData);  // This should reflect the updated state
+    console.log("Updated FormData", formData);
   };
+
   useEffect(() => {
-    console.log('Updated FormData:', formData);
-  }, [formData]); 
-
-
+    console.log("Updated FormData:", formData);
+  }, [formData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -168,18 +164,19 @@ function Profile() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
   }, []);
+
   return (
     <div className="relative min-h-screen flex justify-center items-center font-poppins bg-black overflow-hidden">
-      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />  
-    <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
 
-    {/* Profile Section */}
-    <section className="relative z-10 w-full max-w-sm bg-black text-white shadow-lg rounded-lg">
-      <div className="p-4 border-b border-gray-700">
-        <div className="flex flex-col items-center">
+      <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+
+      {/* Profile Section */}
+      <section className="relative z-10 w-full max-w-md bg-black text-white shadow-lg rounded-lg px-4 py-6">
+        <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div    {...getRootProps()} className="cursor-pointer">
-            <input {...getInputProps()} />
+            <div {...getRootProps()} className="cursor-pointer">
+              <input {...getInputProps()} />
               <img
                 src={imagePreview || formData.user_photo || "/src/Img/images.png"}
                 alt="Profile"
@@ -197,51 +194,50 @@ function Profile() {
           </div>
           <h1 className="text-lg font-semibold mt-4">{userData?.user_name}</h1>
         </div>
-      </div>
 
-      {/* Form Section */}
-      <div className="p-4 space-y-4">
-        <h2 className="text-gray-300">Personal Info</h2>
+        {/* Form Section */}
+        <div className="space-y-4 mt-6">
+          <h2 className="text-gray-300">Personal Info</h2>
 
-        <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full bg-transparent focus:outline-none text-white"
-            placeholder="Enter Email Address"
-          />
-        </div>
+          <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full bg-transparent focus:outline-none text-white"
+              placeholder="Enter Email Address"
+            />
+          </div>
 
-        <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
-          <input
-            type="text"
-            name="user_name"
-            value={formData.user_name}
-            onChange={handleInputChange}
-            className="w-full bg-transparent focus:outline-none text-white"
-            placeholder="Enter Full Name"
-          />
-        </div>
+          <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
+            <input
+              type="text"
+              name="user_name"
+              value={formData.user_name}
+              onChange={handleInputChange}
+              className="w-full bg-transparent focus:outline-none text-white"
+              placeholder="Enter Full Name"
+            />
+          </div>
 
-        <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
-          <input
-            type="text"
-            name="upi_id"
-            onChange={handleInputChange}
-            value={formData.upi_id}
-            className="w-full bg-transparent focus:outline-none text-white"
-            placeholder="Enter UPI ID"
-          />
-        </div>
+          <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
+            <input
+              type="text"
+              name="upi_id"
+              onChange={handleInputChange}
+              value={formData.upi_id}
+              className="w-full bg-transparent focus:outline-none text-white"
+              placeholder="Enter UPI ID"
+            />
+          </div>
 
-        <button
-      onClick={handleUpdateProfile}
-      className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-600 transition flex items-center justify-center"
-      disabled={loading} // Disable the button when loading
-    >
-      {loading ? (
+          <button
+            onClick={handleUpdateProfile}
+            className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-600 transition flex items-center justify-center"
+            disabled={loading} // Disable the button when loading
+          >
+            {loading ? (
         <svg
           className="animate-spin h-5 w-5 text-gray-600"
           xmlns="http://www.w3.org/2000/svg"
@@ -259,12 +255,13 @@ function Profile() {
       ) : (
         'Update'
       )}
-    </button>
-      </div>
-    </section>
-    <Footer />
-  </div>
-  
+          </button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 }
 

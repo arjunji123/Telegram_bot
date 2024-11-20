@@ -8,6 +8,7 @@ import {  fetchReffralData  } from "../../store/actions/homeActions";
 import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
+import ToastNotification from "./Toast";
 import { FRONTEND_URL } from '../config';
 import Loader from '../components/Loader';
 
@@ -28,7 +29,8 @@ const { success, error } = useSelector((state) => ({
 }));
 
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
-
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
   useEffect(() => {
     // Fetch user and coin data on component mount
     const fetchData = async () => {
@@ -123,9 +125,10 @@ const { success, error } = useSelector((state) => ({
     // const referralCode = refferalData && refferalData.referral_code
     if (signupLink) {
       navigator.clipboard.writeText(signupLink);
-      // toast("Referral link copied!");
+      setShowToast(true);
+      setToastMessage("Referral link copied!");
     } else {
-      // toast("Referral link is not available yet.");
+      setToastMessage("Referral link is not available yet.");
     }
   };
 
@@ -137,15 +140,7 @@ const { success, error } = useSelector((state) => ({
   return (
 
     <div className="bg-white flex justify-center min-h-screen">
-    <ToastContainer
- position="top-right"
- autoClose={5000}
- hideProgressBar={false}
- closeOnClick
- pauseOnHover
- draggable
- theme="dark"
-/>
+      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />  
 {loading && (
          <Loader />
     )

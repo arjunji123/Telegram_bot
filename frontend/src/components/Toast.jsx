@@ -1,5 +1,6 @@
 // ToastNotification.js
 import React, { useState, useEffect } from "react";
+import { FaRegCheckCircle } from "react-icons/fa";
 
 const ToastNotification = ({ message, show, setShow }) => {
   useEffect(() => {
@@ -34,7 +35,8 @@ const ToastNotification = ({ message, show, setShow }) => {
         transition: "opacity 0.3s ease-in-out",
       }}
     >
-      <div
+      <FaRegCheckCircle size={16} className="text-[#E5E5E5]"/>
+      {/* <div
         style={{
           width: "20px",
           height: "20px",
@@ -46,7 +48,7 @@ const ToastNotification = ({ message, show, setShow }) => {
         }}
       >
         <span style={{ fontSize: "12px", color: "#333" }}>✓</span>
-      </div>
+      </div> */}
       <span>{message}</span>
     </div>
   );

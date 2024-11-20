@@ -18,26 +18,48 @@ function Login() {
   const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setErrors(''); // Clear previous error message
+  //   // setLoading(true); // Show loader when upload starts
+  //   try {
+  //     await dispatch(login({ mobile, password }));
+  //     setToastMessage("Login successful!");
+  //     setShowToast(true);
+  //     setTimeout(() => {
+  //       // setLoading(false); // Hide loader after success
+  //       navigate("/home");
+  //     }, 2000);
+  //   } catch (error) {
+  //     const backendError = error.error || "Your account is deactivated. Please contact support.";
+  //     setErrors(backendError); // Set error message from backend response
+  //     setToastMessage(backendError);
+  //     setShowToast(true);
+  //   }
+  // };
+
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrors(''); // Clear previous error message
-    // setLoading(true); // Show loader when upload starts
+    setErrors(""); // Clear previous error message
+  
     try {
       await dispatch(login({ mobile, password }));
       setToastMessage("Login successful!");
       setShowToast(true);
       setTimeout(() => {
-        // setLoading(false); // Hide loader after success
         navigate("/home");
       }, 2000);
     } catch (error) {
-      const backendError = error.error || "Your account is deactivated. Please contact support.";
-      setErrors(backendError); // Set error message from backend response
-      setToastMessage(backendError);
+      const errorMessage = error.message || "An unknown error occurred."; // Get the error message from the thrown error
+
+      console.error("Caught error:", errorMessage); // Log error for debugging
+      setErrors(errorMessage); // Display error message in the UI
+      setToastMessage(errorMessage); // Show error message in toast
       setShowToast(true);
     }
   };
-
+  
   const [firstName, setFirstName] = useState("");
 
   useEffect(() => {
