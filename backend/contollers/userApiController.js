@@ -16,7 +16,7 @@ const registerSchema = Joi.object({
   user_name: Joi.string().required(),
   email: Joi.string().email().required(),
   mobile: Joi.string().length(10).required(), // Assuming mobile is a 10-digit number
-  password: Joi.string().min(8).required(),
+  password: Joi.string().required(),
   user_type: Joi.string().valid("user", "admin").required(), // Adjust as needed
   // referral_by: Joi.string().optional(), // If this field is optional
 });
