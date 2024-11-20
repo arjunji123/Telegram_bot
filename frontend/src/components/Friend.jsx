@@ -67,7 +67,7 @@ const { success, error } = useSelector((state) => ({
   const handleShareClick = () => {
     if (referral_code) {
       // Generate the signup link with the referral code
-      const signupLink = `${FRONTEND_URL}/signup?referral_code=${referral_code}`; // Replace with your actual signup page URL
+      const signupLink = `${FRONTEND_URL}/signup?startapp=${referral_code}`; // Replace with your actual signup page URL
   
       // Create the message to share
       const message = `Join our app using this referral link: ${signupLink}`;

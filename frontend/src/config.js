@@ -6,5 +6,5 @@
 
 
  export const FRONTEND_URL =
- "https://t.me/TheUnitadeHub_bot/start";
+ "https://t.me/TheUnitadeHub_bot";
   //"http://localhost:5173"
