@@ -1203,12 +1203,21 @@ exports.transferPendingCoinsToTotal = catchAsyncErrors(
       const updatedPendingCoins = userPendingCoins - reduceCoinRate; // Updated pending coins after deduction
       const earnCoins = reduceCoinRate; // Earn coins is the reduceCoinRate that is transferred
 
+         const title = "Tap-Tap";
+      const description = "Tap-Tap";
+      const dateEntered = new Date().toISOString(); // Current date in ISO format
+      
       // Insert a new row into usercoin_audit with the updated values
-      await db.query(
-        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin) VALUES (?, ?, ?)",
-        [user_id, updatedPendingCoins, earnCoins]
-      );
+      // await db.query(
+      //   "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin) VALUES (?, ?, ?)",
+      //   [user_id, updatedPendingCoins, earnCoins]
+      // );
 
+ await db.query(
+        "INSERT INTO usercoin_audit (user_id, pending_coin, earn_coin, title, description, date_entered) VALUES (?, ?, ?, ?, ?, ?)",
+        [user_id, updatedPendingCoins, earnCoins, title, description, dateEntered]
+      );
+      
       // Step 5: Fetch updated values for response
       const updatedPendingCoinsResult = await db.query(
         "SELECT pending_coin FROM user_data WHERE user_id = ?",
