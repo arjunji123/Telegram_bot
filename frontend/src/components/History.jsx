@@ -65,7 +65,7 @@ useEffect(() => {
         
       
         <div className="flex-grow py-4 h-[400px] overflow-y-auto hide-scrollbar">
-  {/* Sample Data by Date */}
+
   {Object.keys(groupedTransactions).length > 0 ? (
     Object.keys(groupedTransactions).map((date) => (
       <div key={date} className="mb-6">

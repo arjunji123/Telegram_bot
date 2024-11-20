@@ -6,6 +6,7 @@ import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMeData } from "../../store/actions/homeActions";
  import { updateUserProfile  } from "../../store/actions/userActions";
+ import ToastNotification from "./Toast";
 
 function Profile() {
   const navigate = useNavigate();
@@ -15,11 +16,14 @@ function Profile() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const canvasRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
   const [formData, setFormData] = useState({
     user_name: '',
     email: '',
     upi_id: '',
-    user_photo: null, // Store the file in state
+    user_photo: '', 
   });
   useEffect(() => {
     dispatch(fetchMeData());
@@ -50,6 +54,7 @@ function Profile() {
   });
 
   const handleUpdateProfile = async () => {
+    setLoading(true); 
     const updatedFormData = new FormData();
   
     for (const key in formData) {
@@ -67,10 +72,23 @@ function Profile() {
     for (let [key, value] of updatedFormData.entries()) {
       console.log(key, value);
     }
-  
-    // Wait for the profile update to complete before fetching data
+   // Simulate a delay (e.g., making an API call)
+ 
+   try {
+    // Await the async actions (API call)
     await dispatch(updateUserProfile(updatedFormData));
     dispatch(fetchMeData());
+
+    setToastMessage("Profile updated successfully!");
+    setShowToast(true);
+    // alert("Profile updated successfully!");
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    setShowToast(true);
+    setToastMessage("There was an error updating your profile.");
+  } finally {
+    setLoading(false); // Hide loader after the request completes
+  }
   };
   
   
@@ -152,7 +170,7 @@ function Profile() {
   }, []);
   return (
     <div className="relative min-h-screen flex justify-center items-center font-poppins bg-black overflow-hidden">
-    {/* Sparkling Background */}
+      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />  
     <canvas ref={canvasRef} className="absolute inset-0 z-0" />
 
     {/* Profile Section */}
@@ -219,11 +237,29 @@ function Profile() {
         </div>
 
         <button
-          onClick={handleUpdateProfile}
-          className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-600 transition"
+      onClick={handleUpdateProfile}
+      className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-600 transition flex items-center justify-center"
+      disabled={loading} // Disable the button when loading
+    >
+      {loading ? (
+        <svg
+          className="animate-spin h-5 w-5 text-gray-600"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          Update
-        </button>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M12 4v2m0 12v2m4-10h2m-12 0H4m6-6l1.5 1.5M9 5l1.5-1.5m6 6l1.5-1.5m-6 6l1.5 1.5"
+          />
+        </svg>
+      ) : (
+        'Update'
+      )}
+    </button>
       </div>
     </section>
     <Footer />

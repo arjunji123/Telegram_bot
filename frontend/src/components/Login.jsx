@@ -21,13 +21,13 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors(''); // Clear previous error message
-    setLoading(true); // Show loader when upload starts
+    // setLoading(true); // Show loader when upload starts
     try {
       await dispatch(login({ mobile, password }));
       setToastMessage("Login successful!");
       setShowToast(true);
       setTimeout(() => {
-        setLoading(false); // Hide loader after success
+        // setLoading(false); // Hide loader after success
         navigate("/home");
       }, 2000);
     } catch (error) {
@@ -126,9 +126,9 @@ function Login() {
         <div className="bg-[#111113] py-4 sm:py-6 text-center rounded-b-2xl">
           <p className="text-xs sm:text-sm text-[#909090]">
             New to Unitrade? 
-            <a href="/signup" className="text-white font-semibold hover:underline ml-1">
-              Create an Account
-            </a>
+            <Link to="/signup" className="text-white font-semibold hover:underline ml-1">
+            Create an Account
+          </Link>
           </p>
         </div>
       </div>

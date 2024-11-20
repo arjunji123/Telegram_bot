@@ -41,7 +41,7 @@ function Tasks() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await dispatch(fetchAPIData("apiQuests")); // Additional API call (if needed)
+        // await dispatch(fetchAPIData("apiQuests")); // Additional API call (if needed)
         await dispatch(fetchQuestHistory());
 
         setLoading(false); // Set loading to false after data is fetched
@@ -159,7 +159,7 @@ function Tasks() {
       });
 
       if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
-
+      dispatch(fetchQuestHistory());
       setHasWatched(prev => ({ ...prev, [task]: true }));
       toast("Task Completed!");
     } catch (error) {
@@ -231,7 +231,7 @@ function Tasks() {
           },
         }
       );
-
+      dispatch(fetchQuestHistory());
       // 2. Complete the follow quest (your function logic)
       // const response = await fetch(`${BACKEND_URL}/api/v1/api-quests/complete-quest`, {
       //   method: "POST",
