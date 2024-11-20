@@ -43,6 +43,7 @@ const {
   approveQuest,
   disapproveQuest,
   renderTreeView,
+  getoneUserHistory,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -110,6 +111,11 @@ router
 router
   .route("/" + module_slug + "/edit/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), editUserForm);
+
+ router
+  .route("/" + module_slug + "/user-history/:user_id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getoneUserHistory);
+
 
 router
   .route("/" + module_slug + "/update/:id")
