@@ -235,14 +235,14 @@ function generateSlug(title) {
 // })
 
 
-function formatDate(date) {
-    return moment(date).format('YYYY-MM-DD');
-}
+// function formatDate(date) {
+//     return moment(date).format('YYYY-MM-DD');
+// }
 
-// Format time as 'hh:mm A' (12-hour format with AM/PM)
-function formatTime(date) {
-    return moment(date).format('hh:mm A');
-}
+// // Format time as 'hh:mm A' (12-hour format with AM/PM)
+// function formatTime(date) {
+//     return moment(date).format('hh:mm A');
+// }
 
 exports.apiGetAllRecords = catchAsyncErrors(async(req, res, next) => {
 
