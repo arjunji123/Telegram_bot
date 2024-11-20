@@ -414,13 +414,38 @@ exports.checkAdminLoginOrDashboard = catchAsyncErrors(
   }
 );
 
+// exports.dashboard = catchAsyncErrors(async (req, res, next) => {
+//   res.render("users/dashboard", {
+//     layout: "layouts/main",
+//     title: "Dashboard", // Set a title for the page if needed
+//     user: req.user, // Pass user data if required
+//   });
+// });
+
 exports.dashboard = catchAsyncErrors(async (req, res, next) => {
+  // Fetch total number of users, quests, and companies from the correct tables
+  const [totalUsersResult] = await db.query('SELECT COUNT(*) AS count FROM users');
+  const [totalQuestsResult] = await db.query('SELECT COUNT(*) AS count FROM quest');
+
+  // Check the correct table name for companies (e.g., company_data or companies)
+  const [totalCompaniesResult] = await db.query('SELECT COUNT(*) AS count FROM company_data'); // or 'companies'
+
+  // Extract the counts from the results
+  const totalUsers = totalUsersResult[0].count;
+  const totalQuests = totalQuestsResult[0].count;
+  const totalCompanies = totalCompaniesResult[0].count;
+
+  // Render the dashboard with the fetched data
   res.render("users/dashboard", {
     layout: "layouts/main",
-    title: "Dashboard", // Set a title for the page if needed
-    user: req.user, // Pass user data if required
+    title: "Dashboard",
+    user: req.user, // Pass user data if needed
+    totalUsers,
+    totalQuests,
+    totalCompanies
   });
 });
+
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   // Fetch user data along with pay_image in a single query using LEFT JOIN
