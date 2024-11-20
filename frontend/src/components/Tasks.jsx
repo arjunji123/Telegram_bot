@@ -247,252 +247,149 @@ function Tasks() {
 
   return (
     <div className="bg-white flex justify-center min-h-screen font-poppins">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="dark"
-      />
-      {loading && (
-        <Loader />
-      )
-      }
-      <div className="w-full bg-black text-white flex flex-col max-w-lg   ">
-        <div className="flex-grow mb-4 relative z-0">
-          <div className=" px-2 py-6 h-full z-10">
-            <Logo />
-            <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">
-              EARN
-            </p>
-
-            {bannerQuests && bannerQuests.length > 0 && <CustomSwiper banners={bannerQuests}
+    <ToastContainer
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      closeOnClick
+      pauseOnHover
+      draggable
+      theme="dark"
+    />
+    {loading && <Loader />}
+    
+    <div className="w-full bg-black text-white flex flex-col max-w-lg mx-4 sm:mx-auto">
+      <div className="flex-grow mb-4 relative z-0">
+        <div className="px-2 py-6 h-full z-10">
+          <Logo />
+          <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
+  
+          {bannerQuests && bannerQuests.length > 0 && (
+            <CustomSwiper 
+              banners={bannerQuests}
               isVideoWatched={isVideoWatched}
               handleWatchButtonClick={handleWatchButtonClick}
               handleCheckButtonClick={handleCheckButtonClick}
               handleFollowButtonClick={handleFollowButtonClick}
               followed={followed}
               togglePopup={togglePopup}
-            />}
-            <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">
-              {" "}
-
-              COIN QUESTS
-            </h1>
-            <div className="overflow-y-auto max-h-[70vh] min-h-[70vh] mb-2 scrollbar-thin scrollbar-thumb-gray-500">
-              <div className="mt-4">
-                {rows &&
-                  rows.map((row, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-black py-2 px-4 font-poppins"
-                    >
+            />
+          )}
+  
+          <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">COIN QUESTS</h1>
+  
+          <div className="overflow-y-auto max-h-[70vh] min-h-[70vh] mb-2 scrollbar-thin scrollbar-thumb-gray-500">
+            <div className="mt-4">
+              {rows &&
+                rows.map((row, index) => (
+                  <div key={index} className="flex items-center justify-between bg-black py-2 px-4 font-poppins">
+                    <div className="flex items-center">
+                      <img className="w-8 h-8 mr-4" src={row.icon} alt="" />
+                      <div>
+                        <h3 className="text-sm capitalize text-white font-bold">{row.title}</h3>
+                        <p className="text-xs capitalize text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
+                      </div>
+                    </div>
+  
+                    {row.status === "completed" ? (
+                      <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
+                        <FaRegCheckCircle size={20} className="text-[#606060]" />
+                      </p>
+                    ) : (
+                      <>
+                        {!watchTimes[row.taskKey] && (
+                          <a
+                            href={row.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                          >
+                            <span>Watch</span>
+                          </a>
+                        )}
+  
+                        {watchTimes[row.taskKey] && (
+                          <button
+                            onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
+                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                          >
+                            Verify
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+              <hr className="border-2 border-gray-50 w-2/3 mx-auto" />
+            </div>
+  
+            <div className="mt-4">
+              {socials &&
+                socials.map((social, index) => (
+                  <div key={index}>
+                    <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
                       <div className="flex items-center">
-                        <img className="w-8 h-8 mr-4" src={row.icon} alt="" />
+                        <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
                         <div>
-                          <h3 className="text-sm capitalize text-white font-bold">{row.title}</h3>
-                          <p className="text-xs capitalize text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
+                          <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
+                          <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
                         </div>
                       </div>
-
-                      {/* If task is completed, show 'Completed' message */}
-                      {row.status === "completed" ? (
+  
+                      {social.status === "not_completed" && !followed[social.taskKey] && (
+                        <a
+                          href={social.socialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => handleFollowButtonClick(social.taskKey)}
+                          className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                        >
+                          <span>Follow</span>
+                        </a>
+                      )}
+                      {social.status === "not_completed" && followed[social.taskKey] && (
+                        <button
+                          onClick={() => togglePopup(social.taskKey, social.questId)}
+                          className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
+                        >
+                          Verify
+                        </button>
+                      )}
+                      {social.status === "waiting" && (
+                        <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
+                          <span>Waiting</span>
+                        </p>
+                      )}
+                      {social.status === "completed" && (
                         <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
                           <FaRegCheckCircle size={20} className="text-[#606060]" />
                         </p>
-                      ) : (
-                        <>
-                          {/* Render Watch button if the user has not started watching yet */}
-                          {!watchTimes[row.taskKey] && (
-                            <a
-                              href={row.videoUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => handleWatchButtonClick(row.taskKey, row.videoUrl)}
-                              className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                            >
-                              <span>Watch</span>
-                            </a>
-                          )}
-
-                          {/* Show Verify button only if the user has watched enough time */}
-                          {watchTimes[row.taskKey] && (
-                            <button
-                              onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
-                              className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                              disabled={false}
-                            >
-                              Verify
-                            </button>
-                          )}
-                        </>
                       )}
                     </div>
-                  ))}
-                <hr className="border-2 border-gray-50 w-2/3 mx-auto " />
-              </div>
-
-              <div className="mt-4">
-                {socials &&
-                  socials.map((social, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
-                        <div className="flex items-center">
-                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
-                          <div>
-                            <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
-                            <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
-                          </div>
-                        </div>
-
-                        {social.status === "not_completed" && !followed[social.taskKey] && (
-                          <a
-                            href={social.socialUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => handleFollowButtonClick(social.taskKey)}
-                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                          >
-                            <span>Follow</span>
-                          </a>
-                        )}
-                        {social.status === "not_completed" && followed[social.taskKey] && (
-                          <button
-                            onClick={() => togglePopup(social.taskKey, social.questId)}
-                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                          >
-                            Verify
-                          </button>
-                        )}
-                        {/* Render 'Waiting' message */}
-                        {social.status === "waiting" && (
-                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
-                            <span>Waiting</span>
-                          </p>
-                        )}
-                        {social.status === "completed" && (
-                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
-                            <FaRegCheckCircle size={20} className="text-[#606060]" />
-                          </p>
-                        )}
-                      </div>
-                      <hr className="border-2 border-white w-2/3 mx-auto" />
-                    </div>
-                  ))}
-                {socials &&
-                  socials.map((social, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
-                        <div className="flex items-center">
-                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
-                          <div>
-                            <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
-                            <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
-                          </div>
-                        </div>
-
-                        {social.status === "not_completed" && !followed[social.taskKey] && (
-                          <a
-                            href={social.socialUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => handleFollowButtonClick(social.taskKey)}
-                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                          >
-                            <span>Follow</span>
-                          </a>
-                        )}
-                        {social.status === "not_completed" && followed[social.taskKey] && (
-                          <button
-                            onClick={() => togglePopup(social.taskKey, social.questId)}
-                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                          >
-                            Verify
-                          </button>
-                        )}
-                        {/* Render 'Waiting' message */}
-                        {social.status === "waiting" && (
-                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
-                            <span>Waiting</span>
-                          </p>
-                        )}
-                        {social.status === "completed" && (
-                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
-                            <FaRegCheckCircle size={20} className="text-[#606060]" />
-                          </p>
-                        )}
-                      </div>
-                      <hr className="border-2 border-white w-2/3 mx-auto" />
-                    </div>
-                  ))}
-                {socials &&
-                  socials.map((social, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
-                        <div className="flex items-center">
-                          <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
-                          <div>
-                            <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
-                            <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
-                          </div>
-                        </div>
-
-                        {social.status === "not_completed" && !followed[social.taskKey] && (
-                          <a
-                            href={social.socialUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => handleFollowButtonClick(social.taskKey)}
-                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                          >
-                            <span>Follow</span>
-                          </a>
-                        )}
-                        {social.status === "not_completed" && followed[social.taskKey] && (
-                          <button
-                            onClick={() => togglePopup(social.taskKey, social.questId)}
-                            className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
-                          >
-                            Verify
-                          </button>
-                        )}
-                        {/* Render 'Waiting' message */}
-                        {social.status === "waiting" && (
-                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
-                            <span>Waiting</span>
-                          </p>
-                        )}
-                        {social.status === "completed" && (
-                          <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-xs font-bold">
-                            <FaRegCheckCircle size={20} className="text-[#606060]" />
-                          </p>
-                        )}
-                      </div>
-                      <hr className="border-2 border-white w-2/3 mx-auto" />
-                    </div>
-                  ))}
-              </div>
+                    <hr className="border-2 border-white w-2/3 mx-auto" />
+                  </div>
+                ))}
             </div>
-
-
           </div>
         </div>
       </div>
-      <Footer />
-      {showPopup && (
-        <Follow
-          togglePopup={() => togglePopup(null, null)}  // Pass correct taskKey and questId here if necessary
-          handleSubmit={handleSubmit}
-          handleFileChange={handleFileChange}
-          isUploading={isUploading}
-          task={activeTaskKey} // Pass task to handleSubmit
-          questId={activeQuestId} // Pass questId to handleSubmit
-        />
-      )}
-
     </div>
+  
+    <Footer />
+  
+    {showPopup && (
+      <Follow
+        togglePopup={() => togglePopup(null, null)}
+        handleSubmit={handleSubmit}
+        handleFileChange={handleFileChange}
+        isUploading={isUploading}
+        task={activeTaskKey}
+        questId={activeQuestId}
+      />
+    )}
+  </div>
+  
   );
 }
 
