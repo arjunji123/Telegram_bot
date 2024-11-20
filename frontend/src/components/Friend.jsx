@@ -96,7 +96,7 @@ const { success, error } = useSelector((state) => ({
       const signupLink = `${FRONTEND_URL}/?referral_code=${referral_code}`; // Replace with your actual signup page URL
   
       // Encode the message for sharing
-      const message = `Join our app using this referral link: ${signupLink}`;
+      const message = `Join our app using this referral link: ${signupLink} and referral code = ${referral_code}`;
       const encodedMessage = encodeURIComponent(message);
   
       // Create Telegram deep links
