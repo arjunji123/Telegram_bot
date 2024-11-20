@@ -1600,22 +1600,36 @@ function filterSubTree(userTree, userId) {
 }
 
 
-
-
 exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
   try {
     console.log("Route hit successfully");
     const userId = req.params.user_id;
     console.log("User ID:", userId);
 
+    // Query to fetch all user history from usercoin_audit, including pending_coin and title
     const query = `
-      SELECT qa.*, q.quest_name, q.quest_type, q.activity, u.user_name
-      FROM usercoin_audit qa
-      JOIN users u ON qa.user_id = u.id
-      LEFT JOIN quest q ON qa.quest_id = q.id
-      WHERE qa.user_id = ? AND qa.type = 'quest'
+      SELECT 
+        qa.*, 
+        q.quest_name, 
+        q.quest_type, 
+        q.activity, 
+        u.user_name, 
+        ud.coins, 
+        qa.pending_coin,  -- Fetch pending_coin from usercoin_audit
+        qa.title  -- Fetch title from usercoin_audit
+      FROM 
+        usercoin_audit qa
+      JOIN 
+        users u ON qa.user_id = u.id
+      LEFT JOIN 
+        quest q ON qa.quest_id = q.id
+      LEFT JOIN 
+        user_data ud ON qa.user_id = ud.user_id
+      WHERE 
+        qa.user_id = ?
     `;
 
+    // Execute the query with the given user ID
     const [userHistory] = await db.query(query, [userId]);
 
     if (!userHistory.length) {
