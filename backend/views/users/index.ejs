@@ -21,7 +21,10 @@
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>Created</th>
-                            <th>User Type</th>
+                            <!-- <th>User Type</th> -->
+                            <th>Pending Coins</th>
+                            <th>Total Coins</th>
+
                             <th>Status</th>
                             <th>Screenshot</th>
                             <th>Actions</th>
@@ -47,9 +50,16 @@
                                     <td>
                                         <%= user.date_created %>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <%= user.user_type %>
+                                    </td> -->
+                                    <td>
+                                        <%= user.pending_coin || 0 %>
                                     </td>
+                                    <td>
+                                        <%= user.coins || 0 %>
+                                    </td>
+
                                     <td>
                                         <%= parseInt(user.status)===1 ? 'Active' : 'Inactive' %>
                                     </td>
@@ -89,12 +99,18 @@
                                     </td>
 
 
-                            <td class="action_box">
-                                    <a href="/admin/<%= module_slug %>/<%= user.id %>"><i class="fe-eye"></i></a>
-                                    <a href="/admin/user-tree-view/<%= user.id %>"><i class="fe-users"></i></a> <!-- User Tree View icon -->
-                                    <a href="/admin/<%= module_slug %>/edit/<%= user.id %>"><i class="fe-edit"></i></a>
-                                  
-                                </td>
+                                    <td class="action_box">
+                                        <a href="/admin/<%= module_slug %>/<%= user.id %>"><i class="fe-eye"></i></a>
+                                        <a href="/admin/user-tree-view/<%= user.id %>"><i class="fe-users"></i></a>
+                                        <!-- User Tree View icon -->
+                                        <a href="/admin/<%= module_slug %>/edit/<%= user.id %>"><i
+                                                class="fe-edit"></i></a>
+
+                                                <a href="/admin/<%= module_slug %>/user-history/<%= user.id %>" title="View User History">
+                                                    <i class="fe-clock"></i>
+                                                </a>
+                                                
+                                    </td>
                                 </tr>
                                 <% }); %>
                     </tbody>
@@ -104,7 +120,8 @@
     </div>
 </div>
 <!-- Modal for viewing images -->
-<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
