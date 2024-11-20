@@ -7,6 +7,7 @@ const db = require('../config/mysql_database');
 const Joi = require('joi');
 const { htmlToText } = require('html-to-text');
 const { format } = require('date-fns');
+const moment = require('moment');
 
 const table_name = Model.table_name;
 const module_title = Model.module_title;
@@ -190,7 +191,60 @@ function generateSlug(title) {
 
 
 
-exports.apiGetAllRecords = catchAsyncErrors(async(req,res, next) => {
+// exports.apiGetAllRecords = catchAsyncErrors(async(req,res, next) => {
+
+//     const resultPerPage = 1;
+//     const page = parseInt(req.query.page) || 1;
+//     const searchQuery = req.query.search || '';
+//     const filterQuery = req.query.filter || '';
+//     // Calculate offset for pagination
+//     const offset = (page - 1) * resultPerPage;
+    
+//     try {
+//         // Count total blogs
+//         const totalBlogsResult = await db.query('SELECT COUNT(*) as count FROM '+table_name);
+//         const totalBlogs = totalBlogsResult[0][0].count;
+        
+//         // Fetch blogs with pagination and filtering
+//         const [blog_records] = await db.query('SELECT * FROM '+table_name+' order by id desc');
+        
+//         // Filter or process rows if needed
+//         const blogs = blog_records.map(row => ({
+//             id: row.id,
+//             title: row.title,
+//             slug: row.slug,
+//             image: process.env.BACKEND_URL+'/uploads/'+module_slug+'/'+row.image,
+//             created_date: formatDate(row.created_at),
+//             desc: truncateText(htmlToText(row.description), 200),
+//         }));
+      
+     
+//         res.status(200).json({
+//             success: true,
+//             totalBlogs,
+//             resultPerPage,
+//             page,
+//             blogs
+//         });
+      
+//     } catch (error) {
+//         return next(new ErrorHandler('Database query failed', 500));
+//     }
+
+   
+// })
+
+
+function formatDate(date) {
+    return moment(date).format('YYYY-MM-DD');
+}
+
+// Format time as 'hh:mm A' (12-hour format with AM/PM)
+function formatTime(date) {
+    return moment(date).format('hh:mm A');
+}
+
+exports.apiGetAllRecords = catchAsyncErrors(async(req, res, next) => {
 
     const resultPerPage = 1;
     const page = parseInt(req.query.page) || 1;
@@ -200,39 +254,37 @@ exports.apiGetAllRecords = catchAsyncErrors(async(req,res, next) => {
     const offset = (page - 1) * resultPerPage;
     
     try {
-        // Count total blogs
-        const totalBlogsResult = await db.query('SELECT COUNT(*) as count FROM '+table_name);
-        const totalBlogs = totalBlogsResult[0][0].count;
+        // Count total quests
+        const totalQuestsResult = await db.query('SELECT COUNT(*) as count FROM quest');
+        const totalQuests = totalQuestsResult[0][0].count;
         
-        // Fetch blogs with pagination and filtering
-        const [blog_records] = await db.query('SELECT * FROM '+table_name+' order by id desc');
+        // Fetch quests with pagination and filtering
+        const [quest_records] = await db.query('SELECT id, quest_name, start_date, end_date, coin_earn, status FROM quest ORDER BY id DESC LIMIT ?,?', [offset, resultPerPage]);
         
-        // Filter or process rows if needed
-        const blogs = blog_records.map(row => ({
+        // Process rows for response
+        const quests = quest_records.map(row => ({
             id: row.id,
-            title: row.title,
-            slug: row.slug,
-            image: process.env.BACKEND_URL+'/uploads/'+module_slug+'/'+row.image,
-            created_date: formatDate(row.created_at),
-            desc: truncateText(htmlToText(row.description), 200),
+            quest_name: row.quest_name,
+            // start_date: formatDate(row.start_date),  // Assuming you have a date formatting function
+            // end_date: formatDate(row.end_date),      // Assuming you have a date formatting function
+            start_date: formatDate(row.start_date),   // Format only date
+            end_date: formatDate(row.end_date),        // Format only date
+            coin_earn: row.coin_earn,
+            status: row.status
         }));
       
-     
         res.status(200).json({
             success: true,
-            totalBlogs,
+            totalQuests,
             resultPerPage,
             page,
-            blogs
+            quests
         });
       
     } catch (error) {
         return next(new ErrorHandler('Database query failed', 500));
     }
-
-   
-})
-
+});
 
 exports.apiGetSingleRecord = catchAsyncErrors(async(req, res,next) => {
 
