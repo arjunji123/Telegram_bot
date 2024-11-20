@@ -10,6 +10,9 @@
                             <th>Quest Name</th>
                             <th>Quest Type</th>
                             <th>Activity</th>
+                            <th>Coins</th>
+                            <th>Pending Coins</th> <!-- Added Pending Coins column -->
+                            <th>Title</th> <!-- Added Title column -->
                             <th>Screenshot</th>
                             <th>Status</th>
                         </tr>
@@ -22,15 +25,20 @@
                                 <td><%= entry.quest_name || 'Unknown Task' %></td>
                                 <td><%= entry.quest_type || 'N/A' %></td>
                                 <td><%= entry.activity || 'N/A' %></td>
+                                <td><%= entry.coins || 0 %></td>
+                                <td><%= entry.pending_coin || 0 %></td> <!-- Display Pending Coins -->
+                                <td><%= entry.title || 'No Title' %></td> <!-- Display Title -->
                                 <td>
                                     <% if (entry.quest_screenshot) { %>
-                                        <% JSON.parse(entry.quest_screenshot).forEach(screenshot => { %>
-                                            <button class="btn btn-info view-image" data-image="/uploads/<%= screenshot %>">
-                                                View Screenshot
+                                        <% JSON.parse(entry.quest_screenshot).forEach((screenshot, index) => { %>
+                                            <button class="btn btn-info view-image" 
+                                                data-image="/uploads/<%= screenshot %>" 
+                                                title="View Screenshot <%= index + 1 %>">
+                                                Screenshot <%= index + 1 %>
                                             </button>
                                         <% }) %>
                                     <% } else { %>
-                                        No screenshot uploaded
+                                        <span class="text-muted">No screenshot uploaded</span>
                                     <% } %>
                                 </td>
                                 <td>
@@ -48,11 +56,31 @@
         </div>
     </div>
 </div>
+
+<!-- Modal for Viewing Images -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Screenshot Viewer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="Screenshot" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    $('.view-image').click(function () {
-        const imageUrl = $(this).data('image');
-        $('#modalImage').attr('src', imageUrl);
-        $('#imageModal').modal('show');
+    // Modal logic for viewing screenshots
+    document.querySelectorAll('.view-image').forEach(button => {
+        button.addEventListener('click', function () {
+            const imageUrl = this.getAttribute('data-image');
+            document.getElementById('modalImage').setAttribute('src', imageUrl);
+            $('#imageModal').modal('show');
+        });
     });
-    
 </script>
