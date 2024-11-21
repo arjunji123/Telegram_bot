@@ -28,7 +28,7 @@ const CustomSwiper = ({
             // Background gradients for each slide (alternating colors)
             const gradientBackgrounds = [
               "from-gray-300 to-gray-400", // First slide
-              "from-purple-400 to-purple-500", // Second slide
+              "from-fuchsia-300 to-fuchsia-500", // Second slide
               "from-teal-400 to-teal-500", // Third slide
               "from-rose-300 to-rose-400", // Fourth slide
             ];

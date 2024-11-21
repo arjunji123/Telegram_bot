@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Logo from "../utils/Logo";
 import QRCode from "qrcode";
-import { BiSolidDownvote, BiSolidUpvote, BiHistory } from "react-icons/bi";
-import { BsStars, BsPersonFillCheck, BsCurrencyRupee } from "react-icons/bs";
+import {  BiSolidUpvote, BiHistory } from "react-icons/bi";
+import { BsPersonFillCheck, BsCurrencyRupee } from "react-icons/bs";
 import { AiFillCaretDown } from "react-icons/ai";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
 import { useNavigate } from 'react-router-dom';
@@ -16,9 +16,11 @@ import { shareCoins } from "../../store/actions/coinActions";
 import ShareCoin from "../utils/ShareCoin";
 import { toast, ToastContainer } from "react-toastify"; 
 import Loader from '../components/Loader';
-
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 function Withdrawal() {
+  const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
@@ -125,9 +127,6 @@ const [sellData, setSellData] = useState({
     });
   };
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value.trim());
-  };
   const handleReceiveMoney = () => {
     const id = 1; // Replace with the actual id logic as needed
     const { toAddress, fromAddress, amount } = receiveData;
@@ -186,14 +185,39 @@ const handleSellSubmit = (e) => {
   dispatch(sellMoney(user_id, company_id, sellData));
 };
 
-  // if (loading) {
-  //   return <Loader />;
-  // }
+  // SweetAlert function for attractive alert
+  const showAlert = () => {
+    MySwal.fire({
+      title: "Insufficient Referrals!",
+      text: "You need to connect with at least 2 people to sell coins.",
+      icon: "warning",
+      confirmButtonText: "Okay",
+      buttonsStyling: true,
+      customClass: {
+        popup: "bg-gray-800 text-white rounded-lg shadow-lg w-[90%] sm:w-[400px]", // Adjust width for mobile
+        title: "text-white text-sm sm:text-base font-bold", // Smaller text for mobile, larger for larger screens
+        content: "text-gray-300 text-xs sm:text-sm", // Adjust description size for mobile
+        confirmButton: "bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-xs sm:text-sm", // Button size adjustment
+      },
+    });
+  };
+  
+
+  // Handle Button Click
+  const handleButtonClick = (coinRate, companyId) => {
+    if (userData && userData.referral_count >= 2) {
+      // Open popup or perform the Sell action
+      handleSellClick(coinRate, companyId);
+    } else {
+      // Show SweetAlert
+      showAlert();
+    }
+  };
   return (
 
     <>
 
-      <div className="bg-white flex justify-center min-h-screen font-poppins">
+      <div className="bg-white flex justify-center min-h-screen font-eina">
             <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -210,31 +234,11 @@ const handleSellSubmit = (e) => {
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
         <div className="flex-grow relative z-0 pt-6  pb-16">
           <Logo />
-          <div className="flex justify-center font-poppins leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
+          <div className="flex justify-center font-eina  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
             <p>U</p>
             <p className="">{userData ? userData.coins : "700,0000"}</p>
           </div>
 
-          {/* <div className="grid grid-cols-4 gap-2 mb-4">
-            {[
-              { icon: <BiSolidDownvote size={22} />, label: "Receive" },
-              { icon: <BiSolidUpvote size={22} />, label: "Send" },
-              { icon: <BiHistory size={22} />, label: "History" },
-              { icon: <BsStars size={22} />, label: "Points" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                onClick={() => handleIconClick(index)}
-                className={`text-white mx-auto cursor-pointer flex flex-col items-center transition duration-300 ease-in-out ${activeIndex === index ? "opacity-100" : "opacity-50"
-                  }`}
-              >
-                <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
-                  {item.icon}
-                </div>
-                <span className="text-xs text-center">{item.label}</span>
-              </div>
-            ))}
-          </div> */}
            <div className="grid grid-cols-2 gap-2 mb-4">
       {/* Send Button */}
       <div
@@ -244,7 +248,7 @@ const handleSellSubmit = (e) => {
         <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
           <BiSolidUpvote size={22} />
         </div>
-        <span className="text-xs text-center">Send</span>
+        <span className="text-xs text-center font-eina">Send</span>
       </div>
 
       {/* History Button */}
@@ -255,15 +259,11 @@ const handleSellSubmit = (e) => {
         <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
           <BiHistory size={22} />
         </div>
-        <span className="text-xs text-center">History</span>
+        <span className="text-xs text-center font-eina">History</span>
       </div>
     </div>
 
-          {/* <div  onClick={toggleWithdrawalPopup} className="w-8/12 border-2 border-[#f5eded] rounded-3xl h-20 mx-auto flex justify-center items-center mb-4 cursor-pointer">
-            <span className="text-xl font-extrabold font-poppins text-[#f5eded]">WITHDRAW</span>
-          </div> */}
-
-          <p className="text-center text-xs text-[#f5eded] mb-4">
+          <p className="text-center font-eina text-xs text-[#f5eded] mb-4">
             Sell your points at your chosen price, anytime and anywhere. Get instant cash withdrawals with no delays!
           </p>
 
@@ -278,7 +278,7 @@ const handleSellSubmit = (e) => {
                       <BsPersonFillCheck size={18} />
                       <div className="ml-1"> 
                         <span className="text-[12px] font-semibold uppercase">{company.company_name}</span> {/* Adjusted name size */}
-                        <p className="font-bold flex items-center text-[17px] "> 
+                        <p className="font-bold flex  font-eina items-center text-[17px] "> 
                           <BsCurrencyRupee className="" />
                           <span>{company.coin_rate}</span>
                         </p>
@@ -289,7 +289,7 @@ const handleSellSubmit = (e) => {
     
                     <button
                       className="leading-none px-2 py-1 text-xs rounded-md bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
-                      onClick={() => handleSellClick(company.coin_rate, company.company_id)}
+                      onClick={() => handleButtonClick (company.coin_rate, company.company_id)}
                     >
                       <AiFillCaretDown size={16} /> {/* Reduced icon size */}
                       <span className="ml-1">Sell</span>
