@@ -5,7 +5,8 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFeatures = require("../utils/apiFeatures");
 const db = require("../config/mysql_database");
 const Joi = require("joi");
-const bcrypt = require("bcryptjs");
+const { LocalStorage } = require("node-localstorage");
+const localStorage = new LocalStorage("./scratch");
 
 const table_name = Model.table_name;
 const module_title = Model.module_title;
@@ -14,108 +15,101 @@ const module_add_text = Model.module_add_text;
 const module_edit_text = Model.module_edit_text;
 const module_slug = Model.module_slug;
 const module_layout = Model.module_layout;
-const sellTransactionSchema = Joi.object({
-  company_id: Joi.string().required(),
-  transaction_coin: Joi.string().required(),
-  transaction_rate: Joi.number().required(),
-  transaction_amount: Joi.number().required(),
-});
 
-// Sell API function
-
-// exports.createSellTransaction = catchAsyncErrors(async (req, res, next) => {
-//   try {
-//     // Log the incoming request body for debugging
-//     console.log("Request Body:", req.body);
-
-//     // Validate incoming request body against the schema
-//     await sellTransactionSchema.validateAsync(req.body, {
-//       abortEarly: false, // Continue validation after the first error
-//       allowUnknown: true, // Allow unknown fields
-//     });
-
-//     // Assume user_id is extracted from session or token
-//     const user_id = req.user?.id; // Use optional chaining to avoid undefined errors
-
-//     if (!user_id) {
-//       return next(new ErrorHandler("User ID is required", 401)); // Handle missing user_id
-//     }
-
-//     // Create a new transaction object
-//     const newTransaction = new sellTransactionSchema({
-//       user_id,
-//       ...req.body, // Spread validated request body properties
-//       date_created: new Date(), // Set current date
-//       status: "unapproved", // Set initial status if needed
-//     });
-
-//     // Save the transaction to the database
-//     const savedTransaction = await newTransaction.save();
-//     console.log("Saved Transaction:", savedTransaction); // Log the saved transaction
-
-//     // Respond with success message and transaction data
-//     res.status(201).json({
-//       success: true,
-//       message: "Transaction created successfully!",
-//       data: savedTransaction,
-//     });
-//   } catch (error) {
-//     console.error("Error creating sell transaction:", error); // Log the complete error object
-
-//     if (error.isJoi) {
-//       // Handle Joi validation errors
-//       return next(
-//         new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
-//       );
-//     }
-
-//     // Handle Mongoose validation or other database errors
-//     if (error.name === "ValidationError") {
-//       return next(new ErrorHandler("Validation error: " + error.message, 400));
-//     }
-
-//     // Handle other types of errors
-//     return next(
-//       new ErrorHandler("Failed to create transaction: " + error.message, 500)
-//     );
-//   }
-// });
-
-exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
+// Define the GET API to retrieve all user requests and render them in a view
+exports.reqGetAllUsers = async (req, res, next) => {
   try {
-    // Fetch all users where user_type is 'company' and join with company_data to get additional details
-    const companiesQuery = await db.query(
-      `SELECT u.id AS company_id, u.user_name AS company_name, 
-              c.coin_rate, c.description 
-       FROM users u 
-       LEFT JOIN company_data c ON u.id = c.company_id 
-       WHERE u.user_type = 'company'`
-    );
+    // Extract company_id from the request (e.g., from query params or session)
+    const company_id = localStorage.getItem("userdatA_n");
 
-    console.log("Companies query result:", companiesQuery);
-
-    // If no companies are found
-    if (companiesQuery[0].length === 0) {
-      return next(new ErrorHandler("No companies found", 404));
+    // Check if company_id is provided
+    if (!company_id) {
+      return next(new ErrorHandler("Company ID is required", 400));
     }
 
-    // Map the results to a structured array of companies
-    const companies = companiesQuery[0].map((company) => ({
-      company_id: company.company_id,
-      company_name: company.company_name,
-      coin_rate: company.coin_rate || 0, // Set to 0 if null
-      description: company.description || "", // Set to an empty string if null
-    }));
+    // Query the database for user transactions related to the specified company
+    const userTransactions = await db.query(
+      "SELECT * FROM user_transction WHERE company_id = ?",
+      [company_id]
+    );
 
-    // Send the response with the list of companies
-    res.status(200).json({
-      success: true,
-      data: companies,
+    // Check if any transactions were found
+    if (!userTransactions || userTransactions.length === 0) {
+      return res.status(404).render("noResults", {
+        layout: module_layout,
+        title: "No Results Found",
+        module_slug,
+        message: "No user requests found for the specified company",
+      });
+    }
+    // Log retrieved transactions for debugging
+    console.log("User Transactions:", userTransactions);
+
+    // Render the user transactions in the desired view template
+    res.render(module_slug + "/index", {
+      layout: module_layout,
+      title: module_title,
+      module_slug,
+      users: userTransactions, // Pass the users array directly
     });
   } catch (error) {
-    console.error("Error fetching companies:", error);
-    return next(
-      new ErrorHandler("An error occurred while fetching companies", 500)
-    );
+    console.error("Error retrieving user transactions:", error); // Log any error
+
+    // Send a rendered error response
+    return res.status(500).render("error", {
+      layout: module_layout,
+      title: "Error",
+      module_slug,
+      message: "Failed to retrieve user requests: " + error.message,
+    });
+  }
+};
+exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
+  // Get user ID from the request body
+  const { user_id } = req.body;
+
+  // Validate if user_id is provided
+  if (!user_id) {
+    return next(new ErrorHandler("User ID is required", 400));
+  }
+
+  // Check if the file is uploaded
+  if (!req.file) {
+    return next(new ErrorHandler("Image file is required", 400)); // Respond if no file is uploaded
+  }
+
+  const imageBuffer = req.file.buffer; // Accessing the buffer from memory storage
+  console.log(
+    "Image buffer size:",
+    imageBuffer ? imageBuffer.length : "No image buffer"
+  ); // Log to check buffer length
+
+  // Debugging: Log user ID and check if file is present
+  console.log(`User ID from body: ${user_id}`);
+  console.log(`Image uploaded: ${req.file.originalname}`);
+
+  // Update the user_transaction table with the image
+  try {
+    console.log("Attempting to update user transaction...");
+
+    // Corrected table name
+    const query = "UPDATE user_transction SET trans_doc = ? WHERE user_id = ?";
+    const data = [imageBuffer, user_id];
+
+    const [result] = await db.query(query, data);
+    console.log("Query result:", result);
+
+    if (result.affectedRows === 0) {
+      throw new Error("No user found with the provided user ID");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Image uploaded successfully",
+      data: { user_id, image: req.file.originalname },
+    });
+  } catch (error) {
+    console.error("Error updating database:", error);
+    return next(new ErrorHandler("Database update failed", 500));
   }
 });

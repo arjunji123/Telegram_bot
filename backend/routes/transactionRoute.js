@@ -1,9 +1,9 @@
 const express = require("express");
 const multer = require("multer");
 const {
-  reqGetAllUsers,
-  uploadScreenshotApi,
-} = require("../contollers/faqController");
+  allTransactions,
+  approveTransaction,
+} = require("../contollers/transactionController");
 const {
   isAuthenticatedUser,
   authorizeRoles,
@@ -13,13 +13,13 @@ const Model = require("../models/faqModel");
 const module_slug = Model.module_slug;
 const router = express.Router();
 
-var Storage = multer.memoryStorage();  // Use memoryStorage instead of diskStorage
+var Storage = multer.memoryStorage(); // Use memoryStorage instead of diskStorage
 
 var upload = multer({ storage: Storage });
 
-router.route("/faqs").get(isAuthenticatedUser, reqGetAllUsers);
+router.route("/transactions").get(isAuthenticatedUser, allTransactions);
 router
-  .route("/upload")
-  .patch(isAuthenticatedUser, upload.single("image"), uploadScreenshotApi);
+  .route("/approveTransaction")
+  .post(isAuthenticatedUser, approveTransaction);
 
 module.exports = router;

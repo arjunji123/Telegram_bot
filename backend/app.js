@@ -10,32 +10,25 @@ const expressLayouts = require("express-ejs-layouts");
 const errorMiddleware = require("./middleware/error");
 const { LocalStorage } = require("node-localstorage");
 const localStorage = new LocalStorage("./scratch");
+console.log("kjhg");
+
 // app.use(
 //   cors({
 //     origin: "http://localhost:5173",
 //     credentials: true,
 //   })
 // );
- // app.use(
- //   cors({
- //     origin: "https://unitrade-bot.onrender.com",
- //     credentials: true,
- //   })
- // );
- app.use(
-   cors({
-     origin: "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
-     credentials: true,
-   })
- );
 
- // app.use(
- //   cors({
- //     origin: "https://unitrade-bot.onrender.com",
-    
- //     credentials: true,
- //   })
- // );
+app.use(cors()); // Enable CORS for all routes
+// app.use(
+//   cors({
+//     origin:
+//       "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   })
+// );
+
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 app.set("layout", "layouts/layout");
@@ -62,8 +55,12 @@ app.use(
 app.use(flash());
 app.use((req, res, next) => {
   const userType = localStorage.getItem("user_type_n");
+  const userdatA_n = localStorage.getItem("userdatA_n");
+
+  console.log(userdatA_n);
   res.locals.user = req.session.user;
   res.locals.userty = userType;
+  res.locals.userdatA_n = userdatA_n;
   next();
 });
 
@@ -76,6 +73,7 @@ const settings = require("./routes/settingRoute");
 const faqs = require("./routes/faqRoute");
 const testimonials = require("./routes/testimonialRoute");
 // const withdrwals = require("./routes/withdrwalRoute");
+const transactions = require("./routes/transactionRoute");
 
 app.use("/admin", user);
 app.use("/admin", blogs);
@@ -85,6 +83,7 @@ app.use("/admin", quests);
 app.use("/admin", settings);
 app.use("/admin", faqs);
 app.use("/admin", testimonials);
+app.use("/admin", transactions);
 
 // app.use("/admin", withdrwals);
 
@@ -95,6 +94,7 @@ app.use("/api/v1", quests);
 app.use("/api/v1", settings);
 app.use("/api/v1", faqs);
 app.use("/api/v1", testimonials);
+app.use("/api/v1", transactions);
 // app.use("/api/v1", withdrwals);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(errorMiddleware);

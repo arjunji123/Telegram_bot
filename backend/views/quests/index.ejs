@@ -33,19 +33,19 @@
 
                     <tbody>
                         <% let serialNumber=1; %>
-                            <% blogs[0].forEach(function(blog) { %>
+                            <% quests[0].forEach(function(quest) { %>
                                 <tr>
                                     <td>
                                         <%= serialNumber++ %>
                                     </td>
                                     <td>
-                                        <%= blog.quest_name %>
+                                        <%= quest.quest_name %>
                                     </td>
-                                    <td><%= blog.start_date %></td>
-                                <td><%= blog.end_date %></td>
-                                <td><%= blog.coin_earn %></td>
+                                    <td><%= quest.start_date %></td>
+                                <td><%= quest.end_date %></td>
+                                <td><%= quest.coin_earn %></td>
                                     <td class="status_box">
-                                        <% if(blog.status=='active' ){ %>
+                                        <% if(quest.status=='active' ){ %>
                                             <span
                                                 class="btn btn-success rounded-pill waves-effect waves-light">Active</span>
                                             <% }else{ %>
@@ -56,11 +56,11 @@
                                     <input type="checkbox" id="switchd" class="toogle_checkbox" value="0" /><label for="switch">Status</label>
                                 </div>-->
                                     </td>
-                                    <td class="action_box"><a href="/admin/<%= module_slug %>/<%= blog.id %>"><i
+                                    <td class="action_box"><a href="/admin/<%= module_slug %>/<%= quest.id %>"><i
                                                 class="fe-eye"></i></a> <a
-                                            href="/admin/<%= module_slug %>/edit/<%= blog.id %>"><i
+                                            href="/admin/<%= module_slug %>/edit/<%= quest.id %>"><i
                                                 class="fe-edit"></i></a> <a
-                                            href="/admin/<%= module_slug %>/delete/<%= blog.id %>"><i
+                                            href="/admin/<%= module_slug %>/delete/<%= quest.id %>"><i
                                                 class="fe-trash-2"></i></a></td>
                                 </tr>
                                 <% }); %>

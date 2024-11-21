@@ -515,67 +515,6 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-// Sell API function with validation and structured data insertion
-// Sell API function
-
-// exports.createSellTransaction = catchAsyncErrors(async (req, res, next) => {
-//   try {
-//     // Log the incoming request body for debugging
-//     console.log("Request Body:", req.body);
-
-//     // Validate incoming request body against the schema
-//     await sellTransactionSchema.validateAsync(req.body, {
-//       abortEarly: false, // Continue validation after the first error
-//       allowUnknown: true, // Allow unknown fields
-//     });
-
-//     // Assume user_id is extracted from session or token
-//     const user_id = req.user?.id; // Use optional chaining to avoid undefined errors
-
-//     if (!user_id) {
-//       return next(new ErrorHandler("User ID is required", 401)); // Handle missing user_id
-//     }
-
-//     // Create a new transaction object
-//     const newTransaction = new sellTransactionSchema({
-//       user_id,
-//       ...req.body, // Spread validated request body properties
-//       date_created: new Date(), // Set current date
-//       status: "unapproved", // Set initial status if needed
-//     });
-
-//     // Save the transaction to the database
-//     const savedTransaction = await newTransaction.save();
-//     console.log("Saved Transaction:", savedTransaction); // Log the saved transaction
-
-//     // Respond with success message and transaction data
-//     res.status(201).json({
-//       success: true,
-//       message: "Transaction created successfully!",
-//       data: savedTransaction,
-//     });
-//   } catch (error) {
-//     console.error("Error creating sell transaction:", error); // Log the complete error object
-
-//     if (error.isJoi) {
-//       // Handle Joi validation errors
-//       return next(
-//         new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
-//       );
-//     }
-
-//     // Handle Mongoose validation or other database errors
-//     if (error.name === "ValidationError") {
-//       return next(new ErrorHandler("Validation error: " + error.message, 400));
-//     }
-
-//     // Handle other types of errors
-//     return next(
-//       new ErrorHandler("Failed to create transaction: " + error.message, 500)
-//     );
-//   }
-// });
-
 exports.getAllCompaniesApi = catchAsyncErrors(async (req, res, next) => {
   try {
     // Fetch all users where user_type is 'company' and join with company_data to get additional details

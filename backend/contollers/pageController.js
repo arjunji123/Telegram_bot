@@ -267,46 +267,32 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.getAllRecords = catchAsyncErrors(async (req, res, next) => {
-  const resultPerPage = 1;
-  const quest = parseInt(req.query.quest) || 1;
-  const searchQuery = req.query.search || "";
-  const filterQuery = req.query.filter || "";
-  // Calculate offset for pagination
-  const offset = (quest - 1) * resultPerPage;
-
   try {
-    // Count total blogs
-    const totalBlogsResult = await db.query(
-      "SELECT COUNT(*) as count FROM " + table_name
-    );
-    const totalBlogs = totalBlogsResult[0][0].count;
+      // Fetch quest data with formatted dates
+      const quests = await db.query(
+          `SELECT 
+              id,
+              quest_name,
+              DATE_FORMAT(start_date, "%d-%m-%Y") AS start_date,
+              DATE_FORMAT(end_date, "%d-%m-%Y") AS end_date,
+              coin_earn,
+              status
+           FROM quest
+           ORDER BY id DESC`
+      );
 
-    // Fetch blogs with pagination and filtering
-    // const blogs = await db.query('SELECT * FROM blogs  LIMIT ? OFFSET ?', [resultPerPage, offset]);
-    const blogs = await db.query(
-      "SELECT * FROM " + table_name + " order by id desc"
-    );
-
-    /*res.status(200).json({
-            success: true,
-            totalBlogs,
-            resultPerPage,
-            page,
-            blogs
-        });*/
-    const message = req.flash("msg_response");
-
-    res.render(module_slug + "/index", {
-      layout: module_layout,
-      title: module_title,
-      blogs,
-      message,
-      module_slug,
-    });
+      res.render(module_slug + "/index", {
+          layout: module_layout,
+          title: module_single_title + " " + module_add_text,
+          module_slug,
+          quests, // Pass the quests array to the view
+          originalUrl: req.originalUrl, // Pass the original URL here
+      });
   } catch (error) {
-    return next(new ErrorHandler("Database query failed", 500));
+      return next(new ErrorHandler('Failed to fetch quests', 500));
   }
 });
+
 
 exports.getSingleRecord = catchAsyncErrors(async (req, res, next) => {
   const blog = await QueryModel.findById(table_name, req.params.id, next);
