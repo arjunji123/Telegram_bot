@@ -86,7 +86,7 @@
 
                 try {
                     // Ensure the URL matches the backend API route
-                    const response = await fetch('https://telegram-bot-by30.onrender.com/api/v1/upload', {
+                    const response = await fetch('http://localhost:4000/api/v1/upload', {
                         method: 'PATCH',
                         body: formData,
                     });
