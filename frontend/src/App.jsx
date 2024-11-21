@@ -30,7 +30,7 @@ function App({ Component, pageProps }) {
     const tg = window.Telegram.WebApp;
 
     tg.expand(); // Expands the app to full screen
-    tg.MainButton.show();
+    // tg.MainButton.show();
     // Simulate loading time for preloader, or you can perform initial API calls here
     const timer = setTimeout(() => {
       setIsLoading(false);
