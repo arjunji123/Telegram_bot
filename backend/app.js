@@ -19,15 +19,15 @@ console.log("kjhg");
 //   })
 // );
 
-app.use(cors()); // Enable CORS for all routes
-// app.use(
-//   cors({
-//     origin:
-//       "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//   })
-// );
+//app.use(cors()); // Enable CORS for all routes
+app.use(
+  cors({
+    origin:
+      "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
