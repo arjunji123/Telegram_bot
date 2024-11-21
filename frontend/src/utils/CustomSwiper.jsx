@@ -15,7 +15,7 @@ const CustomSwiper = ({
     <div className="flex justify-center items-center">
       {/* Container to center the Swiper */}
       <Swiper
-        spaceBetween={14}
+        spaceBetween={12}
         slidesPerView={1.2} // Adjust to make slides not take full width
         pagination={{ clickable: true }}
         className="rounded-lg shadow-lg overflow-hidden mb-4"
@@ -30,7 +30,7 @@ const CustomSwiper = ({
               "from-gray-300 to-gray-400", // First slide
               "from-[#EFA7FC] to-[#f4dee5]", // Second slide
               "from-[#C2ECEA] to-[#81D5B6]", // Third slide
-              "from-[#f3ef9d] to-[#e1dc7e]", // Fourth slide
+              "from-[#f7d8dd] to-[#f5b5bf]", // Fourth slide
             ];
             const bgGradient =
               gradientBackgrounds[index % gradientBackgrounds.length];
