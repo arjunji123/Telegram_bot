@@ -358,7 +358,7 @@ function Tasks() {
                         </button>
                       )}
                       {social.status === "waiting" && (
-                        <p className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold">
+                        <p className="bg-[#282828] text-[#aaa3a3] w-20 flex justify-center py-2 rounded-full text-sm font-bold" aria-disabled>
                           <span>Waiting</span>
                         </p>
                       )}

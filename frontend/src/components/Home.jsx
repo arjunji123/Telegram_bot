@@ -56,7 +56,7 @@ useEffect(() => {
         }));
         setCoins(newCoins);
         // Remove coins after animation
-        setTimeout(() => setCoins([]), 2500);
+        setTimeout(() => setCoins([]), 1000);
               // Re-fetch data to update userData and pendingCoin without hard refresh
       dispatch(fetchCoinData());
       dispatch(fetchMeData());
