@@ -39,8 +39,8 @@ exports.allTransactions = catchAsyncErrors(async (req, res, next) => {
 
   res.render("transactions/index", {
     layout: "layouts/main",
-    title: "User Transactions",
-    transactions, // Pass transactions array to the frontend
+    title: "User Transactions", 
+    transactions, // Pass transactions array to the frontendsd
   });
 });
 
