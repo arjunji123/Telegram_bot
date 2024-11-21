@@ -112,7 +112,7 @@ function Profile() {
     canvas.height = window.innerHeight;
 
     const sparkles = [];
-    const maxSparkles = 100;
+    const maxSparkles = 60;
 
     class Sparkle {
       constructor(x, y) {

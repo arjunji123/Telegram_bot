@@ -246,7 +246,7 @@ function Tasks() {
 
 
   return (
-    <div className="bg-white flex justify-center min-h-screen font-eina overflow-hidden">
+    <div className="bg-white flex justify-center min-h-screen font-eina ">
     <ToastContainer
       position="top-right"
       autoClose={5000}
@@ -257,9 +257,9 @@ function Tasks() {
       theme="dark"
     />
     {loading && <Loader />}
-    
-    <div className="w-full bg-black text-white  flex flex-col max-w-lg h-screen sm:mx-auto  font-eina overflow-y-scroll ">
-      <div className="flex-grow relative z-0">
+
+    <div className="w-full bg-black text-white  flex flex-col max-w-lg h-screen sm:mx-auto  font-eina  ">
+      <div className="flex-grow overflow-y-auto">
         <div className="px-2 py-6 h-full z-10">
           <Logo />
           <p className="text-left mt-6 text-lg font-extrabold font-eina ml-2">EARN</p>
