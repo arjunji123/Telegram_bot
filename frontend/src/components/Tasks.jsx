@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
 import Loader from '../components/Loader';
-import { FaRegCheckCircle, FaYoutube  } from "react-icons/fa";
+import { FaXTwitter, FaInstagram } from "react-icons/fa6";
+import { FaRegCheckCircle, FaYoutube  , FaTelegramPlane } from "react-icons/fa";
 import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
@@ -167,15 +168,28 @@ function Tasks() {
       console.error("Error completing quest:", error);
     }
   };
-  const socials = nonBannerQuests && nonBannerQuests.filter((quest) => quest.activity === "follow").map((quest, index) => ({
+  const socials = nonBannerQuests && nonBannerQuests.filter((quest) => quest.activity === "follow").map((quest, index) => {
+    let icon = null;
+    if (quest.quest_name.toLowerCase().includes("youtube")) {
+      icon = <FaYoutube size={32} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("telegram")) {
+      icon = <FaTelegramPlane size={32} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("x")) {
+      icon = <FaXTwitter size={32} color="white" className="mr-4" />;
+    } else if (quest.quest_name.toLowerCase().includes("instagram")) {
+      icon = <FaInstagram size={32} color="white" className="mr-4" />;
+    }
+    return {
+      icon,
     taskKey: `task${quest.quest_id}`, // Unique keys
     questId: quest.quest_id,
     title: quest.quest_name,
-    icon: quest.image,
+    // icon: quest.image,
     socialUrl: quest.quest_url,
     coin: quest.coin_earn,
     status: quest.status
-  }));
+  };
+  });
 
   const handleFollowButtonClick = (task) => {
     setFollowed({
@@ -331,7 +345,8 @@ function Tasks() {
                   <div key={index}>
                     <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg ">
                       <div className="flex items-center">
-                        <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
+                      {social.icon}
+                        {/* <img className="w-8 h-8 mr-4" src={social.icon} alt="" /> */}
                         <div>
                           <h3 className="text-sm capitalize text-white font-bold font-eina">{social.title}</h3>
                           <p className="text-xs capitalize text-white font-semibold font-eina">+ {parseInt(social.coin)} Coin</p>
