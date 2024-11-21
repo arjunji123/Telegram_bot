@@ -1834,7 +1834,7 @@ exports.createSellTransaction = async (req, res, next) => {
     console.log(`Coins updated. Remaining Coins: ${updatedCoins}`);
 
     // Insert the transaction into the database
-    const result = await db.query(
+    const transactionResult = await db.query(
       "INSERT INTO user_transction (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
       [
         user_id,
@@ -1846,11 +1846,26 @@ exports.createSellTransaction = async (req, res, next) => {
       ]
     );
 
-    console.log("Transaction Created:", result);
+    console.log("Transaction Created:", transactionResult);
+
+    // Insert the corresponding entry into the usercoin_audit table
+    await db.query(
+      "INSERT INTO usercoin_audit (user_id, company_id, type, title, status, earn_coin, date_created) VALUES (?, ?, ?, ?, ?, ?, NOW())",
+      [
+        user_id,
+        req.body.company_id,
+        "withdrawal",
+        "sell coins",
+        "waiting",
+        -transactionCoins,
+      ]
+    );
+
+    console.log("Audit Entry Created Successfully");
 
     res.status(201).json({
       success: true,
-      message: "Transaction created successfully!",
+      message: "Transaction and audit entry created successfully!",
     });
   } catch (error) {
     console.error("Error creating sell transaction:", error);
@@ -1862,10 +1877,12 @@ exports.createSellTransaction = async (req, res, next) => {
     }
 
     return next(
-      new ErrorHandler("Failed to create transaction: " + error.message, 500)
+  
+  new ErrorHandler("Failed to create transaction: " + error.message, 500)
     );
   }
 };
+
 
 ////////////////////////////////////
 // API to get user history (coins operation, status, pending, etc.)
