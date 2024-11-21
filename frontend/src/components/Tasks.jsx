@@ -258,8 +258,8 @@ function Tasks() {
     />
     {loading && <Loader />}
     
-    <div className="w-full bg-black text-white  flex flex-col max-w-lg mx-4 sm:mx-auto overflow-y-auto">
-      <div className="flex-grow mb-4 relative z-0">
+    <div className="w-full bg-black text-white  flex flex-col max-w-lg  sm:mx-auto overflow-y-auto">
+      <div className="flex-grow relative z-0">
         <div className="px-2 py-6 h-full z-10">
           <Logo />
           <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
@@ -278,7 +278,7 @@ function Tasks() {
   
           <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">COIN QUESTS</h1>
   
-          <div className=" h-full mb-2 ">
+          <div className="  ">
             <div className="mt-4">
               {rows &&
                 rows.map((row, index) => (
