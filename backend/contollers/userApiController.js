@@ -1682,122 +1682,92 @@ exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
 });
 
 /////////////////////////////////////
-
-const sellTransactionSchema = Joi.object({
-  company_id: Joi.string().required(), // Company ID to identify the company
-  tranction_coin: Joi.number().positive().required(), // Number of coins being sold, should be positive
-  transctionRate: Joi.number()
-    .positive()
-    .error(new Error('"tranction_rate" must be a valid positive number')),
-  transction_amount: Joi.number().positive().required(), // Total transaction amount, should be positive
-  // user_id: Joi.string().required(), // User ID for who is making the transaction
-  // date_created: Joi.date().default(() => new Date()), // Auto-populated date (ensure it's a function)
-  status: Joi.string().valid("approved", "unapproved").default("unapproved"), // Status of the transaction
-});
-////////////////
 exports.createSellTransaction = async (req, res, next) => {
   try {
     // Log the incoming request body for debugging
     console.log("Request Body:", req.body);
 
-    // Validate incoming request body against the schema
+    // Validate incoming request body against the schema (if you are using Joi, for example)
     await sellTransactionSchema.validateAsync(req.body, {
-      abortEarly: false,
-      allowUnknown: true,
+      abortEarly: false, // Continue validation after the first error
+      allowUnknown: true, // Allow unknown fields
     });
 
-    // Extract user ID
-    const user_id = req.user?.id;
+    // Extract user ID (assume it's retrieved from session or token)
+    const user_id = req.user?.id; // Optional chaining for safety
     if (!user_id) {
-      return next(new ErrorHandler("User ID is required", 401));
+      return next(new ErrorHandler("User ID is required", 401)); // Handle missing user ID
     }
-
     // Retrieve company data from the database
     const companyData = await db.query(
       "SELECT * FROM company_data WHERE company_id = ?",
       [req.body.company_id]
     );
 
-    console.log("Company Data:", companyData);
+    console.log("Company Data:", companyData); // Log company data
 
+    // Check if companyData is returned correctly
     if (!companyData || companyData.length === 0) {
       return next(
         new ErrorHandler("Company not found or invalid company ID", 404)
-      );
+      ); // Handle invalid company
     }
 
+    // Ensure coin_rate is a valid number
+    // const transctionRate = parseFloat(companyData[0].coin_rate);
     const transctionRate = parseFloat(companyData[0][0].coin_rate);
-    console.log("Transaction Rate:", transctionRate);
+
+    console.log("Transaction Rate:", transctionRate); // Log the transaction rate
 
     if (isNaN(transctionRate)) {
       return next(
         new ErrorHandler('"tranction_rate" must be a valid number', 400)
-      );
+      ); // Handle if coin_rate is not a number
     }
+
+    // Add this validated transaction rate to the request or next logic
+    req.body.tranction_rate = transctionRate; // Ensure this field is set
 
     const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-    // Check if the user has enough coins in the user_data table
-    const userData = await db.query(
-      "SELECT coins FROM user_data WHERE user_id = ?",
-      [user_id]
-    );
-
-    if (!userData || userData.length === 0) {
-      return next(new ErrorHandler("User not found", 404));
-    }
-
-    const userCoins = parseFloat(userData[0].coins);
-    const transactionCoins = parseFloat(req.body.tranction_coin);
-
-    if (userCoins < transactionCoins) {
-      return next(new ErrorHandler("Insufficient coins", 400));
-    }
-
-    // Deduct the coins from the user's balance
-    const updatedCoins = userCoins - transactionCoins;
-    await db.query("UPDATE user_data SET coins = ? WHERE user_id = ?", [
-      updatedCoins,
-      user_id,
-    ]);
-
-    console.log(`Coins updated. Remaining Coins: ${updatedCoins}`);
-
     // Insert the transaction into the database
     const result = await db.query(
-      "INSERT INTO user_transction (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
+      "INSERT INTO user_transction (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) VALUES (?, ?, ?, ?, ?, NOW(),?)",
       [
         user_id,
         req.body.company_id,
-        transactionCoins,
-        transctionRate,
+        req.body.tranction_coin,
+        transctionRate, // Ensure this field is set,
         req.body.transction_amount,
+
         "unapproved",
       ]
     );
 
-    console.log("Transaction Created:", result);
+    console.log("Transaction Created:", result); // Log the inserted transaction data
 
+    // Respond with success message and transaction data
     res.status(201).json({
       success: true,
       message: "Transaction created successfully!",
+      // data: result, // You can send back the result of the insertion or any relevant data
     });
   } catch (error) {
-    console.error("Error creating sell transaction:", error);
+    console.error("Error creating sell transaction:", error); // Log the error object
 
     if (error.isJoi) {
+      // Handle Joi validation errors
       return next(
         new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
       );
     }
 
+    // Handle other types of errors (e.g., database errors)
     return next(
       new ErrorHandler("Failed to create transaction: " + error.message, 500)
     );
   }
 };
-
-
 
 ////////////////////////////////////
 // API to get user history (coins operation, status, pending, etc.)
