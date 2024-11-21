@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
 import Loader from '../components/Loader';
-import { FaRegCheckCircle } from "react-icons/fa";
+import { FaRegCheckCircle, FaYoutube  } from "react-icons/fa";
 import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
@@ -61,7 +61,7 @@ function Tasks() {
     taskKey: `task${quest.quest_id}`, // Unique keys
     questId: quest.quest_id, // Add quest_id here
     title: quest.quest_name,
-    icon: quest.image,
+    icon: <FaYoutube size={32} color="white" className="mr-4" />,
     videoUrl: quest.quest_url,
     coin: quest.coin_earn,
     status: quest.status
@@ -284,7 +284,8 @@ function Tasks() {
                 rows.map((row, index) => (
                   <div key={index} className="flex items-center justify-between bg-black py-2 px-4 font-poppins">
                     <div className="flex items-center">
-                      <img className="w-8 h-8 mr-4" src={row.icon} alt="" />
+                      {/* <img className="w-8 h-8 mr-4" src={row.icon} alt="" /> */}
+                      {row.icon}
                       <div>
                         <h3 className="text-sm capitalize text-white font-bold">{row.title}</h3>
                         <p className="text-xs capitalize text-white font-semibold">+ {parseInt(row.coin)} Coin</p>
