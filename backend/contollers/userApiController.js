@@ -1943,7 +1943,6 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
-
 exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
   // Debug: Log req.user to verify its structure
   console.log("req.user:", req.user);
@@ -1963,12 +1962,13 @@ exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
     // Get current date and time in the desired format
     const dateApprove = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-    // Update transactions in the database
+    // Update one pending transaction in the database
     const result = await db.query(
       `UPDATE user_transction 
            SET status = 'approved', 
                date_approved = ? 
-           WHERE user_id = ? AND status != 'approved'`, // Ensure we're updating only the pending transactions
+           WHERE user_id = ? AND status != 'approved' 
+           LIMIT 1`, // Ensure only one pending transaction is updated
       [dateApprove, user_id]
     );
 
@@ -1980,10 +1980,30 @@ exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
       });
     }
 
+    // Update the corresponding usercoin_audit entry to 'completed'
+    const auditResult = await db.query(
+      `UPDATE usercoin_audit 
+           SET status = 'completed' 
+           WHERE user_id = ? AND status != 'completed' 
+           LIMIT 1`, // Ensure only one audit entry is updated
+      [user_id]
+    );
+
+    // Check if any rows were updated in usercoin_audit
+    if (auditResult.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No matching usercoin_audit entry found",
+      });
+    }
+
     // Respond with success
-    res.json({ success: true, message: "Transactions approved successfully" });
+    res.json({
+      success: true,
+      message: "Transaction approved and audit status updated to completed",
+    });
   } catch (error) {
-    console.error("Error approving transactions:", error);
+    console.error("Error approving transaction:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
