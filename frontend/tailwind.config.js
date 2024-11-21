@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ["Poppins", "mukta"], // Add your custom font here
+        eina: ['"Eina"', 'sans-serif'], // Add your custom font
       },
     },
   },

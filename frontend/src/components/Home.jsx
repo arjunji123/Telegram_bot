@@ -71,7 +71,7 @@ useEffect(() => {
   //   return <Loader />;
   // }
   return (
-    <div className="bg-white flex justify-center">
+    <div className="bg-white flex justify-center font-eina">
     <ToastContainer
       position="top-right"
       autoClose={500}
@@ -86,19 +86,19 @@ useEffect(() => {
     )
     }
 
-    <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
+    <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative ">
       <div className="flex-grow relative z-0">
         <div className="px-4 py-6 space-y-6">
           <Logo />
           <div onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
             <BsPersonCircle size={28} className="mt-1" />
-            <p className="text-2xl font-extrabold capitalize">
+            <p className="text-2xl font-extrabold capitalize font-eina">
               {userData ? userData.user_name : ""}
             </p>
           </div>
   
           {/* User Balance */}
-          <div className="flex justify-center space-x-1 text-3xl font-extrabold font-sans">
+          <div className="flex justify-center space-x-1 text-3xl font-extrabold font-eina">
             <p>U</p>
             <p>{userData ? userData.coins : ""}</p>
           </div>
@@ -156,7 +156,7 @@ useEffect(() => {
       <div className="absolute bottom-20  w-full px-4">
            {/* Pending Coin Display */}
            <div className="w-10/12 py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
-              <p className="text-xl font-extrabold font-poppins ">
+              <p className="text-xl font-extrabold font-eina ">
                 Pending Coin
                 <span className="pl-2 text-xl  font-extrabold">
                   {pendingCoin ? pendingCoin.pending_coin : ""}

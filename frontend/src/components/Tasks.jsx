@@ -246,7 +246,7 @@ function Tasks() {
 
 
   return (
-    <div className="bg-white flex justify-center min-h-screen font-poppins  ">
+    <div className="bg-white flex justify-center min-h-screen font-eina ">
     <ToastContainer
       position="top-right"
       autoClose={5000}
@@ -258,11 +258,11 @@ function Tasks() {
     />
     {loading && <Loader />}
     
-    <div className="w-full bg-black text-white  flex flex-col max-w-lg h-screen sm:mx-auto overflow-y-auto ">
+    <div className="w-full bg-black text-white  flex flex-col max-w-lg h-screen sm:mx-auto overflow-y-auto font-eina ">
       <div className="flex-grow relative z-0">
         <div className="px-2 py-6 h-full z-10">
           <Logo />
-          <p className="text-left mt-6 text-lg font-extrabold font-poppins ml-2">EARN</p>
+          <p className="text-left mt-6 text-lg font-extrabold font-eina ml-2">EARN</p>
   
           {bannerQuests && bannerQuests.length > 0 && (
             <CustomSwiper 
@@ -276,13 +276,13 @@ function Tasks() {
             />
           )}
   
-          <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">COIN QUESTS</h1>
+          <h1 className="text-center text-2xl text-white shadow-lg font-bold font-eina mt-4">COIN QUESTS</h1>
   
           <div className=" h-fit mb-8 ">
             <div className="mt-4">
               {rows &&
                 rows.map((row, index) => (
-                  <div key={index} className="flex items-center justify-between bg-black py-2 px-4 font-poppins">
+                  <div key={index} className="flex items-center justify-between bg-black py-2 px-4 font-eina">
                     <div className="flex items-center">
                       {/* <img className="w-8 h-8 mr-4" src={row.icon} alt="" /> */}
                       {row.icon}
@@ -329,12 +329,12 @@ function Tasks() {
               {socials &&
                 socials.map((social, index) => (
                   <div key={index}>
-                    <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg">
+                    <div className="flex items-center justify-between bg-black py-2 px-4 rounded-lg shadow-lg ">
                       <div className="flex items-center">
                         <img className="w-8 h-8 mr-4" src={social.icon} alt="" />
                         <div>
-                          <h3 className="text-sm capitalize text-white font-bold">{social.title}</h3>
-                          <p className="text-xs capitalize text-white font-semibold">+ {parseInt(social.coin)} Coin</p>
+                          <h3 className="text-sm capitalize text-white font-bold font-eina">{social.title}</h3>
+                          <p className="text-xs capitalize text-white font-semibold font-eina">+ {parseInt(social.coin)} Coin</p>
                         </div>
                       </div>
   
