@@ -556,23 +556,53 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+// exports.allUsers = catchAsyncErrors(async (req, res, next) => {
+//   // Fetch user data along with pay_image in a single query using LEFT JOIN
+//   const users = await db.query(
+//     `SELECT 
+//         u.id,
+//         u.user_name,
+//         u.email,
+//         u.mobile,
+//         DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
+//         ud.pay_image,
+//         u.user_type,
+//         u.status  
+//      FROM users u
+//      INNER JOIN user_data ud ON u.id = ud.user_id 
+//      WHERE u.user_type IN (?)`,
+//     ["user"]
+//   );
+
+//   res.render(module_slug + "/index", {
+//     layout: module_layout,
+//     title: module_single_title + " " + module_add_text,
+//     module_slug,
+//     users, // Pass the users array directly
+//     originalUrl: req.originalUrl, // Pass the original URL here
+//   });
+// });
+
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
-  // Fetch user data along with pay_image in a single query using LEFT JOIN
-  const users = await db.query(
-    `SELECT 
-        u.id,
-        u.user_name,
-        u.email,
-        u.mobile,
-        DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
-        ud.pay_image,
-        u.user_type,
-        u.status  
-     FROM users u
-     INNER JOIN user_data ud ON u.id = ud.user_id 
-     WHERE u.user_type IN (?)`,
-    ["user"]
-  );
+  // Fetch user data along with pay_image and pending_coin in a single query using LEFT JOIN
+ // This SQL query fetches user details and related data
+const users = await db.query(
+  `SELECT 
+      u.id,
+      u.user_name,
+      u.email,
+      u.mobile,
+      DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
+      ud.pay_image,
+      ud.pending_coin,
+      u.user_type,
+      u.status  
+   FROM users u
+   INNER JOIN user_data ud ON u.id = ud.user_id 
+   WHERE u.user_type IN (?)`,
+  ["user"]
+);
+
 
   res.render(module_slug + "/index", {
     layout: module_layout,
