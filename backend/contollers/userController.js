@@ -1650,9 +1650,11 @@ exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+
 exports.renderTreeView = async (req, res) => {
   try {
-    const { userId } = req.params; // Assume userId is passed as a route parameter
+    const { userId } = req.params;
+
     const query = `
       SELECT 
         user_data.id AS user_data_id, 
@@ -1661,32 +1663,33 @@ exports.renderTreeView = async (req, res) => {
         user_data.parent_id, 
         user_data.leftchild_id, 
         user_data.rightchild_id,
-        user_data.referral_by
+        user_data.referral_by,
+        referrer.user_name AS referrer_name
       FROM user_data
       JOIN users ON user_data.user_id = users.id
+      LEFT JOIN users AS referrer ON CONCAT('UNITRADE', referrer.id) = user_data.referral_by;
     `;
 
     const [rows] = await mysqlPool.query(query);
-    console.log("Fetched rows:", rows);
-
     if (!rows || rows.length === 0) {
-      console.log("No user data found.");
       return res.status(404).send("No user data found.");
     }
 
     const userTree = buildUserTree(rows);
     const filteredTree = filterSubTree(userTree, userId);
-    // res.render('tree_view', { userTree: JSON.stringify(filteredTree) });
+
     res.render('tree_view', {
       layout: module_layout,
       title: module_single_title,
       userTree: JSON.stringify(filteredTree),
-  });
+    });
   } catch (error) {
     console.error("Error rendering user tree view:", error);
     res.status(500).send("Error rendering user tree view");
   }
 };
+
+
 
 function buildUserTree(users) {
   const userMap = {};
