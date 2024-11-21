@@ -37,7 +37,7 @@ exports.allTransactions = catchAsyncErrors(async (req, res, next) => {
   );
   console.log("transactions:", transactions); // Log for debugging
 
-  res.render("transaction/index", {
+  res.render("transactions/index", {
     layout: "layouts/main",
     title: "User Transactions", 
     transactions, // Pass transactions array to the frontendsdg
