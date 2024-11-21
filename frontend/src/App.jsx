@@ -27,10 +27,15 @@ function App({ Component, pageProps }) {
   const token = localStorage.getItem("user");
 
   useEffect(() => {
+    const tg = window.Telegram.WebApp;
+
+    tg.expand(); // Expands the app to full screen
+    tg.MainButton.text = "Submit";
+    tg.MainButton.show();
     // Simulate loading time for preloader, or you can perform initial API calls here
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // Adjust the time as needed
+    }, 1000); // Adjust the time as needed
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount
   }, []);

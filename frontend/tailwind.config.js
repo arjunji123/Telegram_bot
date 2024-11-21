@@ -4,6 +4,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      height: {
+        screen: '100vh', // Full viewport height
+      },
       fontFamily: {
         eina: ['"Eina"', 'sans-serif'], // Add your custom font
       },

@@ -37,8 +37,8 @@
 
   html,
   body {
-    height: 100%;
-    background-color: #1B1A1A;
+    overflow: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling (if needed) */
   }
   @font-face {
     font-family: 'Eina';

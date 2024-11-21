@@ -71,7 +71,7 @@ useEffect(() => {
   //   return <Loader />;
   // }
   return (
-    <div className="bg-white flex justify-center font-eina">
+    <div className="bg-white flex justify-center font-eina h-screen w-full overflow-hidden">
     <ToastContainer
       position="top-right"
       autoClose={500}
