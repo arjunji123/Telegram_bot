@@ -246,7 +246,7 @@ function Tasks() {
 
 
   return (
-    <div className="bg-white flex justify-center min-h-screen font-poppins">
+    <div className="bg-white flex justify-center min-h-screen font-poppins   ">
     <ToastContainer
       position="top-right"
       autoClose={5000}
@@ -258,7 +258,7 @@ function Tasks() {
     />
     {loading && <Loader />}
     
-    <div className="w-full bg-black text-white flex flex-col max-w-lg mx-4 sm:mx-auto">
+    <div className="w-full bg-black text-white  flex flex-col max-w-lg mx-4 sm:mx-auto overflow-y-auto">
       <div className="flex-grow mb-4 relative z-0">
         <div className="px-2 py-6 h-full z-10">
           <Logo />
@@ -278,7 +278,7 @@ function Tasks() {
   
           <h1 className="text-center text-2xl text-white shadow-lg font-bold font-poppins mt-4">COIN QUESTS</h1>
   
-          <div className="overflow-y-auto max-h-[70vh] min-h-[70vh] mb-2 scrollbar-thin scrollbar-thumb-gray-500">
+          <div className=" h-full mb-2 ">
             <div className="mt-4">
               {rows &&
                 rows.map((row, index) => (
