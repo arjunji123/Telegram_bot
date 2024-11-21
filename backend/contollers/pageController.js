@@ -599,7 +599,7 @@ exports.getQuestHistory = async (req, res) => {
 
     // Query to fetch quest data with user-specific completion status
     const questHistoryQuery = `
-      SELECT 
+        SELECT 
         q.id AS quest_id,
         q.quest_name,
         q.quest_type,
@@ -616,6 +616,7 @@ exports.getQuestHistory = async (req, res) => {
         q.status,
         q.image,
         q.coin_earn,
+        q.social_media,  -- Include social_media field in the query
         CASE 
           WHEN uca.status = 'completed' THEN 'completed'
           WHEN uca.status = 'waiting' THEN 'waiting'
@@ -660,6 +661,7 @@ exports.getQuestHistory = async (req, res) => {
       status: quest.completion_status,
       image: process.env.BACKEND_URL + "uploads/" + module_slug + "/" + quest.image,
       coin_earn: parseFloat(quest.coin_earn).toFixed(2),
+      social_media: quest.social_media, // Include social_media in the response
     }));
 
     // Construct response
