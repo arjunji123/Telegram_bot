@@ -94,7 +94,9 @@
             .text(d => {
                 const relationship = d.data.relationship ? ` (${d.data.relationship})` : '';
                 const referralBy = d.data.referral_by ? ` [Referred by: ${d.data.referral_by}]` : '';
-                return `${d.data.user_name}${relationship}${referralBy}`;
+                const referrerName = d.data.referrer_name ? ` [Referred by: ${d.data.referrer_name}]` : '';
+
+                return `${d.data.user_name}${relationship}${referralBy}${referrerName}`;
             });
 
         // Implement zoom and pan functionality
