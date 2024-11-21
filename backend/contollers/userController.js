@@ -118,6 +118,109 @@ exports.showLogin = catchAsyncErrors(async (req, res, next) => {
 });
 
 // Login user
+// exports.loginUser = catchAsyncErrors(async (req, res, next) => {
+//   const { email, password } = req.body;
+
+//   // Checking if user email and password are provided
+//   if (!email || !password) {
+//     req.flash("msg_response", {
+//       status: 400,
+//       message: "Please enter email and password",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+
+//   // Find user by email
+//   const userData = await db.query(
+//     "SELECT * FROM users WHERE email = ? limit 1",
+//     [email]
+//   );
+
+//   const user = userData[0][0];
+
+//   // If user not found
+//   if (!user) {
+//     req.flash("msg_response", {
+//       status: 400,
+//       message: "Invalid email or password",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+//   // Check if user_type is either "admin" or "company"
+//   if (user.user_type !== "admin" && user.user_type !== "company") {
+//     req.flash("msg_response", {
+//       status: 403,
+//       message: "You do not have permission to access this panel",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+
+//   // Compare passwords
+//   const isPasswordMatched = await User.comparePasswords(
+//     password,
+//     user.password
+//   );
+
+//   if (!isPasswordMatched) {
+//     req.flash("msg_response", {
+//       status: 400,
+//       message: "Invalid email or password",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+//   req.session.user = user;
+//   localStorage.setItem("user_type_n", user.user_type);
+//   const token = User.generateToken(user.id); // Adjust as per your user object structure
+//   // console.log("aaaa", token);
+
+//   // Send token and then redirect
+//   sendToken(user, token, 201, res);
+
+//   req.flash("msg_response", { status: 200, message: "Successfully LoggedIn" });
+
+//   // Redirect to the dashboard after sending the token
+//   return res.redirect(`/${process.env.ADMIN_PREFIX}/dashboard`);
+// });
+
+// exports.logout = catchAsyncErrors(async (req, res, next) => {
+//   res.cookie("token", null, {
+//     expires: new Date(Date.now()),
+//     httpOnly: true,
+//   });
+//   // Check if req.session exists before trying to destroy it
+//   if (res.session) {
+//     res.session.destroy((err) => {
+//       if (err) {
+//         return next(err); // Handle the error if necessary
+//       }
+//       res.clearCookie("connect.sid");
+//       res.clearCookie("token"); // Clear the session ID cookie
+//       localStorage.removeItem("user_type_n");
+
+//       res.flash("msg_response", {
+//         status: 200,
+//         message: "Logout Successfully",
+//       });
+//       res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//     });
+//   } else {
+//     // Handle the case where req.session is undefined
+//     res.clearCookie("connect.sid");
+//     if (typeof window !== "undefined" && window.localStorage) {
+//       localStorage.removeItem("user_type_n"); // Clear specific data
+//       // or
+//       localStorage.clear(); // Clear all data
+//       console.log("User data removed from localStorage");
+//     }
+//     res.clearCookie("token");
+//     req.flash("msg_response", {
+//       status: 200,
+//       message: "Session already cleared or not found",
+//     });
+//     res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+// });
+
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -170,6 +273,8 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   }
   req.session.user = user;
   localStorage.setItem("user_type_n", user.user_type);
+
+  localStorage.setItem("userdatA_n", user.id);
   const token = User.generateToken(user.id); // Adjust as per your user object structure
   // console.log("aaaa", token);
 
@@ -196,6 +301,7 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
       res.clearCookie("connect.sid");
       res.clearCookie("token"); // Clear the session ID cookie
       localStorage.removeItem("user_type_n");
+      localStorage.removeItem("userdatA_n");
 
       res.flash("msg_response", {
         status: 200,
@@ -208,6 +314,8 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
     res.clearCookie("connect.sid");
     if (typeof window !== "undefined" && window.localStorage) {
       localStorage.removeItem("user_type_n"); // Clear specific data
+      localStorage.removeItem("userdatA_n");
+
       // or
       localStorage.clear(); // Clear all data
       console.log("User data removed from localStorage");
@@ -220,6 +328,7 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
     res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 });
+
 
 //forgot password for sending token in mail
 exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
