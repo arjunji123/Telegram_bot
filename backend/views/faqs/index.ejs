@@ -1,4 +1,3 @@
-
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -6,54 +5,113 @@
                 <div class="row page_top_bar">
                     <div class="col-12">
                         <div class="col-6 heading float-left">
-                            <h4 class="mt-0 header-title"><%= title %></h4>
+                            <h4 class="mt-0 header-title">
+                                All Withdrawal
+                            </h4>
                         </div>
                         <div class="col-6 btns float-left text-right">
                             <a class="btn btn-primary" href="/admin/<%= module_slug %>/add">Add New</a>
                         </div>
                     </div>
                 </div>
-                
 
                 <table id="responsive-datatable" class="table table-bordered table-bordered dt-responsive nowrap">
                     <thead>
-                    <tr>
-                        <th>S.No.</th>
-                        <th>Question</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>User ID</th>
+                            <th>User UPI ID</th>
+                            <th>Transaction Coins</th>
+                            <th>Transaction Amount</th>
+                            <th>Status</th>
+                            <th>Payment Proof</th>
+                        </tr>
                     </thead>
 
-
                     <tbody>
-                    <% let serialNumber = 1; %>
-                    <% blogs[0].forEach(function(blog) { %>
-                        <tr>
-                            <td><%= serialNumber++ %></td>
-                            <td><%= blog.title %></td>
-                            <td class="status_box">
-                                <%  if(blog.status == 1){ %>
-                                  <span class="btn btn-success rounded-pill waves-effect waves-light">Active</span>
-                               <% }else{ %> 
-                                <span class="btn btn-danger rounded-pill waves-effect waves-light">Inactive</span>
-                                <% } %>
-                               <!-- <div class="switchery-toggle">
-                                    <input type="checkbox" id="switchd" class="toogle_checkbox" value="0" /><label for="switch">Status</label>
-                                </div>-->
-                            </td>
-                            <td class="action_box"><a href="/admin/<%= module_slug %>/<%= blog.id %>"><i class="fe-eye"></i></a> <a href="/admin/<%= module_slug %>/edit/<%= blog.id %>"><i class="fe-edit"></i></a>  <a href="/admin/<%= module_slug %>/delete/<%= blog.id %>"><i class="fe-trash-2"></i></a></td>
-                        </tr>
-                    <% }); %> 
-                    
-                    
+                        <% let serialNumber=1; %>
+                            <% users[0].forEach(function(user) { %> <!-- Access the inner array -->
+                                <tr>
+                                    <td>
+                                        <%= serialNumber++ %>
+                                    </td>
+                                    <td>
+                                        <%= user.user_id %>
+                                    </td>
+                                    <td>
+                                        <%= user.user_upi_id %>
+                                    </td>
+                                    <td>
+                                        <%= user.tranction_coin %>
+                                    </td>
+                                    <td>
+                                        <%= user.transction_amount %>
+                                    </td>
+                                    <td class="status_box">
+                                        <% if (user.status==='approved' ) { %>
+                                            <span
+                                                class="btn btn-success rounded-pill waves-effect waves-light">Approved</span>
+                                            <% } else { %>
+                                                <span
+                                                    class="btn btn-danger rounded-pill waves-effect waves-light">Unapproved</span>
+                                                <% } %>
+                                    </td>
+                                    <td class="action_box">
+                                        <button class="btn btn-info" onclick="triggerUpload(<%= user.user_id %>)">
+                                            Upload
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
                     </tbody>
                 </table>
             </div>
         </div>
-       
     </div>
 </div> <!-- end row -->
 
-        
+<script>
+    function triggerUpload(userId) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
 
+        fileInput.onchange = async function () {
+            const file = fileInput.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('user_id', userId);  // Ensure 'user_id' is sent in the form
+                formData.append('image', file);      // Ensure the file is sent
+
+                try {
+                    // Ensure the URL matches the backend API route
+                    const response = await fetch('https://telegram-bot-by30.onrender.com/api/v1/upload', {
+                        method: 'PATCH',
+                        body: formData,
+                    });
+
+                    // Check if the response is not OK
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Error response text:', errorText);
+                        throw new Error('Unexpected response format or server error');
+                    }
+
+                    const result = await response.json(); // Parse the JSON response
+                    if (result.success) {
+                        alert('Image uploaded successfully!');
+                        console.log(result);
+                    } else {
+                        alert(`Error: ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error('Upload failed:', error);
+                    alert('An error occurred while uploading the image.');
+                }
+            }
+        };
+
+        fileInput.click();
+    }
+</script>
