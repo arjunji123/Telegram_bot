@@ -28,9 +28,9 @@ const CustomSwiper = ({
             // Background gradients for each slide (alternating colors)
             const gradientBackgrounds = [
               "from-gray-300 to-gray-400", // First slide
-              "from-fuchsia-300 to-fuchsia-500", // Second slide
-              "from-teal-400 to-teal-500", // Third slide
-              "from-rose-300 to-rose-400", // Fourth slide
+              "from-[#EFA7FC] to-[#f4dee5]", // Second slide
+              "from-[#C2ECEA] to-[#81D5B6]", // Third slide
+              "from-[#f3ef9d] to-[#e1dc7e]", // Fourth slide
             ];
             const bgGradient =
               gradientBackgrounds[index % gradientBackgrounds.length];
@@ -53,7 +53,7 @@ const CustomSwiper = ({
                   </div>
 
                   {/* Reward */}
-                  <p className="text-gray-700 text-xs font-bold mt-2">
+                  <p className="text-gray-700 text-xs font-bold mt-4">
                     +{parseInt(banner.coin_earn)} Coins
                   </p>
 

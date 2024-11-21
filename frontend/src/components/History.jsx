@@ -44,9 +44,6 @@ useEffect(() => {
   fetchData();
 }, [dispatch]);
 
-// if (loading) {
-//   return <Loader />;
-// }
 
   return (
     <div className="bg-white min-h-screen flex justify-center font-poppins">
@@ -73,7 +70,7 @@ useEffect(() => {
           {date}
         </p>
         {groupedTransactions[date]
-          .filter((transaction) => transaction.pending_coin > 0) // Filter out transactions where pending_coin is 0
+          // .filter((transaction) => transaction.pending_coin > 0) 
           .map((transaction, index) => (
             <div key={index} className="flex items-center justify-between py-3">
               <div className="flex items-center space-x-3">
