@@ -195,13 +195,13 @@ console.log("params", params.get);
     <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl ">
       
       {/* Logo and Welcome Section */}
-      <div className="px-6 sm:px-10 shadow-lg relative">
+      {/* <div className="px-6 sm:px-10 shadow-lg relative">
         <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover draggable theme="dark" />
         <div className="flex justify-center py-4 space-x-1">
           <h1 className="font-poppins text-xl sm:text-2xl font-extrabold">UNITRADE</h1>
           <img src={logo} alt="logo" className="w-5 h-5 sm:w-6 sm:h-6 mt-0.5" />
         </div>
-      </div>
+      </div> */}
 
       {/* Form Section */}
       <div className="p-6 sm:p-8 space-y-6">
@@ -305,7 +305,7 @@ console.log("params", params.get);
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold font-eina text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
               disabled={loading} // Disable the button when loading
             >
               

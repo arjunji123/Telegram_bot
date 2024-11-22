@@ -89,7 +89,7 @@ useEffect(() => {
     <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative ">
       <div className="flex-grow relative z-0">
         <div className="px-4 py-6 space-y-6">
-          <Logo />
+          {/* <Logo /> */}
           <div onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
             <BsPersonCircle size={28} className="mt-1" />
             <p className="text-2xl font-extrabold capitalize font-eina">
@@ -155,7 +155,7 @@ useEffect(() => {
       {/* Pending Coin Display - Updated Style */}
       <div className="absolute bottom-20  w-full px-4">
            {/* Pending Coin Display */}
-           <div className="w-10/12 py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
+           <div className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
               <p className="text-xl font-extrabold font-eina ">
                 Pending Coin
                 <span className="pl-2 text-xl  font-extrabold">

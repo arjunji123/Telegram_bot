@@ -285,7 +285,7 @@ function Tasks() {
     <div className="w-full bg-black text-white  flex flex-col max-w-lg h-screen sm:mx-auto  font-eina  ">
       <div className="flex-grow overflow-y-auto">
         <div className="px-2 py-6 h-full z-10">
-          <Logo />
+          {/* <Logo /> */}
           <p className="text-left mt-6 text-lg font-extrabold font-eina ml-2">EARN</p>
   
           {bannerQuests && bannerQuests.length > 0 && (

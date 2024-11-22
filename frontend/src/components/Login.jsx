@@ -74,7 +74,7 @@ function Login() {
       <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden ">
         <div className="p-6 sm:p-10  shadow-lg relative">
           <div className="absolute top-0 left-0 w-full h-1 "></div>
-          <div className="flex justify-center py-4 space-x-1">
+          {/* <div className="flex justify-center py-4 space-x-1">
             <h1 className="font-poppins text-xl sm:text-2xl font-extrabold">
               UNITRADE
             </h1>
@@ -83,7 +83,7 @@ function Login() {
               alt="logo"
               className="w-5 sm:w-6 h-5 sm:h-6 mt-0.5"
             />
-          </div>
+          </div> */}
           <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-[#e0e0e0] tracking-wide text-center">
             {firstName}
           </h1>
@@ -127,7 +127,7 @@ function Login() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+                className="w-full py-3 sm:py-4 text-sm sm:text-base font-eina uppercase font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
               >
                 Log In
               </button>

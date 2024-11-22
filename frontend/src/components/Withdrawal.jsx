@@ -233,10 +233,10 @@ const handleSellSubmit = (e) => {
     }
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
         <div className="flex-grow relative z-0 pt-6  pb-16">
-          <Logo />
+          {/* <Logo /> */}
           <div className="flex justify-center font-eina  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
             <p>U</p>
-            <p className="">{userData ? userData.coins : "700,0000"}</p>
+            <p className="">{userData ? userData.coins : "0"}</p>
           </div>
 
            <div className="grid grid-cols-2 gap-2 mb-4">
