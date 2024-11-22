@@ -74,30 +74,23 @@
                                                 No screenshot uploaded
                                                 <% } %>
                                     </td>
-                                    <td>
-                                        <% if (parseInt(user.status)===1) { %>
-                                            <!-- Deactivate Form - shown only when user is active -->
-                                            <form action="/admin/users/update-status" method="POST"
-                                                style="display:inline;">
+                                     <td>
+                                        <% if (parseInt(user.status) === 1) { %>
+                                            <!-- User is active, actions button is disabled and hidden -->
+                                            <button class="btn btn-sm btn-danger" >
+                                                <i class="fas fa-toggle-off"></i> Deactivate
+                                            </button>
+                                        <% } else { %>
+                                            <!-- Activate Form - shown only when user is inactive -->
+                                            <form action="/admin/users/update-status" method="POST" style="display:inline;">
                                                 <input type="hidden" name="userId" value="<%= user.id %>">
-                                                <input type="hidden" name="status" value="0">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-toggle-off"></i> Deactivate
+                                                <input type="hidden" name="status" value="1">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-toggle-on"></i> Activate
                                                 </button>
                                             </form>
-                                            <% } else { %>
-                                                <!-- Activate Form - shown only when user is inactive -->
-                                                <form action="/admin/users/update-status" method="POST"
-                                                    style="display:inline;">
-                                                    <input type="hidden" name="userId" value="<%= user.id %>">
-                                                    <input type="hidden" name="status" value="1">
-                                                    <button type="submit" class="btn btn-sm btn-success">
-                                                        <i class="fas fa-toggle-on"></i> Activate
-                                                    </button>
-                                                </form>
-                                                <% } %>
+                                        <% } %>
                                     </td>
-
 
                                     <td class="action_box">
                                         <a href="/admin/<%= module_slug %>/<%= user.id %>"><i class="fe-eye"></i></a>
