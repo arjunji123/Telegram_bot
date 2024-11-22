@@ -117,110 +117,6 @@ exports.showLogin = catchAsyncErrors(async (req, res, next) => {
   res.render("users/login", { message });
 });
 
-// Login user
-// exports.loginUser = catchAsyncErrors(async (req, res, next) => {
-//   const { email, password } = req.body;
-
-//   // Checking if user email and password are provided
-//   if (!email || !password) {
-//     req.flash("msg_response", {
-//       status: 400,
-//       message: "Please enter email and password",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-
-//   // Find user by email
-//   const userData = await db.query(
-//     "SELECT * FROM users WHERE email = ? limit 1",
-//     [email]
-//   );
-
-//   const user = userData[0][0];
-
-//   // If user not found
-//   if (!user) {
-//     req.flash("msg_response", {
-//       status: 400,
-//       message: "Invalid email or password",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-//   // Check if user_type is either "admin" or "company"
-//   if (user.user_type !== "admin" && user.user_type !== "company") {
-//     req.flash("msg_response", {
-//       status: 403,
-//       message: "You do not have permission to access this panel",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-
-//   // Compare passwords
-//   const isPasswordMatched = await User.comparePasswords(
-//     password,
-//     user.password
-//   );
-
-//   if (!isPasswordMatched) {
-//     req.flash("msg_response", {
-//       status: 400,
-//       message: "Invalid email or password",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-//   req.session.user = user;
-//   localStorage.setItem("user_type_n", user.user_type);
-//   const token = User.generateToken(user.id); // Adjust as per your user object structure
-//   // console.log("aaaa", token);
-
-//   // Send token and then redirect
-//   sendToken(user, token, 201, res);
-
-//   req.flash("msg_response", { status: 200, message: "Successfully LoggedIn" });
-
-//   // Redirect to the dashboard after sending the token
-//   return res.redirect(`/${process.env.ADMIN_PREFIX}/dashboard`);
-// });
-
-// exports.logout = catchAsyncErrors(async (req, res, next) => {
-//   res.cookie("token", null, {
-//     expires: new Date(Date.now()),
-//     httpOnly: true,
-//   });
-//   // Check if req.session exists before trying to destroy it
-//   if (res.session) {
-//     res.session.destroy((err) => {
-//       if (err) {
-//         return next(err); // Handle the error if necessary
-//       }
-//       res.clearCookie("connect.sid");
-//       res.clearCookie("token"); // Clear the session ID cookie
-//       localStorage.removeItem("user_type_n");
-
-//       res.flash("msg_response", {
-//         status: 200,
-//         message: "Logout Successfully",
-//       });
-//       res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//     });
-//   } else {
-//     // Handle the case where req.session is undefined
-//     res.clearCookie("connect.sid");
-//     if (typeof window !== "undefined" && window.localStorage) {
-//       localStorage.removeItem("user_type_n"); // Clear specific data
-//       // or
-//       localStorage.clear(); // Clear all data
-//       console.log("User data removed from localStorage");
-//     }
-//     res.clearCookie("token");
-//     req.flash("msg_response", {
-//       status: 200,
-//       message: "Session already cleared or not found",
-//     });
-//     res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-// });
-
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -555,33 +451,6 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
-// exports.allUsers = catchAsyncErrors(async (req, res, next) => {
-//   // Fetch user data along with pay_image in a single query using LEFT JOIN
-//   const users = await db.query(
-//     `SELECT 
-//         u.id,
-//         u.user_name,
-//         u.email,
-//         u.mobile,
-//         DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
-//         ud.pay_image,
-//         u.user_type,
-//         u.status  
-//      FROM users u
-//      INNER JOIN user_data ud ON u.id = ud.user_id 
-//      WHERE u.user_type IN (?)`,
-//     ["user"]
-//   );
-
-//   res.render(module_slug + "/index", {
-//     layout: module_layout,
-//     title: module_single_title + " " + module_add_text,
-//     module_slug,
-//     users, // Pass the users array directly
-//     originalUrl: req.originalUrl, // Pass the original URL here
-//   });
-// });
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   // Fetch user data along with pay_image and pending_coin in a single query using LEFT JOIN
@@ -1054,164 +923,6 @@ exports.findById = async (table_name, id) => {
   }
 };
 
-//////////////////////////////////////////////////
-
-// Joi schema for validation
-// const coinRateSchema = Joi.object({
-//   company_id: Joi.number().integer().required(),
-//   coin_rate: Joi.string().required(),
-//   description: Joi.string().optional(),
-// });
-
-// exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
-//   // Step 1: Validate the request body
-//   try {
-//     await coinRateSchema.validateAsync(req.body, {
-//       abortEarly: false,
-//       allowUnknown: true,
-//     });
-//   } catch (error) {
-//     return next(
-//       new ErrorHandler(
-//         error.details.map((d) => d.message), // Map validation errors
-//         400
-//       )
-//     );
-//   }
-
-//   // Step 2: Extract company_id from request body
-//   const companyId = req.body.company_id;
-
-//   // Step 3: Check if the company exists in the users table
-//   const companyExists = await QueryModel.findOne("users", { id: companyId });
-
-//   if (!companyExists) {
-//     return next(new ErrorHandler("Company not found.", 404));
-//   }
-
-//   // Step 4: Prepare data for insertion into the company_data table
-//   const insertData = {
-//     company_id: companyId,
-//     coin_rate: req.body.coin_rate,
-//     description: req.body.description || "", // Optional description
-//   };
-
-//   // Step 5: Insert the coin rate data into the company_data table
-//   try {
-//     const coinRate = await QueryModel.saveData(
-//       "company_data",
-//       insertData,
-//       next
-//     );
-
-//     // Success response
-//     req.flash("msg_response", {
-//       status: 200,
-//       message: "Coin rate added successfully for the company.",
-//     });
-
-//     // Redirect to the users page after successful insert
-//     res.redirect(`/admin/users`);
-//   } catch (err) {
-//     console.error("Error saving coin rate data:", err);
-//     return next(new ErrorHandler("Error while saving coin rate data.", 500));
-//   }
-// });
-
-// exports.submitCompanyForm = catchAsyncErrors(async (req, res, next) => {
-//   const { coin_rate, description } = req.body; // Extract data from the request body
-//   const companyId = req.params.id; // Get the company ID from the request parameters
-
-//   // Validate input (basic example; you can add more validation as needed)
-//   if (!coin_rate || !description) {
-//     return next(
-//       new ErrorHandler("Coin rate and description are required", 400)
-//     );
-//   }
-
-//   try {
-//     // Check if the company data already exists
-//     const existingCompanyDataQuery = await db.query(
-//       "SELECT * FROM company_data WHERE company_id = ?",
-//       [companyId]
-//     );
-
-//     // If data exists, update the existing record
-//     if (existingCompanyDataQuery[0].length > 0) {
-//       await db.query(
-//         "UPDATE company_data SET coin_rate = ?, description = ? WHERE company_id = ?",
-//         [coin_rate, description, companyId]
-//       );
-
-//       // Optionally, set a flash message or response for successful update
-//       req.flash("msg_response", {
-//         status: 200,
-//         message: "Coin rate updated successfully for company ID: " + companyId,
-//       });
-//     } else {
-//       // If data does not exist, insert a new record
-//       const insertData = {
-//         company_id: companyId,
-//         coin_rate: coin_rate,
-//         description: description,
-//       };
-
-//       await db.query("INSERT INTO company_data SET ?", insertData);
-
-//       // Optionally, set a flash message or response for successful insertion
-//       req.flash("msg_response", {
-//         status: 200,
-//         message:
-//           "Coin rate submitted successfully for company ID: " + companyId,
-//       });
-//     }
-
-//     // Redirect back to the index page or another appropriate page
-//     res.redirect("/admin/" + module_slug); // Change this to the appropriate redirection
-//   } catch (error) {
-//     console.error("Error while submitting company form:", error);
-//     return next(
-//       new ErrorHandler(
-//         "An error occurred while submitting the company form",
-//         500
-//       )
-//     );
-//   }
-// });
-
-// exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
-//   const companyId = req.params.id; // Get the company ID from the URL
-
-//   // Fetch the company details from the database
-//   const companyDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-//     companyId,
-//   ]);
-
-//   const company = companyDetail[0][0]; // Extract the company object from the result
-
-//   // Check if the company exists
-//   if (!company) {
-//     return next(new ErrorHandler("Company not found", 404)); // Handle company not found
-//   }
-
-//   // Fetch the existing company data from the company_data table
-//   const companyDataQuery = await db.query(
-//     "SELECT * FROM company_data WHERE company_id = ?",
-//     [companyId]
-//   );
-
-//   const companyData = companyDataQuery[0][0] || {}; // Get the company data or set to an empty object if not found
-
-//   // Render the company form view with the company details and existing company data
-//   res.render(module_slug + "/company-form", {
-//     layout: module_layout, // Assuming there's a layout file
-//     title: "Submit Company Data",
-//     companyId, // Pass the company ID to the form
-//     company, // Pass the company object to the view
-//     companyData, // Pass the existing company data (coin_rate, description)
-//   });
-// });
-
 ///////////////////////////////////////////////
 
 // API to get a single user record
@@ -1231,7 +942,9 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
         ud.referral_by,
         ud.coins,
         ud.pending_coin,
-        ud.upi_id
+        ud.upi_id,
+        ud.transaction_id,
+        ud.utr_no
       FROM
         users u
       LEFT JOIN
@@ -1272,21 +985,6 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-// exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
-//   // Find the user by ID using the Mongoose model
-//   const user = await QueryModel.findById(table_name, req.params.id, next);
-
-//   if (!user) {
-//     return res.status(404).send("User not found");
-//   }
-
-//   // Render the user details page
-//   res.render(module_slug + "/detail", {
-//     layout: module_layout, // Use the correct layout
-//     title: module_single_title, // Use the correct title
-//     user,
-//   });
-// });
 
 ////////////////////
 
