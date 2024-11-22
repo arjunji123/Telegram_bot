@@ -1771,29 +1771,25 @@ const sellTransactionSchema = Joi.object({
 
 exports.createSellTransaction = async (req, res, next) => {
   try {
-    // Log the incoming request body for debugging
     console.log("Request Body:", req.body);
 
-    // Validate incoming request body against the schema
+    // Step 1: Validate incoming request
     await sellTransactionSchema.validateAsync(req.body, {
       abortEarly: false,
       allowUnknown: true,
     });
 
-    // Extract user ID
     const user_id = req.user?.id;
     console.log("User ID:", user_id);
     if (!user_id) {
       return next(new ErrorHandler("User ID is required", 401));
     }
 
-    // Retrieve company data from the database
-    const companyData = await db.query(
+    // Step 2: Fetch company data
+    const [companyData] = await db.query(
       "SELECT * FROM company_data WHERE company_id = ?",
       [req.body.company_id]
     );
-
-    console.log("Company Data:", companyData);
 
     if (!companyData || companyData.length === 0) {
       return next(
@@ -1801,49 +1797,52 @@ exports.createSellTransaction = async (req, res, next) => {
       );
     }
 
-    const transctionRate = parseFloat(companyData[0][0].coin_rate);
-    console.log("Transaction Rate:", transctionRate);
-
-    if (isNaN(transctionRate)) {
+    const transactionRate = parseFloat(companyData[0]?.coin_rate);
+    if (isNaN(transactionRate)) {
       return next(
         new ErrorHandler('"tranction_rate" must be a valid number', 400)
       );
     }
 
-    // Check if the user has enough coins in the user_data table
-    const userData = await db.query(
+    // Step 3: Check user's coin balance
+    const [userData] = await db.query(
       "SELECT coins FROM user_data WHERE user_id = ?",
       [user_id]
     );
-
-    console.log("User Data:", userData);
 
     if (!userData || userData.length === 0) {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    const userCoins = parseFloat(userData[0][0].coins);
-    console.log("User Coins:", userCoins);
-
+    const userCoins = parseFloat(userData[0]?.coins);
     const transactionCoins = parseFloat(req.body.tranction_coin);
-    console.log("Transaction Coins:", transactionCoins);
 
     if (userCoins < transactionCoins) {
       return next(new ErrorHandler("Insufficient coins", 400));
     }
-    // Insert the transaction into the database
-    const transactionResult = await db.query(
-      "INSERT INTO user_transction (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
+
+    // Step 4: Create transaction
+    const [transactionResult] = await db.query(
+      `INSERT INTO user_transction 
+      (user_id, company_id, tranction_coin, tranction_rate, transction_amount, data_created, status) 
+      VALUES (?, ?, ?, ?, ?, NOW(), ?)`,
       [
         user_id,
         req.body.company_id,
         transactionCoins,
-        transctionRate,
+        transactionRate,
         req.body.transction_amount,
         "unapproved",
       ]
     );
-    // Deduct the coins from the user's balance
+
+    const transactionId = transactionResult?.insertId;
+    if (!transactionId) {
+      throw new Error("Failed to generate transaction ID.");
+    }
+    console.log("Generated Transaction ID:", transactionId);
+
+    // Step 5: Deduct coins from user's balance
     const updatedCoins = userCoins - transactionCoins;
     await db.query("UPDATE user_data SET coins = ? WHERE user_id = ?", [
       updatedCoins,
@@ -1852,38 +1851,28 @@ exports.createSellTransaction = async (req, res, next) => {
 
     console.log(`Coins updated. Remaining Coins: ${updatedCoins}`);
 
-    console.log("Transaction Created:", transactionResult);
-
-    // Insert the corresponding entry into the usercoin_audit table
-    const auditParams = {
+    // Step 6: Create audit entry
+    const auditParams = [
       user_id,
-      company_id: req.body.company_id,
-      type: "withdrawal",
-      title: "sell coins",
-      status: "waiting",
-      earn_coin: -transactionCoins,
-    };
+      req.body.company_id,
+      "withdrawal",
+      "sell coins",
+      "waiting",
+      -transactionCoins,
+      transactionId,
+    ];
+    console.log("Audit Query Parameters:", auditParams);
 
-    console.log("Audit Parameters:", auditParams);
-
-    const auditResult = await db.query(
-      `
-      INSERT INTO usercoin_audit 
-      (user_id, company_id, type, title, status, earn_coin, date_entered) 
-      VALUES (?, ?, ?, ?, ?, ?, NOW())
-    `,
-      [
-        auditParams.user_id,
-        auditParams.company_id,
-        auditParams.type,
-        auditParams.title,
-        auditParams.status,
-        auditParams.earn_coin,
-      ]
+    await db.query(
+      `INSERT INTO usercoin_audit 
+      (user_id, company_id, type, title, status, earn_coin, transaction_id, date_entered) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      auditParams
     );
 
-    console.log("Audit Entry Created Successfully:", auditResult);
+    console.log("Audit Entry Created Successfully");
 
+    // Step 7: Respond with success
     res.status(201).json({
       success: true,
       message: "Transaction and audit entry created successfully!",
@@ -1891,12 +1880,14 @@ exports.createSellTransaction = async (req, res, next) => {
   } catch (error) {
     console.error("Error creating sell transaction:", error);
 
+    // Handle validation errors from Joi
     if (error.isJoi) {
       return next(
         new ErrorHandler(error.details.map((d) => d.message).join(", "), 400)
       );
     }
 
+    // Handle other errors
     return next(
       new ErrorHandler("Failed to create transaction: " + error.message, 500)
     );
@@ -1943,64 +1934,113 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
+
 exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
-  // Debug: Log req.user to verify its structure
-  console.log("req.user:", req.user);
-
-  // Extract user_id from req.user (using 'id' from req.user and renaming it to 'user_id')
-  const { id: user_id } = req.user || {};
-
-  // Validate input
-  if (!user_id) {
-    return res.status(400).json({
-      success: false,
-      message: "User ID is required",
-    });
-  }
-
   try {
-    // Get current date and time in the desired format
-    const dateApprove = new Date().toISOString().slice(0, 19).replace("T", " ");
+    console.log("req.body:", req.body);
 
-    // Update one pending transaction in the database
-    const result = await db.query(
-      `UPDATE user_transction 
-           SET status = 'approved', 
-               date_approved = ? 
-           WHERE user_id = ? AND status != 'approved' 
-           LIMIT 1`, // Ensure only one pending transaction is updated
-      [dateApprove, user_id]
-    );
+    // Extract transaction ID from request body
+    const { transaction_id } = req.body;
 
-    // Check if any rows were updated
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
+    if (!transaction_id) {
+      return res.status(400).json({
         success: false,
-        message: "No pending transactions found for this user",
+        message: "Transaction ID is required",
       });
     }
 
-    // Update the corresponding usercoin_audit entry to 'completed'
-    const auditResult = await db.query(
-      `UPDATE usercoin_audit 
-           SET status = 'completed' 
-           WHERE user_id = ? AND status != 'completed' 
-           LIMIT 1`, // Ensure only one audit entry is updated
-      [user_id]
+    // Get current date and time in the desired format
+    const dateApprove = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+    // Retrieve transaction details for the given transaction_id
+    const transactionDetails = await db.query(
+      `SELECT company_id, tranction_coin 
+       FROM user_transction 
+       WHERE id = ? AND status != 'approved'`,
+      [transaction_id]
     );
 
-    // Check if any rows were updated in usercoin_audit
-    if (auditResult.affectedRows === 0) {
+    if (!transactionDetails || transactionDetails.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No matching usercoin_audit entry found",
+        message: "No pending transaction found with the provided ID",
+      });
+    }
+
+    const { company_id, tranction_coin } = transactionDetails[0][0];
+
+    if (!company_id || !tranction_coin) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid transaction details (company_id or tranction_coin missing)",
+      });
+    }
+
+    // Update the specific transaction in the user_transction table
+    const transactionResult = await db.query(
+      `UPDATE user_transction 
+       SET status = 'approved', 
+           date_approved = ? 
+       WHERE id = ?`,
+      [dateApprove, transaction_id]
+    );
+
+    if (transactionResult.affectedRows === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to approve the transaction",
+      });
+    }
+
+    // Update the corresponding entry in the usercoin_audit table
+    const auditResult = await db.query(
+      `UPDATE usercoin_audit 
+       SET status = 'completed' 
+       WHERE transaction_id = ?`,
+      [transaction_id]
+    );
+
+    if (auditResult.affectedRows === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update the audit entry",
+      });
+    }
+
+    // Check if company_id exists in company_data
+    const companyExists = await db.query(
+      `SELECT company_id 
+       FROM company_data 
+       WHERE company_id = ?`,
+      [company_id]
+    );
+
+    if (!companyExists || companyExists.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found in company_data table",
+      });
+    }
+
+    // Add transaction coins to company_coin in the company_data table
+    const companyCoinUpdateResult = await db.query(
+      `UPDATE company_data 
+       SET company_coin = COALESCE(company_coin, 0) + ? 
+       WHERE company_id = ?`,
+      [tranction_coin, company_id]
+    );
+
+    if (companyCoinUpdateResult.affectedRows === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update the company's coin balance",
       });
     }
 
     // Respond with success
     res.json({
       success: true,
-      message: "Transaction approved and audit status updated to completed",
+      message: "Transaction approved, audit updated, and company coins added successfully!",
     });
   } catch (error) {
     console.error("Error approving transaction:", error);
