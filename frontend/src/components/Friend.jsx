@@ -67,12 +67,17 @@ function Friend() {
   const handleShareClick = () => {
     if (referralCode) {
       try {
+        // Attempt to open the Telegram link
         const opened = window.open(telegramDeepLink, "_blank");
         if (!opened) {
           console.error("Failed to open Telegram link.");
+          toast.error("Failed to open Telegram. Make sure Telegram is installed.");
+        } else {
+          console.log("Telegram link opened successfully.");
         }
       } catch (error) {
         console.error("Error sharing via Telegram:", error);
+        toast.error("There was an error opening the Telegram link.");
       }
     } else {
       toast.error("Referral link is not available yet.");
