@@ -19,7 +19,7 @@ function Tasks() {
   const apiQuests = apiData?.quests || [];
   const questHistory = useSelector((state) => state.apiData.data);
   const quest = questHistory?.quest?.quests
-  // console.log(quest);
+  const [loadingState, setLoadingState] = useState({});
   const [loading, setLoading] = useState(true);
   const [watchTimes, setWatchTimes] = useState({});
   const [videoDurations, setVideoDurations] = useState({});
@@ -144,6 +144,7 @@ function Tasks() {
     // console.log("questIdquestId",questId);
 
     try {
+      setLoadingState(prevState => ({ ...prevState, [task]: true }));
       const tokenData = localStorage.getItem("user");
       if (!tokenData) throw new Error("No token data found in localStorage");
 
@@ -163,6 +164,8 @@ function Tasks() {
       dispatch(fetchQuestHistory());
       setHasWatched(prev => ({ ...prev, [task]: true }));
       toast("Task Completed!");
+      setLoadingState(prevState => ({ ...prevState, [task]: false }));
+
     } catch (error) {
       toast.error(`Error completing task: ${error.message}`);
       console.error("Error completing quest:", error);
@@ -339,7 +342,13 @@ function Tasks() {
                             onClick={() => handleCheckButtonClick(row.taskKey, row.questId)}
                             className="bg-[#282828] text-white w-20 flex justify-center py-2 rounded-full text-sm font-bold"
                           >
-                            Verify
+                           {loadingState[row.taskKey] ? (
+           <div className="flex justify-center items-center">
+           <div className="spinner"></div> {/* Custom spinner */}
+         </div>
+        ) : (
+          "Verify"
+        )}
                           </button>
                         )}
                       </>
@@ -401,7 +410,22 @@ function Tasks() {
         </div>
       </div>
     </div>
-  
+       {/* CSS for Custom Spinner */}
+       <style jsx>{`
+        .spinner {
+          border: 4px solid #f3f3f3; /* Light background */
+          border-top: 4px solid #000000; /* Black color */
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     <Footer />
   
     {showPopup && (

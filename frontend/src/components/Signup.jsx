@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
-import { logo } from '../assets/images/index';
+import { logo } from '../images/index';
 import { BACKEND_URL } from '../config';
 import Loader from '../components/Loader';
 

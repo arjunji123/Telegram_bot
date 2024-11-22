@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { IoHome, IoLogOutOutline } from "react-icons/io5";
 import { TbUsersGroup } from "react-icons/tb";
-import earn from '../assets/images/earn.png'; // Ensure the path is correct
+import earn from '../images/earn.png'; // Ensure the path is correct
 import { logout } from "../../store/actions/authActions"
 import { useDispatch } from 'react-redux'; // Import useDispatch
 
