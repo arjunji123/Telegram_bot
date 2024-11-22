@@ -588,16 +588,107 @@ function generateSlug(quest_name) {
 // };
 
 
+// exports.getQuestHistory = async (req, res) => {
+//   try {
+//     const userId = req.user.id; // Assuming the user ID is available in req.user
+
+//     // Pagination parameters
+//     const resultPerPage = parseInt(req.query.limit) || 10;
+//     const page = parseInt(req.query.page) || 1;
+//     const offset = (page - 1) * resultPerPage;
+
+//     // Query to fetch quest data with user-specific completion status
+//     const questHistoryQuery = `
+//         SELECT 
+//         q.id AS quest_id,
+//         q.quest_name,
+//         q.quest_type,
+//         CASE 
+//           WHEN q.activity = 'watch' THEN 'watch'
+//           WHEN q.activity = 'follow' THEN 'follow'
+//           ELSE 'unknown'
+//         END AS activity,
+//         q.quest_url,
+//         q.date_created,
+//         q.start_date,
+//         q.end_date,
+//         q.description,
+//         q.status,
+//         q.image,
+//         q.coin_earn,
+//         q.social_media,  -- Include social_media field in the query
+//         CASE 
+//           WHEN uca.status = 'completed' THEN 'completed'
+//           WHEN uca.status = 'waiting' THEN 'waiting'
+//           ELSE 'not_completed'
+//         END AS completion_status
+//       FROM quest q
+//       LEFT JOIN usercoin_audit uca 
+//         ON q.id = uca.quest_id 
+//         AND uca.user_id = ? 
+//         AND uca.deleted = 0
+//       WHERE q.deleted = 0
+//       LIMIT ? OFFSET ?;
+//     `;
+
+//     // Execute the query to fetch paginated quests
+//     const [questHistory] = await db.query(questHistoryQuery, [
+//       userId,
+//       resultPerPage,
+//       offset,
+//     ]);
+
+//     // Query to get total quest count for pagination
+//     const totalQuestQuery = `
+//       SELECT COUNT(*) AS totalQuests 
+//       FROM quest 
+//       WHERE deleted = 0;
+//     `;
+//     const [totalQuestResult] = await db.query(totalQuestQuery);
+//     const totalQuests = totalQuestResult[0].totalQuests;
+
+//     // Format quest data
+//     const formattedQuests = questHistory.map((quest) => ({
+//       quest_id: quest.quest_id,
+//       quest_name: quest.quest_name,
+//       quest_type: quest.quest_type,
+//       activity: quest.activity,
+//       quest_url: quest.quest_url,
+//       date_created: moment(quest.date_created).format("MM/DD/YYYY, h:mm:ss A"),
+//       start_date: moment(quest.start_date).format("MM/DD/YYYY, h:mm:ss A"),
+//       end_date: moment(quest.end_date).format("MM/DD/YYYY, h:mm:ss A"),
+//       description: quest.description,
+//       status: quest.completion_status,
+//       image: process.env.BACKEND_URL + "uploads/" + module_slug + "/" + quest.image,
+//       coin_earn: parseFloat(quest.coin_earn).toFixed(2),
+//       social_media: quest.social_media, // Include social_media in the response
+//     }));
+
+//     // Construct response
+//     return res.status(200).json({
+//       success: true,
+//       message: "Quest history fetched successfully.",
+//       totalQuests,
+//       resultPerPage,
+//       page,
+//       quests: formattedQuests,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching quest history:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Error fetching quest history.",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
 exports.getQuestHistory = async (req, res) => {
   try {
     const userId = req.user.id; // Assuming the user ID is available in req.user
 
-    // Pagination parameters
-    const resultPerPage = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const offset = (page - 1) * resultPerPage;
-
-    // Query to fetch quest data with user-specific completion status
+    // Query to fetch quest data with user-specific completion status and additional condition for start_date
     const questHistoryQuery = `
         SELECT 
         q.id AS quest_id,
@@ -628,24 +719,12 @@ exports.getQuestHistory = async (req, res) => {
         AND uca.user_id = ? 
         AND uca.deleted = 0
       WHERE q.deleted = 0
-      LIMIT ? OFFSET ?;
+        AND q.end_date >= CURDATE()  -- Ensure the quest end date is not in the past
+        AND q.start_date <= CURDATE()  -- Ensure the quest start date is not in the future
     `;
 
-    // Execute the query to fetch paginated quests
-    const [questHistory] = await db.query(questHistoryQuery, [
-      userId,
-      resultPerPage,
-      offset,
-    ]);
-
-    // Query to get total quest count for pagination
-    const totalQuestQuery = `
-      SELECT COUNT(*) AS totalQuests 
-      FROM quest 
-      WHERE deleted = 0;
-    `;
-    const [totalQuestResult] = await db.query(totalQuestQuery);
-    const totalQuests = totalQuestResult[0].totalQuests;
+    // Execute the query to fetch all matching quests
+    const [questHistory] = await db.query(questHistoryQuery, [userId]);
 
     // Format quest data
     const formattedQuests = questHistory.map((quest) => ({
@@ -668,9 +747,6 @@ exports.getQuestHistory = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Quest history fetched successfully.",
-      totalQuests,
-      resultPerPage,
-      page,
       quests: formattedQuests,
     });
   } catch (error) {
@@ -682,7 +758,6 @@ exports.getQuestHistory = async (req, res) => {
     });
   }
 };
-
 
 exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
   const questId = req.params.id; // Assuming quest ID is passed as a URL parameter
