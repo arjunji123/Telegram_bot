@@ -24,7 +24,7 @@ app.use(
   cors({
     origin:
       "https://telegram-bot-git-frontuni-arjuns-projects-e072bddd.vercel.app",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH"],
     credentials: true,
   })
 );
