@@ -26,18 +26,32 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-  useEffect(() => {
-    const tg = window.Telegram.WebApp;
 
-    tg.ready();
-    tg.expand();
-    // tg.MainButton.show();
-    // Simulate loading time for preloader, or you can perform initial API calls here
+
+  useEffect(() => {
+    // Check if Telegram WebApp is available
+    if (window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+
+      // Use Telegram's theme settings to determine dark mode
+      const isDarkMode = tg.themeParams.bg_color === "#000000";
+
+      // Toggle dark mode class
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+
+      tg.ready();
+      tg.expand();
+       // Simulate loading time for preloader, or you can perform initial API calls here
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000); // Adjust the time as needed
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount
+    }
   }, []);
 
   if (isLoading) {
