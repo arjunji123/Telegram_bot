@@ -24,7 +24,6 @@ import Preloader from "./components/Preloader";
 store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const token = localStorage.getItem("user");
 
 
@@ -39,8 +38,15 @@ function App({ Component, pageProps }) {
   
       tg.ready();
       tg.expand();
-      const isDark = tg.themeParams.bg_color === "#000000";
-      setIsDarkMode(isDark);
+      const isDarkMode = tg.themeParams.bg_color === "#000000";
+     // Apply dark theme settings
+     if (isDarkMode) {
+      document.documentElement.classList.add("dark");  // Add dark theme to root
+      document.documentElement.style.setProperty('--bg-color', '#121212');
+      document.documentElement.style.setProperty('--text-color', '#ffffff');
+    } else {
+      document.documentElement.classList.remove("dark");  // Remove dark theme if not dark mode
+    }
       document.documentElement.style.setProperty("--tg-bg-color", tg.themeParams.bg_color);
       document.documentElement.style.setProperty("--tg-text-color", tg.themeParams.text_color);
 
