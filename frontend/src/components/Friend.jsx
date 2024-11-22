@@ -11,7 +11,6 @@ import "react-toastify/dist/ReactToastify.css";
 import ToastNotification from "./Toast";
 import { FRONTEND_URL } from '../config';
 import Loader from '../components/Loader';
-
 function Friend() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
