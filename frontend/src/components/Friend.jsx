@@ -148,7 +148,6 @@ const { success, error } = useSelector((state) => ({
 <div className="flex-grow relative z-0 py-6">
  <Logo />
  <div className="space-y-2 text-center">
-   {/* Icon */}
    <div className="flex justify-center">
      <img
        src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRBmgzOP_BRigp_fok6RcoiBegiIttLQ8fFVaZ-Hbj3YWdrjJ24"
@@ -161,7 +160,6 @@ const { success, error } = useSelector((state) => ({
           </h2>
 
    <div className="flex justify-center items-center  p-2 sm:p-3 rounded-lg mb-4 shadow-sm">
-       {/* <canvas width={100} height={100} id="qrcode" ref={qrRef} className="rounded-lg "></canvas> */}
        <img className="rounded-lg" src={qrCodeUrl} alt="Signup QR Code" />
      </div>
 
