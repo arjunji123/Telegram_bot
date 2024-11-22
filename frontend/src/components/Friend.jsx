@@ -61,22 +61,18 @@ function Friend() {
 
   // Share referral link on Telegram
 const handleShareClick = () => {
-  if (referral_code) {
+  if (referralCode) {
     // Generate the signup link with the referral code
-    const signupLink = `${FRONTEND_URL}/?referral_code=${referral_code}`;
+    const signupLink = `${FRONTEND_URL}/?referral_code=${referralCode}`;
     
-    // Message to share
-    const message = `Join our mini-app using this referral link: ${signupLink} and referral code = ${referral_code}`;
-    const encodedMessage = encodeURIComponent(message);
+    // Telegram deep link to directly open the mini-app
+    const telegramDeepLink = `https://t.me/TheUnitadeHub_bot?start=${referralCode}`;
 
-    // Telegram mini-app link
-    const telegramMiniAppLink = `https://t.me/share/url?url=${encodeURIComponent(signupLink)}&text=${encodedMessage}`;
-    
-    // Open the mini-app link
+    // Open the Telegram deep link
     try {
-      const opened = window.open(telegramMiniAppLink, "_blank");
+      const opened = window.open(telegramDeepLink, "_blank");
       if (!opened) {
-        console.error("Failed to open Telegram mini-app link.");
+        console.error("Failed to open Telegram link.");
       }
     } catch (error) {
       console.error("Error sharing via Telegram:", error);
