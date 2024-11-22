@@ -26,8 +26,12 @@ function Friend() {
   const referralData = apiData?.reffral?.data || null;
   const referralCode = referralData?.referral_code;
 
+  // Replace with your actual bot username
+  const botUsername = "TheUnitadeHub_bot";
+
   // Derived data
   const signupLink = `${FRONTEND_URL}/?referral_code=${referralCode}`;
+  const telegramDeepLink = `https://t.me/${botUsername}?start=${referralCode}`;
 
   // Fetch referral data on component mount
   useEffect(() => {
@@ -60,33 +64,26 @@ function Friend() {
   };
 
   // Share referral link on Telegram
-const handleShareClick = () => {
-  if (referralCode) {
-    // Generate the signup link with the referral code
-    const signupLink = `${FRONTEND_URL}/?referral_code=${referralCode}`;
-    
-    // Telegram deep link to directly open the mini-app
-    const telegramDeepLink = `https://t.me/TheUnitadeHub_bot?start=${referralCode}`;
-
-    // Open the Telegram deep link
-    try {
-      const opened = window.open(telegramDeepLink, "_blank");
-      if (!opened) {
-        console.error("Failed to open Telegram link.");
+  const handleShareClick = () => {
+    if (referralCode) {
+      try {
+        const opened = window.open(telegramDeepLink, "_blank");
+        if (!opened) {
+          console.error("Failed to open Telegram link.");
+        }
+      } catch (error) {
+        console.error("Error sharing via Telegram:", error);
       }
-    } catch (error) {
-      console.error("Error sharing via Telegram:", error);
+    } else {
+      toast.error("Referral link is not available yet.");
     }
-  } else {
-    toast.error("Referral link is not available yet."); // Show error if no referral code
-  }
-};
+  };
 
   // Copy referral link to clipboard
   const handleCopyClick = () => {
-    if (signupLink) {
-      navigator.clipboard.writeText(signupLink);
-      setToastMessage("Referral link copied!");
+    if (referralCode) {
+      navigator.clipboard.writeText(telegramDeepLink);
+      setToastMessage("Referral deep link copied!");
       setShowToast(true);
     } else {
       toast.error("Referral link is not available yet.");
