@@ -902,10 +902,26 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
 });
 
 async function distributeCoins(userId, performedByUserId) {
-  const COIN_REFERRAL_BONUS = 100; 
-  const COIN_PARENT_ADDITION = 10;
-  const COIN_ANCESTOR_ADDITION = 5;
-  const FIXED_COINS = 100;
+ // Step 1: Retrieve the one_coin_price from the settings table
+  const settingsResult = await db.query(
+    "SELECT one_coin_price FROM settings LIMIT 1" // Assuming there's only one row in the settings table
+  );
+
+  const oneCoinPrice = parseFloat(settingsResult[0][0]?.one_coin_price || 0);
+
+  if (!oneCoinPrice) {
+    req.flash("msg_response", {
+      status: 400,
+      message: "One coin price not configured in settings.",
+    });
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
+  }
+
+  // Step 2: Multiply one_coin_price with the constants
+  const COIN_REFERRAL_BONUS = 100 * oneCoinPrice;
+  const COIN_PARENT_ADDITION = 10 * oneCoinPrice;
+  const COIN_ANCESTOR_ADDITION = 5 * oneCoinPrice;
+  const FIXED_COINS = 100 * oneCoinPrice;
 
   try {
     const userCoinsData = await QueryModel.getData(
