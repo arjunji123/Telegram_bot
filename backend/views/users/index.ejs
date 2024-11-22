@@ -75,23 +75,25 @@
                                                 <% } %>
                                     </td>
                                     <td>
-                                        <% if (parseInt(user.status) === 1) { %>
+                                        <% if (parseInt(user.status)===1) { %>
                                             <!-- User is active, actions button is disabled and hidden -->
-                                            <button class="btn btn-sm btn-danger" disabled >
+                                            <button class="btn btn-sm btn-danger" disabled>
                                                 <i class="fas fa-toggle-off"></i> Deactivate
                                             </button>
-                                        <% } else { %>
-                                            <!-- Activate Form - shown only when user is inactive -->
-                                            <form action="/admin/users/update-status" method="POST" style="display:inline;">
-                                                <input type="hidden" name="userId" value="<%= user.id %>">
-                                                <input type="hidden" name="status" value="1">
-                                                <button type="submit" class="btn btn-sm btn-success">
-                                                    <i class="fas fa-toggle-on"></i> Activate
-                                                </button>
-                                            </form>
-                                        <% } %>
+                                            <% } else { %>
+                                                <!-- Activate Form - shown only when user is inactive -->
+                                                <form action="/admin/users/update-status" method="POST"
+                                                    style="display:inline;" class="activate-form">
+                                                    <input type="hidden" name="userId" value="<%= user.id %>">
+                                                    <input type="hidden" name="status" value="1">
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-success activate-button">
+                                                        <i class="fas fa-toggle-on"></i> Activate
+                                                    </button>
+                                                </form>
+                                                <% } %>
                                     </td>
-                                    
+
 
 
                                     <td class="action_box">
@@ -107,6 +109,8 @@
                                         </a>
 
                                     </td>
+
+
                                 </tr>
                                 <% }); %>
                     </tbody>
@@ -139,6 +143,15 @@
 
 <script>
     $(document).ready(function () {
+        // Show confirmation dialog for the Activate button
+        $('.activate-button').click(function (e) {
+            e.preventDefault();
+            const form = $(this).closest('form'); // Get the form element
+            if (confirm("Are you sure you want to activate this user?")) {
+                form.submit(); // Submit the form if the user confirms
+            }
+        });
+
         // Show modal with the clicked image
         $('.view-image').click(function () {
             var imageUrl = $(this).data('image');
