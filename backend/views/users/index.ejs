@@ -74,10 +74,10 @@
                                                 No screenshot uploaded
                                                 <% } %>
                                     </td>
-                                     <td>
+                                    <td>
                                         <% if (parseInt(user.status) === 1) { %>
                                             <!-- User is active, actions button is disabled and hidden -->
-                                            <button class="btn btn-sm btn-danger" disabled>
+                                            <button class="btn btn-sm btn-danger" disabled >
                                                 <i class="fas fa-toggle-off"></i> Deactivate
                                             </button>
                                         <% } else { %>
@@ -91,6 +91,8 @@
                                             </form>
                                         <% } %>
                                     </td>
+                                    
+
 
                                     <td class="action_box">
                                         <a href="/admin/<%= module_slug %>/<%= user.id %>"><i class="fe-eye"></i></a>
@@ -99,10 +101,11 @@
                                         <a href="/admin/<%= module_slug %>/edit/<%= user.id %>"><i
                                                 class="fe-edit"></i></a>
 
-                                                <a href="/admin/<%= module_slug %>/user-history/<%= user.id %>" title="View User History">
-                                                    <i class="fe-clock"></i>
-                                                </a>
-                                                
+                                        <a href="/admin/<%= module_slug %>/user-history/<%= user.id %>"
+                                            title="View User History">
+                                            <i class="fe-clock"></i>
+                                        </a>
+
                                     </td>
                                 </tr>
                                 <% }); %>
