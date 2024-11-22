@@ -613,7 +613,6 @@ const users = await db.query(
     originalUrl: req.originalUrl, // Pass the original URL here
   });
 });
-
 exports.addFrom = catchAsyncErrors(async (req, res, next) => {
   res.render(module_slug + "/add", {
     layout: module_layout,
