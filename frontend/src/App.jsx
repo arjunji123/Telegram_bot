@@ -24,6 +24,7 @@ import Preloader from "./components/Preloader";
 store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const token = localStorage.getItem("user");
 
 
@@ -35,9 +36,18 @@ function App({ Component, pageProps }) {
     // Check if Telegram WebApp is available
     if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
-      const themeParams = tg.themeParams || {};
+     // Force Telegram to use dark theme
+     tg.themeParams = {
+      bg_color: "#000000",
+      text_color: "#ffffff",
+    };
       tg.ready();
       tg.expand();
+      const isDark = tg.themeParams.bg_color === "#000000";
+      setIsDarkMode(isDark);
+      document.documentElement.style.setProperty("--tg-bg-color", tg.themeParams.bg_color);
+      document.documentElement.style.setProperty("--tg-text-color", tg.themeParams.text_color);
+
     }
 
     // Simulate loading time for preloader

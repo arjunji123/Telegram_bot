@@ -14,13 +14,17 @@
 }
 
 :root {
-  --bg-color: #ffffff; /* Default background */
-  --text-color: #000000; /* Default text */
+  --tg-bg-color: #000000; /* Telegram Header Background Color */
+  --tg-text-color: #ffffff; /* Telegram Header Text Color */
+  --bg-color: #000000; /* General Background */
+  --text-color: #ffffff; /* General Text Color */
 }
 
-.dark {
-  --bg-color: #000000; /* Dark theme background */
-  --text-color: #ffffff; /* Dark theme text */
+
+.dark-header {
+  background-color: var(--tg-bg-color) !important;
+  color: var(--tg-text-color) !important;
+  transition: all 0.3s ease-in-out;
 }
 
 @keyframes coin-pop {
@@ -49,7 +53,6 @@
   -webkit-overflow-scrolling: touch; /* Smooth scrolling (if needed) */
   background-color: var(--bg-color);
   color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
   }
   @font-face {
     font-family: 'Eina';
