@@ -39,7 +39,6 @@ useEffect(() => {
   
   const handleClick = () => {
     if (pendingCoin?.pending_coin === 0) {
-      // Show message if there are no coins to transfer
       toast.warn("You have no coins.");
       return;
     }
