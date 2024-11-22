@@ -30,7 +30,7 @@ function Friend() {
   const botUsername = "TheUnitadeHub_bot";
 
   // Derived data
-  const signupLink = `${FRONTEND_URL}/?startapp=${referralCode}`;
+  const signupLink = `${FRONTEND_URL}/?referral_code=${referralCode}`;
   const telegramDeepLink = `https://t.me/${botUsername}?startapp=${referralCode}`;
 
   // Fetch referral data on component mount
