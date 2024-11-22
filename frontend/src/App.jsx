@@ -36,11 +36,7 @@ function App({ Component, pageProps }) {
     // Check if Telegram WebApp is available
     if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
-     // Force Telegram to use dark theme
-     tg.themeParams = {
-      bg_color: "#000000",
-      text_color: "#ffffff",
-    };
+  
       tg.ready();
       tg.expand();
       const isDark = tg.themeParams.bg_color === "#000000";
