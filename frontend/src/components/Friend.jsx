@@ -60,29 +60,31 @@ function Friend() {
   };
 
   // Share referral link on Telegram
-  const handleShareClick = () => {
-    if (referralCode) {
-      const message = `Join our app using this referral link: ${signupLink} and referral code: ${referralCode}`;
-      const encodedMessage = encodeURIComponent(message);
+const handleShareClick = () => {
+  if (referral_code) {
+    // Generate the signup link with the referral code
+    const signupLink = `${FRONTEND_URL}/?referral_code=${referral_code}`;
+    
+    // Message to share
+    const message = `Join our mini-app using this referral link: ${signupLink} and referral code = ${referral_code}`;
+    const encodedMessage = encodeURIComponent(message);
 
-      const telegramAppLink = `tg://msg?text=${message}`;
-      const telegramWebLink = `https://telegram.me/share/url?url=${encodeURIComponent(
-        signupLink
-      )}&text=${encodedMessage}`;
-
-      try {
-        const opened = window.open(telegramAppLink, "_blank");
-        if (!opened) {
-          window.open(telegramWebLink, "_blank");
-        }
-      } catch (error) {
-        console.error("Error sharing via Telegram:", error);
-        window.open(telegramWebLink, "_blank");
+    // Telegram mini-app link
+    const telegramMiniAppLink = `https://t.me/share/url?url=${encodeURIComponent(signupLink)}&text=${encodedMessage}`;
+    
+    // Open the mini-app link
+    try {
+      const opened = window.open(telegramMiniAppLink, "_blank");
+      if (!opened) {
+        console.error("Failed to open Telegram mini-app link.");
       }
-    } else {
-      toast.error("Referral link is not available yet.");
+    } catch (error) {
+      console.error("Error sharing via Telegram:", error);
     }
-  };
+  } else {
+    toast.error("Referral link is not available yet."); // Show error if no referral code
+  }
+};
 
   // Copy referral link to clipboard
   const handleCopyClick = () => {
