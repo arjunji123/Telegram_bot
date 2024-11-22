@@ -29,29 +29,24 @@ function App({ Component, pageProps }) {
 
 
   useEffect(() => {
+    // Force dark mode globally
+    document.documentElement.classList.add("dark");
+
     // Check if Telegram WebApp is available
     if (window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
 
-      // Use Telegram's theme settings to determine dark mode
-      const isDarkMode = tg.themeParams.bg_color === "#000000";
-
-      // Toggle dark mode class
-      if (isDarkMode) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-
+      // Ready Telegram WebApp and expand
       tg.ready();
       tg.expand();
-       // Simulate loading time for preloader, or you can perform initial API calls here
+    }
+
+    // Simulate loading time for preloader
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000); // Adjust the time as needed
+    }, 1000); // Adjust time as needed
 
-    return () => clearTimeout(timer); // Cleanup the timer on unmount
-    }
+    return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);
 
   if (isLoading) {
