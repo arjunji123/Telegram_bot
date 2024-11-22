@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { logo } from '../images';
+import { logo } from '../assets/images/index';
 import { PiDotsThreeCircle } from "react-icons/pi";
 import { ImCross } from "react-icons/im";
 

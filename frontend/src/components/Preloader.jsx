@@ -1,6 +1,6 @@
 import React from "react";
 import "../Styles/Tasks.css";
-import hero from "../Img/hero.jpg";
+// import hero from "../Img/hero.jpg";
 function Home() {
   return (
     <div className="bg-white flex justify-center">

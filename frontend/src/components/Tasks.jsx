@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
 import Loader from '../components/Loader';
-import { FaXTwitter, FaInstagram } from "react-icons/fa6";
-import { FaRegCheckCircle, FaYoutube  , FaTelegramPlane } from "react-icons/fa";
+import { FaXTwitter, FaInstagram, FaLinkedin  , FaSnapchat, FaWhatsapp  } from "react-icons/fa6";
+import { FaRegCheckCircle, FaYoutube  , FaTelegramPlane, FaPinterest , FaFacebook  } from "react-icons/fa";
 import Follow from "../utils/Follow";
 import CustomSwiper from '../utils/CustomSwiper';
 import Footer from "./Footer";
@@ -178,6 +178,16 @@ function Tasks() {
       icon = <FaXTwitter size={32} color="white" className="mr-4" />;
     } else if (quest.quest_name.toLowerCase().includes("instagram")) {
       icon = <FaInstagram size={32} color="white" className="mr-4" />;
+    }else if (quest.quest_name.toLowerCase().includes("linkedin")) {
+      icon = <FaLinkedin  size={32} color="white" className="mr-4" />;
+    }else if (quest.quest_name.toLowerCase().includes("pinterest")) {
+      icon = <FaPinterest   size={32} color="white" className="mr-4" />;
+    }else if (quest.quest_name.toLowerCase().includes("snapchat")) {
+      icon = <FaSnapchat    size={32} color="white" className="mr-4" />;
+    }else if (quest.quest_name.toLowerCase().includes("facebook")) {
+      icon = <FaFacebook     size={32} color="white" className="mr-4" />;
+    }else if (quest.quest_name.toLowerCase().includes("whatsapp")) {
+      icon = <FaWhatsapp      size={32} color="white" className="mr-4" />;
     }
     return {
       icon,

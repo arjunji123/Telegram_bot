@@ -13,7 +13,6 @@ const CustomSwiper = ({
 }) => {
   return (
     <div className="flex justify-center items-center">
-      {/* Container to center the Swiper */}
       <Swiper
         spaceBetween={12}
         slidesPerView={1.2} // Adjust to make slides not take full width

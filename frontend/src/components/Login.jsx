@@ -5,7 +5,7 @@ import "../Styles/LoginDesign.css";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/actions/authActions";
 import ToastNotification from "./Toast";
-import { logo } from "../images";
+import { logo } from "../assets/images/index";
 import Loader from '../components/Loader';
 
 function Login() {

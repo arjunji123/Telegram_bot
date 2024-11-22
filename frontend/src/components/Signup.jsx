@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
-import { logo } from '../images';
+import { logo } from '../assets/images/index';
 import { BACKEND_URL } from '../config';
 import Loader from '../components/Loader';
 
@@ -290,7 +290,7 @@ console.log("params", params.get);
           </div>
 
           {/* Referral Input */}
-          <div className="relative ">
+          {/* <div className="relative ">
             <input
               type="text"
               name="referral_by"
@@ -299,7 +299,7 @@ console.log("params", params.get);
               className="w-full px-3 sm:px-4 py-2 sm:py-3 uppercase bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Referral By"
             />
-          </div> 
+          </div>  */}
 
           {/* Submit Button */}
           <div className="flex justify-center">
