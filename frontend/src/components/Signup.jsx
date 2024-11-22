@@ -24,9 +24,10 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(location.search); // Use location.search for consistent results
     const referralCode = params.get('referral_code'); // Get the referral code from the URL
-console.log("params", params.get);
+console.log("Referral Code:", params.get('referral_code'));
+  console.log("Referral Code:", referralCode); // For debugging
 
     if (referralCode) {
       setValues((prev) => ({
@@ -34,7 +35,7 @@ console.log("params", params.get);
         referral_by: referralCode, // Set the referral code into the state
       }));
     }
-  }, [location]);
+}, [location.search]); 
   const handleInput = (e) => {
     setValues((prev) => ({
       ...prev,
