@@ -54,13 +54,7 @@ exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
     upi: req.body.upi,
     qr_code: req.body.qr_code,
     reduce_coin_rate: req.body.reduce_coin_rate,
-    // google_url: req.body.google_url,
-    // linkdin_url: req.body.linkdin_url,
-    // twitter_url: req.body.twitter_url,
-    // youtube_url: req.body.youtube_url,
-    // default_meta_title: req.body.default_meta_title,
-    // default_meta_keyword: req.body.default_meta_keyword,
-    // default_meta_description: req.body.default_meta_description,
+    one_coin_price: req.body.one_coin_price,
   };
 
   const blog = await QueryModel.findByIdAndUpdateData(
