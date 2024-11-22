@@ -10,6 +10,7 @@ export default {
       fontFamily: {
         eina: ['"Eina"', 'sans-serif'], // Add your custom font
       },
+      darkMode: "class", // Enable class-based dark mode
     },
   },
   plugins: [],
