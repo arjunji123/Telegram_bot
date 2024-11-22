@@ -690,38 +690,39 @@ exports.getQuestHistory = async (req, res) => {
 
     // Query to fetch quest data with user-specific completion status and additional condition for start_date
     const questHistoryQuery = `
-        SELECT 
-        q.id AS quest_id,
-        q.quest_name,
-        q.quest_type,
-        CASE 
-          WHEN q.activity = 'watch' THEN 'watch'
-          WHEN q.activity = 'follow' THEN 'follow'
-          ELSE 'unknown'
-        END AS activity,
-        q.quest_url,
-        q.date_created,
-        q.start_date,
-        q.end_date,
-        q.description,
-        q.status,
-        q.image,
-        q.coin_earn,
-        q.social_media,  -- Include social_media field in the query
-        CASE 
-          WHEN uca.status = 'completed' THEN 'completed'
-          WHEN uca.status = 'waiting' THEN 'waiting'
-          ELSE 'not_completed'
-        END AS completion_status
-      FROM quest q
-      LEFT JOIN usercoin_audit uca 
-        ON q.id = uca.quest_id 
-        AND uca.user_id = ? 
-        AND uca.deleted = 0
-      WHERE q.deleted = 0
-        AND q.end_date >= CURDATE()  -- Ensure the quest end date is not in the past
-        AND q.start_date <= CURDATE()  -- Ensure the quest start date is not in the future
-    `;
+  SELECT 
+    q.id AS quest_id,
+    q.quest_name,
+    q.quest_type,
+    CASE 
+      WHEN q.activity = 'watch' THEN 'watch'
+      WHEN q.activity = 'follow' THEN 'follow'
+      ELSE 'unknown'
+    END AS activity,
+    q.quest_url,
+    q.date_created,
+    q.start_date,
+    q.end_date,
+    q.description,
+    q.status,
+    q.image,
+    q.coin_earn,
+    q.social_media,
+    CASE 
+      WHEN uca.status = 'completed' THEN 'completed'
+      WHEN uca.status = 'waiting' THEN 'waiting'
+      ELSE 'not_completed'
+    END AS completion_status
+  FROM quest q
+  LEFT JOIN usercoin_audit uca 
+    ON q.id = uca.quest_id 
+    AND uca.user_id = ? 
+    AND uca.deleted = 0
+  WHERE q.deleted = 0
+    AND q.end_date >= CURDATE()  -- Ensure the quest end date is not in the past
+    AND DATE(q.start_date) <= CURDATE()  -- Ensure the quest start date is not in the future (strip time for comparison)
+`;
+
 
     // Execute the query to fetch all matching quests
     const [questHistory] = await db.query(questHistoryQuery, [userId]);
