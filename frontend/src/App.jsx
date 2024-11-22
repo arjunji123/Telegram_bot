@@ -33,10 +33,9 @@ function App({ Component, pageProps }) {
     document.documentElement.classList.add("dark");
 
     // Check if Telegram WebApp is available
-    if (window.Telegram.WebApp) {
+    if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
-
-      // Ready Telegram WebApp and expand
+      const themeParams = tg.themeParams || {};
       tg.ready();
       tg.expand();
     }
