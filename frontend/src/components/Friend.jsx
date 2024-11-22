@@ -45,7 +45,6 @@ const { success, error } = useSelector((state) => ({
     fetchData();
   }, [dispatch]);
   const signupLink = `${FRONTEND_URL}/?referral_code=${refferalData?.referral_code}`;
-
   useEffect(() => {
     if (refferalData?.referral_code ) {
       setTimeout(() => {
