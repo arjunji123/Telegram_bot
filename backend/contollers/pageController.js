@@ -1040,6 +1040,23 @@ exports.completeQuest = catchAsyncErrors(async (req, res, next) => {
   }
 
   try {
+
+
+    // Check if the quest is already completed
+const [completedQuestCheck] = await db.query(
+  "SELECT id FROM usercoin_audit WHERE user_id = ? AND quest_id = ? AND status = 'completed'",
+  [user_id, quest_id]
+);
+
+if (completedQuestCheck.length > 0) {
+  console.log("Quest already completed by user:", { user_id, quest_id });
+  return res.status(200).json({
+    success: false,
+    message: "Quest already completed.",
+  });
+}
+
+
     // Fetch quest details, including activity type, coin_earn value, and quest_name
     const [questResult] = await db.query(
       "SELECT id, coin_earn, activity, quest_name FROM quest WHERE id = ?",
