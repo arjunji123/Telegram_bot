@@ -46,7 +46,6 @@ useEffect(() => {
       [e.target.name]: e.target.value,
     }));
   };
-
   // Form validation logic
   const validateForm = (values) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
