@@ -76,7 +76,7 @@ function Signup() {
 
     // Get the referral code on component mount
     getReferralCode();
-  }, []);
+  }, [location]);
 
   const handleInput = (e) => {
     setValues((prev) => ({
