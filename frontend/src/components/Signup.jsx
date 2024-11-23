@@ -23,65 +23,60 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 
-useEffect(() => {
-  const getReferralCode = () => {
-    let referralCode = null;
+  useEffect(() => {
+    const getReferralCode = () => {
+      let referralCode = null;
 
-    try {
-      // Ensure we're inside the Telegram WebApp
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-        console.log("Inside Telegram Web App");
+      try {
+        // Check if inside Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+          console.log("Inside Telegram Web App");
 
-        // Access initDataUnsafe directly
-        const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initDataUnsafe);
-        console.log("Decoded initDataUnsafe:", initDataDecoded);
+          // Access the Telegram WebApp data
+          const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initDataUnsafe);
+          console.log("Decoded initDataUnsafe:", initDataDecoded);
 
-        // Extract the 'startapp' parameter from the initDataUnsafe
-        const urlParams = new URLSearchParams(initDataDecoded);
-        referralCode = urlParams.get("startapp");
+          // Extract the referral code from the 'startapp' parameter
+          const urlParams = new URLSearchParams(initDataDecoded);
+          referralCode = urlParams.get("startapp");
 
-        if (referralCode) {
-          console.log("Referral Code from Telegram WebApp (initDataUnsafe):", referralCode);
-          
-          // Store referral code in state for use in the mini app
-          setValues((prev) => ({
-            ...prev,
-            referral_by: referralCode,
-          }));
+          if (referralCode) {
+            console.log("Referral Code from Telegram WebApp (initDataUnsafe):", referralCode);
+            setReferralBy(referralCode); // Set the referral code in the state
+          } else {
+            console.log("No 'startapp' found in initDataUnsafe");
+          }
         } else {
-          console.log("No 'startapp' found in initDataUnsafe");
+          console.log("Telegram WebApp is not initialized or initDataUnsafe is unavailable");
         }
-      } else {
-        console.log("Telegram WebApp is not initialized or initDataUnsafe is unavailable");
+
+        // Fallback: Use URL params if WebApp data extraction fails
+        if (!referralCode) {
+          console.log("Using URL params fallback");
+          const currentUrlParams = new URLSearchParams(window.location.search);
+          referralCode = currentUrlParams.get("startapp");
+          console.log("Referral Code from URL:", referralCode);
+
+          if (referralCode) {
+            setReferralBy(referralCode); // Update referralBy in the state
+          }
+        }
+
+        // If referral code is found, store it in the component state
+        if (referralCode) {
+          console.log("Referral code set to state:", referralCode);
+          setReferralCode(referralCode);
+        } else {
+          console.log("No referral code found");
+        }
+      } catch (error) {
+        console.error("Error extracting referral code:", error);
       }
+    };
 
-      // Fallback to URL search parameters if Telegram WebApp initialization fails
-      if (!referralCode) {
-        console.log("Using URL params fallback");
-        const currentUrlParams = new URLSearchParams(window.location.search);
-        referralCode = currentUrlParams.get("startapp");
-        console.log("Referral Code from URL:", referralCode);
-      }
-
-      // If referral code found, update the state
-      if (referralCode) {
-        setValues((prev) => ({
-          ...prev,
-          referral_by: referralCode,
-        }));
-        console.log("Referral code set to state:", referralCode);
-      } else {
-        console.log("No referral code found");
-      }
-    } catch (error) {
-      console.error("Error extracting referral code:", error);
-    }
-  };
-
-  // Call the function to get the referral code
-  getReferralCode();
-}, [location]);  // Re-run this effect on location change
-
+    // Get the referral code on component mount
+    getReferralCode();
+  }, []);
 
   const handleInput = (e) => {
     setValues((prev) => ({
