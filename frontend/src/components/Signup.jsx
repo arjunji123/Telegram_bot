@@ -22,7 +22,6 @@ function Signup() {
   });
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
-import { useEffect } from "react";
 
 useEffect(() => {
   const getReferralCode = () => {
