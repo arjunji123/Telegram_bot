@@ -23,41 +23,38 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 
-
-   useEffect(() => {
+  useEffect(() => {
     const getReferralCode = () => {
       let referralCode = null;
 
       try {
-        // Check if running inside Telegram Web App
+        // Check if we are inside the Telegram Web App
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
           console.log("Inside Telegram Web App");
 
-          // Decode Telegram WebApp initData
+          // Decode Telegram WebApp initData (if available)
           const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
           console.log("Decoded initData:", initDataDecoded);
 
-          // Extract the 'startapp' parameter from initData
+          // Extract startapp parameter from initData
           const urlParams = new URLSearchParams(initDataDecoded);
           referralCode = urlParams.get("startapp");
           console.log("Referral Code from Telegram WebApp:", referralCode);
         }
 
-        // Fallback for Web URL (when not inside Telegram Web App)
+        // Fallback for Web URL
         if (!referralCode) {
           console.log("Using Web URL fallback");
-
-          // Check if the URL has a query parameter
           const currentUrlParams = new URLSearchParams(window.location.search);
           referralCode = currentUrlParams.get("startapp");
           console.log("Referral Code from Web URL:", referralCode);
         }
 
-        // If a referral code is found, set it in the state
+        // If referral code is found, set it in state
         if (referralCode) {
           setValues((prev) => ({
             ...prev,
-            referral_by: referralCode, // Set referral ID
+            referral_by: referralCode,
           }));
           console.log("Referral code set to state:", referralCode);
         } else {
@@ -69,7 +66,7 @@ function Signup() {
     };
 
     getReferralCode();
-  }, []); // Runs once on mount
+  }, [location]); // This will run when the location (URL) changes
 
   const handleInput = (e) => {
     setValues((prev) => ({
