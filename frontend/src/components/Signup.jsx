@@ -24,7 +24,7 @@ function Signup() {
   const location = useLocation(); // Use location to access the URL parameters
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const referralCode = params.get('referral_code'); // Get the referral code from the URL
+    const referralCode = params.get('startapp'); // Get the referral code from the URL
 console.log("params", params.get);
 
     if (referralCode) {
@@ -80,43 +80,6 @@ console.log("params", params.get);
 
     return true; // Return true if all validations pass
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-    
-  //   const isValid = validateForm(values);
-  //   console.log('values', values);
-  //   if (!isValid) return; // Exit if validation fails
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.post(
-  //       `${BACKEND_URL}/api/v1/api-register`,
-  //       values
-  //     );
-  //     console.log("Server Response:", response);
-      
-  //     // Assuming the generated ID is in response.data.id
-  //     const userId = response.data.user.id;
-  // console.log('userId', userId)
-  //     toast.success("Registration successful!");
-  
-  //     setTimeout(() => {
-  //       // Redirect to the Payment page with the generated userId
-  //       navigate(`/payment/${userId}`);
-  //     }, 2000);
-  //   } catch (err) {
-  //     if (err.response && err.response.status === 400) {
-  //       const backendError = err.response.data.error;
-  //       toast.error(backendError); // Display the backend error message
-  //     } else {
-  //       console.log("Axios Error:", err);
-  //       toast.error("An error occurred during registration. Please try again.");
-  //     }
-  //   }
-  //   finally {
-  //     setLoading(false); // Hide loader after the request completes
-  //   }
-  // };
  
   const handleSubmit = async (e) => {
     e.preventDefault();
