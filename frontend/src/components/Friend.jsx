@@ -63,26 +63,36 @@ function Friend() {
     }
   };
 
-  // Share referral link on Telegram
-  const handleShareClick = () => {
-    if (referralCode) {
-      try {
-        // Attempt to open the Telegram link
-        const opened = window.open(telegramDeepLink, "_blank");
-        if (!opened) {
-          console.error("Failed to open Telegram link.");
-          toast.error("Failed to open Telegram. Make sure Telegram is installed.");
-        } else {
-          console.log("Telegram link opened successfully.");
-        }
-      } catch (error) {
-        console.error("Error sharing via Telegram:", error);
-        toast.error("There was an error opening the Telegram link.");
+ const handleShareClick = () => {
+  if (referralCode) {
+    try {
+      // Construct the message and link to share
+      const message = encodeURIComponent(
+        `Hi! Use my referral link to join: ${telegramDeepLink}`
+      );
+
+      // Construct the Telegram deep link
+      const telegramLink = `https://t.me/share/url?url=${encodeURIComponent(
+        telegramDeepLink
+      )}&text=${message}`;
+
+      // Open the Telegram link
+      const opened = window.open(telegramLink, "_blank");
+
+      if (!opened) {
+        console.error("Failed to open Telegram link.");
+        toast.error("Failed to open Telegram. Make sure Telegram is installed.");
+      } else {
+        console.log("Telegram link opened successfully.");
       }
-    } else {
-      toast.error("Referral link is not available yet.");
+    } catch (error) {
+      console.error("Error sharing via Telegram:", error);
+      toast.error("There was an error opening the Telegram link.");
     }
-  };
+  } else {
+    toast.error("Referral link is not available yet.");
+  }
+};
 
   // Copy referral link to clipboard
   const handleCopyClick = () => {
