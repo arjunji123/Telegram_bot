@@ -28,7 +28,7 @@ function Signup() {
       let referralCode = null;
 
       try {
-        // Check if we are inside the Telegram Web App
+        // Check if we are inside the Telegram Web App (inside the browser)
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
           console.log("Inside Telegram Web App");
 
@@ -42,7 +42,7 @@ function Signup() {
           console.log("Referral Code from Telegram WebApp:", referralCode);
         }
 
-        // Fallback for Web URL
+        // Fallback for Web URL: when the app is accessed directly via URL
         if (!referralCode) {
           console.log("Using Web URL fallback");
           const currentUrlParams = new URLSearchParams(window.location.search);
@@ -66,7 +66,7 @@ function Signup() {
     };
 
     getReferralCode();
-  }, [location]); // This will run when the location (URL) changes
+  }, [location]); // Runs when the location (URL) changes
 
   const handleInput = (e) => {
     setValues((prev) => ({
