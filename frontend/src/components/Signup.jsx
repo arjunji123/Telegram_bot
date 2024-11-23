@@ -24,7 +24,7 @@ function Signup() {
   const location = useLocation(); // Use location to access the URL parameters
 
 
-  useEffect(() => {
+   useEffect(() => {
     const getReferralCode = () => {
       let referralCode = null;
 
@@ -37,25 +37,27 @@ function Signup() {
           const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
           console.log("Decoded initData:", initDataDecoded);
 
-          // Extract startapp parameter from initData
+          // Extract the 'startapp' parameter from initData
           const urlParams = new URLSearchParams(initDataDecoded);
           referralCode = urlParams.get("startapp");
           console.log("Referral Code from Telegram WebApp:", referralCode);
         }
 
-        // Fallback for Web URL
+        // Fallback for Web URL (when not inside Telegram Web App)
         if (!referralCode) {
           console.log("Using Web URL fallback");
+
+          // Check if the URL has a query parameter
           const currentUrlParams = new URLSearchParams(window.location.search);
           referralCode = currentUrlParams.get("startapp");
           console.log("Referral Code from Web URL:", referralCode);
         }
 
-        // Set referral code in state
+        // If a referral code is found, set it in the state
         if (referralCode) {
           setValues((prev) => ({
             ...prev,
-            referral_by: referralCode,
+            referral_by: referralCode, // Set referral ID
           }));
           console.log("Referral code set to state:", referralCode);
         } else {
@@ -67,8 +69,7 @@ function Signup() {
     };
 
     getReferralCode();
-  }, []);
-
+  }, []); // Runs once on mount
 
   const handleInput = (e) => {
     setValues((prev) => ({
