@@ -67,26 +67,18 @@ function Friend() {
   if (referralCode) {
     try {
       // Construct a more engaging message with emojis
-      const message = encodeURIComponent(`
-🌟 Welcome to *UnitradeHub*! 🚀
+const message = encodeURIComponent(`
+🌟 Join *UnitradeHub* today! 🚀
 
-🔹 How it works:
-1️⃣ Join the community by paying just ₹300 and instantly get 100 coins! 💰  
-2️⃣ Complete simple tasks and refer your friends to earn even more coins. ✅👥  
-3️⃣ Earn rewards for every task completed and every friend you bring in! 🏆  
-4️⃣ Share coins with others to boost your earnings! 🔄  
-5️⃣ Sell your earned coins to companies at their designated rates! 💸💼
+Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing tasks and referring friends. 🏆  
 
-📲 Use my referral link to get started:  
-${telegramDeepLink}
+📲 Register now using my referral link: ${telegramDeepLink}
 
-🎯 Don't miss this exciting opportunity to grow your earnings effortlessly! 🎉
-      `);
+🎉 Don't miss this chance to earn effortlessly!
+`);
 
-      // Construct the Telegram deep link
-      const telegramLink = `https://t.me/share/url?url=${encodeURIComponent(
-        telegramDeepLink
-      )}&text=${message}`;
+       // Construct the Telegram deep link without the `url` parameter
+      const telegramLink = `https://t.me/share/url?text=${message}`;
 
       // Open the Telegram link
       const opened = window.open(telegramLink, "_blank");
