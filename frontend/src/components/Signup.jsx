@@ -7,6 +7,40 @@ import "../Styles/LoginDesign.css";
 import { logo } from '../images/index';
 import { BACKEND_URL } from '../config';
 import Loader from '../components/Loader';
+// Custom Hook for Referral Code
+const useReferralCode = (setValues) => {
+  useEffect(() => {
+    const getReferralCode = () => {
+      try {
+        let referralCode = null;
+
+        // Step 1: Check if Telegram WebApp context is available
+        if (window.Telegram && window.Telegram.WebApp) {
+          const initData = window.Telegram.WebApp.initData;
+          if (initData) {
+            const initDataParams = new URLSearchParams(initData);
+            referralCode = initDataParams.get("startapp");
+          }
+        }
+
+        // Step 2: Fallback for 'tg://' deep links
+        if (!referralCode && window.location.protocol === "tg:") {
+          const urlParams = new URLSearchParams(window.location.href.split("?")[1]);
+          referralCode = urlParams.get("startapp");
+        }
+
+        // Step 3: Set referral code in state
+        if (referralCode) {
+          setValues((prev) => ({ ...prev, referral_by: referralCode }));
+        }
+      } catch (error) {
+        console.error("Error extracting referral code:", error);
+      }
+    };
+
+    getReferralCode();
+  }, [setValues]);
+};
 
 function Signup() {
   const [loading, setLoading] = useState(false);
@@ -23,71 +57,9 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 
-const useReferralCode = (setValues) => {
-  useEffect(() => {
-    const getReferralCode = () => {
-      try {
-        let referralCode = null;
 
-        // Step 1: Check Telegram WebApp context
-        if (window.Telegram && window.Telegram.WebApp) {
-          console.log("Inside Telegram Web App");
-
-          // Get initData from Telegram WebApp
-          const initData = window.Telegram.WebApp.initData;
-          if (initData) {
-            console.log("Telegram initData:", initData);
-
-            // Parse initData to extract 'startapp'
-            const initDataParams = new URLSearchParams(decodeURIComponent(initData));
-            referralCode = initDataParams.get("startapp");
-
-            if (referralCode) {
-              console.log("Referral Code from Telegram WebApp:", referralCode);
-            } else {
-              console.log("No 'startapp' parameter found in Telegram initData");
-            }
-          } else {
-            console.log("Telegram initData is empty or unavailable");
-          }
-        }
-
-        // Step 2: Fallback to Telegram deep link (tg://resolve...)
-        if (!referralCode && window.location.href.startsWith("tg:")) {
-          console.log("Handling Telegram deep link...");
-
-          // Extract 'startapp' from the tg://resolve link
-          const deepLinkParams = new URLSearchParams(window.location.href.split("?")[1]);
-          referralCode = deepLinkParams.get("startapp");
-
-          if (referralCode) {
-            console.log("Referral Code from deep link:", referralCode);
-          } else {
-            console.log("No 'startapp' parameter found in deep link");
-          }
-        }
-
-        // Step 3: Set the referral code in the state
-        if (referralCode) {
-          setValues((prev) => ({
-            ...prev,
-            referral_by: referralCode,
-          }));
-          console.log("Referral code successfully updated in state:", referralCode);
-        } else {
-          console.log("No referral code found.");
-        }
-      } catch (error) {
-        console.error("Error extracting referral code:", error);
-      }
-    };
-
-    getReferralCode();
-  }, [setValues]);
-};
-
-
-
+  // Use the custom hook for referral code
+  useReferralCode(setValues);
 
   const handleInput = (e) => {
     setValues((prev) => ({
