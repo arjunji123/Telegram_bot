@@ -23,58 +23,62 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 
-  useEffect(() => {
-    const getReferralCode = () => {
-      let referralCode = null;
+useEffect(() => {
+  const getReferralCode = () => {
+    let referralCode = null;
 
-      try {
-        // Check if we are inside Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-          console.log("Inside Telegram Web App");
+    try {
+      // Check if we are inside Telegram WebApp
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+        console.log("Inside Telegram Web App");
 
-          const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
-          console.log("Decoded initData:", initDataDecoded);
+        // Decode the initData to extract parameters
+        const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
+        console.log("Decoded initData:", initDataDecoded);
 
-          const urlParams = new URLSearchParams(initDataDecoded);
-          referralCode = urlParams.get("startapp");
-          
-          if (referralCode) {
-            console.log("Referral Code from Telegram WebApp:", referralCode);
-            // Set the referral code to state
-            setValues((prev) => ({
-              ...prev,
-              referral_by: referralCode,  // Setting "Referral by" field
-            }));
-          } else {
-            console.log("No 'startapp' found in initData");
-          }
-        }
-
-        // Fallback to URL search params
-        if (!referralCode) {
-          console.log("Using URL params fallback");
-          const currentUrlParams = new URLSearchParams(window.location.search);
-          referralCode = currentUrlParams.get("startapp");
-          console.log("Referral Code from URL:", referralCode);
-        }
+        // Extract parameters from the decoded data
+        const urlParams = new URLSearchParams(initDataDecoded);
+        referralCode = urlParams.get("startapp");
 
         if (referralCode) {
-          // Update the state with referral code
+          console.log("Referral Code from Telegram WebApp:", referralCode);
+          // Set the referral code to state
           setValues((prev) => ({
             ...prev,
-            referral_by: referralCode,  // Setting the referral code in "Referral by"
+            referral_by: referralCode,  // Setting "Referral by" field
           }));
-          console.log("Referral code set to state:", referralCode);
         } else {
-          console.log("No referral code found");
+          console.log("No 'startapp' found in initData");
         }
-      } catch (error) {
-        console.error("Error extracting referral code:", error);
+      } else {
+        console.log("Telegram WebApp not initialized or initData not available");
       }
-    };
 
-    getReferralCode(); // Run the function to get the referral code
-  }, [location]); // Run this effect on location change
+      // Fallback to URL params if Telegram WebApp does not provide referral code
+      if (!referralCode) {
+        console.log("Using URL params fallback");
+        const currentUrlParams = new URLSearchParams(window.location.search);
+        referralCode = currentUrlParams.get("startapp");
+        console.log("Referral Code from URL:", referralCode);
+      }
+
+      if (referralCode) {
+        // Update the state with referral code
+        setValues((prev) => ({
+          ...prev,
+          referral_by: referralCode,  // Setting the referral code in "Referral by"
+        }));
+        console.log("Referral code set to state:", referralCode);
+      } else {
+        console.log("No referral code found");
+      }
+    } catch (error) {
+      console.error("Error extracting referral code:", error);
+    }
+  };
+
+  getReferralCode(); // Run the function to get the referral code
+}, [location]); // Run this effect on location change
 
   const handleInput = (e) => {
     setValues((prev) => ({
