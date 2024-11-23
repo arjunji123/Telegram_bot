@@ -20,7 +20,6 @@ function Signup() {
     referral_by: "",
     user_type: "user",
   });
-
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 useEffect(() => {
