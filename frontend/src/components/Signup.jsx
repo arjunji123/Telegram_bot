@@ -23,55 +23,20 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 
-// useEffect(() => {
-//   if (window.Telegram.WebApp.initData) {
-//     const urlParams = new URLSearchParams(window.Telegram.WebApp.initData);
-//     const referralCode = urlParams.get('startapp'); // Extract 'startapp'
-
-//     console.log("Referral Code:", referralCode); // Debugging referral code
-//     if (referralCode) {
-//       setValues((prev) => ({
-//         ...prev,
-//         referral_by: referralCode,
-//       }));
-//     }
-//   }
-// }, []);
 useEffect(() => {
-  let referralCode = null;
+  if (window.Telegram.WebApp.initData) {
+    const urlParams = new URLSearchParams(window.Telegram.WebApp.initData);
+    const referralCode = urlParams.get('startapp'); // Extract 'startapp'
 
-  try {
-    // Check if running inside Telegram Web App
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-      console.log("Telegram WebApp detected"); // Debugging
-      const initDataDecoded = atob(window.Telegram.WebApp.initData); // Decode base64
-      console.log("Decoded initData:", initDataDecoded); // Debugging
-      
-      const urlParams = new URLSearchParams(initDataDecoded);
-      referralCode = urlParams.get('startapp'); // Extract 'startapp'
-      console.log("Referral Code from Telegram:", referralCode); // Debugging
-    }
-
-    // Fallback for web URL
-    if (!referralCode) {
-      console.log("Fallback to Web URL params"); // Debugging
-      const currentUrlParams = new URLSearchParams(location.search); // Use location.search for URL
-      referralCode = currentUrlParams.get('startapp');
-      console.log("Referral Code from Web URL:", referralCode); // Debugging
-    }
-
-    // Set referral code if found
+    console.log("Referral Code:", referralCode); // Debugging referral code
     if (referralCode) {
       setValues((prev) => ({
         ...prev,
         referral_by: referralCode,
       }));
-      console.log("Set referral_by:", referralCode); // Debugging
     }
-  } catch (error) {
-    console.error("Error extracting referral code:", error);
   }
-}, [location]); // Dependency to track changes in location
+}, [location]);
 
 
   const handleInput = (e) => {
