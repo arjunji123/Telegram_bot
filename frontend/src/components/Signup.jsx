@@ -23,20 +23,51 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 
-useEffect(() => {
-  if (window.Telegram.WebApp.initData) {
-    const urlParams = new URLSearchParams(window.Telegram.WebApp.initData);
-    const referralCode = urlParams.get('startapp'); // Extract 'startapp'
 
-    console.log("Referral Code:", referralCode); // Debugging referral code
-    if (referralCode) {
-      setValues((prev) => ({
-        ...prev,
-        referral_by: referralCode,
-      }));
-    }
-  }
-}, [location]);
+  useEffect(() => {
+    const getReferralCode = () => {
+      let referralCode = null;
+
+      try {
+        // Check if running inside Telegram Web App
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+          console.log("Inside Telegram Web App");
+
+          // Decode Telegram WebApp initData
+          const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
+          console.log("Decoded initData:", initDataDecoded);
+
+          // Extract startapp parameter from initData
+          const urlParams = new URLSearchParams(initDataDecoded);
+          referralCode = urlParams.get("startapp");
+          console.log("Referral Code from Telegram WebApp:", referralCode);
+        }
+
+        // Fallback for Web URL
+        if (!referralCode) {
+          console.log("Using Web URL fallback");
+          const currentUrlParams = new URLSearchParams(window.location.search);
+          referralCode = currentUrlParams.get("startapp");
+          console.log("Referral Code from Web URL:", referralCode);
+        }
+
+        // Set referral code in state
+        if (referralCode) {
+          setValues((prev) => ({
+            ...prev,
+            referral_by: referralCode,
+          }));
+          console.log("Referral code set to state:", referralCode);
+        } else {
+          console.log("No referral code found");
+        }
+      } catch (error) {
+        console.error("Error extracting referral code:", error);
+      }
+    };
+
+    getReferralCode();
+  }, []);
 
 
   const handleInput = (e) => {
