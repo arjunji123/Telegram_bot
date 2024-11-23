@@ -66,10 +66,22 @@ function Friend() {
  const handleShareClick = () => {
   if (referralCode) {
     try {
-      // Construct the message and link to share
-      const message = encodeURIComponent(
-        `Hi! Use my referral link to join: ${telegramDeepLink}`
-      );
+      // Construct a more engaging message with emojis
+      const message = encodeURIComponent(`
+🌟 Welcome to *UnitradeHub*! 🚀
+
+🔹 How it works:
+1️⃣ Join the community by paying just ₹300 and instantly get 100 coins! 💰  
+2️⃣ Complete simple tasks and refer your friends to earn even more coins. ✅👥  
+3️⃣ Earn rewards for every task completed and every friend you bring in! 🏆  
+4️⃣ Share coins with others to boost your earnings! 🔄  
+5️⃣ Sell your earned coins to companies at their designated rates! 💸💼
+
+📲 Use my referral link to get started:  
+${telegramDeepLink}
+
+🎯 Don't miss this exciting opportunity to grow your earnings effortlessly! 🎉
+      `);
 
       // Construct the Telegram deep link
       const telegramLink = `https://t.me/share/url?url=${encodeURIComponent(
@@ -93,6 +105,7 @@ function Friend() {
     toast.error("Referral link is not available yet.");
   }
 };
+
 
   // Copy referral link to clipboard
   const handleCopyClick = () => {
