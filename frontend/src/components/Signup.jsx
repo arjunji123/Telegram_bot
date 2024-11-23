@@ -22,18 +22,22 @@ function Signup() {
   });
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
+import { useEffect } from "react";
+
 useEffect(() => {
   const getReferralCode = () => {
     let referralCode = null;
 
     try {
-      // Check if we are inside Telegram WebApp
+      // Check if we are inside the Telegram WebApp
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
         console.log("Inside Telegram Web App");
 
+        // Decode initData to retrieve parameters
         const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
         console.log("Decoded initData:", initDataDecoded);
 
+        // Extract URL parameters from initData
         const urlParams = new URLSearchParams(initDataDecoded);
         referralCode = urlParams.get("startapp");
 
@@ -44,7 +48,7 @@ useEffect(() => {
         }
       }
       
-      // Fallback to URL parameters if not in WebApp
+      // Fallback to URL parameters if we are not inside the WebApp
       if (!referralCode) {
         console.log("Using URL params fallback");
         const currentUrlParams = new URLSearchParams(window.location.search);
@@ -52,6 +56,7 @@ useEffect(() => {
         console.log("Referral Code from URL:", referralCode);
       }
 
+      // If referral code is found, update the state
       if (referralCode) {
         setValues((prev) => ({
           ...prev,
@@ -66,8 +71,8 @@ useEffect(() => {
     }
   };
 
-  getReferralCode(); // Run the function to get the referral code
-}, [location]); // Run this effect on location change
+  getReferralCode(); // Call function to extract referral code
+}, [location]); // Re-run when the location changes
 
 
   const handleInput = (e) => {
