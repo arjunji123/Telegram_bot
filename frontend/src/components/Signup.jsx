@@ -28,7 +28,7 @@ function Signup() {
       let referralCode = null;
 
       try {
-        // Check if we are inside the Telegram Web App (inside the browser)
+        // If the user is inside Telegram WebApp, extract 'startapp' from initData
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
           console.log("Inside Telegram Web App");
 
@@ -36,25 +36,37 @@ function Signup() {
           const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
           console.log("Decoded initData:", initDataDecoded);
 
-          // Extract startapp parameter from initData
+          // Extract 'startapp' parameter from initData
           const urlParams = new URLSearchParams(initDataDecoded);
+
+          // Try extracting 'startapp' from initData (this will handle Telegram's WebApp custom params)
           referralCode = urlParams.get("startapp");
-          console.log("Referral Code from Telegram WebApp:", referralCode);
+
+          // If startapp is still null, log it
+          if (!referralCode) {
+            console.log("No 'startapp' found in initData");
+          } else {
+            console.log("Referral Code from Telegram WebApp:", referralCode);
+          }
         }
 
-        // Fallback for Web URL: when the app is accessed directly via URL
+        // Fallback: If no Telegram WebApp initData, use URL params from the current location
         if (!referralCode) {
-          console.log("Using Web URL fallback");
+          console.log("Using URL params fallback");
+
+          // Use URLSearchParams to get the query parameter from the current URL
           const currentUrlParams = new URLSearchParams(window.location.search);
+          
+          // Get the value of the 'startapp' query parameter from the URL
           referralCode = currentUrlParams.get("startapp");
-          console.log("Referral Code from Web URL:", referralCode);
+          console.log("Referral Code from URL:", referralCode);
         }
 
-        // If referral code is found, set it in state
+        // Set the referral code in the state if found
         if (referralCode) {
           setValues((prev) => ({
             ...prev,
-            referral_by: referralCode,
+            referral_by: referralCode, // Set referral_by to state
           }));
           console.log("Referral code set to state:", referralCode);
         } else {
@@ -65,8 +77,8 @@ function Signup() {
       }
     };
 
-    getReferralCode();
-  }, [location]); // Runs when the location (URL) changes
+    getReferralCode(); // Call the function on component mount
+  }, [location]); // Dependency on location ensures the effect runs on URL change
 
   const handleInput = (e) => {
     setValues((prev) => ({
