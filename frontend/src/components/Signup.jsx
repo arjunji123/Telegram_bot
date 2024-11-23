@@ -28,33 +28,34 @@ useEffect(() => {
     let referralCode = null;
 
     try {
-      // Check if we are inside Telegram WebApp
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+      // Ensure we're inside the Telegram WebApp
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
         console.log("Inside Telegram Web App");
 
-        // Decode the initData to extract parameters
-        const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
-        console.log("Decoded initData:", initDataDecoded);
+        // Access initDataUnsafe directly
+        const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initDataUnsafe);
+        console.log("Decoded initDataUnsafe:", initDataDecoded);
 
-        // Extract parameters from the decoded data
+        // Extract the 'startapp' parameter from the initDataUnsafe
         const urlParams = new URLSearchParams(initDataDecoded);
         referralCode = urlParams.get("startapp");
 
         if (referralCode) {
-          console.log("Referral Code from Telegram WebApp:", referralCode);
-          // Set the referral code to state
+          console.log("Referral Code from Telegram WebApp (initDataUnsafe):", referralCode);
+          
+          // Store referral code in state for use in the mini app
           setValues((prev) => ({
             ...prev,
-            referral_by: referralCode,  // Setting "Referral by" field
+            referral_by: referralCode,
           }));
         } else {
-          console.log("No 'startapp' found in initData");
+          console.log("No 'startapp' found in initDataUnsafe");
         }
       } else {
-        console.log("Telegram WebApp not initialized or initData not available");
+        console.log("Telegram WebApp is not initialized or initDataUnsafe is unavailable");
       }
 
-      // Fallback to URL params if Telegram WebApp does not provide referral code
+      // Fallback to URL search parameters if Telegram WebApp initialization fails
       if (!referralCode) {
         console.log("Using URL params fallback");
         const currentUrlParams = new URLSearchParams(window.location.search);
@@ -62,11 +63,11 @@ useEffect(() => {
         console.log("Referral Code from URL:", referralCode);
       }
 
+      // If referral code found, update the state
       if (referralCode) {
-        // Update the state with referral code
         setValues((prev) => ({
           ...prev,
-          referral_by: referralCode,  // Setting the referral code in "Referral by"
+          referral_by: referralCode,
         }));
         console.log("Referral code set to state:", referralCode);
       } else {
@@ -77,8 +78,10 @@ useEffect(() => {
     }
   };
 
-  getReferralCode(); // Run the function to get the referral code
-}, [location]); // Run this effect on location change
+  // Call the function to get the referral code
+  getReferralCode();
+}, [location]);  // Re-run this effect on location change
+
 
   const handleInput = (e) => {
     setValues((prev) => ({
