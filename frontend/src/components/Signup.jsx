@@ -22,24 +22,24 @@ function Signup() {
   });
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
-useEffect(() => {
-  // Full URL se query parameters nikalna
-  const url = new URL(window.location.href); // Current URL capture karega
-  const referralCode = url.searchParams.get('startapp'); // startapp parameter nikalna
-  
-  console.log("Referral Code from Telegram:", referralCode); // Debugging ke liye
-  
-  // Referral code ko state mein set karna
-  if (referralCode) {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const referralCode = params.get('referral_code'); // Get the referral code from the URL
+console.log("params", params.get);
+
+    if (referralCode) {
+      setValues((prev) => ({
+        ...prev,
+        referral_by: referralCode, // Set the referral code into the state
+      }));
+    }
+  }, [location]);
+  const handleInput = (e) => {
     setValues((prev) => ({
       ...prev,
-      referral_by: referralCode, // referral_by state update
+      [e.target.name]: e.target.value,
     }));
-  } else {
-    console.warn("No referral code found in startapp parameter.");
-  }
-}, []);
-
+  };
 
   // Form validation logic
   const validateForm = (values) => {
