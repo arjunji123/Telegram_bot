@@ -77,12 +77,7 @@ Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing 
 🎉 Don't miss this chance to earn effortlessly!
 `);
 
-      // Encode the message for Telegram sharing
-      const encodedMessage = encodeURIComponent(message);
-
-      // Telegram deep link
-      const telegramDeepLink = `tg://msg?text=${encodedMessage}`;
-
+ const telegramLink = `https://t.me/share/url?text=${message}`;
 
       // Open the Telegram link
       const opened = window.open(telegramLink, "_blank");
