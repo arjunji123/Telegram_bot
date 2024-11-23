@@ -22,7 +22,7 @@ function Signup() {
   });
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
-Initialize Telegram Web App
+
 useEffect(() => {
   if (window.Telegram.WebApp.initData) {
     const urlParams = new URLSearchParams(window.Telegram.WebApp.initData);
