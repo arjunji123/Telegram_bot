@@ -37,27 +37,33 @@ function Signup() {
 //     }
 //   }
 // }, []);
-  useEffect(() => {
-    let referralCode = null;
-    // Check if running inside Telegram Web App
-    if (window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-      const urlParams = new URLSearchParams(window.Telegram.WebApp.initData);
-      referralCode = urlParams.get('startapp'); // Extract 'startapp'
-    }
-    // Fallback for web URL
-    if (!referralCode) {
-      const currentUrlParams = new URLSearchParams(location.search); // Use location.search for URL
-      referralCode = currentUrlParams.get('startapp');
-    }
-    console.log('Referral Code:', referralCode); // Debugging referral code
-    // Set referral code if found
-    if (referralCode) {
-      setValues((prev) => ({
-        ...prev,
-        referral_by: referralCode,
-      }));
-    }
-  }, [location]); // Dependency to track changes in location
+ useEffect(() => {
+  let referralCode = null;
+
+  // Check if running inside Telegram Web App
+  if (window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+    const initDataDecoded = atob(window.Telegram.WebApp.initData); // Decode base64
+    const urlParams = new URLSearchParams(initDataDecoded);
+    referralCode = urlParams.get('startapp'); // Extract 'startapp'
+  }
+
+  // Fallback for web URL
+  if (!referralCode) {
+    const currentUrlParams = new URLSearchParams(location.search); // Use location.search for URL
+    referralCode = currentUrlParams.get('startapp');
+  }
+
+  console.log('Referral Code:', referralCode); // Debugging referral code
+
+  // Set referral code if found
+  if (referralCode) {
+    setValues((prev) => ({
+      ...prev,
+      referral_by: referralCode,
+    }));
+  }
+}, [location]); // Dependency to track changes in location
+
   const handleInput = (e) => {
     setValues((prev) => ({
       ...prev,
