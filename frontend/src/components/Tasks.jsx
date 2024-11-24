@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../utils/Logo";
-import Loader from '../components/Loader';
+// import Loader from '../components/Loader';
+import SkeletonLoader from "../components/SkeletonLoader"; // Import the skeleton loader component
 import { FaXTwitter, FaInstagram, FaLinkedin  , FaSnapchat, FaWhatsapp  } from "react-icons/fa6";
 import { FaRegCheckCircle, FaYoutube  , FaTelegramPlane, FaPinterest , FaFacebook  } from "react-icons/fa";
 import Follow from "../utils/Follow";
@@ -282,7 +283,7 @@ function Tasks() {
       theme="dark"
     />
    {loading ? (
-        <Loader />
+        <SkeletonLoader /> 
       ) :
 
     <div className="w-full bg-black text-white  flex flex-col max-w-lg h-screen sm:mx-auto  font-Inter  ">

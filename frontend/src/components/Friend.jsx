@@ -113,12 +113,10 @@ Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing 
   };
 
   // Display loader while data is loading
-  if (loading) {
-    return <Loader />;
-  }
+
 
   return (
-    <div className="bg-white flex justify-center min-h-screen">
+    <div className="bg-white flex justify-center font-Inter h-screen w-full overflow-hidden relative">
       <ToastNotification
         message={toastMessage}
         show={showToast}
@@ -127,9 +125,9 @@ Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing 
          {loading ? (
         <Loader />
       ) :
-      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg overflow-y-auto px-4">
+      <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative px-4">
         <div className="flex-grow relative z-0 py-6">
-          <Logo />
+          {/* <Logo /> */}
           <div className="space-y-2 text-center">
             <div className="flex justify-center">
               <img
