@@ -39,7 +39,7 @@ function Footer() {
   };
 
   return (
-    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg bg-black flex justify-around items-center z-10 text-xs py-2 shadow-lg">
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-black flex justify-around items-center z-10 text-xs py-2 shadow-lg">
     <div className="text-center text-white w-1/5">
       <Link
         className="flex flex-col items-center"

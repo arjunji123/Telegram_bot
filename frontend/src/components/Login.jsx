@@ -42,14 +42,14 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors(""); // Clear previous error message
-  
+
     try {
       await dispatch(login({ mobile, password }));
       setToastMessage("Login successful!");
       setShowToast(true);
-      setTimeout(() => {
-        navigate("/home");
-      }, 2000);
+      navigate("/home");
+      // setTimeout(() => {
+      // }, 2000);
     } catch (error) {
       const errorMessage = error.message || "An unknown error occurred."; // Get the error message from the thrown error
 
@@ -59,7 +59,7 @@ function Login() {
       setShowToast(true);
     }
   };
-  
+
   const [firstName, setFirstName] = useState("");
 
   useEffect(() => {
@@ -70,7 +70,7 @@ function Login() {
 
   return (
     <div className="bg-white flex justify-center items-center min-h-screen ">
-      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />   
+      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
       <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden ">
         <div className="p-6 sm:p-10  shadow-lg relative">
           <div className="absolute top-0 left-0 w-full h-1 "></div>
@@ -127,7 +127,7 @@ function Login() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full py-3 sm:py-4 text-sm sm:text-base font-eina uppercase font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+                className="w-full py-3 sm:py-4 text-sm sm:text-base font-Inter uppercase font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
               >
                 Log In
               </button>
@@ -147,10 +147,10 @@ function Login() {
         {/* Footer Section */}
         <div className="bg-[#111113] py-4 sm:py-6 text-center rounded-b-2xl">
           <p className="text-xs sm:text-sm text-[#909090]">
-            New to Unitrade? 
+            New to Unitrade?
             <Link to="/" className="text-white font-semibold hover:underline ml-1">
-            Create an Account
-          </Link>
+              Create an Account
+            </Link>
           </p>
         </div>
       </div>

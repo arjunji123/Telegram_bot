@@ -23,17 +23,17 @@ function History({ closePopups }) {
       <div className="overflow-y-auto max-h-[70vh] px-3">
         <div className="mt-4">
           <p className="text-[#ACACAC] text-lg font-semibold">Nov 7, 2024</p>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>
           </div>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>
           </div>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>
@@ -43,12 +43,12 @@ function History({ closePopups }) {
   
         <div className="mt-4">
           <p className="text-[#ACACAC] text-lg font-semibold">Nov 6, 2024</p>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>
           </div>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>
@@ -58,12 +58,12 @@ function History({ closePopups }) {
   
         <div className="mt-4">
           <p className="text-[#ACACAC] text-lg font-semibold">Nov 5, 2024</p>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>
           </div>
-          <div className="flex items-center justify-between py-2 font-poppins">
+          <div className="flex items-center justify-between py-2">
             <img className="w-10 h-10" src="\src\Img\rupees.png" alt="" />
             <h3 className="text-sm capitalize text-white font-semibold">Receive from daily rewards</h3>
             <p className="text-sm capitalize text-white font-semibold">+ 200 Coin</p>

@@ -4,11 +4,8 @@ import React from 'react';
 const Loader = () => {
   return (
     <div className="loader-overlay">
-    <div className="loader-circle">
-      <div className="loader-inner"></div>
+      <div className="loader-circle"></div>
     </div>
-  </div>
-  
   );
 };
 

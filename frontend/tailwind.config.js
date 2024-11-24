@@ -1,16 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  darkMode: "class",
+  darkMode: "class", // Enable class-based dark mode
   theme: {
     extend: {
       height: {
         screen: '100vh', // Full viewport height
       },
       fontFamily: {
-        eina: ['"Eina"', 'sans-serif'], // Add your custom font
+        Inter: ["Inter", "sans-serif"], // Corrected syntax for font-family
       },
-      darkMode: "class", // Enable class-based dark mode
     },
   },
   plugins: [],

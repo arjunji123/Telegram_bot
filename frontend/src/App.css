@@ -1,23 +1,29 @@
-
-
 /* Custom class to hide scrollbar */
 .hide-scrollbar {
-  scrollbar-width: none; /* For Firefox */
-  -ms-overflow-style: none; /* For Internet Explorer */
+  scrollbar-width: none;
+  /* For Firefox */
+  -ms-overflow-style: none;
+  /* For Internet Explorer */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
+  display: none;
+  /* For Chrome, Safari, and Opera */
 }
+
 .top-glow {
   box-shadow: 0 -26px 20px rgba(243, 186, 47, 0.3);
 }
 
 :root {
-  --tg-bg-color: #000000; /* Telegram Header Background Color */
-  --tg-text-color: #ffffff; /* Telegram Header Text Color */
-  --bg-color: #000000; /* General Background */
-  --text-color: #ffffff; /* General Text Color */
+  --tg-bg-color: #000000;
+  /* Telegram Header Background Color */
+  --tg-text-color: #ffffff;
+  /* Telegram Header Text Color */
+  --bg-color: #000000;
+  /* General Background */
+  --text-color: #ffffff;
+  /* General Text Color */
 }
 
 
@@ -32,10 +38,12 @@
     opacity: 0;
     transform: scale(0);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.2);
   }
+
   100% {
     opacity: 0;
     transform: scale(1);
@@ -47,45 +55,72 @@
 }
 
 
-  html,
-  body {
-    overflow: hidden;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling (if needed) */
+html,
+body {
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Smooth scrolling (if needed) */
   background-color: var(--bg-color);
   color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+
+@font-face {
+  font-family: 'Roobert';
+  src: url('./assets/fonts/RoobertTRIALVF-BF67243fd545701.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GasoekOne';
+  src: url('./assets/fonts/GasoekOne-Regular.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* @font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: italic;
+  font-style: normal;
+} */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  /* Removed unnecessary backslash */
+  font-weight: bold;
+  font-style: normal;
+}
+
+@media (min-width: 640px) {
+  table {
+    display: inline-table !important;
   }
-  @font-face {
-    font-family: 'Eina';
-    src: url('/fonts/eina/eina-regular.woff2') format('woff2'),
-         url('/fonts/eina/eina-regular.woff') format('woff'),
-         url('/fonts/eina/eina-regular.ttf') format('truetype');
-    font-weight: 400; /* Adjust the weight based on the font file */
-    font-style: normal; /* Set the style (normal, italic, etc.) */
+
+  thead tr:not(:first-child) {
+    display: none;
   }
-  @media (min-width: 640px) {
-    table {
-      display: inline-table !important;
-    }
+}
 
-    thead tr:not(:first-child) {
-      display: none;
-    }
-  }
+td:not(:last-child) {
+  border-bottom: 0;
+}
 
-  td:not(:last-child) {
-    border-bottom: 0;
-  }
-
-  th:not(:last-child) {
-    border-bottom: 2px solid rgba(0, 0, 0, .1);
-  }
+th:not(:last-child) {
+  border-bottom: 2px solid rgba(0, 0, 0, .1);
+}
 
 
 
 
 
 
-  /* General background and layout */
+/* General background and layout */
 .bg-white {
   background-color: #1a1a1a;
 }
@@ -99,7 +134,8 @@
 }
 
 /* User Info and Balance */
-.user-info, .balance {
+.user-info,
+.balance {
   text-align: center;
 }
 
@@ -149,8 +185,10 @@
 }
 
 .coin-image {
-  width: 20px; /* Adjust size to your coin image */
-  height: 20px; /* Adjust size to your coin image */
+  width: 20px;
+  /* Adjust size to your coin image */
+  height: 20px;
+  /* Adjust size to your coin image */
   transition: transform 0.5s ease-in-out;
   will-change: transform;
 }
@@ -167,121 +205,63 @@
   background-color: #333;
 }
 
- 
-  
+
+
 
 
 /* loader.css */
 
-/* Main container for the loader with background blur */
-.loader-container {
-  position: fixed;  /* Ensures the loader is fixed in place */
-  top: 50%;  /* Vertically center it */
-  left: 50%;  /* Horizontally center it */
-  transform: translate(-50%, -50%);  /* Ensure it is exactly in the center */
-  width: 100%;
-  max-width: 1024px;  /* This is equivalent to max-w-lg (adjust as needed) */
-  height: 100vh;  /* Full viewport height */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.7); /* Dark background with transparency */
-  backdrop-filter: blur(10px);  /* Apply background blur */
-  z-index: 9999; /* Ensures loader is on top */
-}
-
-/* Loader style */
-/* Dark Theme Background */
+/* Loader Overlay - Dark Theme Background */
 .loader-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8); /* Dark overlay */
+  bottom: 60px;
+  background-color: rgba(0, 0, 0, 0.9); /* Slightly darker black */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000; /* Ensure loader is above other content */
 }
 
-/* Loader Styles */
-/* Dark Theme Background */
-.loader-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8); /* Dark background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
 /* Circular Loader */
 .loader-circle {
-  border: 6px solid #f3f3f3; /* Light gray for outer circle */
-  border-top: 6px solid #3498db; /* Blue color for the top portion */
-  border-radius: 50%;
-  width: 60px;
+  border: 8px solid #333; /* Dark gray for the outer border */
+  border-top: 8px solid #fff; /* White for the spinning portion */
+  border-radius: 50%; /* Make it circular */
+  width: 60px; /* Adjust size as per your requirement */
   height: 60px;
-  animation: spin 1.5s linear infinite;
+  animation: spin 1.2s linear infinite; /* Rotation animation */
 }
 
-/* Inner circle to give a glowing effect */
-.loader-inner {
-  position: absolute;
-  border: 6px solid #fff;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  top: 50%;
-  left: 50%;
-  margin-top: -15px;
-  margin-left: -15px;
-  animation: glow 1.5s ease-in-out infinite;
-}
-
-/* Spinner animation */
+/* Spinner Animation */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Glowing effect animation */
-@keyframes glow {
   0% {
-    box-shadow: 0 0 5px #3498db, 0 0 10px #3498db, 0 0 15px #3498db;
-  }
-  50% {
-    box-shadow: 0 0 20px #3498db, 0 0 30px #3498db, 0 0 40px #3498db;
+    transform: rotate(0deg);
   }
   100% {
-    box-shadow: 0 0 5px #3498db, 0 0 10px #3498db, 0 0 15px #3498db;
+    transform: rotate(360deg);
   }
 }
+
 
 
 
 
 
 /* animation of profile page */
-body {
+/* body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   background-color: black;
   color: white;
   font-family: "Poppins", sans-serif;
-}
+} */
 
 canvas {
   position: absolute;
   top: 0;
   left: 0;
 }
-
-
-

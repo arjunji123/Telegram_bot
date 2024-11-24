@@ -124,6 +124,9 @@ Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing 
         show={showToast}
         setShow={setShowToast}
       />
+         {loading ? (
+        <Loader />
+      ) :
       <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg overflow-y-auto px-4">
         <div className="flex-grow relative z-0 py-6">
           <Logo />
@@ -161,8 +164,10 @@ Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing 
             </div>
           </div>
         </div>
-        <Footer />
+
       </div>
+}
+              <Footer />
     </div>
   );
 }

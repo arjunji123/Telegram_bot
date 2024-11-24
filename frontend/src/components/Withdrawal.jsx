@@ -217,7 +217,7 @@ const handleSellSubmit = (e) => {
 
     <>
 
-      <div className="bg-white flex justify-center min-h-screen font-eina">
+      <div className="bg-white flex justify-center min-h-screen font-Inter">
             <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -227,14 +227,13 @@ const handleSellSubmit = (e) => {
         draggable
         theme="dark"
       />
-      {loading && (
-         <Loader />
-    )
-    }
+      {loading ? (
+        <Loader />
+      ) :
       <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
         <div className="flex-grow relative z-0 pt-6  pb-16">
           {/* <Logo /> */}
-          <div className="flex justify-center font-eina  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
+          <div className="flex justify-center font-Inter  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
             <p>U</p>
             <p className="">{userData ? userData.coins : "0"}</p>
           </div>
@@ -248,7 +247,7 @@ const handleSellSubmit = (e) => {
         <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
           <BiSolidUpvote size={22} />
         </div>
-        <span className="text-xs text-center font-eina">Send</span>
+        <span className="text-xs text-center font-Inter">Send</span>
       </div>
 
       {/* History Button */}
@@ -259,11 +258,11 @@ const handleSellSubmit = (e) => {
         <div className="rounded-full w-8 h-8 bg-[#303030] flex justify-center items-center">
           <BiHistory size={22} />
         </div>
-        <span className="text-xs text-center font-eina">History</span>
+        <span className="text-xs text-center font-Inter">History</span>
       </div>
     </div>
 
-          <p className="text-center font-eina text-xs text-[#f5eded] mb-4">
+          <p className="text-center font-Inter text-xs text-[#f5eded] mb-4">
             Sell your points at your chosen price, anytime and anywhere. Get instant cash withdrawals with no delays!
           </p>
 
@@ -278,7 +277,7 @@ const handleSellSubmit = (e) => {
                       <BsPersonFillCheck size={18} />
                       <div className="ml-1"> 
                         <span className="text-[12px] font-semibold uppercase">{company.company_name}</span> {/* Adjusted name size */}
-                        <p className="font-bold flex  font-eina items-center text-[17px] "> 
+                        <p className="font-bold flex  font-Inter items-center text-[17px] "> 
                           <BsCurrencyRupee className="" />
                           <span>{company.coin_rate}</span>
                         </p>
@@ -303,6 +302,7 @@ const handleSellSubmit = (e) => {
 
 
       </div>
+}
       <Footer />
     
       {

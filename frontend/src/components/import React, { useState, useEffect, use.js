@@ -169,7 +169,7 @@ function Profile() {
     };
   }, []);
   return (
-    <div className="relative min-h-screen flex justify-center items-center font-poppins bg-black overflow-hidden">
+    <div className="relative min-h-screen flex justify-center items-center bg-black overflow-hidden">
       <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />  
      
     <canvas ref={canvasRef} className="absolute inset-0 z-0" />

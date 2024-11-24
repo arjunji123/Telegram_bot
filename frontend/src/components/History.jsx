@@ -46,13 +46,12 @@ useEffect(() => {
 
 
   return (
-    <div className="bg-white min-h-screen flex justify-center font-poppins">
+    <div className="bg-white min-h-screen flex justify-center">
+        {loading ? (
+        <Loader />
+      ) :
       <div className=" bg-black text-white w-full max-w-lg flex flex-col px-4">
-        
-      {loading && (
-         <Loader />
-    )
-    }
+  
         <div className="flex items-center justify-between py-4">
           <button onClick={() => navigate(-1)} className="text-2xl text-white">
             <BsArrowLeft />
@@ -96,10 +95,11 @@ useEffect(() => {
   )}
 </div>
 
-        
    
-        <Footer />
+        
       </div>
+}
+        <Footer />
     </div>
   );
 };

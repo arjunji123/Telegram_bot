@@ -171,7 +171,7 @@ function Payment() {
         <div className="flex justify-center">
           <button
             onClick={togglePopup}
-            className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-eina font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+            className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-Inter font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
           >
             Upload Payment Proof
           </button>
@@ -191,7 +191,7 @@ function Payment() {
   
     {/* Popup Modal */}
     {showPopup && (
-      <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50 font-poppins" onClick={togglePopup}>
+      <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50 " onClick={togglePopup}>
         <div
           className="bg-[#1B1A1A] p-4 sm:p-6 rounded-t-3xl shadow-xl w-full max-w-lg relative"
           onClick={(e) => e.stopPropagation()}

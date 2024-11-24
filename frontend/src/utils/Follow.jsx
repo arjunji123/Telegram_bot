@@ -3,7 +3,7 @@ import { ImCross } from "react-icons/im";
 
 function Follow({togglePopup, handleFileChange, handleSubmit, isUploading,  task, questId}) {
     return (
-        <div className="fixed inset-0 flex items-end justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50 font-poppins" onClick={togglePopup}>
+        <div className="fixed inset-0 flex items-end justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50" onClick={togglePopup}>
             <div className="bg-[#1B1A1A] p-4 sm:p-6 rounded-t-3xl shadow-xl min-w-[420px] max-w-lg relative" onClick={(e) => e.stopPropagation()}>
                 <button onClick={togglePopup} className="absolute top-5 right-5 text-gray-400 hover:text-gray-200 focus:outline-none transition duration-300">
                     <ImCross size={20} />

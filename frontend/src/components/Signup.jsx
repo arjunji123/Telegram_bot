@@ -294,7 +294,7 @@ useEffect(() => {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold font-eina text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold font-Inter text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
               disabled={loading} // Disable the button when loading
             >
               
