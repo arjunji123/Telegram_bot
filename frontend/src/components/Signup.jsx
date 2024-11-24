@@ -2,6 +2,7 @@ import React, { useState , useEffect} from "react";
 import { Link, useNavigate, useLocation  } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for the eye button
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
 import { logo } from '../images/index';
@@ -21,6 +22,8 @@ function Signup() {
     referral_by: "",
     user_type: "user",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
 useEffect(() => {
@@ -241,7 +244,7 @@ useEffect(() => {
 
           {/* Password and Confirm Password Input */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="relative">
+            {/* <div className="relative">
               <input
                 type="password"
                 name="password"
@@ -251,8 +254,50 @@ useEffect(() => {
                 className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Password"
               />
-            </div>
-            <div className="relative">
+            </div> */}
+             <div className="relative">
+      {/* Password Input */}
+      <input
+        type={showPassword ? "text" : "password"} // Toggle input type
+        name="password"
+        value={values.password}
+        onChange={handleInput}
+        required
+        className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+        placeholder="Password"
+      />
+
+      {/* Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
+        className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition duration-300"
+      >
+        {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+      </button>
+    </div>
+    <div className="relative">
+      {/* Password Input */}
+      <input
+        type={showConfirmPassword ? "text" : "password"} // Toggle input type
+          name="confirmPassword"
+          value={values.confirmPassword}
+        onChange={handleInput}
+        required
+        className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+        placeholder="Confirm Password"
+      />
+
+      {/* Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setShowConfirmPassword((prev) => !prev)} // Toggle password visibility
+        className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition duration-300"
+      >
+        {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+      </button>
+    </div>
+            {/* <div className="relative">
               <input
                 type="password"
                 name="confirmPassword"
@@ -262,7 +307,7 @@ useEffect(() => {
                 className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Confirm Password"
               />
-            </div>
+            </div> */}
           </div>
 
           {/* UPI ID Input */}

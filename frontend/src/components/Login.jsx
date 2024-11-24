@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../Styles/LoginDesign.css";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/actions/authActions";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for the eye button
 import ToastNotification from "./Toast";
 import { logo } from "../images/index";
 import Loader from '../components/Loader';
@@ -12,6 +13,7 @@ function Login() {
   const dispatch = useDispatch();
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showToast, setShowToast] = useState(false);
@@ -112,7 +114,7 @@ function Login() {
               />
             </div>
 
-            <div className="relative">
+            {/* <div className="relative">
               <input
                 type="password"
                 name="password"
@@ -122,8 +124,29 @@ function Login() {
                 className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Password"
               />
-            </div>
+            </div> */}
 
+<div className="relative">
+      {/* Password Input */}
+      <input
+        type={showPassword ? "text" : "password"} // Toggle input type
+        name="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+        placeholder="Password"
+      />
+
+      {/* Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
+        className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition duration-300"
+      >
+        {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+      </button>
+    </div>
             <div className="flex justify-center">
               <button
                 type="submit"
