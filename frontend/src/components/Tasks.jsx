@@ -56,8 +56,7 @@ function Tasks() {
   }, [dispatch]);
   const bannerQuests = quest && quest.filter(quest => quest.quest_type === "banner");
   const nonBannerQuests = quest && quest.filter(quest => quest.quest_type === "non-banner");
-  console.log(nonBannerQuests, "nonBannerQuestsnonBannerQuests");
-
+  
   const rows = nonBannerQuests && nonBannerQuests.filter((quest) => quest.activity === "watch").map((quest, index) => ({
     taskKey: `task${quest.quest_id}`, // Unique keys
     questId: quest.quest_id, // Add quest_id here
@@ -211,7 +210,6 @@ function Tasks() {
     });
   };
   const handleSubmit = async (task, questId) => {
-    console.log("questIdquestId", questId);
 
     // Basic validations
     if (!screenshot) {
