@@ -7,6 +7,7 @@ import "../Styles/LoginDesign.css";
 import { logo } from '../images/index';
 import { BACKEND_URL } from '../config';
 import Loader from '../components/Loader';
+// Custom Hook for Referral Code
 
 function Signup() {
   const [loading, setLoading] = useState(false);
@@ -20,28 +21,53 @@ function Signup() {
     referral_by: "",
     user_type: "user",
   });
-
   const navigate = useNavigate();
   const location = useLocation(); // Use location to access the URL parameters
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const referralCode = params.get('referral_code'); // Get the referral code from the URL
-console.log("params", params.get);
+useEffect(() => {
+  const getReferralCode = () => {
+    let referralCode = null;
+
+    // Check if we are inside the Telegram Web App
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+      console.log("Inside Telegram Web App");
+
+      // Decode initData
+      const initDataDecoded = decodeURIComponent(window.Telegram.WebApp.initData);
+      console.log("Decoded initData:", initDataDecoded);
+
+      // Parse initData to extract start_param
+      const urlParams = new URLSearchParams(initDataDecoded);
+      referralCode = urlParams.get("start_param"); // Use 'start_param' instead of 'startapp'
+      console.log("Referral Code from Telegram WebApp:", referralCode);
+    }
+
+    // Fallback to URL parameters if not in WebApp
+    if (!referralCode) {
+      const currentUrlParams = new URLSearchParams(window.location.search);
+      referralCode = currentUrlParams.get("start_param"); // Check for 'start_param' in URL
+      console.log("Referral Code from URL:", referralCode);
+    }
 
     if (referralCode) {
       setValues((prev) => ({
         ...prev,
-        referral_by: referralCode, // Set the referral code into the state
+        referral_by: referralCode,
       }));
+      console.log("Referral code set to state:", referralCode);
+    } else {
+      console.log("No referral code found");
     }
-  }, [location]);
+  };
+
+  getReferralCode();
+}, [location]); // Run this effect when location changes
+
   const handleInput = (e) => {
     setValues((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
-
   // Form validation logic
   const validateForm = (values) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -81,43 +107,6 @@ console.log("params", params.get);
 
     return true; // Return true if all validations pass
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-    
-  //   const isValid = validateForm(values);
-  //   console.log('values', values);
-  //   if (!isValid) return; // Exit if validation fails
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.post(
-  //       `${BACKEND_URL}/api/v1/api-register`,
-  //       values
-  //     );
-  //     console.log("Server Response:", response);
-      
-  //     // Assuming the generated ID is in response.data.id
-  //     const userId = response.data.user.id;
-  // console.log('userId', userId)
-  //     toast.success("Registration successful!");
-  
-  //     setTimeout(() => {
-  //       // Redirect to the Payment page with the generated userId
-  //       navigate(`/payment/${userId}`);
-  //     }, 2000);
-  //   } catch (err) {
-  //     if (err.response && err.response.status === 400) {
-  //       const backendError = err.response.data.error;
-  //       toast.error(backendError); // Display the backend error message
-  //     } else {
-  //       console.log("Axios Error:", err);
-  //       toast.error("An error occurred during registration. Please try again.");
-  //     }
-  //   }
-  //   finally {
-  //     setLoading(false); // Hide loader after the request completes
-  //   }
-  // };
  
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -295,7 +284,7 @@ console.log("params", params.get);
               type="text"
               name="referral_by"
               value={values.referral_by}
-              onChange={handleInput}
+             readOnly 
               className="w-full px-3 sm:px-4 py-2 sm:py-3 uppercase bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
               placeholder="Referral By"
             />
