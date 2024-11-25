@@ -1895,24 +1895,18 @@ exports.createSellTransaction = async (req, res, next) => {
 };
 
 ////////////////////////////////////
-// API to get user history (coins operation, status, pending, etc.)
 exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
-  // Get the user_id from the logged-in user's session (JWT token)
-  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
-
-  console.log("Fetching user history for user:", user_id);
+  const user_id = req.user.id;
 
   try {
-    // Query to get the user's coin operation history with the title, excluding 'tap' type
     const result = await db.query(
       `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered, title
        FROM usercoin_audit
-       WHERE user_id = ? AND type != 'tap'
+       WHERE user_id = ? AND type != 'tap' AND NOT (status = 'waiting' AND type = 'withdrawal')
        ORDER BY date_entered DESC`,
       [user_id]
     );
 
-    // If no history is found, send a default response
     if (result[0].length === 0) {
       return res.status(404).json({
         success: true,
@@ -1921,13 +1915,10 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
       });
     }
 
-    console.log("User history fetched:", result[0]);
-
-    // Respond with the user history data
     res.status(200).json({
       success: true,
       message: "User history fetched successfully.",
-      data: result[0], // Sending the entire result set
+      data: result[0],
     });
   } catch (error) {
     console.error("Error fetching user history:", error);
@@ -1935,6 +1926,36 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+exports.getFilteredUserHistory = catchAsyncErrors(async (req, res, next) => {
+  const user_id = req.user.id;
+
+  try {
+    const result = await db.query(
+      `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered, title
+       FROM usercoin_audit
+       WHERE user_id = ? AND status = 'waiting' AND type = 'withdrawal'
+       ORDER BY date_entered DESC`,
+      [user_id]
+    );
+
+    if (result[0].length === 0) {
+      return res.status(404).json({
+        success: true,
+        message: "No filtered history found for the user",
+        data: [],
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Filtered user history fetched successfully.",
+      data: result[0],
+    });
+  } catch (error) {
+    console.error("Error fetching filtered user history:", error);
+    return next(new ErrorHandler("Database query failed", 500));
+  }
+});
 exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
   try {
     console.log("req.body:", req.body);
