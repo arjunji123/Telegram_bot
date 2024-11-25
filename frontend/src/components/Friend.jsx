@@ -50,7 +50,7 @@ function Friend() {
   // Generate QR code when referral code is available
   useEffect(() => {
     if (referralCode) {
-      generateQRCode(signupLink);
+      generateQRCode(telegramDeepLink);
     }
   }, [referralCode]);
 

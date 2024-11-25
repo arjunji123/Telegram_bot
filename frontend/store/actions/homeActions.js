@@ -54,9 +54,17 @@ export const FETCH_QUEST_HISTORY_REQUEST = 'FETCH_QUEST_HISTORY_REQUEST';
 export const SET_QUEST_HISTORY_DATA  = 'SET_QUEST_HISTORY_DATA';
 export const FETCH_QUEST_HISTORY_FAILURE = 'FETCH_QUEST_HISTORY_FAILURE';
 
+export const FETCH_WITHDRAWAL_REQUEST = 'FETCH_WITHDRAWAL_REQUEST';
+export const SET_WITHDRAWAL_DATA  = 'SET_WITHDRAWAL_DATA';
+export const FETCH_WITHDRAWAL_FAILURE = 'FETCH_WITHDRAWAL_FAILURE';
+
 export const TRANSFER_COINS_REQUEST = "TRANSFER_COINS_REQUEST";
 export const TRANSFER_COINS_SUCCESS = "TRANSFER_COINS_SUCCESS";
 export const TRANSFER_COINS_FAILURE = "TRANSFER_COINS_FAILURE";
+
+export const USER_APPROVE_REQUEST = "USER_APPROVE_REQUEST";
+export const USER_APPROVE_SUCCESS = "USER_APPROVE_SUCCESS";
+export const USER_APPROVE_FAILURE = "USER_APPROVE_FAILURE";
 
 
 
@@ -167,6 +175,20 @@ export const fetchQuestHistory = () => async (dispatch) => {
   }
 };
 
+export const fetchWithdrawal = () => async (dispatch) => {
+  dispatch({type: FETCH_WITHDRAWAL_REQUEST});
+  
+  try {
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/user-waiting-requests`);
+    dispatch({ type: SET_WITHDRAWAL_DATA, payload: data });
+  } catch (error) {
+    dispatch({
+      type: FETCH_WITHDRAWAL_FAILURE,
+      payload: error.message,
+    });
+  }
+};
+
 export const transferCoins = (coinData) => async (dispatch) => {
   try {
     // Call the fetcherPost function for the transfer coins API
@@ -179,6 +201,24 @@ export const transferCoins = (coinData) => async (dispatch) => {
     console.error("Transfer failed:", error.message);
     dispatch({
       type: TRANSFER_COINS_FAILURE,
+      payload: error.message,
+    });
+    toast.error("Failed to transfer coins.");
+  }
+};
+
+export const userApprove = (transaction_id) => async (dispatch) => {
+  try {
+    // Call the fetcherPost function for the transfer coins API
+    const response = await fetcherPost(`${BACKEND_URL}/api/v1/user-approve`, transaction_id);
+
+    console.log("Transfer successful:", response);
+    dispatch({ type: USER_APPROVE_SUCCESS, payload: response });
+    // toast.success("Coins transferred successfully!");
+  } catch (error) {
+    console.error("Transfer failed:", error.message);
+    dispatch({
+      type: USER_APPROVE_FAILURE,
       payload: error.message,
     });
     toast.error("Failed to transfer coins.");

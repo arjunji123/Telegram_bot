@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { BACKEND_URL } from '../config';
 import { AiOutlineMail } from 'react-icons/ai'; // Email icon
 import { Link } from 'react-router-dom'; // Import Link for navigation
+ import { fetcherPost } from '../../store/fetcher'; // Adjust path based on your file structure
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -10,10 +11,10 @@ const ForgotPassword = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/forgotPassword', { email });
-            setMessage(response.data.message);
+            const response = await fetcherPost(`${BACKEND_URL}/api/forgotPassword`, { email });
+            setMessage(response.message || 'Reset link sent successfully.');
         } catch (error) {
-            setMessage('Error sending reset link. Please try again.');
+            setMessage(error.message || 'Error sending reset link. Please try again.');
         }
     };
 
