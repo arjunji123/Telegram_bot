@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchMeData } from "../../store/actions/homeActions";
 import { updateUserProfile } from "../../store/actions/userActions";
 import ToastNotification from "./Toast";
+import Loader from '../components/Loader';
 
 function Profile() {
   const navigate = useNavigate();
