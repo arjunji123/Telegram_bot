@@ -1430,13 +1430,12 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
-
 exports.getFilteredUserHistory = catchAsyncErrors(async (req, res, next) => {
   const user_id = req.user.id;
 
   try {
     const result = await db.query(
-      `SELECT user_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered, title
+      `SELECT user_id, transaction_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered, title
        FROM usercoin_audit
        WHERE user_id = ? AND status = 'waiting' AND type = 'withdrawal'
        ORDER BY date_entered DESC`,
@@ -1461,6 +1460,7 @@ exports.getFilteredUserHistory = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
+
 exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
   try {
     console.log("req.body:", req.body);
