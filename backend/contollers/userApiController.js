@@ -357,15 +357,17 @@ exports.logoutApi = catchAsyncErrors(async (req, res, next) => {
     message: "Logout successfully",
   });
 });
-
 //forgot password for sending token in mail
 exports.forgotPasswordApi = catchAsyncErrors(async (req, res, next) => {
   //const user = await User.findOne({email: req.body.email})
+  console.log("email", req.body.email);
+
   const userData = await db.query(
     "SELECT * FROM users WHERE email = ? limit 1",
     [req.body.email]
   );
   const user = userData[0][0];
+  console.log("user data", user);
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
@@ -385,7 +387,6 @@ exports.forgotPasswordApi = catchAsyncErrors(async (req, res, next) => {
   )}/api/v1/password/reset/${resetToken}`;
 
   const message = `password reset token is :- \n\n ${resetPasswordUrl} \n\n If you have not requested reset password then please ingone it`;
-
   try {
     const query =
       "UPDATE users SET reset_password_token = ?, reset_password_expire = ? WHERE email = ?";
@@ -424,6 +425,7 @@ exports.resetPasswordApi = catchAsyncErrors(async (req, res, next) => {
     .digest("hex");
 
   const currentTime = Date.now();
+  console.log(currentTime);
 
   const query = `
         SELECT *
@@ -435,6 +437,7 @@ exports.resetPasswordApi = catchAsyncErrors(async (req, res, next) => {
   // Execute the query
   const userDetail = await db.query(query, [resetPasswordToken, currentTime]);
   const user = userDetail[0][0];
+  console.log(user);
 
   if (!user) {
     return next(
@@ -457,8 +460,11 @@ exports.resetPasswordApi = catchAsyncErrors(async (req, res, next) => {
   const result = await db.query(query_2, [hashedPassword, "", "", user.id]);
 
   const token = User.generateToken(user.id); // Adjust as per your user object structure
-
-  sendToken(user, token, 201, res);
+  res.status(200).json({
+    success: true,
+    message: `Password Changed Successfully`,
+  });
+  // sendToken(user, token, 201, res);
 });
 
 //////////////////////////////////////////
