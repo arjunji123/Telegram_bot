@@ -6,6 +6,7 @@ import Home from "./components/Home";
 import Tasks from "./components/Tasks";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import ForgotPassword from "./components/Forgot";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
 // import Preloader from "./components/Preloader"; // Import the Preloader component
@@ -78,6 +79,7 @@ function App({ Component, pageProps }) {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={token ? <Navigate to="/home" /> : <Signup />} />
             <Route path="/payment/:id" element={<Payment />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
           </Route>
 
           <Route element={<PrivateRoute />}>

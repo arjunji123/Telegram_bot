@@ -9,13 +9,15 @@ const CustomSwiper = ({
   isVideoWatched,
   handleWatchButtonClick,
   handleCheckButtonClick,
-  handleFollowButtonClick,
+  handleFollowButtonClick, watchTimes, loadingState
 }) => {
+  const slidesPerView = banners && banners.length === 1 ? 1 : 1.2; // Adjust slides per view
+
   return (
     <div className="flex justify-center items-center">
       <Swiper
         spaceBetween={12}
-        slidesPerView={1.2} // Adjust to make slides not take full width
+        slidesPerView={slidesPerView} // Dynamically set slidesPerView
         pagination={{ clickable: true }}
         className="rounded-lg shadow-lg overflow-hidden mb-4"
       >
@@ -66,7 +68,7 @@ const CustomSwiper = ({
                       <>
                         {/* Watch Task */}
                         {banner.activity === "watch" &&
-                          !isVideoWatched[taskKey] && (
+                          !watchTimes[taskKey] && (
                             <a
                               href={banner.quest_url}
                               target="_blank"
@@ -84,7 +86,7 @@ const CustomSwiper = ({
                           )}
 
                         {banner.activity === "watch" &&
-                          isVideoWatched[taskKey] && (
+                          watchTimes[taskKey] && (
                             <button
                               onClick={() =>
                                 handleCheckButtonClick(
@@ -94,7 +96,13 @@ const CustomSwiper = ({
                               }
                               className="bg-gray-900 text-white w-20 flex justify-center py-1.5 rounded-full text-sm font-bold"
                             >
-                              Verify
+                             {loadingState[taskKey] ? (
+           <div className="flex justify-center items-center">
+           <div className="spinner"></div> {/* Custom spinner */}
+         </div>
+        ) : (
+          "Verify"
+        )}
                             </button>
                           )}
 

@@ -158,12 +158,12 @@ function Login() {
           </form>
 
           <div className="text-center">
-            <a
-              href="#"
+            <Link
+             to="/forgot"
               className="text-xs sm:text-sm text-[#b0b0b0] hover:text-white transition-all"
             >
               Forgot Password?
-            </a>
+            </Link>
           </div>
         </div>
 
