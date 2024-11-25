@@ -1284,19 +1284,18 @@ res.status(200).json({
 
 ////////////////////////////////////////////
 exports.getUserPendingCoins = catchAsyncErrors(async (req, res, next) => {
-  // Get the user_id from the logged-in user's session
-  const user_id = req.user.id; // Assuming req.user.id contains the authenticated user's ID
+  const user_id = req.user.id;
 
   console.log("Fetching pending coins for user:", user_id);
 
   try {
-    // Query to get the sum of pending coins for the user where the status is 'inactive'
+    // Query to get the sum of pending coins, ensuring no negative values
     const result = await db.query(
-      "SELECT pending_coin AS totalPendingCoins FROM user_data WHERE user_id = ?",
+      "SELECT GREATEST(0, pending_coin) AS totalPendingCoins FROM user_data WHERE user_id = ?",
       [user_id]
     );
 
-    const totalPendingCoins = result[0][0].totalPendingCoins || 0; // If no coins are found, default to 0
+    const totalPendingCoins = result[0][0].totalPendingCoins || 0; // Default to 0 if no coins found
 
     console.log("Total pending coins fetched:", totalPendingCoins);
 
