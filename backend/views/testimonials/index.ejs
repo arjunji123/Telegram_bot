@@ -134,7 +134,7 @@
         var questId = $(this).data('quest-id');
         console.log("Approving quest ID:", questId);  // Debugging output
         $.post(`/api/v1/approve-quest/${questId}`, function (response) {
-            alert(response.message);
+        
             $('#questImageModal').modal('hide');
             location.reload();
         }).fail(function (xhr) {
@@ -150,8 +150,7 @@ $('#disapproveBtn').click(function () {
 
     $.post(`/api/v1/disapprove-quest/${questId}`, function (response) {
         if (response.success) {
-            alert(response.message);
-
+       
             // Remove the corresponding image and reset the screenshot field in the UI
             $(`#quest-row-${questId}`).find('td').eq(7).text("No screenshot uploaded"); // Reset screenshot field
             $('#questImageModal').modal('hide');
