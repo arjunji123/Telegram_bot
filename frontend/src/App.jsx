@@ -9,7 +9,7 @@ import Signup from "./components/Signup";
 import ForgotPassword from "./components/Forgot";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
-// import Preloader from "./components/Preloader"; // Import the Preloader component
+ import Preloader from "./components/Preloader"; // Import the Preloader component
 import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
 import History from "./components/History";
@@ -19,7 +19,7 @@ import { Provider } from "react-redux";
 import store from "../store/store";
 import Profile from "./components/Profile";
 import AuthListener from "./components/AuthListener"; // Import AuthListener
-import Loader from "./components/Loader";
+// import Loader from "./components/Loader";
 
 store.dispatch(loadUserFromLocalStorage());
 function App({ Component, pageProps }) {
@@ -44,7 +44,7 @@ useEffect(() => {
 }, []);
 
   if (isLoading) {
-    return <Loader />; // Show preloader while loading
+    return <Preloader />; // Show preloader while loading
   }
   return (
     <Provider store={store}>
