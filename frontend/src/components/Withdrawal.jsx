@@ -286,9 +286,9 @@ function Withdrawal() {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-sky-400 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold ">{company.company_name.charAt(0)}</span>
+                            <span className="text-sm font-bold uppercase ">{company.company_name.charAt(0)}</span>
                           </div>
-                          <span className="text-sm font-medium">{company.company_name}</span>
+                          <span className="text-sm font-medium capitalize">{company.company_name}</span>
                         </div>
                         <div className="text-sm font-medium text-[#5B5A5C]">123 Orders (30D) | 98%</div>
                       </div>
