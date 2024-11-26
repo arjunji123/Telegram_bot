@@ -1410,6 +1410,7 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
        WHERE user_id = ? 
          AND type != 'tap' 
          AND status != 'not_completed' 
+         AND pending_coin != '0'
          AND NOT (status = 'waiting' AND type = 'withdrawal')
        ORDER BY date_entered DESC`,
       [user_id]
