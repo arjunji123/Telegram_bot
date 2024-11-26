@@ -1404,14 +1404,16 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
   const user_id = req.user.id;
 
   try {
-    const result = await db.query(
+   const result = await db.query(
       `SELECT user_id, transaction_id, coin_operation, status, earn_coin, pending_coin, type, company_id, date_entered, title
        FROM usercoin_audit
-       WHERE user_id = ? AND type != 'tap' AND NOT (status = 'waiting' AND type = 'withdrawal')
+       WHERE user_id = ? 
+         AND type != 'tap' 
+         AND status != 'not_completed' 
+         AND NOT (status = 'waiting' AND type = 'withdrawal')
        ORDER BY date_entered DESC`,
       [user_id]
     );
-
     if (result[0].length === 0) {
       return res.status(404).json({
         success: true,
