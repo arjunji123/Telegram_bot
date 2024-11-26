@@ -66,12 +66,7 @@
     tg.MainButton.setParams({ is_visible: false }); // Hide the Telegram main button
 
 // Prevent dragging from the edges or middle to close the bot
-document.addEventListener('touchstart', (e) => {
-  // Allow touch gestures inside the scrollable content area
-  if (!document.getElementById('content').contains(e.target)) {
-    e.preventDefault(); // Prevent drag-to-close gesture outside content
-  }
-}, { passive: false });
+document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
 
 document.addEventListener('touchmove', (e) => {
   if (!document.getElementById('content').contains(e.target)) {
@@ -84,6 +79,7 @@ const content = document.getElementById('content');
 content.addEventListener('touchmove', (e) => {
   e.stopPropagation(); // Allow smooth scrolling
 }, { passive: false });
+
 
 
   </script>
