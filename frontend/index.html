@@ -33,7 +33,7 @@
       overflow: hidden; /* Prevent full-screen scrolling */
       background-color: #000; /* Dark mode */
       color: #fff; /* Improve visibility */
-      touch-action: none; /* Disable swipe-to-close gestures */
+
     }
 
     #content {
@@ -54,8 +54,9 @@
       -webkit-overflow-scrolling: touch; /* Smooth scrolling */
     }
     
-    h1 {
-      margin: 0 0 20px;
+   /* Disable touch actions from closing the Telegram WebApp */
+   .prevent-close {
+      touch-action: none; /* Disable touch actions that might close the app */
     }
  
   </style>
@@ -75,24 +76,18 @@
     tg.expand(); // Enable full-screen mode
 
 
-  // Disable Telegram's swipe-to-close gesture
+  // Disable swipe-to-close when the user drags
   document.addEventListener('touchstart', function (e) {
-      // Only prevent the default behavior when touching the Telegram WebApp's header
-      if (e.target === document.body) {
-        e.stopPropagation(); // Stop swipe-to-close behavior
-      }
+      e.stopPropagation(); // Prevent drag gestures that could close the bot
     }, { passive: false });
 
-    // Allow smooth scrolling in the #content area
+    // Enable scroll only inside content and prevent it from propagating to the bot
     document.getElementById('content').addEventListener('touchmove', function (e) {
-      e.stopPropagation(); // Prevent Telegram from closing during scrolling
+      e.stopPropagation(); // Prevent Telegram from closing when scrolling
     }, { passive: false });
 
-    // Handle scroll issue in Telegram WebApp
-    document.body.addEventListener('touchmove', function (e) {
-      // Prevent scroll to close behavior only for touch gestures
-      e.preventDefault();
-    }, { passive: false });
+    // Add a class to body to prevent Telegram bot from closing by drag
+    document.body.classList.add('prevent-close');
 
 
 
