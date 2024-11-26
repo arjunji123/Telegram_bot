@@ -1208,12 +1208,12 @@ exports.transferCoins = catchAsyncErrors(async (req, res, next) => {
       "INSERT INTO usercoin_audit (user_id, pending_coin, transaction_id, date_entered, coin_operation, description, earn_coin, type, status, title) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         senderId,
-        amount, // Sender's pending_coin as 0
+        0, // Sender's pending_coin as 0
         recipientId, // Recipient ID as transaction_id
         currentTime,
         "dr", // Sender's coin_operation "dr"
         "Amount sent", // Description
-        0, // earn_coin set to transferred amount
+        amount, // earn_coin set to transferred amount
         "transfer",
         "completed", // Status set to 'completed'
         "Coins Transferred", // Title for sender
