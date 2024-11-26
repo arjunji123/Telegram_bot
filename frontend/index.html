@@ -31,18 +31,13 @@
       padding: 0;
       height: 100%;
       overflow: hidden; /* Disable body scrolling */
-      /* touch-action: none;  */
+      touch-action: none; /* Prevent gestures on the body */
     }
 
    #content {
-      padding: 20px;
+    padding: 20px;
       height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: start;
-      text-align: center;
-      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-y: auto; /* Enable scrolling */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
       scroll-behavior: smooth; /* Smooth scrolling for modern browsers */
 
@@ -68,26 +63,13 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-  // Handle touch gestures
-  document.addEventListener('touchmove', (e) => {
+   // Allow scrolling inside #content
+   document.addEventListener('touchmove', (e) => {
       const scrollableElement = e.target.closest('#content');
       if (!scrollableElement) {
-        // Prevent default touch gestures outside of scrollable areas
-        e.preventDefault();
+        e.preventDefault(); // Prevent scrolling elsewhere
       }
     }, { passive: false });
-
-    // Prevent touchstart propagation globally
-    document.addEventListener('touchstart', (e) => {
-      if (!e.target.closest('#content')) {
-        e.stopPropagation(); // Prevent propagation for non-scrollable areas
-      }
-    }, { passive: true });
-
-    // Ensure smooth scrolling works for `#content`
-    document.querySelector('#content').addEventListener('touchmove', (e) => {
-      e.stopPropagation(); // Allow scrolling to propagate within `#content`
-    }, { passive: true });
 
   </script>
 </body>
