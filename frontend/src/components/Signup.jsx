@@ -183,8 +183,8 @@ useEffect(() => {
   
 
   return (
-    <div className="bg-black flex justify-center items-center min-h-screen overflow-y-auto ">
-    <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl ">
+    <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden ">
+  <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl">
       
       {/* Logo and Welcome Section */}
       {/* <div className="px-6 sm:px-10 shadow-lg relative">
@@ -196,12 +196,12 @@ useEffect(() => {
       </div> */}
 
       {/* Form Section */}
-      <div className="p-6 sm:p-8 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6 overflow-y-auto h-full">
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 px-2 sm:px-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
 
           {/* Name and Mobile Input */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -318,13 +318,13 @@ useEffect(() => {
               value={values.upi_id}
               onChange={handleInput}
               required
-              className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300  text-sm sm:text-base"
               placeholder="UPI ID"
             />
           </div>
 
           {/* Referral Input */}
-          <div className="relative ">
+          <div className="relative hidden">
             <input
               type="text"
               name="referral_by"
@@ -339,7 +339,7 @@ useEffect(() => {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold font-Inter text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold font-Inter text-black bg-white rounded-lg shadow-md transition-transform transform  hover:scale-105 hover:shadow-lg"
               disabled={loading} // Disable the button when loading
             >
               

@@ -26,39 +26,22 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
+console.log(token, "tokentoken");
 
 
-  useEffect(() => {
-    // Force dark mode globally
-    document.documentElement.classList.add("dark");
+useEffect(() => {
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+  }
 
-    // Check if Telegram WebApp is available
-    if (window.Telegram && window.Telegram.WebApp) {
-      const tg = window.Telegram.WebApp;
-  
-      tg.ready();
-      tg.expand();
-      const isDarkMode = tg.themeParams.bg_color === "#000000";
-     // Apply dark theme settings
-     if (isDarkMode) {
-      document.documentElement.classList.add("dark");  // Add dark theme to root
-      document.documentElement.style.setProperty('--bg-color', '#121212');
-      document.documentElement.style.setProperty('--text-color', '#ffffff');
-    } else {
-      document.documentElement.classList.remove("dark");  // Remove dark theme if not dark mode
-    }
-      document.documentElement.style.setProperty("--tg-bg-color", tg.themeParams.bg_color);
-      document.documentElement.style.setProperty("--tg-text-color", tg.themeParams.text_color);
+  const timer = setTimeout(() => {
+    setIsLoading(false);
+  }, 1000);
 
-    }
-
-    // Simulate loading time for preloader
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000); // Adjust time as needed
-
-    return () => clearTimeout(timer); // Cleanup timer on unmount
-  }, []);
+  return () => clearTimeout(timer);
+}, []);
 
   if (isLoading) {
     return <Loader />; // Show preloader while loading
@@ -77,7 +60,7 @@ function App({ Component, pageProps }) {
 
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={token ? <Navigate to="/home" /> : <Signup />} />
+            {/* <Route path="/" element={token !== null? <Navigate to="/home" /> : <Signup />} /> */}
             <Route path="/payment/:id" element={<Payment />} />
             <Route path="/forgot" element={<ForgotPassword />} />
           </Route>

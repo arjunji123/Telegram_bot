@@ -111,6 +111,7 @@ function Login() {
                 required
                 className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
                 placeholder="Phone Number"
+                 autoComplete="mobile"
               />
             </div>
 
@@ -136,6 +137,7 @@ function Login() {
         required
         className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
         placeholder="Password"
+        autoComplete="current-password"
       />
 
       {/* Toggle Button */}

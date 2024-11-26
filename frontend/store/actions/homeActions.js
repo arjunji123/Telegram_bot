@@ -180,7 +180,8 @@ export const fetchWithdrawal = () => async (dispatch) => {
   
   try {
     const data = await fetcherGet(`${BACKEND_URL}/api/v1/user-waiting-requests`);
-    dispatch({ type: SET_WITHDRAWAL_DATA, payload: data });
+    console.log('API Response:', data); // Debugging
+    dispatch({ type: SET_WITHDRAWAL_DATA,   payload: data || [] });
   } catch (error) {
     dispatch({
       type: FETCH_WITHDRAWAL_FAILURE,

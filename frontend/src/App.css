@@ -1,9 +1,6 @@
 /* Custom class to hide scrollbar */
 .hide-scrollbar {
-  scrollbar-width: none;
-  /* For Firefox */
-  -ms-overflow-style: none;
-  /* For Internet Explorer */
+  overflow: auto; /* Allow touch scrolling */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -15,22 +12,12 @@
   box-shadow: 0 -26px 20px rgba(243, 186, 47, 0.3);
 }
 
-:root {
-  --tg-bg-color: #000000;
-  /* Telegram Header Background Color */
-  --tg-text-color: #ffffff;
-  /* Telegram Header Text Color */
-  --bg-color: #000000;
-  /* General Background */
-  --text-color: #ffffff;
-  /* General Text Color */
-}
+
 
 
 .dark-header {
-  background-color: var(--tg-bg-color) !important;
-  color: var(--tg-text-color) !important;
-  transition: all 0.3s ease-in-out;
+  background-color: var(--tg-bg-color, #000); /* Default fallback to black */
+  color: var(--tg-text-color, #fff);         /* Default fallback to white */
 }
 
 @keyframes coin-pop {
@@ -39,9 +26,9 @@
     transform: scale(0);
   }
 
-  50% {
+  80% {
     opacity: 1;
-    transform: scale(1.2);
+    transform: scale(1.1);
   }
 
   100% {
@@ -57,11 +44,8 @@
 
 html,
 body {
-  overflow: hidden;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  /* Smooth scrolling (if needed) */
-  background-color: var(--bg-color);
-  color: var(--text-color);
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
@@ -73,6 +57,7 @@ body {
   src: url('./assets/fonts/RoobertTRIALVF-BF67243fd545701.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -80,6 +65,7 @@ body {
   src: url('./assets/fonts/GasoekOne-Regular.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
+  font-display: swap;
 }
 
 /* @font-face {
@@ -95,6 +81,7 @@ body {
   /* Removed unnecessary backslash */
   font-weight: bold;
   font-style: normal;
+  font-display: swap;
 }
 
 @media (min-width: 640px) {
@@ -132,7 +119,11 @@ th:not(:last-child) {
   border-radius: 15px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 }
-
+@media (max-width: 480px) {
+  .content-container {
+    max-width: 95%; /* Allow better fit on small screens */
+  }
+}
 /* User Info and Balance */
 .user-info,
 .balance {
