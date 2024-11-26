@@ -26,26 +26,20 @@
   <!-- <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500&display=swap" rel="stylesheet"> -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-      body {
+       body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: auto; /* Allow scrolling */
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-      overscroll-behavior: contain; /* Prevent unwanted scroll chaining */
-      background-color: #000; /* Optional: For dark mode appearance */
-      color: #fff; /* Optional: For better visibility */
+      overflow: hidden; /* Prevent full-screen scrolling */
+      background-color: #000; /* Dark mode */
+      color: #fff; /* Improve visibility */
     }
 
     #content {
       padding: 20px;
-      min-height: 100vh; /* Ensure content fills the screen height */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch; /* Ensure smooth scrolling on the content */
+      min-height: 100vh; /* Fill the screen height */
+      overflow-y: auto; /* Allow scrolling within the content */
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
     }
  
   </style>
@@ -64,9 +58,14 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-  document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
-
- document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+ // Prevent drag-to-close gesture
+ document.addEventListener('touchmove', (event) => {
+      // Only prevent default behavior if the event occurs outside the scrollable area
+      const isScrollable = event.target.closest('#content');
+      if (!isScrollable) {
+        event.preventDefault();
+      }
+    }, { passive: false });
 
   </script>
 </body>
