@@ -38,7 +38,7 @@
     #content {
       padding: 20px;
       height: 100%;
-      overflow-y: scroll; /* Allow vertical scrolling */
+      overflow-y: auto; /* Allow vertical scrolling inside this div */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
     }
     
@@ -62,29 +62,17 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-// Handle touch gestures
-document.addEventListener('touchstart', (e) => {
+  // Fix for Telegram drag-to-close issue
+  document.addEventListener('touchmove', (e) => {
       const scrollableArea = document.getElementById('content');
 
-      // Check if the touch is inside the scrollable area
-      const isInsideScrollable = scrollableArea.contains(e.target);
-
-      if (!isInsideScrollable) {
-        // Prevent drag-to-close gestures
-        e.preventDefault();
+      // Allow touch events inside the scrollable area
+      if (scrollableArea.contains(e.target)) {
+        return; // Do nothing for scrolling
       }
-    }, { passive: false });
 
-    document.addEventListener('touchmove', (e) => {
-      const scrollableArea = document.getElementById('content');
-
-      // Allow scrolling inside the scrollable area
-      const isInsideScrollable = scrollableArea.contains(e.target);
-
-      if (!isInsideScrollable) {
-        // Prevent drag-to-close gestures
-        e.preventDefault();
-      }
+      // Prevent default touch gestures elsewhere to avoid closing
+      e.preventDefault();
     }, { passive: false });
   </script>
 </body>
