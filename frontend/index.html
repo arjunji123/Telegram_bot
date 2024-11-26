@@ -44,6 +44,8 @@
       text-align: center;
       overflow-y: auto; /* Enable vertical scrolling */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+      scroll-behavior: smooth; /* Smooth scrolling for modern browsers */
+
     }
 
      /* Prevent middle drag gestures */
@@ -66,15 +68,26 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
- // Allow scrolling only inside the #content div
- document.addEventListener('touchmove', (e) => {
+  // Handle touch gestures
+  document.addEventListener('touchmove', (e) => {
       const scrollableElement = e.target.closest('#content');
       if (!scrollableElement) {
         // Prevent default touch gestures outside of scrollable areas
         e.preventDefault();
       }
     }, { passive: false });
-    document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+
+    // Prevent touchstart propagation globally
+    document.addEventListener('touchstart', (e) => {
+      if (!e.target.closest('#content')) {
+        e.stopPropagation(); // Prevent propagation for non-scrollable areas
+      }
+    }, { passive: true });
+
+    // Ensure smooth scrolling works for `#content`
+    document.querySelector('#content').addEventListener('touchmove', (e) => {
+      e.stopPropagation(); // Allow scrolling to propagate within `#content`
+    }, { passive: true });
 
   </script>
 </body>
