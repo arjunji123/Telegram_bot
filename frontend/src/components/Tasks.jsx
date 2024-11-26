@@ -405,7 +405,7 @@ function Tasks() {
                         </p>
                       )}
                     </div>
-                    <hr className="border-2 border-white w-2/3 mx-auto" />
+                    <hr className="border-2 border-gray-700 w-2/3 mx-auto" />
                   </div>
                 ))}
             </div>

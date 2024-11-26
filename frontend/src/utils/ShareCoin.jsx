@@ -39,9 +39,31 @@ function ShareCoin({ toggleSharePopup, handleSendInputChange, handleSendMoney , 
             />
 
         <div className="flex justify-center items-center">
-            <button onClick={handleSendMoney} className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg"  >
-            Submit
+            <button onClick={handleSendMoney} className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg"  disabled={loading} >
+            {loading ? (
+              <div className="flex justify-center items-center">
+                <div className="spinner"></div> {/* Custom spinner */}
+              </div>
+            ) : (
+              'Submit' // Normal button text
+            )}
             </button>
+             {/* CSS for Custom Spinner */}
+      <style jsx>{`
+        .spinner {
+          border: 4px solid #f3f3f3; /* Light background */
+          border-top: 4px solid #000000; /* Black color */
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
         </div>
     </div>
 </div>

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 
 function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, userData, company_id}) {
+  const [loading, setLoading] = useState(false);
     const [rupeeValue, setRupeeValue] = useState(0);
     const upiId = userData?.upi_id; // Non-editable UPI ID
     const totalCoin = userData?.coins
@@ -31,18 +32,14 @@ function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, user
       const totalRupees = coinAmount * coinRate;
       setRupeeValue(totalRupees.toFixed(2));
   }, [coinAmount, coinRate]);
-      // Run the effect whenever coinAmount changes
-      const handleUpiChange = (e) => {
-        setEditableUpiId(e.target.value);
-        handleSellChange(e); // Keep existing functionality if needed for parent update
-    };
+     
 
     const handleSubmit = () => {
       if (!coinAmount || coinAmount > totalCoin) {
           setError("Please enter a valid coin amount within your balance.");
           return;
       }
-
+      setLoading(true);
       // Prepare the API payload
       const payload = {
           upi_id: upiId,
@@ -99,11 +96,33 @@ function Send({ togglePopup, handleSellChange, handleSellSubmit , coinRate, user
       </div> */}
 
       <div className="flex justify-center items-center">
-        <button  onClick={handleSubmit} className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg">
-          Submit
+        <button  onClick={handleSubmit} className="btn bg-[#3A3A3A] text-white font-semibold hover:bg-[#505050] transition duration-300 ease-in-out w-full py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg"  disabled={loading} >
+        {loading ? (
+              <div className="flex justify-center items-center">
+                <div className="spinner"></div> {/* Custom spinner */}
+              </div>
+            ) : (
+              'Submit' // Normal button text
+            )}
         </button>
       </div>
     </div>
+      {/* CSS for Custom Spinner */}
+      <style jsx>{`
+        .spinner {
+          border: 4px solid #f3f3f3; /* Light background */
+          border-top: 4px solid #000000; /* Black color */
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
   </div>
 
   )

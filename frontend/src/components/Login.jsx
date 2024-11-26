@@ -44,7 +44,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors(""); // Clear previous error message
-
+    setLoading(true);
     try {
       await dispatch(login({ mobile, password }));
       setToastMessage("Login successful!");
@@ -153,8 +153,15 @@ function Login() {
               <button
                 type="submit"
                 className="w-full py-3 sm:py-4 text-sm sm:text-base font-Inter uppercase font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
-              >
-                Log In
+                disabled={loading}    >
+                  
+              {loading ? (
+              <div className="flex justify-center items-center">
+                <div className="spinner"></div> {/* Custom spinner */}
+              </div>
+            ) : (
+              'Log In' // Normal button text
+            )}
               </button>
             </div>
           </form>
@@ -168,7 +175,22 @@ function Login() {
             </Link>
           </div>
         </div>
+  {/* CSS for Custom Spinner */}
+  <style jsx>{`
+        .spinner {
+          border: 4px solid #f3f3f3; /* Light background */
+          border-top: 4px solid #000000; /* Black color */
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          animation: spin 1s linear infinite;
+        }
 
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
         {/* Footer Section */}
         <div className="bg-[#111113] py-4 sm:py-6 text-center rounded-b-2xl">
           <p className="text-xs sm:text-sm text-[#909090]">

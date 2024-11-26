@@ -148,12 +148,22 @@ const handleSendInputChange = (e) => {
     [name]: value,
   }));
 };
-const handleSendMoney = () => {
+const handleSendMoney = async () => {
   if (!sendData.amount || !sendData.recipientReferralCode) {
     toast.warn("Please fill in all fields.");
     return;
   }
-  dispatch(shareCoins(sendData));
+
+  setLoading(true);
+
+  try {
+    await dispatch(shareCoins(sendData));
+    // toast.success("Coins sent successfully!");
+  } catch (error) {
+    toast.error("Failed to send coins.");
+  } finally {
+    setLoading(false);
+  }
 };
 
 useEffect(() => {

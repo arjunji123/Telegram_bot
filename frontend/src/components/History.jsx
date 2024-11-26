@@ -57,6 +57,11 @@ console.log('withdrawal', withdrawal)
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, approve it!",
+      customClass: {
+        popup: "bg-gray-800 text-white rounded-lg shadow-lg w-[90%] sm:w-[400px]", // Adjust width for mobile
+        title: "text-white text-sm sm:text-base font-bold", // Smaller text for mobile, larger for larger screens
+        content: "text-gray-300 text-xs sm:text-sm", // Adjust description size for mobile
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -148,7 +153,7 @@ console.log('withdrawal', withdrawal)
                             onClick={() => handleApprove(transaction.transaction_id)}
                             className="leading-none capitalize px-4 py-2 text-[13px] rounded-full bg-[#282828] flex text-white font-semibold hover:bg-[#1C1C1E] transition duration-200 ease-in-out"
                           >
-                            {transaction.status}
+                            {transaction && transaction.status ? "Approve": "Waiting"}
                           </button>
                         </div>
                       ))}
