@@ -21,14 +21,7 @@ const registerSchema = Joi.object({
   // referral_by: Joi.string().optional(), // If this field is optional
 });
 
-// const generateReferralCode = (length = 8) => {
-//   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-//   let referralCode = "UNITRADE"; // Prefix the referral code with "UNITRADE"
-//   for (let i = 0; i < length; i++) {
-//     referralCode += chars.charAt(Math.floor(Math.random() * chars.length));
-//   }
-//   return referralCode;
-// };
+
 const generateReferralCode = (userId) => {
   const referralCode = `UNITRADE${userId}`; // Prefix "UNITRADE" with the user's user_id
   return referralCode;
