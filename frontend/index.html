@@ -40,6 +40,7 @@
       height: 100%;
       overflow-y: auto; /* Allow vertical scrolling inside this div */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+      box-sizing: border-box;
     }
     
     h1 {
@@ -62,27 +63,21 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-  // Allow scrolling only in the #content div
-  document.addEventListener('touchmove', (e) => {
-      const scrollableArea = document.getElementById('content');
 
-      if (scrollableArea.contains(e.target)) {
-        // Allow scrolling inside the #content div
-        return true;
-      }
-
-      // Prevent scrolling outside the #content div
-      e.preventDefault();
-    }, { passive: false });
-
-    // Prevent default drag-to-close behavior in Telegram
-    document.addEventListener('touchstart', (e) => {
+        // Prevent default drag-to-close behavior in Telegram
+        document.addEventListener('touchstart', (e) => {
       const scrollableArea = document.getElementById('content');
 
       if (!scrollableArea.contains(e.target)) {
         e.preventDefault(); // Block touch interactions outside the scrollable area
       }
     }, { passive: false });
+  // Allow only vertical scrolling within #content
+  document.getElementById('content').addEventListener('touchmove', (e) => {
+      e.stopPropagation(); // Prevent the touch event from propagating to parent elements
+    }, { passive: false });
+
+
   </script>
 </body>
 
