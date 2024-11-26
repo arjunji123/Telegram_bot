@@ -30,22 +30,22 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden; /* Disable body scrolling */
-      touch-action: none; /* Prevent gestures on the body */
+      overflow: hidden; /* Prevent body scrolling */
     }
 
    #content {
-    padding: 20px;
-      height: 100%;
-      overflow-y: auto; /* Enable scrolling */
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+    height: 100%; /* Fill available space */
+      overflow-y: auto; /* Enable vertical scrolling */
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
       scroll-behavior: smooth; /* Smooth scrolling for modern browsers */
+      padding: 20px;
 
     }
 
      /* Prevent middle drag gestures */
     html, body {
-      overscroll-behavior: none; /* Disable scroll chaining */
+      margin: 0;
+      padding: 10px 0;
     }
   </style>
 </head>
@@ -63,11 +63,10 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-   // Allow scrolling inside #content
+   // Allow scrolling only inside the #content
    document.addEventListener('touchmove', (e) => {
-      const scrollableElement = e.target.closest('#content');
-      if (!scrollableElement) {
-        e.preventDefault(); // Prevent scrolling elsewhere
+      if (!e.target.closest('#content')) {
+        e.preventDefault(); // Prevent gestures outside #content
       }
     }, { passive: false });
 
