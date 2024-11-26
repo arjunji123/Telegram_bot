@@ -62,17 +62,26 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-  // Fix for Telegram drag-to-close issue
+  // Allow scrolling only in the #content div
   document.addEventListener('touchmove', (e) => {
       const scrollableArea = document.getElementById('content');
 
-      // Allow touch events inside the scrollable area
       if (scrollableArea.contains(e.target)) {
-        return; // Do nothing for scrolling
+        // Allow scrolling inside the #content div
+        return true;
       }
 
-      // Prevent default touch gestures elsewhere to avoid closing
+      // Prevent scrolling outside the #content div
       e.preventDefault();
+    }, { passive: false });
+
+    // Prevent default drag-to-close behavior in Telegram
+    document.addEventListener('touchstart', (e) => {
+      const scrollableArea = document.getElementById('content');
+
+      if (!scrollableArea.contains(e.target)) {
+        e.preventDefault(); // Block touch interactions outside the scrollable area
+      }
     }, { passive: false });
   </script>
 </body>
