@@ -33,14 +33,24 @@
       overflow: hidden; /* Prevent full-screen scrolling */
       background-color: #000; /* Dark mode */
       color: #fff; /* Improve visibility */
+      touch-action: none; /* Disable swipe-to-close gestures */
     }
 
     #content {
       padding: 20px;
-      height: 100vh;
-      overflow-y: auto; /* Allow vertical scrolling inside this div */
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow-y: auto; /* Enable scrolling inside the content */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-      box-sizing: border-box;
+    }
+       /* Additional styles for smooth scrolling */
+       html, body {
+      height: 100%;
+      overscroll-behavior: none; /* Disable scroll chaining */
     }
     
     h1 {
@@ -65,20 +75,17 @@
 
     tg.MainButton.setParams({ is_visible: false }); // Hide the Telegram main button
 
-// Prevent dragging from the edges or middle to close the bot
-document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
+//   // Prevent Telegram's swipe-to-close gesture
+document.addEventListener('touchstart', function(e) {
+      if (e.target === document.body) {
+        e.stopPropagation(); // Stop swipe-to-close behavior
+      }
+    }, { passive: false });
 
-document.addEventListener('touchmove', (e) => {
-  if (!document.getElementById('content').contains(e.target)) {
-    e.preventDefault(); // Prevent scrolling outside content
-  }
-}, { passive: false });
-
-// Enable smooth scrolling inside the content
-const content = document.getElementById('content');
-content.addEventListener('touchmove', (e) => {
-  e.stopPropagation(); // Allow smooth scrolling
-}, { passive: false });
+    // Allow smooth scrolling in the #content area
+    document.getElementById('content').addEventListener('touchmove', function(e) {
+      e.stopPropagation(); // Prevent Telegram from closing during scrolling
+    }, { passive: false });
 
 
 
