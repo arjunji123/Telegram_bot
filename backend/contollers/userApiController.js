@@ -1443,7 +1443,7 @@ exports.getFilteredUserHistory = catchAsyncErrors(async (req, res, next) => {
     );
 
     if (result[0].length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: true,
         message: "No filtered history found for the user",
         data: [],
@@ -1460,6 +1460,7 @@ exports.getFilteredUserHistory = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database query failed", 500));
   }
 });
+
 
 exports.approveUserTransaction = catchAsyncErrors(async (req, res, next) => {
   try {
