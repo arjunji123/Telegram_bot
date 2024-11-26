@@ -3,62 +3,47 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
-
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <!-- Mobile app capabilities -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
-  <title>Invite Frineds</title>
+  <title>Invite Friends</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const tg = window.Telegram.WebApp;
       const userId = tg.initDataUnsafe?.user?.id;
       // console.log('User ID:', userId);
-    })
-
+    });
   </script>
-  <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
-  <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
-  <!-- <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500&display=swap" rel="stylesheet"> -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-       body {
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden; /* Prevent full-screen scrolling */
-      background-color: #000; /* Dark mode */
-      color: #fff; /* Improve visibility */
-
+      overflow: hidden; /* Disable scroll on body */
+      touch-action: none; /* Disable swipe-to-close gesture */
     }
 
     #content {
       padding: 20px;
       height: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      overflow-y: auto; /* Enable scrolling inside the content */
+      overflow-y: auto; /* Enable scrolling inside content */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
     }
-       /* Additional styles for smooth scrolling */
-       html, body {
+
+    /* Prevent middle drag gestures */
+    html, body {
       height: 100%;
-      overscroll-behavior: none; /* Disable scroll chaining */
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling */
+      overscroll-behavior: none; /* Prevent scroll chaining */
+      touch-action: none; /* Disable touch interactions */
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
     }
-    
-   /* Disable touch actions from closing the Telegram WebApp */
-   .prevent-close {
-      touch-action: none; /* Disable touch actions that might close the app */
-    }
- 
   </style>
 </head>
 
@@ -67,30 +52,22 @@
 
   <script type="module" src="/src/main.jsx"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
- 
+
   <script>
     // Initialize Telegram WebApp SDK
     const tg = window.Telegram.WebApp;
-    // Optional: Use Telegram WebApp functions
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-
-  // Disable swipe-to-close when the user drags
-  document.addEventListener('touchstart', function (e) {
-      e.stopPropagation(); // Prevent drag gestures that could close the bot
+    // Prevent Telegram's swipe-to-close gesture
+    document.addEventListener('touchstart', (e) => {
+      e.stopPropagation(); // Stop swipe-to-close when touching anywhere
     }, { passive: false });
 
-    // Enable scroll only inside content and prevent it from propagating to the bot
-    document.getElementById('content').addEventListener('touchmove', function (e) {
-      e.stopPropagation(); // Prevent Telegram from closing when scrolling
+    // Allow smooth scrolling in the #content area
+    document.getElementById('content').addEventListener('touchmove', (e) => {
+      e.stopPropagation(); // Prevent Telegram from closing during scrolling
     }, { passive: false });
-
-    // Add a class to body to prevent Telegram bot from closing by drag
-    document.body.classList.add('prevent-close');
-
-
-
   </script>
 </body>
 
