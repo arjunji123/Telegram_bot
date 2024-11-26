@@ -4,59 +4,73 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
+
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <!-- Mobile app capabilities -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
-  <title>Invite Friends</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Invite Frineds</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tg = window.Telegram.WebApp;
+      const userId = tg.initDataUnsafe?.user?.id;
+      // console.log('User ID:', userId);
+    })
 
+  </script>
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
+  <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500&display=swap" rel="stylesheet"> -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: auto; /* Allow scrolling */
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-      overscroll-behavior: contain; /* Prevent unwanted scroll chaining */
-      font-family: 'Inter', sans-serif;
-      background-color: #000; /* Optional: For dark mode appearance */
-      color: #fff; /* Optional: For better visibility */
+      overflow: hidden; /* Disable scrolling */
+      touch-action: none; /* Block touch gestures */
     }
 
     #content {
       padding: 20px;
-      min-height: 100vh; /* Ensure content fills the screen height */
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch; /* Ensure smooth scrolling on the content */
+      -webkit-overflow-scrolling: touch;
+    }
+     /* Prevent middle drag gestures */
+     html, body {
+      height: 100%;
+      overscroll-behavior: none; /* Disable scroll chaining */
+      touch-action: none;       /* Disable touch interactions */
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
     }
   </style>
 </head>
 
 <body>
   <div id="root"></div>
-  <div id="content">
-    <p>Invite your friends through this interface!</p>
-  </div>
 
+  <script type="module" src="/src/main.jsx"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+ 
   <script>
     // Initialize Telegram WebApp SDK
     const tg = window.Telegram.WebApp;
+    // Optional: Use Telegram WebApp functions
+    tg.ready(); // Ensure the WebApp is ready
+    tg.expand(); // Enable full-screen mode
 
-    // Ensure the WebApp is ready
-    tg.ready();
+    document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
 
-    // Enable full-screen mode
-    tg.expand();
+    document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
-    // Optional: Fetch and log user ID
-    const userId = tg.initDataUnsafe?.user?.id;
-    console.log('User ID:', userId);
   </script>
 </body>
 
