@@ -51,6 +51,7 @@
        html, body {
       height: 100%;
       overscroll-behavior: none; /* Disable scroll chaining */
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling */
     }
     
     h1 {
@@ -73,18 +74,24 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-    tg.MainButton.setParams({ is_visible: false }); // Hide the Telegram main button
 
-//   // Prevent Telegram's swipe-to-close gesture
-document.addEventListener('touchstart', function(e) {
+  // Disable Telegram's swipe-to-close gesture
+  document.addEventListener('touchstart', function (e) {
+      // Only prevent the default behavior when touching the Telegram WebApp's header
       if (e.target === document.body) {
         e.stopPropagation(); // Stop swipe-to-close behavior
       }
     }, { passive: false });
 
     // Allow smooth scrolling in the #content area
-    document.getElementById('content').addEventListener('touchmove', function(e) {
+    document.getElementById('content').addEventListener('touchmove', function (e) {
       e.stopPropagation(); // Prevent Telegram from closing during scrolling
+    }, { passive: false });
+
+    // Handle scroll issue in Telegram WebApp
+    document.body.addEventListener('touchmove', function (e) {
+      // Prevent scroll to close behavior only for touch gestures
+      e.preventDefault();
     }, { passive: false });
 
 
