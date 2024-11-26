@@ -464,6 +464,7 @@ const users = await db.query(
       DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
       ud.pay_image,
       ud.pending_coin,
+      ud.referral_code,
        ud.coins,
       u.user_type,
       u.status  
