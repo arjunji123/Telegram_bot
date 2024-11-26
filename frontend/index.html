@@ -26,31 +26,28 @@
   <!-- <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500&display=swap" rel="stylesheet"> -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
+      body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden; /* Disable scrolling */
-      touch-action: none; /* Block touch gestures */
+      overflow: auto; /* Allow scrolling */
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+      overscroll-behavior: contain; /* Prevent unwanted scroll chaining */
+      background-color: #000; /* Optional: For dark mode appearance */
+      color: #fff; /* Optional: For better visibility */
     }
 
     #content {
       padding: 20px;
-      height: 100%;
+      min-height: 100vh; /* Ensure content fills the screen height */
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      -webkit-overflow-scrolling: touch; /* Ensure smooth scrolling on the content */
     }
-     /* Prevent middle drag gestures */
-     html, body {
-      height: 100%;
-      overscroll-behavior: none; /* Disable scroll chaining */
-      touch-action: none;       /* Disable touch interactions */
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-    }
+ 
   </style>
 </head>
 
@@ -67,9 +64,9 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-    document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
+    // document.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
 
-    document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    // document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
   </script>
 </body>
