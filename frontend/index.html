@@ -37,6 +37,11 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
+     /* Prevent middle drag gestures */
+     html, body {
+      overscroll-behavior: none; /* Disable scroll chaining */
+      touch-action: none;       /* Disable touch interactions */
+    }
   </style>
 </head>
 
@@ -53,7 +58,7 @@
     // Prevent default gestures in the main content area
     const content = document.getElementById('content');
     content.addEventListener('touchmove', (e) => {
-      e.stopPropagation(); // Prevent event propagation to Telegram's WebApp container
+      e.preventDefault(); // Block default drag gestures
     });
 
     content.addEventListener('gesturestart', (e) => {
@@ -62,6 +67,7 @@
 
     // Optional: Use Telegram WebApp functions
     tg.ready(); // Ensure the WebApp is ready
+    tg.expand(); // Enable full-screen mode
 
     // Example: Log user data for debugging
     // console.log("Telegram WebApp initialized:", tg.initDataUnsafe);
