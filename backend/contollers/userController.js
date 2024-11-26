@@ -429,7 +429,7 @@ exports.checkAdminLoginOrDashboard = catchAsyncErrors(
 
 exports.dashboard = catchAsyncErrors(async (req, res, next) => {
   // Fetch total number of users, quests, and companies from the correct tables
-  const [totalUsersResult] = await db.query('SELECT COUNT(*) AS count FROM users');
+  const [totalUsersResult] = await db.query('SELECT COUNT(*) AS count FROM user_data');
   const [totalQuestsResult] = await db.query('SELECT COUNT(*) AS count FROM quest');
 
   // Check the correct table name for companies (e.g., company_data or companies)
