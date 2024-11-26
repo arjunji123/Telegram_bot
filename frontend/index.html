@@ -63,25 +63,27 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
-  // Prevent dragging to close the bot
-  const content = document.getElementById('content');
-        // Prevent default drag-to-close behavior in Telegram
-        document.addEventListener('touchstart', (e) => {
-        // Only allow touch gestures in the scrollable content area
-        if (!content.contains(e.target)) {
-        e.preventDefault(); // Prevent default drag behavior outside the content
-      }
-    }, { passive: false });
+    tg.MainButton.setParams({ is_visible: false }); // Hide the Telegram main button
 
-    content.addEventListener('touchmove', (e) => {
-      e.stopPropagation(); // Allow smooth scrolling only inside content
-    }, { passive: false });
-    document.addEventListener('touchmove', (e) => {
-      // Disable drag gestures globally, except inside the content
-      if (!content.contains(e.target)) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+// Prevent dragging from the edges or middle to close the bot
+document.addEventListener('touchstart', (e) => {
+  // Allow touch gestures inside the scrollable content area
+  if (!document.getElementById('content').contains(e.target)) {
+    e.preventDefault(); // Prevent drag-to-close gesture outside content
+  }
+}, { passive: false });
+
+document.addEventListener('touchmove', (e) => {
+  if (!document.getElementById('content').contains(e.target)) {
+    e.preventDefault(); // Prevent scrolling outside content
+  }
+}, { passive: false });
+
+// Enable smooth scrolling inside the content
+const content = document.getElementById('content');
+content.addEventListener('touchmove', (e) => {
+  e.stopPropagation(); // Allow smooth scrolling
+}, { passive: false });
 
 
   </script>
