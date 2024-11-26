@@ -37,9 +37,13 @@
 
     #content {
       padding: 20px;
-      min-height: 100vh; /* Fill the screen height */
-      overflow-y: auto; /* Allow scrolling within the content */
+      height: 100%;
+      overflow-y: scroll; /* Allow vertical scrolling */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+    }
+    
+    h1 {
+      margin: 0 0 20px;
     }
  
   </style>
@@ -58,15 +62,30 @@
     tg.ready(); // Ensure the WebApp is ready
     tg.expand(); // Enable full-screen mode
 
- // Prevent drag-to-close gesture
- document.addEventListener('touchmove', (event) => {
-      // Only prevent default behavior if the event occurs outside the scrollable area
-      const isScrollable = event.target.closest('#content');
-      if (!isScrollable) {
-        event.preventDefault();
+// Handle touch gestures
+document.addEventListener('touchstart', (e) => {
+      const scrollableArea = document.getElementById('content');
+
+      // Check if the touch is inside the scrollable area
+      const isInsideScrollable = scrollableArea.contains(e.target);
+
+      if (!isInsideScrollable) {
+        // Prevent drag-to-close gestures
+        e.preventDefault();
       }
     }, { passive: false });
 
+    document.addEventListener('touchmove', (e) => {
+      const scrollableArea = document.getElementById('content');
+
+      // Allow scrolling inside the scrollable area
+      const isInsideScrollable = scrollableArea.contains(e.target);
+
+      if (!isInsideScrollable) {
+        // Prevent drag-to-close gestures
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 </body>
 
