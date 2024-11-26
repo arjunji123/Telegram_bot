@@ -154,7 +154,7 @@ function Home() {
             {/* Pending Coin Display */}
             <div className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
               <p className="text-xl font-extrabold font-Inter ">
-                Claim Coin
+                Claim Coin 11
                 <span className="pl-2 text-xl  font-extrabold">
                   {pendingCoin ? pendingCoin.pending_coin : ""}
                 </span>
