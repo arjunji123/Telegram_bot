@@ -44,6 +44,9 @@ const {
   disapproveQuest,
   renderTreeView,
   getoneUserHistory,
+  getNotificationsApi,
+  markNotificationAsRead,
+ 
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -63,7 +66,7 @@ const {
   createSellTransaction,
   approveUserTransaction,
   getUserHistory,
- getFilteredUserHistory,
+  getFilteredUserHistory,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -89,7 +92,10 @@ router.route("/me").get(isAuthenticatedUser, getUserDetail);
 router.route("/password/update").post(isAuthenticatedUser, updatePassword);
 
 router.route("/me/update").post(isAuthenticatedUser, updateProfile);
-
+router.route("/notifications").get(getNotificationsApi);
+router
+  .route("/read-notification/:notificationId/mark-read")
+  .patch(markNotificationAsRead);
 router.route("/users").get(isAuthenticatedUser, allUsers);
 router.get("/user-tree-view/:userId", isAuthenticatedUser, renderTreeView);
 
@@ -178,8 +184,10 @@ router.post(
 );
 
 router.get("/user-history", isApiAuthenticatedUser, getUserHistory);
-router.get("/user-waiting-requests", isApiAuthenticatedUser, getFilteredUserHistory);
-
+router.get(
+  "/user-waiting-requests",
+  isApiAuthenticatedUser,
+  getFilteredUserHistory
+);
 router.post("/user-approve", isApiAuthenticatedUser, approveUserTransaction);
 module.exports = router;
-
