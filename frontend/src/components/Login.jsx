@@ -73,8 +73,8 @@ function Login() {
   return (
     <div className="bg-white flex justify-center items-center min-h-screen ">
       <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
-      <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden ">
-        <div className="p-6 sm:p-10  shadow-lg relative">
+      <div className="w-full max-w-lg bg-black text-white h-screen shadow-2xl overflow-hidden  ">
+        <div className="p-6 sm:p-10  shadow-lg relative ">
           <div className="absolute top-0 left-0 w-full h-1 "></div>
           {/* <div className="flex justify-center py-4 space-x-1">
             <h1 className="font-poppins text-xl sm:text-2xl font-extrabold">
@@ -95,7 +95,7 @@ function Login() {
         </div>
 
         {/* Form Section */}
-        <div className="p-6 sm:p-8 space-y-6">
+        <div className="p-6 sm:p-8 space-y-6 ">
           <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
             Log In
           </h2>

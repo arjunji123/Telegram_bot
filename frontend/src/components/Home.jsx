@@ -55,7 +55,7 @@ function Home() {
         }));
         setCoins(newCoins);
         // Remove coins after animation
-        setTimeout(() => setCoins([]), 100);
+        setTimeout(() => setCoins([]), 1000);
         // Re-fetch data to update userData and pendingCoin without hard refresh
         dispatch(fetchCoinData());
         dispatch(fetchMeData());
@@ -102,17 +102,17 @@ function Home() {
 
               {/* Coin Button and Image */}
               <div className="coin-animation-container my-6 relative">
+                {/* Button with conditional styles for disabled state */}
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-
-                  className="coin-btn"
-                  onClick={handleClick}
+                  className={`coin-btn ${pendingCoin?.pending_coin === 0 ? 'opacity-50 cursor-not-allowed' : ''}`} // Disable on no coins
+                  onClick={pendingCoin?.pending_coin === 0 ? null : handleClick} // Disable click event
                 >
                   <img
                     src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
                     alt="Main Character"
-                    className="character-img"
+                    className={`character-img ${pendingCoin?.pending_coin === 0 ? 'opacity-40' : 'opacity-100'}`} // Reduce opacity if no coins
                   />
                 </motion.div>
 
@@ -135,17 +135,13 @@ function Home() {
                         exit={{ opacity: 0, scale: 0.5 }}
                         transition={{ duration: 2, ease: "easeOut" }}
                       >
-                        {/* <img
-                      src="src/images/dollar-coin.png"
-                      alt="Hamster Coin"
-                      className="coin-image w-6 h-6"
-                    /> */}
                         <BsCoin size={2} className="coin-image" />
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
               </div>
+
             </div>
           </div>
 

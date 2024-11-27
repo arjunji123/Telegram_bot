@@ -126,7 +126,7 @@ Pay ₹300, get 2000 coins instantly 💰, and start earning more by completing 
         <Loader />
       ) :
       <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative px-4">
-        <div className="flex-grow relative z-0 py-6">
+        <div className="flex-grow relative z-0 py-6 top-10">
           {/* <Logo /> */}
           <div className="space-y-2 text-center">
             <div className="flex justify-center">

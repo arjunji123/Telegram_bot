@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import Logo from "../utils/Logo";
 import QRCode from "qrcode";
 import { BiSolidUpvote, BiHistory } from "react-icons/bi";
 import { BsPersonFillCheck, BsCurrencyRupee } from "react-icons/bs";
-import { AiFillCaretDown } from "react-icons/ai";
 import { IoMdThumbsUp } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import WithdrawCoin from "../utils/WithdrawCoin";
@@ -241,8 +239,9 @@ function Withdrawal() {
           <Loader />
         ) :
           <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
-            <div className="flex-grow relative z-0 pt-6  pb-16">
+            <div className="flex-grow relative z-0 pt-6 top-10 pb-16">
               {/* <Logo /> */}
+              
               <div className="flex justify-center font-Inter  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
                 <p>U</p>
                 <p className="">{userData ? userData.coins : "0"}</p>
@@ -285,20 +284,20 @@ function Withdrawal() {
                     <div key={index} className="py-2">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-sky-400 rounded-full flex items-center justify-center">
+                          <div className="w-5 h-5 bg-sky-400 rounded-full flex items-center justify-center">
                             <span className="text-sm font-bold uppercase ">{company.company_name.charAt(0)}</span>
                           </div>
                           <span className="text-sm font-medium capitalize">{company.company_name}</span>
                         </div>
                         <div className="text-sm font-medium text-[#5B5A5C]">123 Orders (30D) | 98%</div>
                       </div>
-                      <div className="flex justify-between items-center py-2">
+                      <div className="flex justify-between items-center py-1.5">
                         <p className="font-bold flex  font-Inter items-center  ">
                           <BsCurrencyRupee className="" />  <span className="text-[20px] ">{company.coin_rate}</span></p>
                         <div className="text-sm font-medium text-[#5B5A5C]">Online</div>
                       </div>
                       <div className="flex justify-between items-start">
-                        <div className="leading-tight">
+                        <div className="leading-4 ">
                           <p>
                             <span className="text-xs font-bold text-[#5B5A5C]">Quantity</span>
                             <span className="text-xs font-medium ml-2 text-[#B8B7BA]">300 USDT</span>
@@ -308,17 +307,17 @@ function Withdrawal() {
                             <span className="text-xs font-medium ml-2 text-[#B8B7BA]">22,000 - 22,000 INR</span>
                           </p>
                         </div>
-                        <p className="flex items-start text-green-500 gap-0.5 ">
-                          <IoMdThumbsUp size={24} className="pt-1"/>
+                        <p className="flex items-start text-green-500 gap-0.5 self-start"> {/* Added self-start */}
+                        <IoMdThumbsUp size={24} className="pt-1"/>
                           <span className="text-sm font-medium leading-loose">100%</span>
                         </p>
                       </div>
-                      <div className="flex justify-between items-center py-2 ">
+                      <div className="flex justify-between items-center py-1.5 ">
                         <div className="">
 
                         </div>
                         <button
-                          className="leading-none px-4 py-2 text-sm rounded-full bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
+                          className="leading-none px-3 py-1.5 text-sm rounded-full bg-red-600 flex text-white font-semibold hover:bg-red-500 transition duration-200 ease-in-out"
                           onClick={() => handleButtonClick(company.coin_rate, company.company_id)}
                         >Sell
                         </button>
