@@ -591,45 +591,91 @@ exports.uploadScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   console.log(`UTR Number: ${utr_no}`);
   console.log(`Transaction ID: ${transaction_id}`);
 
-  // Update the user data in the database
   try {
-    // Prepare the query and data based on whether `pay_image` is present
-    let query = "UPDATE user_data SET utr_no = ?, transaction_id = ?";
-    let data = [utr_no, transaction_id, user_id];
+    // Fetch `user_name` from `users` table using `user_id`
+    const [userResult] = await db.query(
+      `SELECT u.user_name 
+       FROM users u
+       JOIN user_data ud ON u.id = ud.user_id
+       WHERE ud.user_id = ?`,
+      [user_id]
+    );
 
-    if (pay_image) {
-      query += ", pay_image = ?";
-      data.splice(2, 0, pay_image); // Insert `pay_image` before `user_id`
-    }
+    // Log the raw query result for debugging
+    console.log("Raw query result:", userResult);
 
-    query += " WHERE user_id = ?";
-
-    const result = await db.query(query, data);
-
-    // Check if any rows were affected
-    if (result.affectedRows === 0) {
+    if (!userResult || userResult.length === 0 || !userResult[0].user_name) {
       return next(
-        new ErrorHandler("No user found with the provided user ID", 404)
+        new ErrorHandler(
+          "No user found with the provided user ID in users table",
+          404
+        )
       );
     }
+
+    // Extract the user_name from the first result
+    const userName = userResult[0].user_name;
+
+    // Update the user data in the `user_data` table
+    let userQuery = "UPDATE user_data SET utr_no = ?, transaction_id = ?";
+    let userData = [utr_no, transaction_id];
+
+    if (pay_image) {
+      userQuery += ", pay_image = ?";
+      userData.push(pay_image);
+    }
+
+    userQuery += " WHERE user_id = ?";
+    userData.push(user_id);
+
+    const updateResult = await db.query(userQuery, userData);
+
+    if (updateResult.affectedRows === 0) {
+      return next(
+        new ErrorHandler(
+          "No user found with the provided user ID in user_data table",
+          404
+        )
+      );
+    }
+
+    // Insert notification data into the notifications table
+    const notificationQuery = `
+      INSERT INTO notifications 
+      (user_id, user_name, activity, message, message_status, date_created) 
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const activity = "Payment";
+    const message = `${userName} requested to activate the account.`;
+    const messageStatus = "Unread";
+    const dateCreated = new Date();
+
+    await db.query(notificationQuery, [
+      user_id,
+      userName,
+      activity,
+      message,
+      messageStatus,
+      dateCreated,
+    ]);
 
     // Send a success response back to the client
     res.status(200).json({
       success: true,
-      message: "Data updated successfully",
+      message: "Data updated successfully and notification created.",
       data: {
         user_id,
+        user_name: userName,
         pay_image: pay_image || "No image uploaded", // Optional in response
         utr_no,
         transaction_id,
       },
     });
   } catch (error) {
-    console.error("Database update error:", error); // Log the error for debugging
-    return next(new ErrorHandler("Database update failed", 500));
+    console.error("Database operation error:", error); // Log the error for debugging
+    return next(new ErrorHandler("Database operation failed", 500));
   }
 });
-
 
 
 exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
