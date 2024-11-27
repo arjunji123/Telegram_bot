@@ -117,6 +117,110 @@ exports.showLogin = catchAsyncErrors(async (req, res, next) => {
   res.render("users/login", { message });
 });
 
+// Login user
+// exports.loginUser = catchAsyncErrors(async (req, res, next) => {
+//   const { email, password } = req.body;
+
+//   // Checking if user email and password are provided
+//   if (!email || !password) {
+//     req.flash("msg_response", {
+//       status: 400,
+//       message: "Please enter email and password",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+
+//   // Find user by email
+//   const userData = await db.query(
+//     "SELECT * FROM users WHERE email = ? limit 1",
+//     [email]
+//   );
+
+//   const user = userData[0][0];
+
+//   // If user not found
+//   if (!user) {
+//     req.flash("msg_response", {
+//       status: 400,
+//       message: "Invalid email or password",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+//   // Check if user_type is either "admin" or "company"
+//   if (user.user_type !== "admin" && user.user_type !== "company") {
+//     req.flash("msg_response", {
+//       status: 403,
+//       message: "You do not have permission to access this panel",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+
+//   // Compare passwords
+//   const isPasswordMatched = await User.comparePasswords(
+//     password,
+//     user.password
+//   );
+
+//   if (!isPasswordMatched) {
+//     req.flash("msg_response", {
+//       status: 400,
+//       message: "Invalid email or password",
+//     });
+//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+//   req.session.user = user;
+//   localStorage.setItem("user_type_n", user.user_type);
+//   const token = User.generateToken(user.id); // Adjust as per your user object structure
+//   // console.log("aaaa", token);
+
+//   // Send token and then redirect
+//   sendToken(user, token, 201, res);
+
+//   req.flash("msg_response", { status: 200, message: "Successfully LoggedIn" });
+
+//   // Redirect to the dashboard after sending the token
+//   return res.redirect(`/${process.env.ADMIN_PREFIX}/dashboard`);
+// });
+
+// exports.logout = catchAsyncErrors(async (req, res, next) => {
+//   res.cookie("token", null, {
+//     expires: new Date(Date.now()),
+//     httpOnly: true,
+//   });
+//   // Check if req.session exists before trying to destroy it
+//   if (res.session) {
+//     res.session.destroy((err) => {
+//       if (err) {
+//         return next(err); // Handle the error if necessary
+//       }
+//       res.clearCookie("connect.sid");
+//       res.clearCookie("token"); // Clear the session ID cookie
+//       localStorage.removeItem("user_type_n");
+
+//       res.flash("msg_response", {
+//         status: 200,
+//         message: "Logout Successfully",
+//       });
+//       res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//     });
+//   } else {
+//     // Handle the case where req.session is undefined
+//     res.clearCookie("connect.sid");
+//     if (typeof window !== "undefined" && window.localStorage) {
+//       localStorage.removeItem("user_type_n"); // Clear specific data
+//       // or
+//       localStorage.clear(); // Clear all data
+//       console.log("User data removed from localStorage");
+//     }
+//     res.clearCookie("token");
+//     req.flash("msg_response", {
+//       status: 200,
+//       message: "Session already cleared or not found",
+//     });
+//     res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+//   }
+// });
+
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -224,7 +328,6 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
     res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 });
-
 
 //forgot password for sending token in mail
 exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
@@ -429,11 +532,17 @@ exports.checkAdminLoginOrDashboard = catchAsyncErrors(
 
 exports.dashboard = catchAsyncErrors(async (req, res, next) => {
   // Fetch total number of users, quests, and companies from the correct tables
-  const [totalUsersResult] = await db.query('SELECT COUNT(*) AS count FROM user_data');
-  const [totalQuestsResult] = await db.query('SELECT COUNT(*) AS count FROM quest');
+  const [totalUsersResult] = await db.query(
+    "SELECT COUNT(*) AS count FROM user_data"
+  );
+  const [totalQuestsResult] = await db.query(
+    "SELECT COUNT(*) AS count FROM quest"
+  );
 
   // Check the correct table name for companies (e.g., company_data or companies)
-  const [totalCompaniesResult] = await db.query('SELECT COUNT(*) AS count FROM company_data'); // or 'companies'
+  const [totalCompaniesResult] = await db.query(
+    "SELECT COUNT(*) AS count FROM company_data"
+  ); // or 'companies'
 
   // Extract the counts from the results
   const totalUsers = totalUsersResult[0].count;
@@ -447,33 +556,32 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
     user: req.user, // Pass user data if needed
     totalUsers,
     totalQuests,
-    totalCompanies
+    totalCompanies,
   });
 });
 
 
+
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   // Fetch user data along with pay_image and pending_coin in a single query using LEFT JOIN
- // This SQL query fetches user details and related data
-const users = await db.query(
-  `SELECT 
+  // This SQL query fetches user details and related data
+  const users = await db.query(
+    `SELECT 
       u.id,
       u.user_name,
       u.email,
       u.mobile,
       DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
+      ud.referral_code,
       ud.pay_image,
       ud.pending_coin,
-      ud.referral_code,
-       ud.coins,
       u.user_type,
       u.status  
    FROM users u
    INNER JOIN user_data ud ON u.id = ud.user_id 
    WHERE u.user_type IN (?)`,
-  ["user"]
-);
-
+    ["user"]
+  );
 
   res.render(module_slug + "/index", {
     layout: module_layout,
@@ -483,6 +591,7 @@ const users = await db.query(
     originalUrl: req.originalUrl, // Pass the original URL here
   });
 });
+
 exports.addFrom = catchAsyncErrors(async (req, res, next) => {
   res.render(module_slug + "/add", {
     layout: module_layout,
@@ -772,7 +881,7 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
 });
 
 async function distributeCoins(userId, performedByUserId) {
- // Step 1: Retrieve the one_coin_price from the settings table
+  // Step 1: Retrieve the one_coin_price from the settings table
   const settingsResult = await db.query(
     "SELECT one_coin_price FROM settings LIMIT 1" // Assuming there's only one row in the settings table
   );
@@ -801,9 +910,20 @@ async function distributeCoins(userId, performedByUserId) {
     );
     const currentPendingCoin = userCoinsData[0]?.pending_coin || 0;
 
-    if (userCoinsData[0]?.referral_by && currentPendingCoin < COIN_REFERRAL_BONUS) {
+    if (
+      userCoinsData[0]?.referral_by &&
+      currentPendingCoin < COIN_REFERRAL_BONUS
+    ) {
       console.info(`Awarding referral bonus to User ID: ${userId}`);
-      await updatePendingCoins(userId, COIN_REFERRAL_BONUS, "cr", "Referral bonus added", "self", null, performedByUserId);
+      await updatePendingCoins(
+        userId,
+        COIN_REFERRAL_BONUS,
+        "cr",
+        "Referral bonus added",
+        "self",
+        null,
+        performedByUserId
+      );
     } else {
       console.info(`Skipping referral bonus for User ID: ${userId}.`);
     }
@@ -822,17 +942,30 @@ async function distributeCoins(userId, performedByUserId) {
 
       if (!parentId) break;
 
-      const coinsToAdd = isFirstParent ? COIN_PARENT_ADDITION : COIN_ANCESTOR_ADDITION;
-      const actualCoinsToAdd = remainingCoins >= coinsToAdd ? coinsToAdd : remainingCoins;
+      const coinsToAdd = isFirstParent
+        ? COIN_PARENT_ADDITION
+        : COIN_ANCESTOR_ADDITION;
+      const actualCoinsToAdd =
+        remainingCoins >= coinsToAdd ? coinsToAdd : remainingCoins;
 
-      await updatePendingCoins(parentId, actualCoinsToAdd, "cr", "referral bonus added", "referral", null, performedByUserId);
+      await updatePendingCoins(
+        parentId,
+        actualCoinsToAdd,
+        "cr",
+        "referral bonus added",
+        "referral",
+        null,
+        performedByUserId
+      );
       remainingCoins -= actualCoinsToAdd;
       currentUserId = parentId;
       isFirstParent = false;
     }
 
     if (remainingCoins > 0) {
-      console.info(`Coin distribution incomplete. ${remainingCoins} coins left undistributed.`);
+      console.info(
+        `Coin distribution incomplete. ${remainingCoins} coins left undistributed.`
+      );
     } else {
       console.info(`Coin distribution complete.`);
     }
@@ -894,7 +1027,9 @@ async function updatePendingCoins(
       date_entered: new Date(),
     });
 
-    console.info(`Updated pending coins for User ID: ${userId}. Total Pending Coins: ${updatedPendingCoin}`);
+    console.info(
+      `Updated pending coins for User ID: ${userId}. Total Pending Coins: ${updatedPendingCoin}`
+    );
   } catch (error) {
     console.error("Error in updatePendingCoins:", error.message);
   }
@@ -924,7 +1059,7 @@ exports.findById = async (table_name, id) => {
   }
 };
 
-///////////////////////////////////////////////
+//////////////////////////////////////////////////
 
 // API to get a single user record
 
@@ -985,7 +1120,6 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
     return res.status(500).send("Server Error: " + error.message); // Return error message
   }
 });
-
 
 ////////////////////
 
@@ -1182,65 +1316,9 @@ exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-// exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
-//   const { quest_id } = req.params;
-
-//   try {
-//     // Fetch the coin_earn value from the quest table
-//     const [questData] = await db.query(
-//       `SELECT coin_earn FROM quest WHERE id = ?`,
-//       [quest_id]
-//     );
-
-//     // Check if the quest exists
-//     if (questData.length === 0) {
-//       return next(new ErrorHandler("Quest not found", 404));
-//     }
-
-//     const coinEarned = questData[0].coin_earn;
-
-//     // Check if the quest has a positive coin_earn value
-//     if (coinEarned <= 0) {
-//       return next(
-//         new ErrorHandler("Coin earn value must be greater than zero.", 400)
-//       );
-//     }
-
-//     // Update the pending_coin and status in usercoin_audit
-//     const result = await db.query(
-//       `UPDATE usercoin_audit 
-//        SET pending_coin = pending_coin + ?, 
-//            quest_screenshot = NULL,
-//            status = 'completed'
-//        WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
-//       [coinEarned, quest_id]
-//     );
-
-//     // Check if the update affected any rows
-//     if (result.affectedRows === 0) {
-//       return next(
-//         new ErrorHandler(
-//           "No matching quest found or screenshot already processed",
-//           404
-//         )
-//       );
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Quest approved, pending coins updated, and status set to completed.",
-//     });
-//   } catch (error) {
-//     console.error("Database update error:", error); // Log specific error for troubleshooting
-//     return next(
-//       new ErrorHandler("Approval process failed: " + error.message, 500)
-//     );
-//   }
-// });
-
 exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
   const { quest_id } = req.params; // Extract quest_id from URL parameters
-  console.log('Quest ID:', quest_id); // Log the quest ID
+  console.log("Quest ID:", quest_id); // Log the quest ID
 
   try {
     // Fetch the quest data and associated user data by joining quest and usercoin_audit tables
@@ -1252,22 +1330,22 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
        FOR UPDATE`, // Lock the row for update
       [quest_id]
     );
-    console.log('Fetched quest data:', questData); // Log fetched data
+    console.log("Fetched quest data:", questData); // Log fetched data
 
     // Check if the quest exists
     if (questData.length === 0) {
-      console.log('No quest found with ID:', quest_id); // Log if no quest is found
+      console.log("No quest found with ID:", quest_id); // Log if no quest is found
       return next(new ErrorHandler("Quest not found", 404));
     }
 
     const quest = questData[0];
     const coinEarned = parseFloat(quest.coin_earn); // Ensure coinEarned is a number
     const auditId = quest.audit_id;
-    console.log('Coin earned from quest:', coinEarned); // Log coin earn value
+    console.log("Coin earned from quest:", coinEarned); // Log coin earn value
 
     // Check if the quest has a positive coin_earn value
     if (coinEarned <= 0) {
-      console.log('Coin earned is less than or equal to zero'); // Log if coinEarned is invalid
+      console.log("Coin earned is less than or equal to zero"); // Log if coinEarned is invalid
       return next(
         new ErrorHandler("Coin earn value must be greater than zero.", 400)
       );
@@ -1279,14 +1357,14 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
        SET pending_coin = pending_coin + ?, 
            quest_screenshot = NULL,
            status = 'completed'
-       WHERE id = ? AND quest_screenshot IS NOT NULL`, 
+       WHERE id = ? AND quest_screenshot IS NOT NULL`,
       [coinEarned, auditId] // Use audit_id to ensure only this row is updated
     );
-    console.log('Update result for usercoin_audit:', result); // Log the update result
+    console.log("Update result for usercoin_audit:", result); // Log the update result
 
     // Check if the update affected any rows
     if (result.affectedRows === 0) {
-      console.log('No rows were updated for audit ID:', auditId); // Log if no rows were updated
+      console.log("No rows were updated for audit ID:", auditId); // Log if no rows were updated
       return next(
         new ErrorHandler(
           "No matching quest found or screenshot already processed",
@@ -1299,19 +1377,20 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
     const [userData] = await db.query(
       `UPDATE user_data 
        SET pending_coin = pending_coin + ? 
-       WHERE user_id = ?`, 
+       WHERE user_id = ?`,
       [coinEarned, quest.user_id] // Update only pending_coin
     );
 
     if (userData.affectedRows === 0) {
-      console.log('User not found for quest approval:', quest.user_id);
+      console.log("User not found for quest approval:", quest.user_id);
       return next(new ErrorHandler("User not found for the approval", 404));
     }
 
     // Respond with success
     res.status(200).json({
       success: true,
-      message: "Quest approved, pending coins updated in both usercoin_audit and user_data, and status set to completed.",
+      message:
+        "Quest approved, pending coins updated in both usercoin_audit and user_data, and status set to completed.",
     });
   } catch (error) {
     console.error("Database update error:", error); // Log specific error for troubleshooting
@@ -1321,33 +1400,10 @@ exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-
-// exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
-//   const { quest_id } = req.params;
-
-//   try {
-//     // Remove the quest screenshot only from the usercoin_audit table
-//     await db.query(
-//       `UPDATE usercoin_audit 
-//        SET quest_screenshot = NULL 
-//        WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
-//       [quest_id]
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Quest disapproved, screenshot removed.",
-//     });
-//   } catch (error) {
-//     console.error("Database update error:", error);
-//     return next(new ErrorHandler("Disapproval process failed", 500));
-//   }
-// });
-
 // Route to handle disapproval of a quest
 exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
   const { quest_id } = req.params; // Extract quest_id from URL parameters
-  console.log('Quest ID:', quest_id); // Log the quest ID
+  console.log("Quest ID:", quest_id); // Log the quest ID
 
   try {
     // Fetch the quest data and associated user data by joining quest and usercoin_audit tables
@@ -1357,44 +1413,49 @@ exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
        WHERE uca.quest_id = ? AND uca.quest_screenshot IS NOT NULL`,
       [quest_id]
     );
-    console.log('Fetched quest data:', questData); // Log fetched data
+    console.log("Fetched quest data:", questData); // Log fetched data
 
     // Check if the quest exists and has a screenshot
     if (questData.length === 0) {
-      console.log('No quest found with ID:', quest_id); // Log if no quest is found
-      return next(new ErrorHandler("Quest not found or no screenshot to remove.", 404));
+      console.log("No quest found with ID:", quest_id); // Log if no quest is found
+      return next(
+        new ErrorHandler("Quest not found or no screenshot to remove.", 404)
+      );
     }
 
     const auditId = questData[0].audit_id;
-    console.log('Audit ID:', auditId); // Log audit_id
+    console.log("Audit ID:", auditId); // Log audit_id
 
     // Update the quest_screenshot field to NULL and set status to 'not_completed'
     const result = await db.query(
       `UPDATE usercoin_audit 
        SET quest_screenshot = NULL, status = 'not_completed' 
-       WHERE id = ?`, 
+       WHERE id = ?`,
       [auditId] // Use audit_id to ensure only this row is updated
     );
-    console.log('Update result for usercoin_audit:', result); // Log the update result
+    console.log("Update result for usercoin_audit:", result); // Log the update result
 
     // Check if the update affected any rows
     if (result.affectedRows === 0) {
-      console.log('No rows were updated for audit ID:', auditId); // Log if no rows were updated
-      return next(new ErrorHandler("Screenshot removal and status update failed.", 500));
+      console.log("No rows were updated for audit ID:", auditId); // Log if no rows were updated
+      return next(
+        new ErrorHandler("Screenshot removal and status update failed.", 500)
+      );
     }
 
     // Respond with success
     res.status(200).json({
       success: true,
-      message: "Quest screenshot disapproved and status updated to 'not_completed'.",
+      message:
+        "Quest screenshot disapproved and status updated to 'not_completed'.",
     });
   } catch (error) {
     console.error("Database update error:", error); // Log specific error for troubleshooting
-    return next(new ErrorHandler("Disapproval process failed: " + error.message, 500));
+    return next(
+      new ErrorHandler("Disapproval process failed: " + error.message, 500)
+    );
   }
 });
-
-
 
 exports.renderTreeView = async (req, res) => {
   try {
@@ -1423,7 +1484,7 @@ exports.renderTreeView = async (req, res) => {
     const userTree = buildUserTree(rows);
     const filteredTree = filterSubTree(userTree, userId);
 
-    res.render('tree_view', {
+    res.render("tree_view", {
       layout: module_layout,
       title: module_single_title,
       userTree: JSON.stringify(filteredTree),
@@ -1434,33 +1495,34 @@ exports.renderTreeView = async (req, res) => {
   }
 };
 
-
-
 function buildUserTree(users) {
   const userMap = {};
 
   // Create a map of users
-  users.forEach(user => {
+  users.forEach((user) => {
     userMap[user.user_id] = { ...user, children: [] };
   });
 
   // Build the tree structure
-  users.forEach(user => {
+  users.forEach((user) => {
     if (user.parent_id === null) {
       userMap[user.user_id].isRoot = true;
     } else {
       const parent = userMap[user.parent_id];
       if (parent) {
-        const relationship = user.user_id === parent.leftchild_id ? "left" : "right";
+        const relationship =
+          user.user_id === parent.leftchild_id ? "left" : "right";
         userMap[user.user_id].relationship = relationship; // Add relationship info
         parent.children.push(userMap[user.user_id]);
       } else {
-        console.warn(`Parent with ID ${user.parent_id} not found for user ${user.user_id}`);
+        console.warn(
+          `Parent with ID ${user.parent_id} not found for user ${user.user_id}`
+        );
       }
     }
   });
 
-  return Object.values(userMap).filter(user => user.isRoot);
+  return Object.values(userMap).filter((user) => user.isRoot);
 }
 
 function filterSubTree(userTree, userId) {
@@ -1477,10 +1539,9 @@ function filterSubTree(userTree, userId) {
     return false;
   }
 
-  userTree.forEach(root => findNode(root));
+  userTree.forEach((root) => findNode(root));
   return targetNode ? [targetNode] : [];
 }
-
 
 exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
   try {
@@ -1515,24 +1576,84 @@ exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
     const [userHistory] = await db.query(query, [userId]);
 
     if (!userHistory.length) {
-      return res.render('users/history', {
+      return res.render("users/history", {
         layout: module_layout,
         title: `User History - ${userId}`,
         userId,
         userHistory: [],
-        message: "No history available for this user."
+        message: "No history available for this user.",
       });
     }
 
-    res.render('users/history', {
+    res.render("users/history", {
       layout: module_layout,
       title: `User History - ${userId}`,
       userId,
-      userHistory
+      userHistory,
     });
   } catch (error) {
     console.error("Error fetching user history:", error);
     res.status(500).send("Error fetching data");
+  }
+});
+
+exports.getNotificationsApi = catchAsyncErrors(async (req, res, next) => {
+  // Query to get all unread notifications (ignoring user_id filter)
+  const query = `
+    SELECT id, user_id, user_name, activity, message, message_status, date_created 
+    FROM notifications 
+    WHERE message_status = 'unread'
+  `;
+
+  const [rows] = await db.query(query);
+
+  if (rows.length === 0) {
+    return res.status(404).json({
+      success: false,
+      error: "No unread notifications found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    notifications: rows,
+  });
+});
+
+// Endpoint to mark notification as read
+exports.markNotificationAsRead = catchAsyncErrors(async (req, res, next) => {
+  const notificationId = req.params.notificationId; // Get the notificationId from URL params
+
+  if (!notificationId) {
+    return res.status(400).json({
+      success: false,
+      message: "Notification ID is required",
+    });
+  }
+
+  try {
+    // Update message status to 'read'
+    const updateQuery = `
+      UPDATE notifications 
+      SET message_status = 'read' 
+      WHERE id = ?
+    `;
+
+    const [rows] = await db.query(updateQuery, [notificationId]);
+
+    if (rows.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found or already marked as read",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Notification marked as read",
+    });
+  } catch (error) {
+    next(error); // Pass error to global error handler
   }
 });
 
