@@ -239,7 +239,7 @@ function Withdrawal() {
           <Loader />
         ) :
           <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
-            <div className="flex-grow relative z-0 pt-6 top-10 pb-16">
+            <div className="flex-grow relative z-0   py-16">
               {/* <Logo /> */}
               
               <div className="flex justify-center font-Inter  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">

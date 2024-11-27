@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for the eye button
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
 import "../Styles/LoginDesign.css";
-import { logo } from '../images/index';
+import ToastNotification from "./Toast";
 import { BACKEND_URL } from '../config';
 import Loader from '../components/Loader';
 // Custom Hook for Referral Code
@@ -25,7 +25,9 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation(); // Use location to access the URL parameters
+  const location = useLocation(); 
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");// Use location to access the URL parameters
 useEffect(() => {
   const getReferralCode = () => {
     let referralCode = null;
@@ -116,9 +118,9 @@ useEffect(() => {
   
     const isValid = validateForm(values); // Assuming this is your form validation logic
     console.log('values', values);
-  
+      setShowToast(true);
     if (!isValid) {
-      toast.error("Please fill out the required fields correctly.");
+      setToastMessage("Please fill out the required fields correctly.");
       return; // Exit if validation fails
     }
   
@@ -135,12 +137,12 @@ useEffect(() => {
       const userId = response.data.user.id; // Assuming the user ID is in the response
       console.log('userId', userId);
   
-      toast.success("Registration successful!");
-  
+      setToastMessage("Registration successful!");
+      setShowToast(true);
       setTimeout(() => {
         // Redirect to the Payment page with the generated userId
         navigate(`/payment/${userId}`);
-      }, 2000);
+      }, 500);
     } catch (err) {
       setLoading(false); // Make sure to hide the loader in case of error
   
@@ -152,28 +154,35 @@ useEffect(() => {
           
           if (typeof errorMessages === 'string') {
             // If the error is a string (e.g., "Mobile number already exists")
-            toast.error(errorMessages);
+            setToastMessage(errorMessages);
+            setShowToast(true);
           } else if (Array.isArray(errorMessages) && errorMessages.length > 0) {
             // If the error is an array of messages
-            toast.error(errorMessages[0]);
+            setToastMessage(errorMessages[0]);
+            setShowToast(true);
           } else {
-            toast.error("An unknown error occurred.");
+            setToastMessage("An unknown error occurred.");
+            setShowToast(true);
           }
         } else if (err.response.status === 404) {
           // Handle 404 error (Not Found)
-          toast.error("Requested resource not found.");
+          setToastMessage("Requested resource not found.");
+          setShowToast(true);
         } else if (err.response.status === 500) {
           // Handle 500 error (Server Error)
-          toast.error("Server error occurred. Please try again later.");
+          setToastMessage("Server error occurred. Please try again later.");
+          setShowToast(true);
         } else {
           // Handle other status codes (e.g., 401, 403)
           const errorMessage = err.response.data.message || 'An unknown error occurred.';
-          toast.error(errorMessage);
+          setToastMessage(errorMessage);
+          setShowToast(true);
         }
       } else {
         // Network or other errors (e.g., timeout, no internet)
         console.log("Axios Error:", err);
-        toast.error("Network error. Please check your connection or try again later.");
+        setToastMessage("Network error. Please check your connection or try again later.");
+        setShowToast(true);
       }
     } finally {
       setLoading(false); // Hide the loading spinner after the request completes
@@ -184,6 +193,7 @@ useEffect(() => {
 
   return (
     <div  className="bg-black flex justify-center items-center min-h-screen overflow-hidden " >
+            <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
   <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl">
       
       {/* Logo and Welcome Section */}
@@ -196,7 +206,7 @@ useEffect(() => {
       </div> */}
 
       {/* Form Section */}
-      <div id="content" className="p-4 top-10  sm:p-6 space-y-6 overflow-y-auto h-full" style={styles.content}>
+      <div id="content" className="p-4  sm:p-6 space-y-6 overflow-y-auto h-full" style={styles.content}>
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
