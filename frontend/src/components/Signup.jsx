@@ -183,7 +183,7 @@ useEffect(() => {
   
 
   return (
-    <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden ">
+    <div id="content" className="bg-black flex justify-center items-center min-h-screen overflow-hidden " style={styles.content}>
   <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl">
       
       {/* Logo and Welcome Section */}
@@ -385,5 +385,14 @@ useEffect(() => {
   </div>
   );
 }
+const styles = {
+  content: {
+    height: '100vh', // Full viewport height
+    overflowY: 'auto', // Enable vertical scrolling
+    padding: '20px',
+    boxSizing: 'border-box',
+    WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+  },
+};
 
 export default Signup;

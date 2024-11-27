@@ -77,7 +77,7 @@ console.log('withdrawal', withdrawal)
   };
 
   return (
-    <div className="bg-white min-h-screen flex justify-center">
+    <div id="content" className="bg-white min-h-screen flex justify-center" style={styles.content}>
       {loading ? (
         <Loader />
       ) : (
@@ -171,5 +171,13 @@ console.log('withdrawal', withdrawal)
     </div>
   );
 };
-
+const styles = {
+  content: {
+    height: '100vh', // Full viewport height
+    overflowY: 'auto', // Enable vertical scrolling
+    padding: '20px',
+    boxSizing: 'border-box',
+    WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+  },
+};
 export default TransactionHistory;

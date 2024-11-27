@@ -35,12 +35,21 @@ useEffect(() => {
     tg.ready();
     tg.expand();
   }
+ // Prevent drag-to-close while allowing scrollable content
+ const handleTouchMove = (e) => {
+  if (!e.target.closest("#content")) {
+    e.preventDefault(); // Block scrolling outside of #content
+  }
+};
 
+document.addEventListener("touchmove", handleTouchMove, { passive: false });
   const timer = setTimeout(() => {
     setIsLoading(false);
   }, 1000);
 
-  return () => clearTimeout(timer);
+  return () => {clearTimeout(timer);
+  document.removeEventListener("touchmove", handleTouchMove); // Cleanup the event listener
+  }
 }, []);
 
   if (isLoading) {
