@@ -26,7 +26,6 @@ const generateReferralCode = (userId) => {
   const referralCode = `UNITRADE${userId}`; // Prefix "UNITRADE" with the user's user_id
   return referralCode;
 };
-
 exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   // Validate request body with Joi schema
   try {
@@ -189,90 +188,108 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     return null; // No available spot found
   }
   // Main logic for user registration
-  // Main logic for user registration
-  // Main logic for user registration
-let referralBy = req.body.referral_by; // Use 'let' to allow reassignment
-let parentId = null;
-let position = null;
 
-if (referralBy) {
-  const parentInfo = await findAvailableParent(referralBy);
-  if (parentInfo) {
-    parentId = parentInfo.parentId;
-    position = parentInfo.position;
+  let referralBy = req.body.referral_by; // Use 'let' to allow reassignment
+  let parentId = null;
+  let position = null;
+
+  if (referralBy) {
+    const parentInfo = await findAvailableParent(referralBy);
+    if (parentInfo) {
+      parentId = parentInfo.parentId;
+      position = parentInfo.position;
+    } else {
+      const nextParentInfo = await findAvailableParent();
+      if (nextParentInfo) {
+        parentId = nextParentInfo.parentId;
+        position = nextParentInfo.position;
+      }
+    }
   } else {
+    // If referralBy is not provided, fetch the referral_code of the user where user_id = 2
+    const defaultUser = await db.query(
+      "SELECT referral_code FROM user_data WHERE user_id = ?",
+      [2]
+    );
+    const referralCode = defaultUser[0]?.[0]?.referral_code || null;
+
     const nextParentInfo = await findAvailableParent();
     if (nextParentInfo) {
       parentId = nextParentInfo.parentId;
       position = nextParentInfo.position;
     }
-  }
-} else {
-  // If referralBy is not provided, fetch the referral_code of the user where user_id = 2
-  const defaultUser = await db.query("SELECT referral_code FROM user_data WHERE user_id = ?", [2]);
-  const referralCode = defaultUser[0]?.[0]?.referral_code || null;
 
-  const nextParentInfo = await findAvailableParent();
-  if (nextParentInfo) {
-    parentId = nextParentInfo.parentId;
-    position = nextParentInfo.position;
+    referralBy = referralCode; // Set the referralBy to the referral_code of user_id = 2
   }
 
-  referralBy = referralCode; // Set the referralBy to the referral_code of user_id = 2
-}
+  try {
+    // Insert user data into the users table
+    const user = await QueryModel.saveData("users", insertData);
+    const userId = user.id;
+    const generatedReferralCode = generateReferralCode(userId);
 
-try {
-  // Insert user data into the users table
-  const user = await QueryModel.saveData("users", insertData);
-  const userId = user.id;
-  const generatedReferralCode = generateReferralCode(userId);
+    // Prepare additional data for the user_data table
+    const insertData2 = {
+      user_id: userId,
+      upi_id: req.body.upi_id,
+      referral_by: referralBy,
+      referral_code: req.body.referral_code || generatedReferralCode,
+      parent_id: parentId,
+      leftchild_id: null,
+      rightchild_id: null,
+    };
 
-  // Prepare additional data for the user_data table
-  const insertData2 = {
-    user_id: userId,
-    upi_id: req.body.upi_id,
-    referral_by: referralBy,
-    referral_code: req.body.referral_code || generatedReferralCode,
-    parent_id: parentId,
-    leftchild_id: null,
-    rightchild_id: null,
-  };
+    // Insert additional user data into user_data table
+    const newUserData = await UserDataModel.create(insertData2);
+    if (!newUserData) {
+      return res
+        .status(500)
+        .json({ success: false, error: "Error inserting user data" });
+    }
 
-  // Insert additional user data into user_data table
-  const newUserData = await UserDataModel.create(insertData2);
-  if (!newUserData) {
-    return res.status(500).json({ success: false, error: "Error inserting user data" });
-  }
+    // Update parent record with the new child ID if parentId and position are set
+    if (parentId && position) {
+      const updateData = { [position]: userId };
+      await UserDataModel.updateData("user_data", updateData, {
+        user_id: parentId,
+      });
+    }
+    // Insert a notification into the notifications table
+    const notificationMessage = `${req.body.user_name} successfully registered.`;
+    const notificationQuery = `
+    INSERT INTO notifications (user_id, user_name, activity, message, message_status, date_created)
+    VALUES (?, ?, ?, ?, ?, ?)`;
 
-  // Update parent record with the new child ID if parentId and position are set
-  if (parentId && position) {
-    const updateData = { [position]: userId };
-    await UserDataModel.updateData("user_data", updateData, {
-      user_id: parentId,
+    await db.query(notificationQuery, [
+      userId, // user_id
+      req.body.user_name, // user_name
+      "register", // activity
+      notificationMessage, // message
+      "unread", // message_status
+      dateCreated, // date_created
+    ]);
+    // Fetch the newly inserted user to generate the token
+    const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+      userId,
+    ]);
+    const newUser = userDetail[0][0];
+
+    // Generate token for the new user
+    const token = User.generateToken(newUser.id);
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        ...newUser,
+        referral_by: referralBy, // Include referral_by in the response (it will have the referral_code of user_id = 2)
+      },
     });
+    return;
+  } catch (error) {
+    console.error("Error during user registration:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
-
-  // Fetch the newly inserted user to generate the token
-  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
-  const newUser = userDetail[0][0];
-
-  // Generate token for the new user
-  const token = User.generateToken(newUser.id);
-
-  res.status(201).json({
-    success: true,
-    token,
-    user: {
-      ...newUser,
-      referral_by: referralBy, // Include referral_by in the response (it will have the referral_code of user_id = 2)
-    },
-  });
-  return;
-} catch (error) {
-  console.error("Error during user registration:", error);
-  return res.status(500).json({ success: false, error: error.message });
-}
-
 });
 ////////////////////////////////////////////////////////////////////////////////////////////
 
