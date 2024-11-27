@@ -66,6 +66,12 @@ const CustomSwiper = ({
                         <p className="bg-[#282828] text-white w-20 flex justify-center py-2  rounded-full text-xs font-bold">
                           <FaRegCheckCircle size={20} className="text-[#606060]" />
                         </p>
+                      ) :
+                      
+                      banner.status === "waiting" ? (
+                        <p className="bg-[#282828] text-[#aaa3a3] w-20 flex justify-center py-2 rounded-full text-sm font-bold" aria-disabled>
+                          <span>Waiting</span>
+                        </p>
                       ) : (
                         <>
                           {/* Watch Task */}
