@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { BsArrowLeft, BsPencil, BsFillSaveFill } from "react-icons/bs";
+import {  BsPencil, BsFillSaveFill } from "react-icons/bs";
+import { FaChevronLeft } from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
@@ -167,17 +168,27 @@ function Profile() {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex justify-center items-center bg-black overflow-hidden">
-      <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
-
-      <canvas ref={canvasRef} className="absolute inset-0 z-0" />
-
-      {/* Profile Section */}
-      {loading ? (
-        <Loader />
-      ) :
-      <section className="relative z-10 w-full max-w-md bg-black text-white shadow-lg rounded-lg px-4 py-6">
+    <div className="relative min-h-screen flex justify-center items-center bg-black overflow-auto">
+    {/* Back Button at the top */}
+    <div className="absolute top-4 left-4 z-10">
+      <button onClick={() => navigate(-1)} className="text-2xl text-white cursor-pointer">
+        <FaChevronLeft />
+      </button>
+    </div>
+  
+    {/* Toast Notification */}
+    <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
+  
+    {/* Canvas background */}
+    <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+  
+    {/* Profile Section */}
+    {loading ? (
+      <Loader />
+    ) : (
+      <section className="relative z-10 w-full max-w-md bg-black text-white shadow-lg rounded-lg px-4 py-6 overflow-y-auto">
         <div className="flex flex-col items-center space-y-4">
+          {/* Profile Picture */}
           <div className="relative">
             <div {...getRootProps()} className="cursor-pointer">
               <input {...getInputProps()} />
@@ -198,11 +209,12 @@ function Profile() {
           </div>
           <h1 className="text-lg font-semibold mt-4">{userData?.user_name}</h1>
         </div>
-
+  
         {/* Form Section */}
         <div className="space-y-4 mt-6">
           <h2 className="text-gray-300">Personal Info</h2>
-
+  
+          {/* Email Input */}
           <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
             <input
               type="email"
@@ -213,7 +225,8 @@ function Profile() {
               placeholder="Enter Email Address"
             />
           </div>
-
+  
+          {/* Name Input */}
           <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
             <input
               type="text"
@@ -224,7 +237,8 @@ function Profile() {
               placeholder="Enter Full Name"
             />
           </div>
-
+  
+          {/* UPI ID Input */}
           <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
             <input
               type="text"
@@ -235,37 +249,43 @@ function Profile() {
               placeholder="Enter UPI ID"
             />
           </div>
-
+        </div>
+  
+        {/* Update Button */}
+        <div className="mt-6">
           <button
             onClick={handleUpdateProfile}
             className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-600 transition flex items-center justify-center"
             disabled={loading} // Disable the button when loading
           >
             {loading ? (
-        <svg
-          className="animate-spin h-5 w-5 text-gray-600"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 4v2m0 12v2m4-10h2m-12 0H4m6-6l1.5 1.5M9 5l1.5-1.5m6 6l1.5-1.5m-6 6l1.5 1.5"
-          />
-        </svg>
-      ) : (
-        'Update'
-      )}
+              <svg
+                className="animate-spin h-5 w-5 text-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 4v2m0 12v2m4-10h2m-12 0H4m6-6l1.5 1.5M9 5l1.5-1.5m6 6l1.5-1.5m-6 6l1.5 1.5"
+                />
+              </svg>
+            ) : (
+              'Update'
+            )}
           </button>
         </div>
       </section>
-}
-      {/* Footer */}
-      <Footer />
-    </div>
+    )}
+  
+    {/* Footer */}
+    <Footer />
+  </div>
+  
+  
   );
 }
 

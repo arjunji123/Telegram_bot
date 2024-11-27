@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { BsArrowLeft, BsCoin } from "react-icons/bs";
+import {  BsCoin } from "react-icons/bs";
+import { FaChevronLeft } from "react-icons/fa";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import { fetchHistory, fetchWithdrawal, userApprove } from "../../store/actions/homeActions";
@@ -64,6 +65,7 @@ console.log('withdrawal', withdrawal)
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
+        setLoading(true); // Show the loader before starting the API calls
         try {
           await dispatch(userApprove({ transaction_id }));
           await dispatch(fetchWithdrawal());
@@ -72,19 +74,22 @@ console.log('withdrawal', withdrawal)
         } catch (error) {
           Swal.fire("Failed!", "The transaction could not be approved.", "error");
         }
+        finally {
+          setLoading(false); // Hide the loader after the operations are done
+        }
       }
     });
   };
 
   return (
-    <div  className="bg-white min-h-screen flex justify-center" style={styles.content}>
+    <div  className="bg-white min-h-screen flex justify-center overflow-hidden" >
       {loading ? (
         <Loader />
       ) : (
-        <div className="bg-black text-white w-full max-w-lg flex flex-col px-4">
+        <div className="bg-black text-white w-full max-w-lg flex flex-col px-4 overflow-hidden">
           <div className="flex items-center justify-between py-4">
-            <button onClick={() => navigate(-1)} className="text-2xl text-white">
-              <BsArrowLeft />
+            <button onClick={() => navigate(-1)} className="text-2xl text-white cursor-pointer">
+              <FaChevronLeft />
             </button>
           </div>
 
@@ -173,7 +178,7 @@ console.log('withdrawal', withdrawal)
 };
 const styles = {
   content: {
-    height: '100vh', // Full viewport height
+    // height: '100vh', // Full viewport height
     overflowY: 'auto', // Enable vertical scrolling
     WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
   },
