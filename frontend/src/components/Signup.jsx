@@ -389,7 +389,6 @@ const styles = {
   content: {
     height: '100vh', // Full viewport height
     overflowY: 'auto', // Enable vertical scrolling
-    padding: '20px',
     WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
   },
 };
