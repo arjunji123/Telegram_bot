@@ -77,7 +77,7 @@ console.log('withdrawal', withdrawal)
   };
 
   return (
-    <div id="content" className="bg-white min-h-screen flex justify-center" style={styles.content}>
+    <div  className="bg-white min-h-screen flex justify-center" style={styles.content}>
       {loading ? (
         <Loader />
       ) : (
@@ -109,7 +109,7 @@ console.log('withdrawal', withdrawal)
           </div>
 
           {/* Content */}
-          <div className="flex-grow py-4 h-[400px] overflow-y-auto hide-scrollbar">
+          <div id="content" className="flex-grow py-4 h-[400px] overflow-y-auto hide-scrollbar" style={styles.content}>
             {activeTab === "History" && (
               <>
                 {Object.keys(groupedTransactions).length > 0 ? (
@@ -176,7 +176,6 @@ const styles = {
     height: '100vh', // Full viewport height
     overflowY: 'auto', // Enable vertical scrolling
     padding: '20px',
-    boxSizing: 'border-box',
     WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
   },
 };

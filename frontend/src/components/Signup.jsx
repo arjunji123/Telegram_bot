@@ -183,7 +183,7 @@ useEffect(() => {
   
 
   return (
-    <div id="content" className="bg-black flex justify-center items-center min-h-screen overflow-hidden " style={styles.content}>
+    <div  className="bg-black flex justify-center items-center min-h-screen overflow-hidden " >
   <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl">
       
       {/* Logo and Welcome Section */}
@@ -196,7 +196,7 @@ useEffect(() => {
       </div> */}
 
       {/* Form Section */}
-      <div className="p-4 sm:p-6 space-y-6 overflow-y-auto h-full">
+      <div id="content" className="p-4 sm:p-6 space-y-6 overflow-y-auto h-full" style={styles.content}>
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
@@ -390,7 +390,6 @@ const styles = {
     height: '100vh', // Full viewport height
     overflowY: 'auto', // Enable vertical scrolling
     padding: '20px',
-    boxSizing: 'border-box',
     WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
   },
 };
