@@ -74,7 +74,7 @@ function App({ Component, pageProps }) {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <div className={` ${keyboardHeight > 0 ? `pb-${keyboardHeight}` : ''}`}>
+        <div className={` ${keyboardHeight > 0 ? `pb-[${keyboardHeight}px]` : ''}`}> {/* Dynamic padding based on keyboard height */}
         <Routes>
      
         <Route

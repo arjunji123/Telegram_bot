@@ -6,18 +6,21 @@ const useKeyboard = () => {
 
   useEffect(() => {
     const handleResize = () => {
-        // If the window height is less than the document height, it means the keyboard is visible
-        if (window.innerHeight < document.documentElement.clientHeight) {
-          setKeyboardHeight(document.documentElement.clientHeight - window.innerHeight);
-        } else {
-          setKeyboardHeight(0); // Reset when the keyboard hides
+      if (window.innerHeight < 500) { // You can adjust this threshold if needed
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
+          setKeyboardHeight(100); // Set a fixed padding value or calculate dynamically
         }
-      };
-  
-      window.addEventListener("resize", handleResize);
+      } else {
+        setKeyboardHeight(0);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it initially to check the screen height
 
     return () => {
-        window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
