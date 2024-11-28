@@ -271,3 +271,39 @@ canvas {
 }
 
 
+/* Apply styles for iPhone */
+@media screen and (max-width: 767px) {
+  /* Prevent layout shifting when keyboard appears */
+  body, html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .min-h-screen {
+    min-height: 100vh;
+  }
+
+  .h-full {
+    height: 100%;
+  }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
+
+  .input-field {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-bottom: 12px;
+  }
+  
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Specific adjustments for when the keyboard shows up */
+  .keyboard-active {
+    padding-bottom: 80px; /* You can adjust based on your needs */
+  }
+}

@@ -28,7 +28,7 @@ function Signup() {
   const location = useLocation(); 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");// Use location to access the URL parameters
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 useEffect(() => {
   const getReferralCode = () => {
     let referralCode = null;
@@ -191,15 +191,33 @@ useEffect(() => {
   };
   
   useEffect(() => {
-    const onResize = () => {
-      if (window.visualViewport) {
-        setKeyboardHeight(window.innerHeight - window.visualViewport.height);
-      }
+    const handleKeyboardShow = () => {
+      setKeyboardVisible(true);
+      document.body.classList.add('keyboard-active'); // Add class to adjust padding
     };
 
-    window.visualViewport.addEventListener("resize", onResize);
+    const handleKeyboardHide = () => {
+      setKeyboardVisible(false);
+      document.body.classList.remove('keyboard-active'); // Remove class to restore layout
+    };
+
+    window.addEventListener('focus', handleKeyboardShow); // Handle when input is focused
+    window.addEventListener('blur', handleKeyboardHide);  // Handle when input is blurred
+
+    // For iOS: Detect when keyboard shows up or disappears
+    window.addEventListener('resize', () => {
+      if (window.innerHeight < window.outerHeight) {
+        handleKeyboardShow();
+      } else {
+        handleKeyboardHide();
+      }
+    });
+
+    // Cleanup on unmount
     return () => {
-      window.visualViewport.removeEventListener("resize", onResize);
+      window.removeEventListener('focus', handleKeyboardShow);
+      window.removeEventListener('blur', handleKeyboardHide);
+      window.removeEventListener('resize', handleKeyboardShow);
     };
   }, []);
 
@@ -207,9 +225,7 @@ useEffect(() => {
     <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
     <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
     <div
-      className={`w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe ${
-        keyboardHeight ? `pb-[${keyboardHeight}px]` : ""
-      }`}
+           className={`w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe ${keyboardVisible ? 'keyboard-active' : ''}`}
     >
       <div id="content" className="p-4 sm:p-6 space-y-6 h-full overflow-y-auto touch-auto">
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
