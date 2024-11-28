@@ -86,7 +86,7 @@ console.log('withdrawal', withdrawal)
       {loading ? (
         <Loader />
       ) : (
-        <div className="fixed bg-black text-white w-full max-w-lg flex flex-col px-4 overflow-hidden">
+        <div className=" bg-black text-white w-full max-w-lg flex flex-col px-4 overflow-hidden">
           <div className="flex items-center justify-between py-4">
             <button onClick={() => navigate(-1)} className="text-2xl text-white cursor-pointer">
               <FaChevronLeft />
@@ -114,7 +114,9 @@ console.log('withdrawal', withdrawal)
           </div>
 
           {/* Content */}
-          <div id="content" className="flex-grow py-4 h-screen overflow-y-auto hide-scrollbar" style={styles.content}>
+          <div id="content" className="flex-grow py-4 h-screen overflow-y-auto hide-scrollbar"
+          //  style={styles.content}
+           >
             {activeTab === "History" && (
               <>
                 {Object.keys(groupedTransactions).length > 0 ? (

@@ -9,7 +9,11 @@
 }
 
 
-
+#content {
+  height: 100%; /* Full viewport height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
 
 html,
 body {
