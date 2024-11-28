@@ -1557,7 +1557,7 @@ exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
         q.quest_type, 
         q.activity, 
         u.user_name, 
-        ud.coins, 
+         qa.earn_coin, 
         qa.pending_coin,  -- Fetch pending_coin from usercoin_audit
         qa.title  -- Fetch title from usercoin_audit
       FROM 
