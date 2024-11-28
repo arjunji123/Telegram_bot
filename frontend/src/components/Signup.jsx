@@ -28,6 +28,7 @@ function Signup() {
   const location = useLocation(); 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");// Use location to access the URL parameters
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 useEffect(() => {
   const getReferralCode = () => {
     let referralCode = null;
@@ -189,32 +190,34 @@ useEffect(() => {
     }
   };
   
-  
+  useEffect(() => {
+    const onResize = () => {
+      if (window.visualViewport) {
+        setKeyboardHeight(window.innerHeight - window.visualViewport.height);
+      }
+    };
+
+    window.visualViewport.addEventListener("resize", onResize);
+    return () => {
+      window.visualViewport.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   return (
-    <div  className="bg-black flex justify-center items-center min-h-screen overflow-hidden " >
-            <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
-  <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe">
-      
-      {/* Logo and Welcome Section */}
-      {/* <div className="px-6 sm:px-10 shadow-lg relative">
-        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover draggable theme="dark" />
-        <div className="flex justify-center py-4 space-x-1">
-          <h1 className="font-poppins text-xl sm:text-2xl font-extrabold">UNITRADE</h1>
-          <img src={logo} alt="logo" className="w-5 h-5 sm:w-6 sm:h-6 mt-0.5" />
-        </div>
-      </div> */}
-
-      {/* Form Section */}
-      <div id="content" className="p-4  sm:p-6 space-y-6 h-full overflow-y-auto touch-auto" 
-      // style={styles.content}
-      >
+    <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
+    <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
+    <div
+      className={`w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe ${
+        keyboardHeight ? `pb-[${keyboardHeight}px]` : ""
+      }`}
+    >
+      <div id="content" className="p-4 sm:p-6 space-y-6 h-full overflow-y-auto touch-auto">
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
-
+  
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-
+  
           {/* Name and Mobile Input */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="relative">
@@ -224,7 +227,8 @@ useEffect(() => {
                 value={values.user_name}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                aria-label="Name"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
                 placeholder="Name"
               />
             </div>
@@ -235,12 +239,13 @@ useEffect(() => {
                 value={values.mobile}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                aria-label="Mobile No."
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
                 placeholder="Mobile No."
               />
             </div>
           </div>
-
+  
           {/* Email Input */}
           <div className="relative">
             <input
@@ -249,79 +254,59 @@ useEffect(() => {
               value={values.email}
               onChange={handleInput}
               required
-              className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+              aria-label="Email"
+              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
               placeholder="Email"
             />
           </div>
-
-          {/* Password and Confirm Password Input */}
+  
+          {/* Password and Confirm Password Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {/* <div className="relative">
+            {/* Password */}
+            <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={values.password}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                aria-label="Password"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
                 placeholder="Password"
               />
-            </div> */}
-             <div className="relative">
-      {/* Password Input */}
-      <input
-        type={showPassword ? "text" : "password"} // Toggle input type
-        name="password"
-        value={values.password}
-        onChange={handleInput}
-        required
-        className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
-        placeholder="Password"
-      />
-
-      {/* Toggle Button */}
-      <button
-        type="button"
-        onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
-        className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition duration-300"
-      >
-        {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-      </button>
-    </div>
-    <div className="relative">
-      {/* Password Input */}
-      <input
-        type={showConfirmPassword ? "text" : "password"} // Toggle input type
-          name="confirmPassword"
-          value={values.confirmPassword}
-        onChange={handleInput}
-        required
-        className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
-        placeholder="Confirm Password"
-      />
-
-      {/* Toggle Button */}
-      <button
-        type="button"
-        onClick={() => setShowConfirmPassword((prev) => !prev)} // Toggle password visibility
-        className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition duration-300"
-      >
-        {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-      </button>
-    </div>
-            {/* <div className="relative">
+              <button
+                type="button"
+                aria-label="Toggle Password Visibility"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition"
+              >
+                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
+            </div>
+  
+            {/* Confirm Password */}
+            <div className="relative">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={values.confirmPassword}
                 onChange={handleInput}
                 required
-                className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
+                aria-label="Confirm Password"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
                 placeholder="Confirm Password"
               />
-            </div> */}
+              <button
+                type="button"
+                aria-label="Toggle Confirm Password Visibility"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-[#00c6ff] transition"
+              >
+                {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
+            </div>
           </div>
-
+  
           {/* UPI ID Input */}
           <div className="relative">
             <input
@@ -330,71 +315,64 @@ useEffect(() => {
               value={values.upi_id}
               onChange={handleInput}
               required
-              className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300  text-sm sm:text-base"
+              aria-label="UPI ID"
+              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
               placeholder="UPI ID"
             />
           </div>
-
-          {/* Referral Input */}
-          <div className="relative hidden">
-            <input
-              type="text"
-              name="referral_by"
-              value={values.referral_by}
-             readOnly 
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 uppercase bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-500 transition duration-300 ease-in-out text-sm sm:text-base"
-              placeholder="Referral By"
-            />
-          </div> 
-
+  
           {/* Submit Button */}
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold font-Inter text-black bg-white rounded-lg shadow-md transition-transform transform  hover:scale-105 hover:shadow-lg"
-              disabled={loading} // Disable the button when loading
+              className="w-full py-3 sm:py-4 text-sm sm:text-base uppercase font-bold text-black bg-white rounded-lg shadow-md hover:scale-105 hover:shadow-lg transition-transform"
+              disabled={loading}
             >
-              
               {loading ? (
-              <div className="flex justify-center items-center">
-                <div className="spinner"></div> {/* Custom spinner */}
-              </div>
-            ) : (
-              'Sign Up' // Normal button text
-            )}
+                <div className="flex justify-center items-center">
+                  <div className="spinner"></div>
+                </div>
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </div>
-
         </form>
-       {/* CSS for Custom Spinner */}
-       <style jsx>{`
-        .spinner {
-          border: 4px solid #f3f3f3; /* Light background */
-          border-top: 4px solid #000000; /* Black color */
-          border-radius: 50%;
-          width: 24px;
-          height: 24px;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+  
+        {/* Spinner Styles */}
+        <style jsx>{`
+          .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000000;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+          }
+  
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
       </div>
-
-      {/* Footer Section */}
-     <div className="bg-[#111113] py-4 sm:py-6 text-center">
+  
+      {/* Footer */}
+      <div className="bg-[#111113] py-4 sm:py-6 text-center">
         <p className="text-xs sm:text-sm text-[#909090]">
           Already have an account?
           <Link to="/login" className="text-white font-semibold hover:underline ml-1">
             Login
           </Link>
         </p>
-      </div> 
+      </div>
     </div>
   </div>
+  
   );
 }
 const styles = {
