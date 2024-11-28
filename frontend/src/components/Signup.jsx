@@ -190,42 +190,31 @@ useEffect(() => {
     }
   };
   
-  useEffect(() => {
-    const handleKeyboardShow = () => {
+ // This useEffect will handle the keyboard visibility detection
+ useEffect(() => {
+  const handleResize = () => {
+    if (window.innerHeight < window.outerHeight) {
       setKeyboardVisible(true);
-      document.body.classList.add('keyboard-active'); // Add class to adjust padding
-    };
-
-    const handleKeyboardHide = () => {
+    } else {
       setKeyboardVisible(false);
-      document.body.classList.remove('keyboard-active'); // Remove class to restore layout
-    };
+    }
+  };
 
-    window.addEventListener('focus', handleKeyboardShow); // Handle when input is focused
-    window.addEventListener('blur', handleKeyboardHide);  // Handle when input is blurred
+  // Add event listeners to detect when keyboard shows or hides
+  window.addEventListener('resize', handleResize);
 
-    // For iOS: Detect when keyboard shows up or disappears
-    window.addEventListener('resize', () => {
-      if (window.innerHeight < window.outerHeight) {
-        handleKeyboardShow();
-      } else {
-        handleKeyboardHide();
-      }
-    });
-
-    // Cleanup on unmount
-    return () => {
-      window.removeEventListener('focus', handleKeyboardShow);
-      window.removeEventListener('blur', handleKeyboardHide);
-      window.removeEventListener('resize', handleKeyboardShow);
-    };
-  }, []);
+  // Cleanup event listeners when component unmounts
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []);
 
   return (
     <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
     <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
     <div
-           className={`w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe ${keyboardVisible ? 'keyboard-active' : ''}`}
+                  className={`w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe ${keyboardVisible ? 'keyboard-active' : ''}`}
+
     >
       <div id="content" className="p-4 sm:p-6 space-y-6 h-full overflow-y-auto touch-auto">
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
@@ -261,6 +250,7 @@ useEffect(() => {
               />
             </div>
           </div>
+          
   
           {/* Email Input */}
           <div className="relative">
