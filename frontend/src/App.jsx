@@ -68,7 +68,7 @@ function App({ Component, pageProps }) {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <div style={{ paddingBottom: `${keyboardHeight}px` }}> {/* Apply dynamic padding */}
+        <KeyboardPaddingFix /> {/* Add KeyboardPaddingFix to the top level */}
         <Routes>
      
         <Route
@@ -93,7 +93,6 @@ function App({ Component, pageProps }) {
             <Route path="/history" element={<History />} />
           </Route>
         </Routes>
-        </div>
       </BrowserRouter>
     </Provider>
   );
