@@ -59,7 +59,12 @@ function App({ Component, pageProps }) {
       document.removeEventListener("touchmove", handleTouchMove);
     };
   }, []);
-
+  useEffect(() => {
+    // Adjust body style to prevent keyboard overlay in iOS WebView
+    if (navigator.userAgent.match(/iPhone|iPad|iPod/)) {
+      document.body.style.overflow = 'auto';
+    }
+  }, []);
 
   if (isLoading) {
     return <Preloader />; // Show preloader while loading
