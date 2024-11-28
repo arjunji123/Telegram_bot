@@ -45,17 +45,7 @@ function App({ Component, pageProps }) {
     };
 
 
-    // Adjust for keyboard appearance on iOS
-    const adjustForKeyboard = () => {
-      const activeElement = document.activeElement;
-      if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
-        setTimeout(() => {
-          activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 100); // Smooth scroll aligns with iOS keyboard animation
-      }
-    };
 
-    window.addEventListener("resize", adjustForKeyboard);
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     // Timer for preloader
@@ -66,7 +56,6 @@ function App({ Component, pageProps }) {
     return () => {
       clearTimeout(timer);
       document.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("resize", adjustForKeyboard);
     };
   }, []);
 
