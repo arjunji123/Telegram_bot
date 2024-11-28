@@ -112,7 +112,7 @@ function Home() {
                   <img
                     src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
                     alt="Main Character"
-                    className={`character-img ${pendingCoin?.pending_coin === 0 ? 'opacity-40' : 'opacity-100'}`} // Reduce opacity if no coins
+                    className={`character-img ${pendingCoin?.pending_coin === 0 ? 'opacity-70 ' : 'opacity-100'}`} // Reduce opacity if no coins
                   />
                 </motion.div>
 
