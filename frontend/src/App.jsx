@@ -44,14 +44,15 @@ function App({ Component, pageProps }) {
       }
     };
 
-    // Adjust for iPhone keyboard hiding content
     const adjustForKeyboard = () => {
       const activeElement = document.activeElement;
       if (
         activeElement &&
-        (activeElement.tagName === "input" || activeElement.tagName === "textarea")
+        (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
       ) {
-        activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+          activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 200); // Delay aligns with keyboard animation
       }
     };
 
