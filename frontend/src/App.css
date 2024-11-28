@@ -18,7 +18,7 @@
 html,
 body {
   height: 100%; /* Ensure full-height body for proper scrolling */
-  overflow: hidden; /* Prevent body scroll when modal or content is active */
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   margin: 0;
   padding: 0;
