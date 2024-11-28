@@ -41,7 +41,7 @@
                     notificationBadge.style.display = 'inline'; // Show badge if there are notifications
 
                     notificationDropdown.innerHTML = `
-                <h6 class="dropdown-header text-white bg-dark">Notifications</h6>
+                <h6 class="dropdown-header text-white">Notifications</h6>
                 ${data.notifications.map(notification => `
                     <div class="dropdown-item notify-item" data-id="${notification.id}">
                         <i class="fe-info"></i>
@@ -68,7 +68,7 @@
                     // No new notifications
                     notificationBadge.style.display = 'none';
                     notificationDropdown.innerHTML = `
-                <h6 class="dropdown-header text-white bg-dark">No New Notifications</h6>
+                <h6 class="dropdown-header text-white">No New Notifications</h6>
             `;
                 }
             } catch (error) {
@@ -132,7 +132,7 @@
                         if (remainingNotifications.length === 0) {
                             notificationBadge.style.display = 'none';
                             notificationDropdown.innerHTML = `
-                    <h6 class="dropdown-header text-white bg-dark">No New Notifications</h6>
+                    <h6 class="dropdown-header text-white ">No New Notifications</h6>
                     `;
                         }
                     }
@@ -219,7 +219,7 @@
         border-radius: 50%;
         padding: 3px 6px;
         font-weight: bold;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 4px rgb(191, 134, 134);
     }
 
     .notification-dropdown {
@@ -230,7 +230,7 @@
         overflow-y: auto;
         border-radius: 8px;
         padding: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(224, 182, 182, 0.1);
     }
 
     .dropdown-header {
@@ -287,22 +287,25 @@
         <li class="dropdown notification-list topbar-dropdown">
             <a class="nav-link dropdown-toggle waves-effect waves-light notification-wrapper" data-bs-toggle="dropdown"
                 href="#" role="button" aria-haspopup="true" aria-expanded="false" id="notification-icon">
-                <i class="mdi mdi-bell-outline notification-icon" style="margin-bottom: 10px;"></i>
+                <i class="mdi mdi-bell-outline notification-icon"></i>
                 <span class="notification-badge" id="notification-badge">0</span>
             </a>
 
             <div class="dropdown-menu dropdown-menu-end notification-dropdown" id="notification-dropdown">
-                <h6 class="dropdown-header text-white bg-dark">Notifications</h6>
+                <h6 class="dropdown-header text-white" style="font-size: large;">Notifications</h6>
                 <div id="notification-list">
                     <!-- Notifications will be dynamically inserted here -->
                     <a href="#" class="dropdown-item notify-item">
                         <i class="fe-info"></i>
                         <span>Loading...</span>
-                        <button class="close-btn">X</button>
+                        <button class="close-btn">
+                            <i class="mdi mdi-close"></i>
+                        </button>
                     </a>
                 </div>
             </div>
         </li>
+
 
         <!-- Admin dropdown -->
         <li class="dropdown notification-list topbar-dropdown">
@@ -310,15 +313,15 @@
                 aria-haspopup="false" aria-expanded="false">
                 <img src="<%- process.env.BACKEND_URL %>/assets/images/users/user-1.jpg" alt="user-image"
                     class="rounded-circle">
-                <span class="pro-user-name ms-1" style="color: orange;">
+                <span class="pro-user-name ms-1" style="color: #a29e07;">
                     <b> Admin</b>
-                    <b><i class="mdi mdi-chevron-down" style="color: orange;"></i></b>
+                    <b><i class="mdi mdi-chevron-down" style="color: #a29e07;"></i></b>
                 </span>
             </a>
 
             <div class="dropdown-menu dropdown-menu-end profile-dropdown" style="background-color: #2c3e50;">
                 <div class="dropdown-header noti-title">
-                    <h6 class="text-overflow m-0" style="color: orange; ">Welcome!</h6>
+                    <h6 class="text-overflow m-0" style="color: #a29e07; ">Welcome!</h6>
                 </div>
                 <a href="me" class="dropdown-item notify-item">
                     <i class="fe-user"></i>
