@@ -7,10 +7,7 @@
   }
 }
 
-/* index.css or tailwind.css */
-input:focus, textarea:focus {
-  scroll-padding-bottom: 50px; /* Adjust based on your needs */
-}
+
 .loader {
   border-top-color: #ddff00;
   animation: spin 1s ease-in-out infinite;
