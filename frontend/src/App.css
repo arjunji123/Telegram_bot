@@ -24,7 +24,9 @@ textarea {
 
 html,
 body {
-  overflow-x: hidden;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
   -webkit-overflow-scrolling: touch;
   margin: 0;
   padding: 0;

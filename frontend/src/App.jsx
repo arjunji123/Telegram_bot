@@ -48,12 +48,17 @@ function App({ Component, pageProps }) {
     // Adjust for keyboard appearance on iOS
     const adjustForKeyboard = () => {
       const activeElement = document.activeElement;
-      if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
+      ) {
         setTimeout(() => {
+          // Scroll the focused input into view on iOS
           activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 100); // Smooth scroll aligns with iOS keyboard animation
+        }, 100); // Smooth scroll for iOS keyboard interaction
       }
     };
+
      // Prevent layout shift on iOS keyboard
      const preventIOSKeyboardIssues = () => {
       const initialViewportHeight = window.innerHeight;
