@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-12">
-        <div class="card" style="margin-top: 26px;">
+        <div class="card">
             <div class="card-body">
                 <h4 class="header-title">Preview Quest - <%= blog.quest_name %>
                 </h4>
@@ -58,6 +58,29 @@
 
 
                         </div>
+                        <div class="row">
+                            <div class="col-lg-6 float-left">
+                                <div class="mb-3">
+                                    <label for="social_media" class="form-label">Social Media</label>
+                                    <div>
+                                        <% const socialMedias=['Facebook', 'X' , 'Instagram' , 'LinkedIn' , 'Snapchat'
+                                            , 'YouTube' , 'Pinterest' , 'WhatsApp' ]; socialMedias.forEach(media=> {
+                                            %>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="social_media"
+                                                    id="social_media_<%= media %>" value="<%= media %>"
+                                                    <%=blog.social_media===media ? 'checked' : '' %>
+                                                disabled>
+                                                <label class="form-check-label" for="social_media_<%= media %>">
+                                                    <%= media %>
+                                                </label>
+                                            </div>
+                                            <% }); %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
 
                         <div class="row">
                             <div class="col-lg-12 float-left">
