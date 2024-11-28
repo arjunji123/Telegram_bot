@@ -13,6 +13,14 @@
   height: 100%; /* Full viewport height */
   overflow-y: auto; /* Enable vertical scrolling */
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  position: relative;
+}
+
+/* Ensure inputs are properly positioned */
+input,
+textarea {
+  -webkit-appearance: none;
+  font-size: inherit;
 }
 
 html,

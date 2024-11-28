@@ -33,27 +33,32 @@ function App({ Component, pageProps }) {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
-        // Prevent drag-to-close
-        tg.disableClosingConfirmation();
+       // Disable drag-to-close gesture
+    if (tg.disableClosingConfirmation) {
+      tg.disableClosingConfirmation();
+    }
     }
 
     // Prevent drag-to-close while allowing scrollable content
     const handleTouchMove = (e) => {
-      if (!e.target.closest("#content")) {
-        e.preventDefault(); // Block scrolling outside of #content
+      const contentElement = document.querySelector("#content");
+      if (contentElement && !e.target.closest("#content")) {
+        e.preventDefault(); // Prevent dragging outside the content area
       }
     };
 
-    // Adjust for iPhone keyboard hiding content
-    const adjustForKeyboard = () => {
-      const activeElement = document.activeElement;
-      if (
-        activeElement &&
-        (activeElement.tagName === "input" || activeElement.tagName === "textarea")
-      ) {
+   // Fix for iOS keyboard hiding input fields
+   const adjustForKeyboard = () => {
+    const activeElement = document.activeElement;
+    if (
+      activeElement &&
+      (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
+    ) {
+      setTimeout(() => {
         activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    };
+      }, 100); // Add a delay for better alignment with iOS keyboard animation
+    }
+  };
 
     window.addEventListener("resize", adjustForKeyboard);
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -65,8 +70,9 @@ function App({ Component, pageProps }) {
 
     return () => {
       clearTimeout(timer);
-      document.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("resize", adjustForKeyboard);
+     // Cleanup Event Listeners
+     window.removeEventListener("resize", adjustForKeyboard);
+     document.removeEventListener("touchmove", handleTouchMove);
     };
   }, []);
 
