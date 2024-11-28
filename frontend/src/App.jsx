@@ -19,7 +19,7 @@ import { Provider } from "react-redux";
 import store from "../store/store";
 import Profile from "./components/Profile";
 import AuthListener from "./components/AuthListener"; // Import AuthListener
-import KeyboardPaddingFix from "./components/KeyboardPaddingFix"; // Import the KeyboardPaddingFix component
+import KeyboardFix  from "./components/KeyboardFix"; // Import the KeyboardPaddingFix component
 
 
 store.dispatch(loadUserFromLocalStorage());
@@ -27,7 +27,7 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-  const keyboardHeight = KeyboardPaddingFix(); // Get keyboard height
+  const keyboardHeight = KeyboardFix (); // Get keyboard height
   useEffect(() => {
     // Initialize Telegram WebApp
     if (window.Telegram && window.Telegram.WebApp) {
@@ -98,7 +98,7 @@ useEffect(() => {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <div className="no-shift"> {/* Add no-shift class here */} 
+        <KeyboardFix /> 
            <Routes>
      
         <Route
@@ -123,7 +123,7 @@ useEffect(() => {
             <Route path="/history" element={<History />} />
           </Route>
         </Routes>
-        </div>
+
       </BrowserRouter>
     </Provider>
   );
