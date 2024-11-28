@@ -206,7 +206,7 @@ useEffect(() => {
       </div> */}
 
       {/* Form Section */}
-      <div id="content" className="p-4  sm:p-6 space-y-6 h-screen overflow-y-auto touch-auto" style={styles.content}>
+      <div id="content" className="p-4  sm:p-6 space-y-6 h-full overflow-y-auto touch-auto" style={styles.content}>
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
