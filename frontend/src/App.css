@@ -271,38 +271,59 @@ canvas {
 }
 
 
-/* For iPhones (portrait and landscape) */
-@media only screen and (max-width: 768px) and (min-width: 375px) {
-  /* Adjustments for iPhones with portrait/landscape orientation */
+/* app.css */
 
-
-  input, textarea {
-    /* Optional: Adjust the focus behavior for input fields */
-    padding-bottom: 15px;
-    font-size: 16px;
+/* Apply only for iPhone screens */
+@media only screen and (max-width: 414px) and (max-height: 736px) { /* For iPhone 6, 7, 8, and Plus */
+  body, html {
+    height: 100%;
+    overflow: hidden; /* Prevent scrolling */
   }
 
-  .form-container {
-    /* Ensure the container is flexible and doesn't hide behind the keyboard */
-    overflow: visible;
-    position: relative;
-  }
-}
-/* For iPhone and iPad */
-@media only screen and (max-width: 768px) {
-  input:focus,
-  textarea:focus {
-    margin-bottom: 60px; /* Creates space for the keyboard */
-  }
-}
-
-@media only screen and (max-width: 768px) {
-  html, body {
-    overflow-x: hidden;
+  input:focus, textarea:focus {
+    margin-bottom: 100px; /* Adjust according to keyboard size */
     position: relative;
   }
 
-  .content {
-    min-height: calc(100vh - 60px); /* Ensure content fits above the keyboard */
+  /* Prevent layout shift */
+  .no-shift {
+    overflow: auto !important;
+    height: 100vh;
+  }
+}
+
+/* For iPhone X, XS, XR */
+@media only screen and (max-width: 375px) and (max-height: 812px) {
+  body, html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  input:focus, textarea:focus {
+    margin-bottom: 120px; /* Adjust according to keyboard size */
+    position: relative;
+  }
+
+  .no-shift {
+    overflow: auto !important;
+    height: 100vh;
+  }
+}
+
+/* For smaller iPhones (e.g., iPhone 5, SE) */
+@media only screen and (max-width: 320px) {
+  body, html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  input:focus, textarea:focus {
+    margin-bottom: 90px; /* Adjust according to keyboard size */
+    position: relative;
+  }
+
+  .no-shift {
+    overflow: auto !important;
+    height: 100vh;
   }
 }

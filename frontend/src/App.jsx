@@ -69,11 +69,7 @@ function App({ Component, pageProps }) {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <div
-          className={`${
-            keyboardHeight > 0 ? `pb-[${keyboardHeight}px]` : ""
-          }`}
-        >     
+        <div className="no-shift"> {/* Add no-shift class here */} 
            <Routes>
      
         <Route
