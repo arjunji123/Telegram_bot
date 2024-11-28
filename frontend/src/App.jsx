@@ -19,7 +19,7 @@ import { Provider } from "react-redux";
 import store from "../store/store";
 import Profile from "./components/Profile";
 import AuthListener from "./components/AuthListener"; // Import AuthListener
-import { useNavigate } from 'react-router-dom';
+import KeyboardPaddingFix from "./components/KeyboardPaddingFix"; // Import the KeyboardPaddingFix component
 
 
 store.dispatch(loadUserFromLocalStorage());
@@ -79,6 +79,7 @@ function App({ Component, pageProps }) {
       {" "}
       <BrowserRouter>
         <AuthListener />
+        <KeyboardPaddingFix /> {/* Add KeyboardPaddingFix to the top level */}
         <Routes>
      
         <Route

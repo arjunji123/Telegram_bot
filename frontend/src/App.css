@@ -10,7 +10,10 @@
 
 
 
-
+/* CSS */
+.container {
+  padding-bottom: env(safe-area-inset-bottom); /* For iPhones with a notch */
+}
 html,
 body {
   overflow-x: hidden;
