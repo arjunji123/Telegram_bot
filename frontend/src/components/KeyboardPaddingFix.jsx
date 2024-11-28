@@ -5,22 +5,29 @@ const useKeyboard = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerHeight < 500) { // You can adjust this threshold if needed
-        const activeElement = document.activeElement;
-        if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
-          setKeyboardHeight(100); // Set a fixed padding value or calculate dynamically
+       // Function to detect if it's iPhone
+       const isIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+       const handleKeyboardChange = () => {
+      if (isIphone) {
+        const height = window.innerHeight;
+        const bodyHeight = document.body.clientHeight;
+        
+        // If window height is less than the body height, the keyboard is visible
+        if (height < bodyHeight) {
+          // Adjust keyboard height (this value can be dynamic)
+          setKeyboardHeight(bodyHeight - height);
+        } else {
+          setKeyboardHeight(0);
         }
-      } else {
-        setKeyboardHeight(0);
       }
     };
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Call it initially to check the screen height
+    window.addEventListener("resize", handleKeyboardChange);
+    handleKeyboardChange(); // Call it initially to check the screen height
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleKeyboardChange);
     };
   }, []);
 
