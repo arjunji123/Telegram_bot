@@ -8,25 +8,12 @@
   /* For Chrome, Safari, and Opera */
 }
 
-#content {
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  position: relative;
-}
-/* Ensure inputs are properly positioned */
-input,
-textarea {
-  -webkit-appearance: none;
-  font-size: inherit;
-}
+
 
 
 html,
 body {
-  height: 100%;
-  overflow: hidden;
-  position: relative;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   margin: 0;
   padding: 0;
