@@ -27,13 +27,15 @@
             transform: scale(1.2);
         }
         .node text {
-            font-size: 12px;
-            font-weight: bold;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: 120px; /* Limit max text width */
-        }
+    font-size: 12px;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100px; /* Define a fixed width */
+    display: inline-block; /* Necessary for ellipsis to work */
+}
+
        .link {
             fill: none;
             stroke: #888;
