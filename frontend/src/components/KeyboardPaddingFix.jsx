@@ -6,18 +6,18 @@ const useKeyboard = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerHeight < document.documentElement.clientHeight) {
-        const heightDifference = document.documentElement.clientHeight - window.innerHeight;
-        setKeyboardHeight(heightDifference);
-      } else {
-        setKeyboardHeight(0);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
+        // If the window height is less than the document height, it means the keyboard is visible
+        if (window.innerHeight < document.documentElement.clientHeight) {
+          setKeyboardHeight(document.documentElement.clientHeight - window.innerHeight);
+        } else {
+          setKeyboardHeight(0); // Reset when the keyboard hides
+        }
+      };
+  
+      window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+        window.removeEventListener("resize", handleResize);
     };
   }, []);
 

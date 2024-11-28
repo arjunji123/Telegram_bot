@@ -27,6 +27,7 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
+  const keyboardHeight = KeyboardPaddingFix(); // Get keyboard height
   useEffect(() => {
     // Initialize Telegram WebApp
     if (window.Telegram && window.Telegram.WebApp) {
@@ -68,7 +69,7 @@ function App({ Component, pageProps }) {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <KeyboardPaddingFix /> {/* Add KeyboardPaddingFix to the top level */}
+        <div className={` ${keyboardHeight > 0 ? `pb-${keyboardHeight}` : ''}`}>
         <Routes>
      
         <Route
@@ -93,6 +94,7 @@ function App({ Component, pageProps }) {
             <Route path="/history" element={<History />} />
           </Route>
         </Routes>
+        </div>
       </BrowserRouter>
     </Provider>
   );
