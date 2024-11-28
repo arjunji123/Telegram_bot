@@ -33,6 +33,8 @@ function App({ Component, pageProps }) {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
+        // Prevent drag-to-close
+        tg.disableClosingConfirmation();
     }
 
     // Prevent drag-to-close while allowing scrollable content
@@ -47,7 +49,7 @@ function App({ Component, pageProps }) {
       const activeElement = document.activeElement;
       if (
         activeElement &&
-        (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
+        (activeElement.tagName === "input" || activeElement.tagName === "textarea")
       ) {
         activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
       }
