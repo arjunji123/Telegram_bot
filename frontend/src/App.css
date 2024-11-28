@@ -274,9 +274,7 @@ canvas {
 /* For iPhones (portrait and landscape) */
 @media only screen and (max-width: 768px) and (min-width: 375px) {
   /* Adjustments for iPhones with portrait/landscape orientation */
-  body {
-    padding-bottom: 60px; /* Ensure enough space for the keyboard */
-  }
+
 
   input, textarea {
     /* Optional: Adjust the focus behavior for input fields */
