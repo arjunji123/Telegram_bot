@@ -24,23 +24,26 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors(""); // Clear previous error message
-    setLoading(true);
+    setLoading(true); // Set loading state to true
     try {
-      await dispatch(login({ mobile, password }));
+      await dispatch(login({ mobile, password })); // Dispatch login action
       setToastMessage("Login successful!");
       setShowToast(true);
-      navigate("/home");
-      // setTimeout(() => {
-      // }, 2000);
+      navigate("/home"); // Navigate to home on success
     } catch (error) {
-      const errorMessage = error.message || "An unknown error occurred."; // Get the error message from the thrown error
-
+      const errorMessage = error.message || "An unknown error occurred."; // Get the error message
       console.error("Caught error:", errorMessage); // Log error for debugging
-      setErrors(errorMessage); // Display error message in the UI
-      setToastMessage(errorMessage); // Show error message in toast
+      setErrors(errorMessage); // Update the error state for UI display
+      setToastMessage(errorMessage); // Show the error message in toast
       setShowToast(true);
+  
+      // Stop the loading state after a short delay
+      setTimeout(() => {
+        setLoading(false); // Reset loading state to allow retry
+      }, 2000); // 2-second delay
     }
   };
+  
 
   const [firstName, setFirstName] = useState("");
 
@@ -129,21 +132,24 @@ function Login() {
         {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
       </button>
     </div>
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className="w-full py-3 sm:py-4 text-sm sm:text-base font-Inter uppercase font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
-                disabled={loading}    >
-                  
-              {loading ? (
-              <div className="flex justify-center items-center">
-                <div className="spinner"></div> {/* Custom spinner */}
-              </div>
-            ) : (
-              'Log In' // Normal button text
-            )}
-              </button>
-            </div>
+    <div className="flex justify-center">
+  <button
+    type="submit"
+    className={`w-full py-3 sm:py-4 text-sm sm:text-base font-Inter uppercase font-bold text-black bg-white rounded-lg shadow-md transform transition duration-300 ease-in-out ${
+      loading ? "cursor-not-allowed opacity-70" : "hover:scale-105 hover:bg-gray-200 hover:shadow-lg"
+    }`}
+    disabled={loading}
+  >
+    {loading ? (
+      <div className="flex justify-center items-center">
+        <div className="spinner"></div> {/* Custom spinner */}
+      </div>
+    ) : (
+      "Log In" // Normal button text
+    )}
+  </button>
+</div>
+
           </form>
 
           <div className="text-center">
