@@ -21,9 +21,15 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
+  padding-bottom: env(safe-area-inset-bottom); /* Ensures content doesn't go behind the keyboard */
+  padding-top: env(safe-area-inset-top); /* Adjust for status bar space */
+  padding-left: env(safe-area-inset-left); /* Safe area for the left side */
+  padding-right: env(safe-area-inset-right); /* Safe area for the right side */
 }
 
-
+input, textarea {
+  padding-bottom: env(safe-area-inset-bottom); /* Ensure inputs don't get hidden behind the keyboard */
+}
 @font-face {
   font-family: 'Roobert';
   src: url('./assets/fonts/RoobertTRIALVF-BF67243fd545701.ttf') format('truetype');
