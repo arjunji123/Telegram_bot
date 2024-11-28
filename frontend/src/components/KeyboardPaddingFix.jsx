@@ -1,34 +1,32 @@
 // src/components/KeyboardPaddingFix.js
+
 import React, { useState, useEffect } from "react";
 
 const KeyboardPaddingFix = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  const handleKeyboardShow = () => {
-    setKeyboardHeight(300); // Adjust height based on your needs
-  };
-
-  const handleKeyboardHide = () => {
-    setKeyboardHeight(0);
-  };
-
   useEffect(() => {
-    window.addEventListener("resize", () => {
+    const handleResize = () => {
+      // Check if the keyboard is showing
       if (window.innerHeight < document.documentElement.clientHeight) {
-        handleKeyboardShow();
+        // The keyboard is likely visible, calculate the height
+        setKeyboardHeight(document.documentElement.clientHeight - window.innerHeight);
       } else {
-        handleKeyboardHide();
+        // Keyboard is hidden
+        setKeyboardHeight(0);
       }
-    });
+    };
 
-    return () => window.removeEventListener("resize", handleKeyboardHide);
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
-  return (
-    <div style={{ paddingBottom: `${keyboardHeight}px` }} className="keyboard-padding-container">
-      {/* The rest of the app content will go here */}
-    </div>
-  );
+  // We apply the keyboard height dynamically as padding
+  return <div style={{ paddingBottom: `${keyboardHeight}px` }} />;
 };
 
 export default KeyboardPaddingFix;
