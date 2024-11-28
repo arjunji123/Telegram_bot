@@ -33,32 +33,27 @@ function App({ Component, pageProps }) {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
-       // Disable drag-to-close gesture
-    if (tg.disableClosingConfirmation) {
-      tg.disableClosingConfirmation();
-    }
+        // Prevent drag-to-close
+        tg.disableClosingConfirmation();
     }
 
     // Prevent drag-to-close while allowing scrollable content
     const handleTouchMove = (e) => {
-      const contentElement = document.querySelector("#content");
-      if (contentElement && !e.target.closest("#content")) {
-        e.preventDefault(); // Prevent dragging outside the content area
+      if (!e.target.closest("#content")) {
+        e.preventDefault(); // Block scrolling outside of #content
       }
     };
 
-   // Fix for iOS keyboard hiding input fields
-   const adjustForKeyboard = () => {
-    const activeElement = document.activeElement;
-    if (
-      activeElement &&
-      (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
-    ) {
-      setTimeout(() => {
+    // Adjust for iPhone keyboard hiding content
+    const adjustForKeyboard = () => {
+      const activeElement = document.activeElement;
+      if (
+        activeElement &&
+        (activeElement.tagName === "input" || activeElement.tagName === "textarea")
+      ) {
         activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 100); // Add a delay for better alignment with iOS keyboard animation
-    }
-  };
+      }
+    };
 
     window.addEventListener("resize", adjustForKeyboard);
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -70,9 +65,8 @@ function App({ Component, pageProps }) {
 
     return () => {
       clearTimeout(timer);
-     // Cleanup Event Listeners
-     window.removeEventListener("resize", adjustForKeyboard);
-     document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("resize", adjustForKeyboard);
     };
   }, []);
 
