@@ -269,3 +269,42 @@ canvas {
   height: 120px;
   margin-bottom: 16px;
 }
+
+
+/* For iPhones (portrait and landscape) */
+@media only screen and (max-width: 768px) and (min-width: 375px) {
+  /* Adjustments for iPhones with portrait/landscape orientation */
+  body {
+    padding-bottom: 60px; /* Ensure enough space for the keyboard */
+  }
+
+  input, textarea {
+    /* Optional: Adjust the focus behavior for input fields */
+    padding-bottom: 15px;
+    font-size: 16px;
+  }
+
+  .form-container {
+    /* Ensure the container is flexible and doesn't hide behind the keyboard */
+    overflow: visible;
+    position: relative;
+  }
+}
+/* For iPhone and iPad */
+@media only screen and (max-width: 768px) {
+  input:focus,
+  textarea:focus {
+    margin-bottom: 60px; /* Creates space for the keyboard */
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .content {
+    min-height: calc(100vh - 60px); /* Ensure content fits above the keyboard */
+  }
+}

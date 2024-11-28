@@ -216,7 +216,7 @@ useEffect(() => {
           Sign Up
         </h2>
   
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 form-container">
   
           {/* Name and Mobile Input */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -228,7 +228,7 @@ useEffect(() => {
                 onChange={handleInput}
                 required
                 aria-label="Name"
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
                 placeholder="Name"
               />
             </div>
@@ -240,7 +240,7 @@ useEffect(() => {
                 onChange={handleInput}
                 required
                 aria-label="Mobile No."
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
                 placeholder="Mobile No."
               />
             </div>
@@ -255,7 +255,7 @@ useEffect(() => {
               onChange={handleInput}
               required
               aria-label="Email"
-              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
+              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
               placeholder="Email"
             />
           </div>
@@ -271,7 +271,7 @@ useEffect(() => {
                 onChange={handleInput}
                 required
                 aria-label="Password"
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
                 placeholder="Password"
               />
               <button
@@ -293,7 +293,7 @@ useEffect(() => {
                 onChange={handleInput}
                 required
                 aria-label="Confirm Password"
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
                 placeholder="Confirm Password"
               />
               <button
@@ -316,7 +316,7 @@ useEffect(() => {
               onChange={handleInput}
               required
               aria-label="UPI ID"
-              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base"
+              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
               placeholder="UPI ID"
             />
           </div>
