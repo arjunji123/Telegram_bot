@@ -32,7 +32,7 @@
         // Function to get unread notifications from the backend
         async function getUnreadNotifications() {
             try {
-                const response = await fetch('http://localhost:4000/api/v1/notifications');
+                const response = await fetch('https://telegram-bot-by30.onrender.com/api/v1/notifications');
                 const data = await response.json();
 
                 if (data.success && data.notifications.length > 0) {
@@ -93,7 +93,7 @@
 
                 try {
                     const response = await fetch(
-                        `http://localhost:4000/api/v1/read-notification/${notificationId}/mark-read`,
+                        `https://telegram-bot-by30.onrender.com/api/v1/read-notification/${notificationId}/mark-read`,
                         {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
@@ -103,7 +103,7 @@
 
                     if (data.success) {
 
-                        window.location.href = "http://localhost:4000/admin/users";
+                        window.location.href = "https://telegram-bot-by30.onrender.com/admin/users";
                     }
                 } catch (error) {
                     console.error('Error marking notification as read:', error);
@@ -115,7 +115,7 @@
                 const notificationId = event.target.getAttribute('data-id');
                 try {
                     const response = await fetch(
-                        `http://localhost:4000/api/v1/read-notification/${notificationId}/mark-read`,
+                        `https://telegram-bot-by30.onrender.com/api/v1/read-notification/${notificationId}/mark-read`,
                         {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
