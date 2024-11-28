@@ -59,6 +59,35 @@ function App({ Component, pageProps }) {
       document.removeEventListener("touchmove", handleTouchMove);
     };
   }, []);
+// Add this to your main component (e.g., App.js or a custom hook)
+
+useEffect(() => {
+  // Check if it's an iPhone (iOS Device)
+  if (navigator.userAgent.match(/iPhone|iPad|iPod/)) {
+    // Fix for iPhone keyboard behavior
+    const originalBodyStyle = document.body.style;
+
+    // Disable scroll and resize behavior when keyboard opens
+    const preventKeyboardLayoutShift = () => {
+      document.body.style.overflow = 'hidden';
+    };
+
+    const allowScrollAfterKeyboard = () => {
+      document.body.style.overflow = 'auto';
+    };
+
+    // Add event listeners for focus and blur to handle keyboard visibility
+    window.addEventListener('focus', preventKeyboardLayoutShift, true);
+    window.addEventListener('blur', allowScrollAfterKeyboard, true);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('focus', preventKeyboardLayoutShift, true);
+      window.removeEventListener('blur', allowScrollAfterKeyboard, true);
+      document.body.style = originalBodyStyle; // Reset the body style
+    };
+  }
+}, []);
 
 
   if (isLoading) {
