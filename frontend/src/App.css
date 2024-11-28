@@ -271,4 +271,11 @@ canvas {
 }
 
 
-
+/* Ensure the form container is scrollable on small screens */
+@media screen and (max-width: 767px) {
+  .form-container {
+    max-height: 80vh;  /* Limits the height to 80% of the screen */
+    overflow-y: auto;  /* Makes the form scrollable if the keyboard appears */
+    padding-bottom: env(safe-area-inset-bottom);  /* Adds padding to avoid keyboard overlap */
+  }
+}
