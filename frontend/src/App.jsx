@@ -27,28 +27,47 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-useEffect(() => {
-  if (window.Telegram && window.Telegram.WebApp) {
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-  }
- // Prevent drag-to-close while allowing scrollable content
- const handleTouchMove = (e) => {
-  if (!e.target.closest("#content")) {
-    e.preventDefault(); // Block scrolling outside of #content
-  }
-};
+  useEffect(() => {
+    // Initialize Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+    }
 
-document.addEventListener("touchmove", handleTouchMove, { passive: false });
-  const timer = setTimeout(() => {
-    setIsLoading(false);
-  }, 1000);
+    // Prevent drag-to-close while allowing scrollable content
+    const handleTouchMove = (e) => {
+      if (!e.target.closest("#content")) {
+        e.preventDefault(); // Block scrolling outside of #content
+      }
+    };
 
-  return () => {clearTimeout(timer);
-  document.removeEventListener("touchmove", handleTouchMove); // Cleanup the event listener
-  }
-}, []);
+    // Adjust for iPhone keyboard hiding content
+    const adjustForKeyboard = () => {
+      const activeElement = document.activeElement;
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")
+      ) {
+        activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    };
+
+    window.addEventListener("resize", adjustForKeyboard);
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    // Timer for preloader
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("resize", adjustForKeyboard);
+    };
+  }, []);
+
 
   if (isLoading) {
     return <Preloader />; // Show preloader while loading
@@ -66,6 +85,7 @@ document.addEventListener("touchmove", handleTouchMove, { passive: false });
   />
 
           <Route element={<PublicRoute />}>
+            <Route path="/" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             {/* <Route path="/" element={token !== null? <Navigate to="/home" /> : <Signup />} /> */}
             <Route path="/payment/:id" element={<Payment />} />

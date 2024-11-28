@@ -194,7 +194,7 @@ useEffect(() => {
   return (
     <div  className="bg-black flex justify-center items-center min-h-screen overflow-hidden " >
             <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
-  <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl">
+  <div className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe">
       
       {/* Logo and Welcome Section */}
       {/* <div className="px-6 sm:px-10 shadow-lg relative">
@@ -206,7 +206,7 @@ useEffect(() => {
       </div> */}
 
       {/* Form Section */}
-      <div id="content" className="p-4  sm:p-6 space-y-6 overflow-y-auto h-full" style={styles.content}>
+      <div id="content" className="p-4  sm:p-6 space-y-6 h-screen overflow-y-auto touch-auto" style={styles.content}>
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
@@ -397,8 +397,8 @@ useEffect(() => {
 }
 const styles = {
   content: {
-    height: '100%', // Full viewport height
-    overflowY: 'auto', // Enable vertical scrolling
+    // height: '100%', // Full viewport height
+    // overflowY: 'auto', // Enable vertical scrolling
     WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
   },
 };
