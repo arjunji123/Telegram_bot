@@ -23,7 +23,6 @@ exports.allTransactions = catchAsyncErrors(async (req, res, next) => {
   const [transactions] = await db.query(
     `SELECT 
         ut.user_id,
-        ut.user_upi_id,
         ut.company_id,
         ut.tranction_coin,
         ut.tranction_rate,
@@ -31,10 +30,13 @@ exports.allTransactions = catchAsyncErrors(async (req, res, next) => {
         ut.trans_doc,
         DATE_FORMAT(ut.data_created, "%d-%m-%Y %H:%i:%s") AS data_created,
         ut.status,
-        u.user_name  -- Adjust based on your table structure
+        u.user_name,
+        ud.upi_id -- Added field from user_data table
      FROM user_transction ut
-     JOIN users u ON ut.user_id = u.id` // Modify or remove conditions for testing
-  );
+     JOIN users u ON ut.user_id = u.id
+     LEFT JOIN user_data ud ON u.id = ud.user_id` );
+  
+  
   console.log("transactions:", transactions); // Log for debugging
 
   res.render("transactions/index", {
@@ -43,6 +45,7 @@ exports.allTransactions = catchAsyncErrors(async (req, res, next) => {
     transactions, // Pass transactions array to the frontendsdg
   });
 });
+
 
 exports.approveTransaction = catchAsyncErrors(async (req, res, next) => {
   const { user_id } = req.body;
