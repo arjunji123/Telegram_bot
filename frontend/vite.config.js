@@ -25,6 +25,8 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   server: {
+    host: true, // Set to true to listen on all IPs
+    port: 3000, // Specify a custom port, e.g., 3000
     proxy: {
       '/api': { // Ensure the proxy path starts with '/' 
         target: "https://telegram-bot-by30.onrender.com/api/v1", // Target backend API
