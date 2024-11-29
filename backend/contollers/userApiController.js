@@ -480,19 +480,6 @@ exports.resetPasswordApi = catchAsyncErrors(async (req, res, next) => {
 
 //////////////////////////////////////////
 
-// get user detail
-exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
-  console.log(req.user);
-  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-    req.user.id,
-  ]);
-  const user = userDetail[0][0];
-
-  res.status(200).json({
-    success: true,
-    user,
-  });
-});
 
 // update user password
 exports.updatePasswordApi = catchAsyncErrors(async (req, res, next) => {
@@ -849,7 +836,6 @@ exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-
 exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
   try {
     // Fetch the user's ID from the request
@@ -905,7 +891,9 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
         ? `${process.env.BACKEND_URL}uploads/${userData.user_photo}`
         : null, // Full URL for user photo or null if not set
       referral_count: referralCount, // Include referral count in the response
+      referral_code: userData.referral_code,
     };
+    console.log(userProfile);
 
     // Send the response with the user's profile
     res.status(200).json({
@@ -919,7 +907,6 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
-
 ////////////////////////////////////
 
 exports.getCompanyDetailApi = catchAsyncErrors(async (req, res, next) => {
