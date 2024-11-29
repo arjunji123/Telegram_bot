@@ -225,7 +225,7 @@ function Withdrawal() {
 
     <>
 
-      <div className="bg-white flex justify-center min-h-screen font-Inter">
+      <div className="bg-white flex justify-center min-h-screen font-Inter overflow-hidden">
         <ToastContainer
           position="top-right"
           autoClose={5000}
@@ -238,8 +238,8 @@ function Withdrawal() {
         {loading ? (
           <Loader />
         ) :
-          <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 ">
-            <div className="flex-grow relative z-0   py-16">
+          <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 overflow-hidden">
+            <div className="flex-grow relative z-0   top-16">
               {/* <Logo /> */}
               
               <div className="flex justify-center font-Inter  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
@@ -278,7 +278,7 @@ function Withdrawal() {
               <hr className="border-gray-300 mb-4 w-full mx-auto" />
 
               {/* Co-Companies List */}
-              <div id="content" className="flex flex-col space-y-4">
+              <div id="content" className="flex flex-col h-[400px] space-y-4 overflow-y-auto hide-scrollbar">
                 {apiCompanies && apiCompanies.data && apiCompanies.data.length > 0 ? (
                   apiCompanies.data && apiCompanies.data.map((company, index) => (
                     <div key={index} className="py-2">
