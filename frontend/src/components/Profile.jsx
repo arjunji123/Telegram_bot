@@ -225,7 +225,7 @@ function Profile() {
             </div>
             <div className="text-center mt-4">
               {/* User Name */}
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-blue-300 to-white bg-clip-text text-transparent">
                 {userData?.user_name}
               </h1>
 
