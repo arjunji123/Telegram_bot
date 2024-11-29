@@ -213,14 +213,6 @@ th:not(:last-child) {
 
 
 /* animation of profile page */
-/* body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: black;
-  color: white;
-  font-family: "Poppins", sans-serif;
-} */
 
 canvas {
   position: absolute;

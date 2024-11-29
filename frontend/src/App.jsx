@@ -40,9 +40,31 @@ function App({ Component, pageProps }) {
     // iOS Keyboard Handling
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     // Prevent drag-to-close while allowing scrollable content
+    // const handleTouchMove = (e) => {
+    //   if (!e.target.closest("#content")) {
+    //     e.preventDefault(); // Block scrolling outside of #content
+    //   }
+    // };
+
+
     const handleTouchMove = (e) => {
-      if (!e.target.closest("#content")) {
-        e.preventDefault(); // Block scrolling outside of #content
+      const content = document.getElementById("content");
+    
+      // Check if the event target is within the #content div
+      if (content && content.contains(e.target)) {
+        // Allow scrolling inside the #content
+        const { scrollTop, scrollHeight, clientHeight } = content;
+    
+        // Prevent scrolling beyond top or bottom
+        const atTop = scrollTop === 0;
+        const atBottom = scrollTop + clientHeight === scrollHeight;
+    
+        if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+          e.preventDefault(); // Block overscroll
+        }
+      } else {
+        // Prevent touchmove outside #content to stop drag-to-close
+        e.preventDefault();
       }
     };
     const adjustForKeyboard = () => {
