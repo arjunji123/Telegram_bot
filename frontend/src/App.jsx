@@ -35,6 +35,7 @@ function App({ Component, pageProps }) {
       tg.expand();
       // Prevent drag-to-close
       tg.disableClosingConfirmation();
+      Telegram.WebApp.enableSwipeBack(false); // Prevent swipe-to-close on Telegram WebApp
 
     }
     // iOS Keyboard Handling
@@ -45,26 +46,46 @@ function App({ Component, pageProps }) {
     //     e.preventDefault(); // Block scrolling outside of #content
     //   }
     // };
-
+    const handleTouchStart = (e) => {
+      const content = document.getElementById("content");
+    
+      if (!content) return;
+    
+      // Store the initial touch position to handle scroll direction properly
+      if (content.contains(e.target)) {
+        // Only start tracking touch within the content area
+        content.isTouching = true;
+      } else {
+        // Prevent default behavior to avoid Telegram's drag-to-close
+        e.preventDefault();
+      }
+    };
 
     const handleTouchMove = (e) => {
       const content = document.getElementById("content");
     
-      // Check if the event target is within the #content div
-      if (content && content.contains(e.target)) {
+      if (!content || !content.isTouching) return;
+    
+      if (content.contains(e.target)) {
         // Allow scrolling inside the #content
         const { scrollTop, scrollHeight, clientHeight } = content;
-    
-        // Prevent scrolling beyond top or bottom
+        
         const atTop = scrollTop === 0;
         const atBottom = scrollTop + clientHeight === scrollHeight;
     
-        if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
-          e.preventDefault(); // Block overscroll
+        // Prevent overscroll
+        if ((atTop && e.touches[0].clientY > e.touches[0].pageY) || (atBottom && e.touches[0].clientY < e.touches[0].pageY)) {
+          e.preventDefault(); // Prevent overscroll within the content
         }
       } else {
-        // Prevent touchmove outside #content to stop drag-to-close
+        // Prevent default behavior outside the #content to stop drag-to-close
         e.preventDefault();
+      }
+    };
+    const handleTouchEnd = (e) => {
+      const content = document.getElementById("content");
+      if (content) {
+        content.isTouching = false; // End touch tracking
       }
     };
     const adjustForKeyboard = () => {
@@ -87,8 +108,10 @@ function App({ Component, pageProps }) {
       window.addEventListener('resize', adjustForKeyboard); // Handle resize on iPhone
     }
 
+    document.addEventListener("touchstart", handleTouchStart, { passive: false });
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
 
     // Timer for preloader
