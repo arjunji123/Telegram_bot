@@ -24,18 +24,21 @@ const sellTransactionSchema = Joi.object({
 
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   try {
-    // Fetch user data from the users table where user_type is 'company'
-    const users = await db.query(
+   const users = await db.query(
       `SELECT 
-          u.id,
-          u.user_name,
-          u.email,
-          u.mobile,
-          DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
-          u.user_type,
-          u.status  
-       FROM users u
-       WHERE u.user_type = ?`, // Fetch only where user_type is 'company'
+            u.id,
+            u.user_name,
+            u.email,
+            u.mobile,
+            DATE_FORMAT(u.date_created, "%d-%m-%Y") AS date_created,
+            u.user_type,
+            u.status,
+            cd.coin_rate,
+            cd.company_coin
+         FROM users u
+         JOIN company_data cd
+         ON u.id = cd.company_id  -- Relating users.id with company_data.company_id
+         WHERE u.user_type = ?`, // Fetch only where user_type is 'company'
       ["company"] // Directly passing the value 'company'
     );
 
@@ -184,100 +187,6 @@ exports.addCoinRate = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Error while saving coin rate data.", 500));
   }
 });
-
-// exports.submitCompanyForm = catchAsyncErrors(async (req, res, next) => {
-//   const { coin_rate, description } = req.body; // Extract data from the request body
-//   const companyId = req.params.id; // Get the company ID from the request parameters
-
-//   // Validate input (basic example; you can add more validation as needed)
-//   if (!coin_rate || !description) {
-//     return next(
-//       new ErrorHandler("Coin rate and description are required", 400)
-//     );
-//   }
-
-//   try {
-//     // Check if the company data already exists
-//     const existingCompanyDataQuery = await db.query(
-//       "SELECT * FROM company_data WHERE company_id = ?",
-//       [companyId]
-//     );
-
-//     // If data exists, update the existing record
-//     if (existingCompanyDataQuery[0].length > 0) {
-//       await db.query(
-//         "UPDATE company_data SET coin_rate = ?, description = ? WHERE company_id = ?",
-//         [coin_rate, description, companyId]
-//       );
-
-//       // Optionally, set a flash message or response for successful update
-//       req.flash("msg_response", {
-//         status: 200,
-//         message: "Coin rate updated successfully for company ID: " + companyId,
-//       });
-//     } else {
-//       // If data does not exist, insert a new record
-//       const insertData = {
-//         company_id: companyId,
-//         coin_rate: coin_rate,
-//         description: description,
-//       };
-
-//       await db.query("INSERT INTO company_data SET ?", insertData);
-
-//       // Optionally, set a flash message or response for successful insertion
-//       req.flash("msg_response", {
-//         status: 200,
-//         message:
-//           "Coin rate submitted successfully for company ID: " + companyId,
-//       });
-//     }
-
-//     // Redirect back to the index page or another appropriate page
-//     res.redirect("/admin/" + module_slug); // Change this to the appropriate redirection
-//   } catch (error) {
-//     console.error("Error while submitting company form:", error);
-//     return next(
-//       new ErrorHandler(
-//         "An error occurred while submitting the company form",
-//         500
-//       )
-//     );
-//   }
-// });
-
-// exports.showCompanyForm = catchAsyncErrors(async (req, res, next) => {
-//   const companyId = req.params.id; // Get the company ID from the URL
-
-//   // Fetch the company details from the database
-//   const companyDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-//     companyId,
-//   ]);
-
-//   const company = companyDetail[0][0]; // Extract the company object from the result
-
-//   // Check if the company exists
-//   if (!company) {
-//     return next(new ErrorHandler("Company not found", 404)); // Handle company not found
-//   }
-
-//   // Fetch the existing company data from the company_data table
-//   const companyDataQuery = await db.query(
-//     "SELECT * FROM company_data WHERE company_id = ?",
-//     [companyId]
-//   );
-
-//   const companyData = companyDataQuery[0][0] || {}; // Get the company data or set to an empty object if not found
-
-//   // Render the company form view with the company details and existing company data
-//   res.render(module_slug + "/company-form", {
-//     layout: module_layout, // Assuming there's a layout file
-//     title: "Submit Company Data",
-//     companyId, // Pass the company ID to the form
-//     company, // Pass the company object to the view
-//     companyData, // Pass the existing company data (coin_rate, description)
-//   });
-// });
 
 ///////////////////////////////////////////////
 
