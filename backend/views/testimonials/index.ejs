@@ -16,10 +16,8 @@
                     <thead>
                         <tr>
                             <th>S.No.</th>
-                            <th>User ID</th>
                             <th>User Name</th>
                             <th>Task Name</th>
-                            <th>Task ID</th>
                             <th>Quest Type</th>
                             <th>Activity</th>
                             <th>Screenshot</th>
@@ -33,10 +31,8 @@
                         <% questEntries[0].forEach(entry => { %>
                             <tr id="quest-row-<%= entry.id %>">
                                 <td><%= serialNumber++ %></td>
-                                <td><%= entry.user_id %></td>
                                 <td><%= entry.user_name || 'Unknown User' %></td>
                                 <td><%= entry.quest_name || 'Unknown Task' %></td>
-                                <td><%= entry.quest_id %></td>
                                 <td><%= entry.quest_type || 'N/A' %></td>
                                 <td><%= entry.activity || 'N/A' %></td>
                              
