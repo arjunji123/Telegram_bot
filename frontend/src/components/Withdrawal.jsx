@@ -278,7 +278,7 @@ function Withdrawal() {
               <hr className="border-gray-300 mb-4 w-full mx-auto" />
 
               {/* Co-Companies List */}
-              <div className="flex flex-col space-y-4">
+              <div id="content" className="flex flex-col space-y-4">
                 {apiCompanies && apiCompanies.data && apiCompanies.data.length > 0 ? (
                   apiCompanies.data && apiCompanies.data.map((company, index) => (
                     <div key={index} className="py-2">
