@@ -36,7 +36,7 @@ console.log('withdrawal', withdrawal)
   // Group transactions by date
   const groupByDate = (data) =>
     data.reduce((acc, item) => {
-      const date = new Date(item.date_entered).toLocaleDateString();
+      const date = new Date(item.transaction_date).toLocaleDateString();
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;
