@@ -1525,51 +1525,51 @@ function buildUserTree(users) {
   return Object.values(userMap).filter((user) => user.isRoot);
 }
 
-// function filterSubTree(userTree, userId) {
-//   let targetNode = null;
-
-//   function findNode(node) {
-//     if (node.user_id == userId) {
-//       targetNode = node;
-//       return true;
-//     }
-//     for (const child of node.children) {
-//       if (findNode(child)) return true;
-//     }
-//     return false;
-//   }
-
-//   userTree.forEach((root) => findNode(root));
-//   return targetNode ? [targetNode] : [];
-// }
-
-function filterSubTree(userTree, userId, maxLevel = 5) {
+function filterSubTree(userTree, userId) {
   let targetNode = null;
 
-  function findNode(node, currentLevel) {
-    if (node.id == userId) {
-      targetNode = { ...node, children: [] }; // Create a fresh target node
-      filterChildren(node, targetNode, currentLevel); // Filter children up to maxLevel
+  function findNode(node) {
+    if (node.user_id == userId) {
+      targetNode = node;
       return true;
     }
     for (const child of node.children) {
-      if (findNode(child, currentLevel)) return true;
+      if (findNode(child)) return true;
     }
     return false;
   }
 
-  function filterChildren(sourceNode, targetNode, currentLevel) {
-    if (currentLevel >= maxLevel) return; // Stop recursion after maxLevel
-    sourceNode.children.forEach(child => {
-      const filteredChild = { ...child, children: [] };
-      targetNode.children.push(filteredChild);
-      filterChildren(child, filteredChild, currentLevel + 1);
-    });
-  }
-
-  userTree.forEach(root => findNode(root, 1)); // Start from level 1
+  userTree.forEach((root) => findNode(root));
   return targetNode ? [targetNode] : [];
 }
+
+// function filterSubTree(userTree, userId, maxLevel = 5) {
+//   let targetNode = null;
+
+//   function findNode(node, currentLevel) {
+//     if (node.id == userId) {
+//       targetNode = { ...node, children: [] }; // Create a fresh target node
+//       filterChildren(node, targetNode, currentLevel); // Filter children up to maxLevel
+//       return true;
+//     }
+//     for (const child of node.children) {
+//       if (findNode(child, currentLevel)) return true;
+//     }
+//     return false;
+//   }
+
+//   function filterChildren(sourceNode, targetNode, currentLevel) {
+//     if (currentLevel >= maxLevel) return; // Stop recursion after maxLevel
+//     sourceNode.children.forEach(child => {
+//       const filteredChild = { ...child, children: [] };
+//       targetNode.children.push(filteredChild);
+//       filterChildren(child, filteredChild, currentLevel + 1);
+//     });
+//   }
+
+//   userTree.forEach(root => findNode(root, 1)); // Start from level 1
+//   return targetNode ? [targetNode] : [];
+// }
 
 exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
   try {
