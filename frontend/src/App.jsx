@@ -43,11 +43,15 @@ function App({ Component, pageProps }) {
         e.preventDefault(); // Block scrolling outside of #content
       }
     };
+    // Adjust for keyboard (especially on iOS)
     const adjustForKeyboard = () => {
-      const viewportHeight = window.innerHeight;
-      tg.setViewportHeight(viewportHeight);
-      document.body.style.height = `${viewportHeight}px`;
-  };
+      const tg = window.Telegram.WebApp;
+      if (tg) {
+        const viewportHeight = window.innerHeight;
+        tg.setViewportHeight(viewportHeight);
+        document.body.style.height = `${viewportHeight}px`;
+      }
+    };
   const resetPadding = () => {
     document.body.style.paddingBottom = '0px';
 };
@@ -74,6 +78,7 @@ const handleIOSKeyboard = () => {
       window.removeEventListener('resize', adjustForKeyboard);
       window.removeEventListener('focusin', adjustForKeyboard);
       window.removeEventListener('focusout', resetPadding);
+      window.removeEventListener("resize", handleIOSKeyboard);
     };
   }, []);
 // Add this to your main component (e.g., App.js or a custom hook)
