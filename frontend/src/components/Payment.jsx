@@ -158,7 +158,8 @@ function Payment() {
           <h4 className="text-xs font-semibold text-white">Scan to Pay</h4>
           <div className="bg-white p-3 rounded-lg shadow-md w-48 h-48 flex items-center justify-center">
             {qrCodeUrl ? (
-              <img src={qrCodeUrl} alt="QR Code" className="object-contain w-full h-full rounded-md shadow-lg" />
+              // <img src={qrCodeUrl} alt="QR Code" className="object-contain w-full h-full rounded-md shadow-lg" />
+              <img src={apiSettings?.qr_code || ""} alt="QR Code" className="object-contain w-full h-full rounded-md shadow-lg" />
             ) : (
               <div className="w-full h-full bg-black rounded-md flex items-center justify-center">
                 <span className="text-white text-sm">No QR Code Available</span>
