@@ -575,6 +575,7 @@ exports.allUsers = catchAsyncErrors(async (req, res, next) => {
       ud.referral_code,
       ud.pay_image,
       ud.pending_coin,
+       ud.coins,
       u.user_type,
       u.status  
    FROM users u
