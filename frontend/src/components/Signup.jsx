@@ -22,6 +22,12 @@ function Signup() {
     referral_by: "",
     user_type: "user",
   });
+  const [errors, setErrors] = useState({
+    email: "",
+    mobile: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
@@ -69,63 +75,73 @@ useEffect(() => {
 }, [location]); // Run this effect when location changes
 
   const handleInput = (e) => {
-    setValues((prev) => ({
+    const { name, value } = e.target;
+    setValues((prev) => ({ ...prev, [name]: value }));
+    if (name === "email" && errors.email) validateEmail(value);
+    if (name === "mobile" && errors.mobile) validateMobile(value);
+    if (name === "password" && errors.password) validatePassword(value);
+    if (name === "confirmPassword" && errors.confirmPassword) validateConfirmPassword(value)
+  };
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setErrors((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      email: emailRegex.test(email) ? "" : "Invalid email address.",
+    }));
+  }
+
+  const validateMobile = (mobile) => {
+    const mobileRegex = /^[0-9]{10}$/;
+    setErrors((prev) => ({
+      ...prev,
+      mobile: mobileRegex.test(mobile) ? "" : "Invalid mobile number.",
     }));
   };
-  // Form validation logic
-  const validateForm = (values) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!values.email) {
-      toast.error("Email is required");
-      return false;
-    } else if (!emailRegex.test(values.email)) {
-      toast.error("Invalid email format");
-      return false;
-    }
 
-    const mobileRegex = /^[0-9]{10}$/;
-    if (!values.mobile) {
-      toast.error("Mobile number is required");
-      return false;
-    } else if (!mobileRegex.test(values.mobile)) {
-      toast.error("Invalid mobile number. Must be 10 digits.");
-      return false;
-    }
-
-    if (!values.password) {
-      toast.error("Password is required");
-      return false;
-    } 
-    // else if (values.password.length < 8) {
-    //   toast.error("Password must be at least 8 characters");
-    //   return false;
-    // }
-
-    if (!values.confirmPassword) {
-      toast.error("Confirm password is required");
-      return false;
-    } else if (values.password !== values.confirmPassword) {
-      toast.error("Passwords do not match");
-      return false;
-    }
-
-    return true; // Return true if all validations pass
+  const validatePassword = (password) => {
+    const minLength = 6;
+    setErrors((prev) => ({
+      ...prev,
+      password:
+        password.length >= minLength
+          ? ""
+          : `Password must be at least ${minLength} characters long.`,
+    }));
   };
+  const validateConfirmPassword = (confirmPassword) => {
+    setErrors((prev) => ({
+      ...prev,
+      confirmPassword:
+        confirmPassword === values.password ? "" : "Passwords do not match.",
+    }));
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "email") validateEmail(value);
+    if (name === "mobile") validateMobile(value);
+    if (name === "password") validatePassword(value);
+    if (name === "confirmPassword") validateConfirmPassword(value);
+  };
+
  
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const isValid = validateForm(values); // Assuming this is your form validation logic
-    console.log('values', values);
-      setShowToast(true);
-    if (!isValid) {
+    // Display validation errors if any field is invalid
+    if (
+      !values.email || errors.email ||
+      !values.mobile || errors.mobile ||
+      !values.password || errors.password ||
+      !values.confirmPassword || errors.confirmPassword
+    ) {
       setToastMessage("Please fill out the required fields correctly.");
-      return; // Exit if validation fails
+      setShowToast(true);
+      return; // Exit without sending the request
     }
   
-    setLoading(true);
+    setLoading(true); // Start the loader while sending the request
   
     try {
       const response = await axios.post(
@@ -135,58 +151,44 @@ useEffect(() => {
   
       console.log("Server Response:", response);
   
-      const userId = response.data.user.id; // Assuming the user ID is in the response
-      console.log('userId', userId);
+      // Assuming user ID is returned in the response
+      const userId = response.data.user.id;
+      console.log("userId:", userId);
   
       setToastMessage("Registration successful!");
       setShowToast(true);
+  
+      // Redirect to the Payment page with the generated userId
       setTimeout(() => {
-        // Redirect to the Payment page with the generated userId
         navigate(`/payment/${userId}`);
       }, 500);
     } catch (err) {
-      setLoading(false); // Make sure to hide the loader in case of error
+      setLoading(false); // Ensure the loader stops in case of an error
   
+      // Check if the error is from the server (err.response exists)
       if (err.response) {
-        // If the error is from the backend
-        if (err.response.data && !err.response.data.success) {
-          // Check if the error contains a specific message or an array of messages
-          const errorMessages = err.response.data.error;
-          
-          if (typeof errorMessages === 'string') {
-            // If the error is a string (e.g., "Mobile number already exists")
-            setToastMessage(errorMessages);
-            setShowToast(true);
-          } else if (Array.isArray(errorMessages) && errorMessages.length > 0) {
-            // If the error is an array of messages
-            setToastMessage(errorMessages[0]);
-            setShowToast(true);
-          } else {
-            setToastMessage("An unknown error occurred.");
-            setShowToast(true);
-          }
-        } else if (err.response.status === 404) {
-          // Handle 404 error (Not Found)
-          setToastMessage("Requested resource not found.");
-          setShowToast(true);
-        } else if (err.response.status === 500) {
-          // Handle 500 error (Server Error)
-          setToastMessage("Server error occurred. Please try again later.");
-          setShowToast(true);
+        const errorMessages = err.response.data.error;
+  
+        if (typeof errorMessages === "string") {
+          setToastMessage(errorMessages);
+        } else if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+          setToastMessage(errorMessages[0]); // Show the first error message
         } else {
-          // Handle other status codes (e.g., 401, 403)
-          const errorMessage = err.response.data.message || 'An unknown error occurred.';
-          setToastMessage(errorMessage);
-          setShowToast(true);
+          setToastMessage("An unknown error occurred.");
         }
+      } else if (err.request) {
+        // Handle network errors or no response from server
+        console.log("Network Error:", err);
+        setToastMessage("Network error. Please check your connection.");
       } else {
-        // Network or other errors (e.g., timeout, no internet)
+        // Handle unexpected Axios-related errors
         console.log("Axios Error:", err);
-        setToastMessage("Network error. Please check your connection or try again later.");
-        setShowToast(true);
+        setToastMessage("An unexpected error occurred. Please try again.");
       }
+  
+      setShowToast(true); // Show the error toast
     } finally {
-      setLoading(false); // Hide the loading spinner after the request completes
+      setLoading(false); // Hide the loader after request completes
     }
   };
   
@@ -228,6 +230,7 @@ useEffect(() => {
                 className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
                 placeholder="Name"
               />
+
             </div>
             <div className="relative">
               <input
@@ -235,11 +238,14 @@ useEffect(() => {
                 name="mobile"
                 value={values.mobile}
                 onChange={handleInput}
+                onBlur={handleBlur}
                 required
                 aria-label="Mobile No."
                 className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
                 placeholder="Mobile No."
               />
+                        {errors.mobile && <span className="error-message text-xs text-red-500">{errors.mobile}</span>}
+
             </div>
           </div>
           
@@ -251,11 +257,14 @@ useEffect(() => {
               name="email"
               value={values.email}
               onChange={handleInput}
+              onBlur={handleBlur}
               required
               aria-label="Email"
               className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
               placeholder="Email"
             />
+                      {errors.email && <span className="error-message text-xs text-red-500">{errors.email}</span>}
+
           </div>
   
           {/* Password and Confirm Password Inputs */}
@@ -267,6 +276,7 @@ useEffect(() => {
                 name="password"
                 value={values.password}
                 onChange={handleInput}
+                onBlur={handleBlur}
                 required
                 aria-label="Password"
                 className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
@@ -280,6 +290,8 @@ useEffect(() => {
               >
                 {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
               </button>
+              {errors.password && <span className="error-message text-xs text-red-500">{errors.password}</span>}
+
             </div>
   
             {/* Confirm Password */}
@@ -289,6 +301,7 @@ useEffect(() => {
                 name="confirmPassword"
                 value={values.confirmPassword}
                 onChange={handleInput}
+                onBlur={handleBlur}
                 required
                 aria-label="Confirm Password"
                 className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
@@ -302,7 +315,11 @@ useEffect(() => {
               >
                 {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
               </button>
+              {errors.confirmPassword && (
+            <span className="error-message text-xs text-red-500">{errors.confirmPassword}</span>
+          )}
             </div>
+         
           </div>
   
           {/* UPI ID Input */}
