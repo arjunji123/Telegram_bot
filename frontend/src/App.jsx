@@ -35,7 +35,6 @@ function App({ Component, pageProps }) {
       tg.expand();
       // Prevent drag-to-close
       tg.disableClosingConfirmation();
-      Telegram.WebApp.enableSwipeBack(false); // Prevent swipe-to-close on Telegram WebApp
 
     }
     // iOS Keyboard Handling
