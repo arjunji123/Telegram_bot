@@ -204,7 +204,7 @@ useEffect(() => {
     <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
     <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
     <div
-                  className={`w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe ${keyboardVisible ? 'keyboard-active' : ''}`}
+                  className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe "
 
     >
 
@@ -213,7 +213,7 @@ useEffect(() => {
           Sign Up
         </h2>
   
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 form-container">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 ">
   
           {/* Name and Mobile Input */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
