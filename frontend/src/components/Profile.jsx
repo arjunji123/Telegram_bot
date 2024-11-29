@@ -19,6 +19,7 @@ function Profile() {
   const [imagePreview, setImagePreview] = useState(null);
   const canvasRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [loader, setLoader] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,10 +29,20 @@ function Profile() {
     user_photo: "",
   });
 
-  useEffect(() => {
-    dispatch(fetchMeData());
-  }, [dispatch]);
 
+  useEffect(() => {
+    //   //   // Fetch user and coin data on component mount
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchMeData());
+        setLoader(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoader(false); // Set loading to false if there's an error
+      }
+    };
+    fetchData();
+  }, [dispatch]);
   useEffect(() => {
     if (userData) {
       setFormData({
@@ -183,7 +194,7 @@ function Profile() {
     <canvas ref={canvasRef} className="absolute inset-0 z-0" />
   
     {/* Profile Section */}
-    {loading ? (
+    {loader ? (
       <Loader />
     ) : (
       <section className="relative z-10 w-full max-w-md bg-black text-white shadow-lg rounded-lg px-4 py-6 overflow-y-auto">
