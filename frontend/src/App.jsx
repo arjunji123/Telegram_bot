@@ -51,12 +51,18 @@ function App({ Component, pageProps }) {
   const resetPadding = () => {
     document.body.style.paddingBottom = '0px';
 };
-
+const handleIOSKeyboard = () => {
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      document.body.style.height = `${window.innerHeight}px`;
+  }
+};
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener('resize', adjustForKeyboard);
     window.addEventListener('focusin', adjustForKeyboard); // Handle input focus
     window.addEventListener('focusout', resetPadding);    // Handle input blur
+    window.addEventListener('resize', handleIOSKeyboard);
+
     // Timer for preloader
     const timer = setTimeout(() => {
       setIsLoading(false);
