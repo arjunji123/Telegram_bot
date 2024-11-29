@@ -36,36 +36,37 @@ function App({ Component, pageProps }) {
         // Prevent drag-to-close
         tg.disableClosingConfirmation();
     }
+        // iOS Keyboard Handling
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
+        const handleKeyboardShow = () => {
+          document.body.style.height = `${window.innerHeight}px`;
+          document.body.style.overflow = "hidden";
+        };
     // Prevent drag-to-close while allowing scrollable content
     const handleTouchMove = (e) => {
       if (!e.target.closest("#content")) {
         e.preventDefault(); // Block scrolling outside of #content
       }
     };
-    // Adjust for keyboard (especially on iOS)
-    const adjustForKeyboard = () => {
-      const tg = window.Telegram.WebApp;
-      if (tg) {
-        const viewportHeight = window.innerHeight;
-        tg.setViewportHeight(viewportHeight);
-        document.body.style.height = `${viewportHeight}px`;
+    const handleKeyboardHide = () => {
+      document.body.style.height = "100vh";
+      document.body.style.overflow = "auto";
+    };
+    const handleResize = () => {
+      if (isIOS) {
+        document.body.style.height = `${window.innerHeight}px`;
       }
     };
-  const resetPadding = () => {
-    document.body.style.paddingBottom = '0px';
-};
-const handleIOSKeyboard = () => {
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      document.body.style.height = `${window.innerHeight}px`;
-  }
-};
+    if (isIOS) {
+      window.addEventListener("focusin", handleKeyboardShow);
+      window.addEventListener("focusout", handleKeyboardHide);
+      window.addEventListener("resize", handleResize);
+    }
+
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener('resize', adjustForKeyboard);
-    window.addEventListener('focusin', adjustForKeyboard); // Handle input focus
-    window.addEventListener('focusout', resetPadding);    // Handle input blur
-    window.addEventListener('resize', handleIOSKeyboard);
+
 
     // Timer for preloader
     const timer = setTimeout(() => {
@@ -75,10 +76,11 @@ const handleIOSKeyboard = () => {
     return () => {
       clearTimeout(timer);
       document.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener('resize', adjustForKeyboard);
-      window.removeEventListener('focusin', adjustForKeyboard);
-      window.removeEventListener('focusout', resetPadding);
-      window.removeEventListener("resize", handleIOSKeyboard);
+      if (isIOS) {
+        window.removeEventListener("focusin", handleKeyboardShow);
+        window.removeEventListener("focusout", handleKeyboardHide);
+        window.removeEventListener("resize", handleResize);
+      }
     };
   }, []);
 // Add this to your main component (e.g., App.js or a custom hook)
