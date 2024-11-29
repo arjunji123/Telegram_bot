@@ -38,11 +38,23 @@ function App({ Component, pageProps }) {
     }
         // iOS Keyboard Handling
         const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-
-        const handleKeyboardShow = () => {
-          document.body.style.height = `${window.innerHeight}px`;
-          document.body.style.overflow = "hidden";
-        };
+  // Adjust body height dynamically
+  const adjustBodyHeight = () => {
+    if (isIOS) {
+      document.body.style.height = `${window.innerHeight}px`;
+    }
+  };
+  const handleKeyboardShow = () => {
+    if (isIOS) {
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.tagName === "INPUT") {
+        // Scroll into view if input is hidden
+        setTimeout(() => {
+          activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100); // Delay to allow keyboard animation
+      }
+    }
+  };
     // Prevent drag-to-close while allowing scrollable content
     const handleTouchMove = (e) => {
       if (!e.target.closest("#content")) {
@@ -50,18 +62,18 @@ function App({ Component, pageProps }) {
       }
     };
     const handleKeyboardHide = () => {
-      document.body.style.height = "100vh";
-      document.body.style.overflow = "auto";
-    };
-    const handleResize = () => {
       if (isIOS) {
-        document.body.style.height = `${window.innerHeight}px`;
+        document.body.style.height = "100vh";
       }
     };
+  
+   
     if (isIOS) {
       window.addEventListener("focusin", handleKeyboardShow);
       window.addEventListener("focusout", handleKeyboardHide);
-      window.addEventListener("resize", handleResize);
+      window.addEventListener("resize", adjustBodyHeight);
+          // Initial adjustment on mount
+    adjustBodyHeight();
     }
 
 
@@ -79,7 +91,7 @@ function App({ Component, pageProps }) {
       if (isIOS) {
         window.removeEventListener("focusin", handleKeyboardShow);
         window.removeEventListener("focusout", handleKeyboardHide);
-        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("resize", adjustBodyHeight);
       }
     };
   }, []);
