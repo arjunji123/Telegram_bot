@@ -22,7 +22,7 @@ function Footer() {
       setActivePage('tasks');
     } else if (path === '/friend') {
       setActivePage('friend');
-    } else if (path === '/withdrawal') {
+    } else if (path === '/withdrawal'||'/history') {
       setActivePage('withdrawal');
     }
   }, [location]);
