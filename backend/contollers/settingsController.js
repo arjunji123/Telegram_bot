@@ -102,14 +102,14 @@ exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
   }
   settings.header_logo =
     process.env.BACKEND_URL +
-    "/uploads/" +
+    "uploads/" +
     module_slug +
     "/" +
     settings.header_logo;
 
   settings.qr_code =
     process.env.BACKEND_URL +
-    "/uploads/" +
+    "uploads/" +
     module_slug +
     "/" +
     settings.qr_code;
