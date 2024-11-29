@@ -87,7 +87,7 @@ function Login() {
             className="space-y-4 sm:space-y-6 px-2 sm:px-4" >
             <div className="relative">
               <input
-                type="text"
+                type="number"
                 name="mobile"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
