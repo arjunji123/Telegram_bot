@@ -1123,7 +1123,6 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 ////////////////////
-
 exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
   const userId = req.params.id; // Get user ID from request parameters
   console.log("User ID:", userId); // Log the user ID for debugging
@@ -1133,9 +1132,6 @@ exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
     SELECT
       u.user_name,
       u.email,
-      u.date_created,
-      u.user_type,
-      u.status,
       u.mobile
     FROM
       users u
@@ -1143,52 +1139,57 @@ exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
       u.id = ?
   `;
 
-  // Execute the query to fetch the user data
-  const userResult = await mysqlPool.query(userQuery, [userId]);
-  const user = userResult[0][0]; // Get the user data
+  try {
+    // Execute the query to fetch the user data
+    const userResult = await mysqlPool.query(userQuery, [userId]);
+    const user = userResult[0][0]; // Get the user data
 
-  if (!user) {
-    // Return an error if the user is not found
-    console.log("User not found");
-    return next(new ErrorHandler("User not found", 404));
-  }
+    if (!user) {
+      // Return an error if the user is not found
+      console.log("User not found");
+      return next(new ErrorHandler("User not found", 404));
+    }
 
-  // Log the user data for debugging
-  console.log("User Data:", user);
-
-  // Fetch the user-specific data from the 'user_data' table
-  const userDataQuery = `
-    SELECT
-      ud.referral_code,
-      ud.upi_id,
-      ud.parent_id
-    FROM
-      user_data ud
-    WHERE
-      ud.user_id = ?
-  `;
-
-  // Execute the query to fetch the user-specific data
-  const userDataResult = await mysqlPool.query(userDataQuery, [userId]);
-  const userData = userDataResult[0][0]; // Get the user data
-
-  if (!userData) {
-    // Log if the user data is not found but don't throw an error if not mandatory
-    console.log("User data not found");
-  } else {
     // Log the user data for debugging
-    console.log("User Data from user_data Table:", userData);
-  }
+    console.log("User Data:", user);
 
-  // Render the 'edit' view and pass the necessary data
-  res.render(module_slug + "/edit", {
-    layout: module_layout,
-    title: module_single_title + " " + module_edit_text, // Title for the page
-    userId,
-    user, // Pass the user details to the view
-    userData, // Pass the user-specific data to the view
-    module_slug, // Pass the module_slug to the view
-  });
+    // Fetch the user-specific data from the 'user_data' table
+    const userDataQuery = `
+      SELECT
+        ud.upi_id
+      FROM
+        user_data ud
+      WHERE
+        ud.user_id = ?
+    `;
+
+    // Execute the query to fetch the user-specific data
+    const userDataResult = await mysqlPool.query(userDataQuery, [userId]);
+    const userData = userDataResult[0][0]; // Get the user data
+
+    if (!userData) {
+      // Log if the user data is not found but don't throw an error if not mandatory
+      console.log("User data not found");
+    } else {
+      // Log the user data for debugging
+      console.log("User Data from user_data Table:", userData);
+    }
+
+    // Render the 'edit' view and pass the necessary data
+    res.render(module_slug + "/edit", {
+      layout: module_layout,
+      title: `${module_single_title} ${module_edit_text}`, // Title for the page
+      userId,
+      user, // Pass the user details to the view
+      userData, // Pass the user-specific data to the view
+      module_slug, // Pass the module_slug to the view
+    });
+  } catch (error) {
+    console.error("Error while fetching user data:", error);
+    return next(
+      new ErrorHandler("An error occurred while fetching user data", 500)
+    );
+  }
 });
 
 ////////////////////////////
@@ -1197,58 +1198,75 @@ exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
   const userId = req.params.id; // Get user ID from request parameters
 
   // Extract data from the request body
-  const { user_name, email, status, referral_code, upi_id, parent_id } =
-    req.body;
+  const { user_name, email, upi_id, mobile } = req.body;
 
   // Log incoming data for debugging
   console.log("Incoming Data:", req.body);
 
-  // Check if any required fields are missing or have null values
-
-  // Update data in 'users' table
-  const updateUserQuery = `
-    UPDATE users
-    SET 
-      user_name = ?, 
-      email = ?, 
-      status = ?
-    WHERE 
-      id = ?
-  `;
+  // Ensure required fields are valid
+  if (!user_name || !email) {
+    return next(new ErrorHandler("User name and email are required", 400));
+  }
 
   try {
     // Check if user exists before updating
-    const userUpdateResult = await mysqlPool.query(updateUserQuery, [
-      user_name,
-      email,
-      status,
-      userId,
-    ]);
+    const checkUserQuery = `
+      SELECT * FROM users WHERE id = ?;
+    `;
+    const checkUserResult = await mysqlPool.query(checkUserQuery, [userId]);
 
-    if (userUpdateResult[0].affectedRows === 0) {
+    if (checkUserResult[0].length === 0) {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    // Update data in 'user_data' table
-    const updateUserDataQuery = `
-      UPDATE user_data
-      SET 
-        referral_code = ?, 
-        upi_id = ?, 
-        parent_id = ?
-      WHERE 
-        user_id = ?
+    // Construct the update query for 'users' table
+    let updateUserQuery = `
+      UPDATE users
+      SET user_name = ?, email = ?
     `;
 
+    // Update mobile only if provided
+    if (mobile) {
+      updateUserQuery += `, mobile = ?`;
+    }
+
+    updateUserQuery += ` WHERE id = ?`;
+
+    const updateUserParams = [user_name, email];
+    if (mobile) updateUserParams.push(mobile); // Add mobile if it's provided
+    updateUserParams.push(userId); // Always include the userId
+
+    // Execute the update query for 'users' table
+    const userUpdateResult = await mysqlPool.query(
+      updateUserQuery,
+      updateUserParams
+    );
+
+    if (userUpdateResult[0].affectedRows === 0) {
+      return next(new ErrorHandler("Failed to update user", 500));
+    }
+
+    // Construct the update query for 'user_data' table
+    let updateUserDataQuery = `
+      UPDATE user_data
+      SET upi_id = ?
+    `;
+
+    // Update UPI ID only if provided
+    if (upi_id) {
+      updateUserDataQuery += ` WHERE user_id = ?`;
+    } else {
+      updateUserDataQuery += ` WHERE user_id = ? AND upi_id IS NOT NULL`; // Ensure we only update if a UPI ID exists
+    }
+
+    // Execute the update query for 'user_data' table
     const userDataUpdateResult = await mysqlPool.query(updateUserDataQuery, [
-      referral_code,
       upi_id,
-      parent_id,
       userId,
     ]);
 
     if (userDataUpdateResult[0].affectedRows === 0) {
-      return next(new ErrorHandler("User data not found", 404));
+      return next(new ErrorHandler("Failed to update user data", 500));
     }
 
     // Flash success message
