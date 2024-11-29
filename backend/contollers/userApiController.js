@@ -1455,7 +1455,6 @@ exports.createSellTransaction = async (req, res, next) => {
 exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
   const user_id = req.user.id;
 
-
   try {
     const result = await db.query(
       `SELECT 
@@ -1471,7 +1470,7 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
           CASE 
               WHEN type = 'withdrawal' THEN date_approved 
               ELSE date_entered 
-          END
+          END AS transaction_date -- Using a clean alias for better handling
        FROM usercoin_audit
        WHERE user_id = ? 
          AND type != 'tap' 
@@ -1479,7 +1478,6 @@ exports.getUserHistory = catchAsyncErrors(async (req, res, next) => {
        ORDER BY date_entered DESC`,
       [user_id]
     );
-
     if (result[0].length === 0) {
       return res.status(404).json({
         success: true,
