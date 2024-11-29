@@ -82,7 +82,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
     email: req.body.email,
     mobile: req.body.mobile,
     password: await bcrypt.hash(req.body.password, 10),
-    status: req.body.status,
+   status: "1",
     date_created: date_created,
     user_type: "company", // Set user_type to "company"
     date_modified: date_created,
