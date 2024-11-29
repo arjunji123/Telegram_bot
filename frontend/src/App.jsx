@@ -27,7 +27,6 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-  const keyboardHeight = KeyboardFix (); // Get keyboard height
   useEffect(() => {
     // Initialize Telegram WebApp
     if (window.Telegram && window.Telegram.WebApp) {
@@ -36,18 +35,39 @@ function App({ Component, pageProps }) {
       tg.expand();
         // Prevent drag-to-close
         tg.disableClosingConfirmation();
+        
     }
-
+        // iOS Keyboard Handling
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     // Prevent drag-to-close while allowing scrollable content
     const handleTouchMove = (e) => {
       if (!e.target.closest("#content")) {
         e.preventDefault(); // Block scrolling outside of #content
       }
     };
+    const adjustForKeyboard = () => {
+      const tg = window.Telegram.WebApp;
+      const stableHeight = tg.viewportStableHeight || window.innerHeight; // Get stable height for iOS
+      document.body.style.height = `${stableHeight}px`;
+      document.body.style.overflow = 'hidden'; // Disable scrolling
+    };
+    const resetPadding = () => {
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'auto'; // Allow scrolling when the keyboard is hidden
+    };
 
+ 
+  
+       // Adjust the viewport height on focus and blur events
+       if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        window.addEventListener('focusin', adjustForKeyboard); // Handle input focus
+        window.addEventListener('focusout', resetPadding); // Handle input blur
+        window.addEventListener('resize', adjustForKeyboard); // Handle resize on iPhone
+      }
 
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
 
     // Timer for preloader
     const timer = setTimeout(() => {
@@ -57,37 +77,16 @@ function App({ Component, pageProps }) {
     return () => {
       clearTimeout(timer);
       document.removeEventListener("touchmove", handleTouchMove);
+      if (isIOS) {
+        window.removeEventListener('focusin', adjustForKeyboard);
+      window.removeEventListener('focusout', resetPadding);
+      window.removeEventListener('resize', adjustForKeyboard);
+      }
     };
   }, []);
 // Add this to your main component (e.g., App.js or a custom hook)
 
-useEffect(() => {
-  // Check if it's an iPhone (iOS Device)
-  if (navigator.userAgent.match(/iPhone|iPad|iPod/)) {
-    // Fix for iPhone keyboard behavior
-    const originalBodyStyle = document.body.style;
 
-    // Disable scroll and resize behavior when keyboard opens
-    const preventKeyboardLayoutShift = () => {
-      document.body.style.overflow = 'hidden';
-    };
-
-    const allowScrollAfterKeyboard = () => {
-      document.body.style.overflow = 'auto';
-    };
-
-    // Add event listeners for focus and blur to handle keyboard visibility
-    window.addEventListener('focus', preventKeyboardLayoutShift, true);
-    window.addEventListener('blur', allowScrollAfterKeyboard, true);
-
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener('focus', preventKeyboardLayoutShift, true);
-      window.removeEventListener('blur', allowScrollAfterKeyboard, true);
-      document.body.style = originalBodyStyle; // Reset the body style
-    };
-  }
-}, []);
 
 
   if (isLoading) {
@@ -98,7 +97,6 @@ useEffect(() => {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <KeyboardFix /> 
            <Routes>
      
         <Route
