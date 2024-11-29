@@ -1457,23 +1457,109 @@ exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+// exports.renderTreeView = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+
+//     const query = `
+//       SELECT 
+//         user_data.id AS user_data_id, 
+//         user_data.user_id, 
+//         users.user_name, 
+//         user_data.parent_id, 
+//         user_data.leftchild_id, 
+//         user_data.rightchild_id,
+//         user_data.referral_by,
+//         referrer.user_name AS referrer_name
+//       FROM user_data
+//       JOIN users ON user_data.user_id = users.id
+//       LEFT JOIN users AS referrer ON CONCAT('UNITRADE', referrer.id) = user_data.referral_by;
+//     `;
+
+//     const [rows] = await mysqlPool.query(query);
+//     if (!rows || rows.length === 0) {
+//       return res.status(404).send("No user data found.");
+//     }
+
+//     const userTree = buildUserTree(rows);
+//     const filteredTree = filterSubTree(userTree, userId , 5);
+
+//     res.render("tree_view", {
+//       layout: module_layout,
+//       title: module_single_title,
+//       userTree: JSON.stringify(filteredTree),
+//     });
+//   } catch (error) {
+//     console.error("Error rendering user tree view:", error);
+//     res.status(500).send("Error rendering user tree view");
+//   }
+// };
+
+// function buildUserTree(users) {
+//   const userMap = {};
+
+//   // Create a map of users
+//   users.forEach((user) => {
+//     userMap[user.user_id] = { ...user, children: [] };
+//   });
+
+//   // Build the tree structure
+//   users.forEach((user) => {
+//     if (user.parent_id === null) {
+//       userMap[user.user_id].isRoot = true;
+//     } else {
+//       const parent = userMap[user.parent_id];
+//       if (parent) {
+//         const relationship =
+//           user.user_id === parent.leftchild_id ? "left" : "right";
+//         userMap[user.user_id].relationship = relationship; // Add relationship info
+//         parent.children.push(userMap[user.user_id]);
+//       } else {
+//         console.warn(
+//           `Parent with ID ${user.parent_id} not found for user ${user.user_id}`
+//         );
+//       }
+//     }
+//   });
+
+//   return Object.values(userMap).filter((user) => user.isRoot);
+// }
+
+// function filterSubTree(userTree, userId) {
+//   let targetNode = null;
+
+//   function findNode(node) {
+//     if (node.user_id == userId) {
+//       targetNode = node;
+//       return true;
+//     }
+//     for (const child of node.children) {
+//       if (findNode(child)) return true;
+//     }
+//     return false;
+//   }
+
+//   userTree.forEach((root) => findNode(root));
+//   return targetNode ? [targetNode] : [];
+// }
+
+
+
 exports.renderTreeView = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const query = `
       SELECT 
-        user_data.id AS user_data_id, 
-        user_data.user_id, 
+        users.id AS id, 
+        users.id AS unique_id, 
         users.user_name, 
-        user_data.parent_id, 
-        user_data.leftchild_id, 
-        user_data.rightchild_id,
-        user_data.referral_by,
+        users.parent_id, 
+        users.leftchild_id, 
+        users.rightchild_id,
+        users.referral_by,
         referrer.user_name AS referrer_name
-      FROM user_data
-      JOIN users ON user_data.user_id = users.id
-      LEFT JOIN users AS referrer ON CONCAT('UNITRADE', referrer.id) = user_data.referral_by;
+      FROM users
+      LEFT JOIN users AS referrer ON CONCAT('UNITRADE', referrer.id) = users.referral_by;
     `;
 
     const [rows] = await mysqlPool.query(query);
@@ -1481,10 +1567,13 @@ exports.renderTreeView = async (req, res) => {
       return res.status(404).send("No user data found.");
     }
 
+    // Build the entire user tree
     const userTree = buildUserTree(rows);
-    const filteredTree = filterSubTree(userTree, userId , 5);
 
-    res.render("tree_view", {
+    // Filter the tree to 5 levels starting from the selected user
+    const filteredTree = filterSubTree(userTree, userId, 5);
+
+    res.render('tree_view', {
       layout: module_layout,
       title: module_single_title,
       userTree: JSON.stringify(filteredTree),
@@ -1499,37 +1588,34 @@ function buildUserTree(users) {
   const userMap = {};
 
   // Create a map of users
-  users.forEach((user) => {
-    userMap[user.user_id] = { ...user, children: [] };
+  users.forEach(user => {
+    userMap[user.id] = { ...user, children: [] };
   });
 
   // Build the tree structure
-  users.forEach((user) => {
+  users.forEach(user => {
     if (user.parent_id === null) {
-      userMap[user.user_id].isRoot = true;
+      userMap[user.id].isRoot = true;
     } else {
       const parent = userMap[user.parent_id];
       if (parent) {
-        const relationship =
-          user.user_id === parent.leftchild_id ? "left" : "right";
-        userMap[user.user_id].relationship = relationship; // Add relationship info
-        parent.children.push(userMap[user.user_id]);
+        const relationship = user.id === parent.leftchild_id ? "left" : "right";
+        userMap[user.id].relationship = relationship; // Add relationship info
+        parent.children.push(userMap[user.id]);
       } else {
-        console.warn(
-          `Parent with ID ${user.parent_id} not found for user ${user.user_id}`
-        );
+        console.warn(`Parent with ID ${user.parent_id} not found for user ${user.id}`);
       }
     }
   });
 
-  return Object.values(userMap).filter((user) => user.isRoot);
+  return Object.values(userMap).filter(user => user.isRoot);
 }
 
-function filterSubTree(userTree, userId) {
+function filterSubTree(userTree, userId, maxLevel) {
   let targetNode = null;
 
   function findNode(node) {
-    if (node.user_id == userId) {
+    if (node.id == userId) {
       targetNode = node;
       return true;
     }
@@ -1539,9 +1625,26 @@ function filterSubTree(userTree, userId) {
     return false;
   }
 
-  userTree.forEach((root) => findNode(root));
-  return targetNode ? [targetNode] : [];
+  userTree.forEach(root => findNode(root));
+
+  if (!targetNode) return [];
+
+  // Filter subtree to 5 levels
+  function filterLevels(node, currentLevel = 1) {
+    if (currentLevel > maxLevel) {
+      return null;
+    }
+    return {
+      ...node,
+      children: node.children
+        .map(child => filterLevels(child, currentLevel + 1))
+        .filter(Boolean), // Remove null values
+    };
+  }
+
+  return [filterLevels(targetNode)];
 }
+
 
 // function filterSubTree(userTree, userId, maxLevel = 5) {
 //   let targetNode = null;
