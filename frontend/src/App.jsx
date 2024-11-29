@@ -27,7 +27,6 @@ function App({ Component, pageProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-  const keyboardHeight = KeyboardFix (); // Get keyboard height
   useEffect(() => {
     // Initialize Telegram WebApp
     if (window.Telegram && window.Telegram.WebApp) {
@@ -44,11 +43,20 @@ function App({ Component, pageProps }) {
         e.preventDefault(); // Block scrolling outside of #content
       }
     };
-
+    const adjustForKeyboard = () => {
+      const viewportHeight = window.innerHeight;
+      tg.setViewportHeight(viewportHeight);
+      document.body.style.height = `${viewportHeight}px`;
+  };
+  const resetPadding = () => {
+    document.body.style.paddingBottom = '0px';
+};
 
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-
+    window.addEventListener('resize', adjustForKeyboard);
+    window.addEventListener('focusin', adjustForKeyboard); // Handle input focus
+    window.addEventListener('focusout', resetPadding);    // Handle input blur
     // Timer for preloader
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -57,37 +65,14 @@ function App({ Component, pageProps }) {
     return () => {
       clearTimeout(timer);
       document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener('resize', adjustForKeyboard);
+      window.removeEventListener('focusin', adjustForKeyboard);
+      window.removeEventListener('focusout', resetPadding);
     };
   }, []);
 // Add this to your main component (e.g., App.js or a custom hook)
 
-useEffect(() => {
-  // Check if it's an iPhone (iOS Device)
-  if (navigator.userAgent.match(/iPhone|iPad|iPod/)) {
-    // Fix for iPhone keyboard behavior
-    const originalBodyStyle = document.body.style;
 
-    // Disable scroll and resize behavior when keyboard opens
-    const preventKeyboardLayoutShift = () => {
-      document.body.style.overflow = 'hidden';
-    };
-
-    const allowScrollAfterKeyboard = () => {
-      document.body.style.overflow = 'auto';
-    };
-
-    // Add event listeners for focus and blur to handle keyboard visibility
-    window.addEventListener('focus', preventKeyboardLayoutShift, true);
-    window.addEventListener('blur', allowScrollAfterKeyboard, true);
-
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener('focus', preventKeyboardLayoutShift, true);
-      window.removeEventListener('blur', allowScrollAfterKeyboard, true);
-      document.body.style = originalBodyStyle; // Reset the body style
-    };
-  }
-}, []);
 
 
   if (isLoading) {
@@ -98,7 +83,6 @@ useEffect(() => {
       {" "}
       <BrowserRouter>
         <AuthListener />
-        <KeyboardFix /> 
            <Routes>
      
         <Route
