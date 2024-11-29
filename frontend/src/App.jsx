@@ -40,51 +40,9 @@ function App({ Component, pageProps }) {
     // iOS Keyboard Handling
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     // Prevent drag-to-close while allowing scrollable content
-    // const handleTouchMove = (e) => {
-    //   if (!e.target.closest("#content")) {
-    //     e.preventDefault(); // Block scrolling outside of #content
-    //   }
-    // };
-    const handleTouchStart = (e) => {
-      const content = document.getElementById("content");
-    
-      if (!content) return;
-    
-      // Store the initial touch position to handle scroll direction properly
-      if (content.contains(e.target)) {
-        // Only start tracking touch within the content area
-        content.isTouching = true;
-      } else {
-        // Prevent default behavior to avoid Telegram's drag-to-close
-        e.preventDefault();
-      }
-    };
-
     const handleTouchMove = (e) => {
-      const content = document.getElementById("content");
-    
-      if (!content || !content.isTouching) return;
-    
-      if (content.contains(e.target)) {
-        // Allow scrolling inside the #content
-        const { scrollTop, scrollHeight, clientHeight } = content;
-        
-        const atTop = scrollTop === 0;
-        const atBottom = scrollTop + clientHeight === scrollHeight;
-    
-        // Prevent overscroll
-        if ((atTop && e.touches[0].clientY > e.touches[0].pageY) || (atBottom && e.touches[0].clientY < e.touches[0].pageY)) {
-          e.preventDefault(); // Prevent overscroll within the content
-        }
-      } else {
-        // Prevent default behavior outside the #content to stop drag-to-close
-        e.preventDefault();
-      }
-    };
-    const handleTouchEnd = (e) => {
-      const content = document.getElementById("content");
-      if (content) {
-        content.isTouching = false; // End touch tracking
+      if (!e.target.closest("#content")) {
+        e.preventDefault(); // Block scrolling outside of #content
       }
     };
     const adjustForKeyboard = () => {
@@ -107,10 +65,8 @@ function App({ Component, pageProps }) {
       window.addEventListener('resize', adjustForKeyboard); // Handle resize on iPhone
     }
 
-    document.addEventListener("touchstart", handleTouchStart, { passive: false });
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchend", handleTouchEnd, { passive: false });
 
 
     // Timer for preloader
