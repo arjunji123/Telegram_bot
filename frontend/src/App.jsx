@@ -35,6 +35,8 @@ function App({ Component, pageProps }) {
       tg.expand();
         // Prevent drag-to-close
         tg.disableClosingConfirmation();
+        const stableHeight = tg.viewportStableHeight || window.innerHeight;
+        document.body.style.height = `${stableHeight}px`;
     }
         // iOS Keyboard Handling
         const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
