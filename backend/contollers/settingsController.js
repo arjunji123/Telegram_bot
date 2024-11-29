@@ -107,6 +107,12 @@ exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
     "/" +
     settings.header_logo;
 
+  settings.qr_code =
+    process.env.BACKEND_URL +
+    "/uploads/" +
+    module_slug +
+    "/" +
+    settings.qr_code;
   res.status(200).json({
     success: true,
     settings,
