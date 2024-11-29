@@ -49,6 +49,7 @@ function App({ Component, pageProps }) {
         const { height } = window.visualViewport;
         document.body.style.height = `${height}px`;
         document.documentElement.style.height = `${height}px`;
+        document.body.scrollTop = 0; // Prevent unwanted scrolling
       }
     };
     const resetLayoutAfterKeyboard = () => {
