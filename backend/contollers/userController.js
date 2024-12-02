@@ -1668,4 +1668,32 @@ exports.markNotificationAsRead = catchAsyncErrors(async (req, res, next) => {
     next(error); // Pass error to global error handler
   }
 });
+exports.markAllNotificationsAsRead = catchAsyncErrors(
+  async (req, res, next) => {
+    try {
+      // Update all notifications to 'read'
+      const updateQuery = `
+      UPDATE notifications 
+      SET message_status = 'read' 
+      WHERE message_status != 'read'
+    `;
+
+      const [rows] = await db.query(updateQuery);
+
+      if (rows.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No unread notifications found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "All notifications marked as read",
+      });
+    } catch (error) {
+      next(error); // Pass error to global error handler
+    }
+  }
+);
 
