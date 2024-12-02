@@ -77,28 +77,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
   };
 
   // User Data Model for insertion
-  const UserDataModel = {
-    async create(userData) {
-      const query = `
-        INSERT INTO user_data (user_id, upi_id, referral_by, referral_code, parent_id, leftchild_id, rightchild_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`;
-      const result = await db.query(query, [
-        userData.user_id,
-        userData.upi_id,
-        userData.referral_by,
-        userData.referral_code,
-        userData.parent_id,
-        userData.leftchild_id,
-        userData.rightchild_id,
-      ]);
-      return result;
-    },
-    async updateData(table, data, condition) {
-      const query = `UPDATE ${table} SET ? WHERE ?`;
-      const result = await db.query(query, [data, condition]);
-      return result;
-    },
-  };
 
   // Function to check if a user has both children
   async function hasBothChildren(userId) {
@@ -115,7 +93,8 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       const userQuery = `SELECT user_id as parent_id FROM user_data WHERE referral_code = ?`;
       const [userRows] = await db.query(userQuery, [referralCode]);
       const currentUser = userRows[0];
-if (currentUser) {
+
+      if (currentUser) {
         // Check if the current parent already has both children
         if (await hasBothChildren(currentUser.parent_id)) {
           console.log("Referred user's parent already has both children.");
@@ -227,6 +206,29 @@ if (currentUser) {
     referralBy = referralCode; // Set the referralBy to the referral_code of user_id = 2
   }
 
+  const UserDataModel = {
+    async create(userData) {
+      const query = `
+        INSERT INTO user_data (user_id, upi_id, referral_by, referral_code, parent_id, leftchild_id, rightchild_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      const result = await db.query(query, [
+        userData.user_id,
+        userData.upi_id,
+        userData.referral_by,
+        userData.referral_code,
+        userData.parent_id,
+        userData.leftchild_id,
+        userData.rightchild_id,
+      ]);
+      return result;
+    },
+    async updateData(table, data, condition) {
+      const query = `UPDATE ${table} SET ? WHERE ?`;
+      const result = await db.query(query, [data, condition]);
+      return result;
+    },
+  };
+
   try {
     // Insert user data into the users table
     const user = await QueryModel.saveData("users", insertData);
@@ -296,7 +298,6 @@ if (currentUser) {
     return res.status(500).json({ success: false, error: error.message });
   }
 });
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Login user
