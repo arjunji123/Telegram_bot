@@ -115,14 +115,18 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       const userQuery = `SELECT user_id as parent_id FROM user_data WHERE referral_code = ?`;
       const [userRows] = await db.query(userQuery, [referralCode]);
       const currentUser = userRows[0];
-
-      if (currentUser) {
-        // Attempt to find an available spot in the referred user's subtree
-        const result = await findAvailableSpotInSubtree(currentUser.parent_id);
-        if (result) {
-          return result;
+if (currentUser) {
+        // Check if the current parent already has both children
+        if (await hasBothChildren(currentUser.parent_id)) {
+          console.log("Referred user's parent already has both children.");
+        } else {
+          // Attempt to find an available spot in the referred user's subtree
+          const result = await findAvailableSpotInSubtree(currentUser.parent_id);
+          if (result) {
+            return result;
+          }
+          console.log("Referred user's subtree is fully occupied.");
         }
-        console.log("Referred user's subtree is fully occupied.");
       } else {
         console.log("No user found for the given referral code.");
       }
