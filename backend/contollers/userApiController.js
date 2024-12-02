@@ -778,6 +778,79 @@ exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+// exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
+//   try {
+//     // Fetch the user's ID from the request
+//     const userId = req.user.id;
+
+//     // Check if userId is undefined or null
+//     if (!userId) {
+//       return next(new ErrorHandler("User ID is missing", 400));
+//     }
+
+//     // Fetch user details from the 'users' table
+//     const userDetailsQuery = await db.query(
+//       "SELECT user_name, email, mobile FROM users WHERE id = ?",
+//       [userId]
+//     );
+
+//     if (userDetailsQuery[0].length === 0) {
+//       return next(new ErrorHandler("User not found", 404));
+//     }
+
+//     const user = userDetailsQuery[0][0]; // Extract user details
+
+//     // Fetch additional details from the 'user_data' table
+//     const userDataQuery = await db.query(
+//       "SELECT coins, pending_coin, upi_id, user_photo, referral_code FROM user_data WHERE user_id = ?",
+//       [userId]
+//     );
+
+//     if (userDataQuery[0].length === 0) {
+//       return next(new ErrorHandler("User data not found", 404));
+//     }
+
+//     const userData = userDataQuery[0][0]; // Extract user_data details
+//     const referralCode = userData.referral_code; // Get the referral code of the logged-in user
+
+//     // Count how many users have used this referral code
+//     const referralCountQuery = await db.query(
+//       "SELECT COUNT(*) AS referral_count FROM user_data WHERE referral_by = ?",
+//       [referralCode]
+//     );
+
+//     const referralCount = referralCountQuery[0][0].referral_count || 0; // Extract referral count
+
+//     // Construct the response object with all the necessary details
+//     const userProfile = {
+//       user_name: user.user_name,
+//       email: user.email,
+//       mobile: user.mobile,
+//       coins: userData.coins || 0, // If coins are null, set to 0
+//       pending_coin: userData.pending_coin || 0, // If pending coins are null, set to 0
+//       upi_id: userData.upi_id || "", // If upi_id is null, set to an empty string
+//       user_photo: userData.user_photo
+//         ? `${process.env.BACKEND_URL}uploads/${userData.user_photo}`
+//         : null, // Full URL for user photo or null if not set
+//       referral_count: referralCount, // Include referral count in the response
+//       referral_code: userData.referral_code,
+//     };
+//     console.log(userProfile);
+
+//     // Send the response with the user's profile
+//     res.status(200).json({
+//       success: true,
+//       data: userProfile,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching user profile:", error);
+//     return next(
+//       new ErrorHandler("An error occurred while fetching user profile", 500)
+//     );
+//   }
+// });
+
+
 exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
   try {
     // Fetch the user's ID from the request
@@ -813,9 +886,12 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     const userData = userDataQuery[0][0]; // Extract user_data details
     const referralCode = userData.referral_code; // Get the referral code of the logged-in user
 
-    // Count how many users have used this referral code
+    // Count how many active users have used this referral code
     const referralCountQuery = await db.query(
-      "SELECT COUNT(*) AS referral_count FROM user_data WHERE referral_by = ?",
+      `SELECT COUNT(*) AS referral_count 
+       FROM user_data 
+       JOIN users ON user_data.user_id = users.id 
+       WHERE user_data.referral_by = ? AND users.status = 'active'`,
       [referralCode]
     );
 
@@ -849,6 +925,8 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+
+
 ////////////////////////////////////
 
 exports.getCompanyDetailApi = catchAsyncErrors(async (req, res, next) => {
