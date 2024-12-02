@@ -42,11 +42,11 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
 
   const dateCreated = new Date().toISOString().slice(0, 19).replace("T", " ");
   if (req.file) req.body.image = req.file.filename;
+
   // Check if email, mobile, or UPI ID already exists
   const { email, mobile } = req.body;
   const existingUserQuery = `
-  SELECT email, mobile FROM users WHERE email = ? OR mobile = ?
-`;
+  SELECT email, mobile FROM users WHERE email = ? OR mobile = ?`;
   const [existingUserRows] = await db.query(existingUserQuery, [email, mobile]);
 
   if (existingUserRows.length > 0) {
@@ -116,32 +116,16 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       const [userRows] = await db.query(userQuery, [referralCode]);
       const currentUser = userRows[0];
 
-      // if (currentUser) {
-      //   // Attempt to find an available spot in the referred user's subtree
-      //   const result = await findAvailableSpotInSubtree(currentUser.parent_id);
-      //   if (result) {
-      //     return result;
-      //   }
-      //   console.log("Referred user's subtree is fully occupied.");
-      // } else {
-      //   console.log("No user found for the given referral code.");
-      // }
       if (currentUser) {
-            // Check if the current parent already has both children
-            if (await hasBothChildren(currentUser.parent_id)) {
-                console.log("Referred user's parent already has both children.");
-            } else {
-                // Attempt to find an available spot in the referred user's subtree
-                const result = await findAvailableSpotInSubtree(currentUser.parent_id);
-                if (result) {
-                    return result;
-                }
-                console.log("Referred user's subtree is fully occupied.");
-            }
-        } else {
-            console.log("No user found for the given referral code.");
+        // Check if the referred user's subtree has both child positions filled
+        const result = await findAvailableSpotInSubtree(currentUser.parent_id);
+        if (result) {
+          return result;
         }
-      
+        console.log("Referred user's subtree is fully occupied.");
+      } else {
+        console.log("No user found for the given referral code.");
+      }
     }
 
     // If referral is not provided, or the referred user's subtree is fully occupied, find the next available parent
@@ -203,9 +187,8 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
 
     return null; // No available spot found
   }
-  // Main logic for user registration
 
-  let referralBy = req.body.referral_by; // Use 'let' to allow reassignment
+  let referralBy = req.body.referral_by;
   let parentId = null;
   let position = null;
 
@@ -222,19 +205,10 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       }
     }
   } else {
-    // If referralBy is not provided, fetch the referral_code of the user where user_id = 2
-    // const defaultUser = await db.query(
-    //   "SELECT referral_code FROM user_data WHERE user_id = ?",
-    //   [2]
-    // );
-    const defaultUser = await db.query(`
-  SELECT users.id, user_data.referral_code 
-  FROM users 
-  JOIN user_data 
-  ON users.id = user_data.user_id 
-  WHERE users.user_type = 'user' AND user_data.parent_id IS NULL;
-`);
-
+    const defaultUser = await db.query(
+      "SELECT referral_code FROM user_data WHERE user_id = ?",
+      [2]
+    );
     const referralCode = defaultUser[0]?.[0]?.referral_code || null;
     console.log(defaultUser);
 
@@ -244,7 +218,7 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       position = nextParentInfo.position;
     }
 
-    referralBy = referralCode; // Set the referralBy to the referral_code of user_id = 2
+    referralBy = referralCode;
   }
 
   try {
@@ -253,7 +227,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     const userId = user.id;
     const generatedReferralCode = generateReferralCode(userId);
 
-    // Prepare additional data for the user_data table
     const insertData2 = {
       user_id: userId,
       upi_id: req.body.upi_id,
@@ -264,7 +237,6 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
       rightchild_id: null,
     };
 
-    // Insert additional user data into user_data table
     const newUserData = await UserDataModel.create(insertData2);
     if (!newUserData) {
       return res
@@ -272,50 +244,44 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
         .json({ success: false, error: "Error inserting user data" });
     }
 
-    // Update parent record with the new child ID if parentId and position are set
     if (parentId && position) {
       const updateData = { [position]: userId };
       await UserDataModel.updateData("user_data", updateData, {
         user_id: parentId,
       });
     }
-    // Insert a notification into the notifications table
+
     const notificationMessage = `${req.body.user_name} successfully registered.`;
     const notificationQuery = `
     INSERT INTO notifications (user_id, user_name, activity, message, message_status, date_created)
     VALUES (?, ?, ?, ?, ?, ?)`;
 
     await db.query(notificationQuery, [
-      userId, // user_id
-      req.body.user_name, // user_name
-      "register", // activity
-      notificationMessage, // message
-      "unread", // message_status
-      dateCreated, // date_created
+      userId,
+      req.body.user_name,
+      "register",
+      notificationMessage,
+      "unread",
+      dateCreated,
     ]);
-    // Fetch the newly inserted user to generate the token
+
     const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
       userId,
     ]);
-    const newUser = userDetail[0][0];
+    const newUser = userDetail[0];
 
-    // Generate token for the new user
-    const token = User.generateToken(newUser.id);
-
-    res.status(201).json({
+    return res.status(200).json({
       success: true,
-      token,
-      user: {
-        ...newUser,
-        referral_by: referralBy, // Include referral_by in the response (it will have the referral_code of user_id = 2)
-      },
+      message: "User registered successfully.",
+      user: newUser,
     });
-    return;
   } catch (error) {
-    console.error("Error during user registration:", error);
-    return res.status(500).json({ success: false, error: error.message });
+    return res
+      .status(500)
+      .json({ success: false, error: "Error registering user" });
   }
 });
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Login user
