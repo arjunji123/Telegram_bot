@@ -117,110 +117,6 @@ exports.showLogin = catchAsyncErrors(async (req, res, next) => {
   res.render("users/login", { message });
 });
 
-// Login user
-// exports.loginUser = catchAsyncErrors(async (req, res, next) => {
-//   const { email, password } = req.body;
-
-//   // Checking if user email and password are provided
-//   if (!email || !password) {
-//     req.flash("msg_response", {
-//       status: 400,
-//       message: "Please enter email and password",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-
-//   // Find user by email
-//   const userData = await db.query(
-//     "SELECT * FROM users WHERE email = ? limit 1",
-//     [email]
-//   );
-
-//   const user = userData[0][0];
-
-//   // If user not found
-//   if (!user) {
-//     req.flash("msg_response", {
-//       status: 400,
-//       message: "Invalid email or password",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-//   // Check if user_type is either "admin" or "company"
-//   if (user.user_type !== "admin" && user.user_type !== "company") {
-//     req.flash("msg_response", {
-//       status: 403,
-//       message: "You do not have permission to access this panel",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-
-//   // Compare passwords
-//   const isPasswordMatched = await User.comparePasswords(
-//     password,
-//     user.password
-//   );
-
-//   if (!isPasswordMatched) {
-//     req.flash("msg_response", {
-//       status: 400,
-//       message: "Invalid email or password",
-//     });
-//     return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-//   req.session.user = user;
-//   localStorage.setItem("user_type_n", user.user_type);
-//   const token = User.generateToken(user.id); // Adjust as per your user object structure
-//   // console.log("aaaa", token);
-
-//   // Send token and then redirect
-//   sendToken(user, token, 201, res);
-
-//   req.flash("msg_response", { status: 200, message: "Successfully LoggedIn" });
-
-//   // Redirect to the dashboard after sending the token
-//   return res.redirect(`/${process.env.ADMIN_PREFIX}/dashboard`);
-// });
-
-// exports.logout = catchAsyncErrors(async (req, res, next) => {
-//   res.cookie("token", null, {
-//     expires: new Date(Date.now()),
-//     httpOnly: true,
-//   });
-//   // Check if req.session exists before trying to destroy it
-//   if (res.session) {
-//     res.session.destroy((err) => {
-//       if (err) {
-//         return next(err); // Handle the error if necessary
-//       }
-//       res.clearCookie("connect.sid");
-//       res.clearCookie("token"); // Clear the session ID cookie
-//       localStorage.removeItem("user_type_n");
-
-//       res.flash("msg_response", {
-//         status: 200,
-//         message: "Logout Successfully",
-//       });
-//       res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//     });
-//   } else {
-//     // Handle the case where req.session is undefined
-//     res.clearCookie("connect.sid");
-//     if (typeof window !== "undefined" && window.localStorage) {
-//       localStorage.removeItem("user_type_n"); // Clear specific data
-//       // or
-//       localStorage.clear(); // Clear all data
-//       console.log("User data removed from localStorage");
-//     }
-//     res.clearCookie("token");
-//     req.flash("msg_response", {
-//       status: 200,
-//       message: "Session already cleared or not found",
-//     });
-//     res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
-//   }
-// });
-
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -858,7 +754,7 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   }
 });
 ////////////////////////////////////////////
-///////////////////////////////////////////
+
 exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
   const userId = req.body.userId;
   const newStatus = req.body.status;
@@ -1123,6 +1019,7 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 ////////////////////
+// Controller to handle editing user data
 exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
   const userId = req.params.id; // Get user ID from request parameters
   console.log("User ID:", userId); // Log the user ID for debugging
@@ -1145,15 +1042,13 @@ exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
     const user = userResult[0][0]; // Get the user data
 
     if (!user) {
-      // Return an error if the user is not found
       console.log("User not found");
       return next(new ErrorHandler("User not found", 404));
     }
 
-    // Log the user data for debugging
     console.log("User Data:", user);
 
-    // Fetch the user-specific data from the 'user_data' table
+    // Fetch user-specific data from the 'user_data' table
     const userDataQuery = `
       SELECT
         ud.upi_id
@@ -1163,26 +1058,22 @@ exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
         ud.user_id = ?
     `;
 
-    // Execute the query to fetch the user-specific data
     const userDataResult = await mysqlPool.query(userDataQuery, [userId]);
-    const userData = userDataResult[0][0]; // Get the user data
+    const userData = userDataResult[0][0]; // Get the user-specific data
 
     if (!userData) {
-      // Log if the user data is not found but don't throw an error if not mandatory
       console.log("User data not found");
     } else {
-      // Log the user data for debugging
       console.log("User Data from user_data Table:", userData);
     }
 
-    // Render the 'edit' view and pass the necessary data
     res.render(module_slug + "/edit", {
       layout: module_layout,
-      title: `${module_single_title} ${module_edit_text}`, // Title for the page
+      title: `${module_single_title} ${module_edit_text}`,
       userId,
-      user, // Pass the user details to the view
-      userData, // Pass the user-specific data to the view
-      module_slug, // Pass the module_slug to the view
+      user,
+      userData,
+      module_slug,
     });
   } catch (error) {
     console.error("Error while fetching user data:", error);
@@ -1192,51 +1083,38 @@ exports.editUserForm = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-////////////////////////////
-
+// Controller to handle updating user data
 exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
   const userId = req.params.id; // Get user ID from request parameters
 
   // Extract data from the request body
   const { user_name, email, upi_id, mobile } = req.body;
-
-  // Log incoming data for debugging
   console.log("Incoming Data:", req.body);
 
-  // Ensure required fields are valid
   if (!user_name || !email) {
     return next(new ErrorHandler("User name and email are required", 400));
   }
 
   try {
-    // Check if user exists before updating
-    const checkUserQuery = `
-      SELECT * FROM users WHERE id = ?;
-    `;
+    // Check if user exists
+    const checkUserQuery = `SELECT * FROM users WHERE id = ?;`;
     const checkUserResult = await mysqlPool.query(checkUserQuery, [userId]);
 
     if (checkUserResult[0].length === 0) {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    // Construct the update query for 'users' table
-    let updateUserQuery = `
-      UPDATE users
-      SET user_name = ?, email = ?
-    `;
+    // Update the 'users' table
+    let updateUserQuery = `UPDATE users SET user_name = ?, email = ?`;
+    const updateUserParams = [user_name, email];
 
-    // Update mobile only if provided
     if (mobile) {
       updateUserQuery += `, mobile = ?`;
+      updateUserParams.push(mobile);
     }
-
     updateUserQuery += ` WHERE id = ?`;
+    updateUserParams.push(userId);
 
-    const updateUserParams = [user_name, email];
-    if (mobile) updateUserParams.push(mobile); // Add mobile if it's provided
-    updateUserParams.push(userId); // Always include the userId
-
-    // Execute the update query for 'users' table
     const userUpdateResult = await mysqlPool.query(
       updateUserQuery,
       updateUserParams
@@ -1246,36 +1124,22 @@ exports.updateUserRecord = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Failed to update user", 500));
     }
 
-    // Construct the update query for 'user_data' table
-    let updateUserDataQuery = `
-      UPDATE user_data
-      SET upi_id = ?
-    `;
-
-    // Update UPI ID only if provided
-    if (upi_id) {
-      updateUserDataQuery += ` WHERE user_id = ?`;
-    } else {
-      updateUserDataQuery += ` WHERE user_id = ? AND upi_id IS NOT NULL`; // Ensure we only update if a UPI ID exists
-    }
-
-    // Execute the update query for 'user_data' table
+    // Update the 'user_data' table
+    const updateUserDataQuery = `UPDATE user_data SET upi_id = ? WHERE user_id = ?`;
     const userDataUpdateResult = await mysqlPool.query(updateUserDataQuery, [
       upi_id,
       userId,
     ]);
 
     if (userDataUpdateResult[0].affectedRows === 0) {
-      return next(new ErrorHandler("Failed to update user data", 500));
+      console.log("User data not updated or not required to update");
     }
 
-    // Flash success message
     req.flash("msg_response", {
       status: 200,
       message: "Successfully updated user details and user data.",
     });
 
-    // Redirect to the users listing page (index page)
     res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
   } catch (error) {
     console.error("Error while updating user:", error);
