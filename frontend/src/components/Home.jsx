@@ -11,6 +11,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import Loader from '../components/Loader';
 
+
+
+
 function Home() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -19,11 +22,14 @@ function Home() {
   const pendingCoin = apiData?.coin?.data || null;
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
+
   const handleNavigate = () => {
     navigate('/Profile');
   };
+
   useEffect(() => {
-    //   //   // Fetch user and coin data on component mount
+    // Fetch user and coin data on component mount
     const fetchData = async () => {
       try {
         await dispatch(fetchCoinData());
@@ -43,6 +49,20 @@ function Home() {
       return;
     }
 
+    // Trigger animation effect and sound/vibration
+    setIsAnimating(true);
+
+    // Play sound for 0.5 seconds
+    const vibrationSound = new Audio('src/assets/sound/mobile-phone-vibration-77849.mp3');
+    vibrationSound.play();
+    vibrationSound.currentTime = 0; // Reset to start
+    setTimeout(() => vibrationSound.pause(), 500); // Stop sound after 0.5s
+
+    // Trigger phone vibration (vibrate for 500ms)
+    if (navigator.vibrate) {
+      navigator.vibrate(500); // Vibrate for 500ms
+    }
+
     // Dispatch coin transfer action
     dispatch(transferCoins())
       .then(() => {
@@ -54,8 +74,10 @@ function Home() {
           rotate: Math.random() * 360,
         }));
         setCoins(newCoins);
+
         // Remove coins after animation
         setTimeout(() => setCoins([]), 1000);
+
         // Re-fetch data to update userData and pendingCoin without hard refresh
         dispatch(fetchCoinData());
         dispatch(fetchMeData());
@@ -63,14 +85,16 @@ function Home() {
       .catch((error) => {
         // Show error message if transfer fails
         toast.error("Coin transfer failed.");
+      })
+      .finally(() => {
+        // Reset animation after it's completed
+        setTimeout(() => setIsAnimating(false), 1000); // Duration of the animation
       });
   };
-  // Show loader until loading state is false
-  // if (loading) {
-  //   return <Loader />;
-  // }
+
+
   return (
-    <div className="bg-white flex justify-center font-Inter h-screen w-full overflow-hidden relative">
+    <div className="bg-black flex justify-center items-center font-Inter min-h-screen w-full overflow-hidden relative">
       <ToastContainer
         position="top-right"
         autoClose={500}
@@ -82,90 +106,119 @@ function Home() {
       />
       {loading ? (
         <Loader />
-      ) :
-        <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative ">
-          <div className="flex-grow relative z-0 top-10">
-            <div className="px-4 py-6 space-y-6 ">
-              {/* <Logo /> */}
-              <div onClick={handleNavigate} className="flex justify-center space-x-1 cursor-pointer">
-                <BsPersonCircle size={28} className="mt-1" />
-                <p className="text-2xl font-extrabold capitalize font-Inter">
-                  {userData ? userData.user_name : ""}
-                </p>
-              </div>
-
-              {/* User Balance */}
-              <div className="flex justify-center space-x-1 text-3xl font-extrabold font-Inter">
-                <p>U</p>
-                <p>{userData ? userData.coins : ""}</p>
-              </div>
-
-              {/* Coin Button and Image */}
-              <div className="coin-animation-container my-6 relative">
-                {/* Button with conditional styles for disabled state */}
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`coin-btn ${pendingCoin?.pending_coin === 0 ? 'opacity-50 cursor-not-allowed' : ''}`} // Disable on no coins
-                  onClick={pendingCoin?.pending_coin === 0 ? null : handleClick} // Disable click event
-                >
-                  <img
-                    src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE"
-                    alt="Main Character"
-                    className={`character-img ${pendingCoin?.pending_coin === 0 ? 'opacity-70 ' : 'opacity-100'}`} // Reduce opacity if no coins
-                  />
-                </motion.div>
-
-                {/* Hamster-style Coin Animation */}
-                <div className="coins-container flex justify-center items-center">
-                  <AnimatePresence>
-                    {coins.map((coin) => (
-                      <motion.div
-                        key={coin.id}
-                        className="coin"
-                        initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
-                        animate={{
-                          opacity: 1,
-                          x: coin.x,
-                          y: coin.y,
-                          rotate: [coin.rotate, coin.rotate + 360],
-                          scale: [1, 1.3, 1],
-                          filter: "grayscale(100%)", // Grayscale for black-and-white effect
-                        }}
-                        exit={{ opacity: 0, scale: 0.5 }}
-                        transition={{ duration: 2, ease: "easeOut" }}
-                      >
-                        <BsCoin size={2} className="coin-image" />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Pending Coin Display - Updated Style */}
-          <div className="absolute bottom-20  w-full px-4">
-            {/* Pending Coin Display */}
-            <div className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold text-black bg-white rounded-lg shadow-md  mx-auto flex justify-center items-center cursor-pointer">
-              <p className="text-xl font-extrabold font-Inter ">
-                Claim Coin
-                <span className="pl-2 text-xl  font-extrabold">
-                  {pendingCoin ? pendingCoin.pending_coin : ""}
-                </span>
+      ) : (
+        <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
+          {/* Header Section */}
+          <div className="flex justify-between items-center px-4 py-2 bg-black border-b border-gray-700">
+            <div className="flex items-center space-x-2">
+              <p className="text-xl font-bold font-Inter">
+                <span className="pl-2 text-xl bold"></span>
               </p>
             </div>
           </div>
 
-          {/* Footer */}
-        </div>
-      }
+          {/* User Info Section */}
+          <div className="flex flex-col items-center mt-6 space-y-4">
+            <div
+              onClick={handleNavigate}
+              className="bg-blue-600 text-white h-20 w-20 flex justify-center items-center rounded-full"
+            >
+              {userData?.user_photo  ? (
+                <img
+                  src={userData.user_photo}
+                  alt="Profile"
+                  className="w-20 h-20 object-cover rounded-full border-4 border-gray-600"
+                />
+              ) : (
+                <span className="text-2xl font-bold">
+                {userData?.user_name
+                  ? userData.user_name
+                      .split(" ") // Split the name into words
+                      .map(word => word[0]) // Get the first letter of each word
+                      .join("") // Join the initials
+                      .toUpperCase() // Ensure uppercase
+                  : "UN"}
+              </span>              )}
+            </div>
 
+            <p className="text-2xl font-extrabold capitalize font-Inter">{userData ? userData.user_name : "User Name"}</p>
+            <p className="text-4xl font-extrabold">
+            𝕌 {userData ? userData.coins : "0"}
+            </p>
+          </div>
 
-      <Footer />
+        
+
+          {/* The button */}
+          <div className="absolute bottom-20 w-full px-4 space-y-5">
+         {/* Game Section */}
+<div className="flex justify-center items-center mt-6">
+  <div className="bg-gray-800 rounded-lg overflow-hidden w-full shadow-md">
+    <img
+      src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE" // Replace with actual game thumbnail
+      alt="Game Thumbnail"
+      className="w-full h-40 object-cover"
+    />
+    <div className="flex space-x-2 items-center px-3 py-2 bg-gray-900">
+      <p className="text-white text-sm font-semibold">Claim Coin</p>
+      <span className="text-red-400 text-sm font-bold">
+        {pendingCoin ? pendingCoin.pending_coin : "0"}
+      </span>
     </div>
+  </div>
+</div>
 
+            <button
+              onClick={handleClick}
+              className="party-cracker-btn w-full bg-white text-black py-3 text-lg font-bold rounded-lg shadow-md hover:bg-gray-200 relative overflow-hidden"
+            >
+              Tap Coin
+            </button>
+          </div>
+          {/* Full-page animation when animating */}
+          {isAnimating && (
+            <div className="absolute top-0 left-0 w-full h-full z-50 flex justify-center items-center">
+              <div
+                className="absolute top-10 left-0 animate-explode flex justify-center items-center w-full"
+                style={{
+                  background: 'url("src/assets/gif/e4d2c1d0da356797359acd9270bcdd77.gif") no-repeat center center',
+                  backgroundSize: 'cover',
+                  width: '100%', // Takes up 70% of the page width
+                  height: '60%', // Takes up the full page height
+                  opacity: 1,
+                  animation: 'backgroundAnimation 2.5s forwards',
+                  zIndex: 1000,
+                }}
+              ></div>
+            </div>
+          )} <style>
+            {`
+        @keyframes explodeAnimation {
+          0% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.5);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(2);
+          }
+        }
+
+        .animate-explode {
+          border-radius: 50%;
+          background: rgba(255, 165, 0, 0.5);
+          animation: explodeAnimation 2.5s forwards;
+        }
+      `}
+          </style>
+        </div>
+      )}
+            <Footer />
+    </div>
   );
 }
 

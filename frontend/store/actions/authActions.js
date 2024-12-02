@@ -10,6 +10,10 @@ export const SIGNUP_FAILURE = 'SIGNUP_FAILURE';
 export const LOGOUT = 'LOGOUT';
 export const LOAD_USER = 'LOAD_USER';
 
+export const PASSWORD_RESET_REQUEST = 'PASSWORD_RESET_REQUEST';
+export const PASSWORD_RESET_SUCCESS = 'PASSWORD_RESET_SUCCESS';
+export const PASSWORD_RESET_FAILURE = 'PASSWORD_RESET_FAILURE';
+
 // Set token in cookies (expires in 7 days)
 const setToken = (token) => {
   Cookies.set('token', JSON.stringify(token), { expires: 7 });
@@ -118,6 +122,42 @@ export const signUp = (credentials) => async (dispatch) => {
     });
     throw error; // Rethrow error for component handling
   }
+};
+
+
+
+
+export const resetPassword = (email) => async (dispatch) => {
+    dispatch({ type: PASSWORD_RESET_REQUEST });
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/v1/api-password/forgot`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            dispatch({
+                type: PASSWORD_RESET_SUCCESS,
+                payload: data.message || 'Reset link sent successfully.',
+            });
+        } else {
+            dispatch({
+                type: PASSWORD_RESET_FAILURE,
+                payload: data.message || 'Error sending reset link. Please try again.',
+            });
+        }
+    } catch (error) {
+        dispatch({
+            type: PASSWORD_RESET_FAILURE,
+            payload: error.message || 'Error sending reset link. Please try again.',
+        });
+    }
 };
 
 // Logout action

@@ -1,25 +1,43 @@
 import React, { useState } from 'react';
-import { BACKEND_URL } from '../config';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { AiOutlineMail } from 'react-icons/ai'; // Email icon
-import { Link } from 'react-router-dom'; // Import Link for navigation
- import { fetcherPost } from '../../store/fetcher'; // Adjust path based on your file structure
+import { Link , useNavigate} from 'react-router-dom'; // Import Link for navigation
+ import { resetPassword} from '../../store/actions/authActions';
+ import { useDispatch, useSelector } from 'react-redux';
 
 const ForgotPassword = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
-    const [message, setMessage] = useState('');
+    const dispatch = useDispatch();
+    const { loading, message, error } = useSelector((state) => state.auth);
 
-    const handleSubmit = async (e) => {
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        try {
-            const response = await fetcherPost(`${BACKEND_URL}/api/forgotPassword`, { email });
-            setMessage(response.message || 'Reset link sent successfully.');
-        } catch (error) {
-            setMessage(error.message || 'Error sending reset link. Please try again.');
+        dispatch(resetPassword(email)); // Dispatch the action
+
+        // Toast and navigation after response updates in Redux
+        if (error) {
+            toast.error(error); // Show error toast
+        } else if (message) {
+            toast.success(message); // Show success toast
+            navigate('/login'); // Navigate to login page
         }
     };
 
+
     return (
         <div className="bg-black flex justify-center items-center min-h-screen p-4">
+             <ToastContainer
+        position="top-right"
+        autoClose={500}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
             <div className="w-full max-w-md bg-black text-white rounded-lg shadow-lg overflow-hidden border border-white p-6">
                 <h2 className="text-2xl font-bold text-center mb-4">Forgot Password</h2>
                 <p className="text-gray-400 text-center mb-6 text-sm">
@@ -47,7 +65,9 @@ const ForgotPassword = () => {
                         </button>
                     </div>
                 </form>
-                {message && <p className="mt-4 text-center text-red-500 text-sm">{message}</p>}
+
+                {error  && <p className="mt-4 text-center text-red-500 text-sm">{error }</p>}
+                {message  && <p className="mt-4 text-center  text-sm">{message }</p>}
                 <div className="mt-6 text-center">
                     <Link to="/login" className="text-white hover:underline text-sm">
                         Return to Login

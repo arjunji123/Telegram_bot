@@ -124,3 +124,12 @@
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 1); /* Neon effect */
   z-index: 1; /* Ensure it stays above other elements */
 }
+
+
+
+
+.party-cracker-btn {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
