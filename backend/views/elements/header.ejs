@@ -42,7 +42,7 @@
 
         async function getUnreadNotifications() {
             try {
-                const response = await fetch('<%- process.env.BACKEND_URL %>/api/v1/notifications');
+                const response = await fetch('<%- process.env.BACKEND_URL %>api/v1/notifications');
                 const data = await response.json();
 
                 if (data.success && data.notifications.length > 0) {
@@ -97,7 +97,7 @@
 
                 try {
                     await fetch(
-                        `<%- process.env.BACKEND_URL %>/api/v1/read-notification/${notificationId}/mark-read`,
+                        `<%- process.env.BACKEND_URL %>api/v1/read-notification/${notificationId}/mark-read`,
                         { method: 'PATCH', headers: { 'Content-Type': 'application/json' } }
                     );
                     window.location.href = '<%- process.env.BACKEND_URL %>/admin/users';
@@ -110,7 +110,7 @@
                 const notificationId = event.target.closest('.close-btn').getAttribute('data-id');
                 try {
                     await fetch(
-                        `<%- process.env.BACKEND_URL %>/api/v1/read-notification/${notificationId}/mark-read`,
+                        `<%- process.env.BACKEND_URL %>api/v1/read-notification/${notificationId}/mark-read`,
                         { method: 'PATCH', headers: { 'Content-Type': 'application/json' } }
                     );
                     event.target.closest('.dropdown-item').remove();
@@ -123,7 +123,7 @@
             if (event.target.id === 'clear-all-btn') {
                 try {
                     await fetch(
-                        `<%- process.env.BACKEND_URL %>/api/v1/read-notifications/mark-all-read`,
+                        `<%- process.env.BACKEND_URL %>api/v1/read-notifications/mark-all-read`,
                         { method: 'POST', headers: { 'Content-Type': 'application/json' } }
                     );
                     displayedNotifications.clear();
