@@ -392,151 +392,51 @@ exports.logoutApi = catchAsyncErrors(async (req, res, next) => {
     message: "Logout successfully",
   });
 });
-//forgot password for sending token in mail
 exports.forgotPasswordApi = catchAsyncErrors(async (req, res, next) => {
-  //const user = await User.findOne({email: req.body.email})
-  console.log("email", req.body.email);
+  const { email } = req.body; // Get email from request body
 
-  const userData = await db.query(
-    "SELECT * FROM users WHERE email = ? limit 1",
-    [req.body.email]
-  );
-  const user = userData[0][0];
-  console.log("user data", user);
+  // Find user by email
+  const userDetail = await db.query("SELECT * FROM users WHERE email = ?", [
+    email,
+  ]);
 
-  if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+  // If no user found
+  if (userDetail[0].length === 0) {
+    return next(new ErrorHandler("User not found with this email", 404));
   }
 
-  //get ResetPasswordToken token
-  const resetTokenValues = User.getResetPasswordToken();
+  const user = userDetail[0][0];
 
-  const resetToken = resetTokenValues.resetToken;
-  const resetPasswordToken = resetTokenValues.resetPasswordToken;
-  const resetPasswordExpire = resetTokenValues.resetPasswordExpire;
+  // Generate a new random password
+  const newPassword = crypto.randomBytes(3).toString("hex"); // Generate a random 8-byte password
 
-  /*await user.save({validateBeforeSave: false});*/
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  const resetPasswordUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/password/reset/${resetToken}`;
+  // Update the password in the database
+  const query = "UPDATE users SET password = ? WHERE id = ?";
+  await db.query(query, [hashedPassword, user.id]);
 
-  const message = `password reset token is :- \n\n ${resetPasswordUrl} \n\n If you have not requested reset password then please ingone it`;
+  // Send email to the user with the new password using sendEmail function
+  const emailOptions = {
+    email: user.email, // User's email from the database
+    subject: "Your new password",
+    message: `Your new password is: ${newPassword}. Please use it to login to your account.`,
+  };
+
   try {
-    const query =
-      "UPDATE users SET reset_password_token = ?, reset_password_expire = ? WHERE email = ?";
-    // Execute the update query
-    const result = await db.query(query, [
-      resetPasswordToken,
-      resetPasswordExpire,
-      req.body.email,
-    ]);
-
-    await sendEmail({
-      email: user.email,
-      subject: "Password Recovery",
-      message,
-    });
-
+    await sendEmail(emailOptions); // Call sendEmail to send the email
     res.status(200).json({
       success: true,
-      message: `Email sent successfully to ${user.email}`,
+      message: "New password has been sent to your email.",
     });
   } catch (error) {
-    await db.query(
-      `UPDATE users SET reset_password_token = '', reset_password_expire = '' WHERE email = ${req.body.email}`
-    );
-
-    return next(new ErrorHandler(error.message, 500));
+    return next(new ErrorHandler("Error sending email", 500));
   }
 });
 
-// reset user password
-exports.resetPasswordApi = catchAsyncErrors(async (req, res, next) => {
-  //creating token hash
-  const resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(req.params.token)
-    .digest("hex");
-
-  const currentTime = Date.now();
-  console.log(currentTime);
-
-  const query = `
-        SELECT *
-        FROM users
-        WHERE reset_password_token = ? 
-        AND reset_password_expire > ?
-    `;
-
-  // Execute the query
-  const userDetail = await db.query(query, [resetPasswordToken, currentTime]);
-  const user = userDetail[0][0];
-  console.log(user);
-
-  if (!user) {
-    return next(
-      new ErrorHandler(
-        "Reset password token is invalid or has been expired",
-        404
-      )
-    );
-  }
-
-  if (req.body.password !== req.body.confirmPassword) {
-    return next(new ErrorHandler("Password does not matched", 404));
-  }
-
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-  const query_2 =
-    "UPDATE users SET password = ?, reset_password_token = ?,reset_password_expire = ?  WHERE id = ?";
-  // Execute the update query
-  const result = await db.query(query_2, [hashedPassword, "", "", user.id]);
-
-  const token = User.generateToken(user.id); // Adjust as per your user object structure
-  res.status(200).json({
-    success: true,
-    message: `Password Changed Successfully`,
-  });
-  // sendToken(user, token, 201, res);
-});
 
 //////////////////////////////////////////
-
-
-// update user password
-exports.updatePasswordApi = catchAsyncErrors(async (req, res, next) => {
-  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
-    req.user.id,
-  ]);
-  const user = userDetail[0][0];
-
-  const isPasswordMatched = await User.comparePasswords(
-    req.body.oldPassword,
-    user.password
-  );
-
-  if (!isPasswordMatched) {
-    return next(new ErrorHandler("Old password is incorrect", 400));
-  }
-
-  if (req.body.newPassword !== req.body.confirmPassword) {
-    return next(new ErrorHandler("password does not matched", 400));
-  }
-
-  // user.password = req.body.newPassword;
-
-  // await user.save();
-
-  const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
-  const query = "UPDATE users SET password = ? WHERE id = ?";
-  // Execute the update query
-  const result = await db.query(query, [hashedPassword, user.id]);
-
-  const token = User.generateToken(user.id);
-  sendToken(user, token, 200, res);
-});
 
 // update user profile
 exports.updateProfileApi = catchAsyncErrors(async (req, res, next) => {
