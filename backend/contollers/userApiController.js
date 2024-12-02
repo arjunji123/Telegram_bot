@@ -435,7 +435,43 @@ exports.forgotPasswordApi = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+exports.updatePasswordApi = catchAsyncErrors(async (req, res, next) => {
+  // Retrieve the user details from the database using the user ID from the request
+  const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
+    req.user.id,
+  ]);
+  const user = userDetail[0][0];
 
+  // Check if the old password entered by the user matches the current password in the database
+  const isPasswordMatched = await User.comparePasswords(
+    req.body.oldPassword,
+    user.password
+  );
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Old password is incorrect", 400));
+  }
+
+  // Ensure the new password and confirm password match
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Passwords do not match", 400));
+  }
+
+  // Hash the new password before storing it
+  const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+
+  // SQL query to update the password in the database
+  const query = "UPDATE users SET password = ? WHERE id = ?";
+
+  // Execute the update query
+  await db.query(query, [hashedPassword, user.id]);
+
+  // Send a success response to the client
+  res.status(200).json({
+    success: true,
+    message: "Password updated successfully",
+  });
+});
 //////////////////////////////////////////
 
 // update user profile
