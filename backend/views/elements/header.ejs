@@ -2,7 +2,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const notificationBadge = document.querySelector('.notification-badge');
         const notificationDropdown = document.querySelector('#notification-dropdown');
-        const sound = new Audio('<%- process.env.BACKEND_URL %>/assets/notification.mp3');
+        const sound = new Audio('<%- process.env.BACKEND_URL %>assets/notification.mp3');
         const popupContainer = document.createElement('div');
         popupContainer.style.position = 'fixed';
         popupContainer.style.bottom = '10px';
@@ -93,7 +93,7 @@
             if (event.target.closest('.notify-item') && !event.target.classList.contains('close-btn')) {
                 const notificationItem = event.target.closest('.notify-item');
                 const notificationId = notificationItem.getAttribute('data-id');
-                const notificationUrl = notificationItem.getAttribute('<%- process.env.BACKEND_URL %>/admin/users');
+                const notificationUrl = notificationItem.getAttribute('<%- process.env.BACKEND_URL %>admin/users');
 
                 try {
                     await fetch(
