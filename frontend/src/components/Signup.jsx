@@ -204,8 +204,8 @@ useEffect(() => {
     };
 
     const resetBodyHeight = () => {
-      document.body.style.height = "100vh";
-      document.body.style.overflow = "auto";
+      // document.body.style.height = "100vh";
+      // document.body.style.overflow = "auto";
     };
 
     const handleFocus = (e) => {
