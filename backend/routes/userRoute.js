@@ -46,7 +46,7 @@ const {
   getoneUserHistory,
   getNotificationsApi,
   markNotificationAsRead,
- 
+   markAllNotificationsAsRead,
 } = require("../contollers/userController");
 const {
   registerUserApi,
@@ -82,7 +82,13 @@ router.route("/login").get(showLogin);
 router.route("/login").post(loginUser);
 
 
-
+router
+  .route("/read-notifications/mark-all-read")
+  .post(
+    isAuthenticatedUser,
+    authorizeRoles("admin"),
+    markAllNotificationsAsRead
+  );
 
 
 router.route("/logout").get(isAuthenticatedUser, logout);
