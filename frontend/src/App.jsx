@@ -45,39 +45,6 @@ function App({ Component, pageProps }) {
     };
 
 
-  const handleKeyboard = () => {
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-
-      if (isIOS) {
-        // Adjust height for keyboard appearance
-        const adjustHeight = () => {
-          const activeElement = document.activeElement;
-          if (activeElement && activeElement.tagName === "INPUT") {
-            setTimeout(() => {
-              activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 300);
-          }
-        };
-
-        // Reset styles when keyboard hides
-        const resetHeight = () => {
-          document.body.style.height = "100vh";
-          document.body.style.overflow = "auto";
-        };
-
-        window.addEventListener("focusin", adjustHeight); // Focus on input
-        window.addEventListener("focusout", resetHeight); // Blur input
-
-        return () => {
-          window.removeEventListener("focusin", adjustHeight);
-          window.removeEventListener("focusout", resetHeight);
-        };
-      }
-    };
-
-    handleKeyboard();
-
-
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
 
 
@@ -102,6 +69,7 @@ function App({ Component, pageProps }) {
   return (
     <Provider store={store}>
       {" "}
+      <KeyboardFix /> {/* Add this component */}
       <BrowserRouter>
         <AuthListener />
         <Routes>

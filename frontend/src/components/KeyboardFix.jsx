@@ -1,53 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 
 const KeyboardFix = () => {
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-
   useEffect(() => {
-    // Check if the device is iOS
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
     if (isIOS) {
-      // Save original styles to restore later
-      const originalBodyStyle = document.body.style;
-
-      // Function to prevent content from being pushed up
-      const preventKeyboardShift = () => {
-        document.body.style.overflow = 'hidden'; // Disable scrolling while keyboard is open
-        setKeyboardVisible(true);
+      // Function to adjust the view when the keyboard appears
+      const adjustView = () => {
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
+          setTimeout(() => {
+            activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300); // Delay to allow keyboard to fully appear
+        }
       };
 
-      // Function to restore scrolling behavior after the keyboard is closed
-      const restoreScrolling = () => {
-        document.body.style.overflow = 'auto'; // Re-enable scrolling
-        setKeyboardVisible(false);
+      // Reset height when the keyboard hides
+      const resetView = () => {
+        document.body.style.height = "100vh";
+        document.body.style.overflow = "auto";
       };
 
-      // Listen for the focus event (input fields gaining focus)
-      const inputFocusHandler = () => {
-        preventKeyboardShift();
-      };
+      window.addEventListener("focusin", adjustView); // Input focus
+      window.addEventListener("focusout", resetView); // Input blur
 
-      // Listen for the blur event (input fields losing focus)
-      const inputBlurHandler = () => {
-        restoreScrolling();
-      };
-
-      // Add event listeners for the input fields
-      document.querySelectorAll("input, textarea").forEach((element) => {
-        element.addEventListener("focus", inputFocusHandler);
-        element.addEventListener("blur", inputBlurHandler);
-      });
-
-      // Cleanup the event listeners on component unmount
       return () => {
-        document.querySelectorAll("input, textarea").forEach((element) => {
-          element.removeEventListener("focus", inputFocusHandler);
-          element.removeEventListener("blur", inputBlurHandler);
-        });
-
-        // Restore original body styles
-        document.body.style = originalBodyStyle;
+        window.removeEventListener("focusin", adjustView);
+        window.removeEventListener("focusout", resetView);
       };
     }
   }, []);
