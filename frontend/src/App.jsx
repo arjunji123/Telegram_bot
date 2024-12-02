@@ -37,33 +37,45 @@ function App({ Component, pageProps }) {
       tg.disableClosingConfirmation();
 
     }
-    // iOS Keyboard Handling
-    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-    // Prevent drag-to-close while allowing scrollable content
+ 
     const handleTouchMove = (e) => {
       if (!e.target.closest("#content")) {
         e.preventDefault(); // Block scrolling outside of #content
       }
     };
-    const adjustForKeyboard = () => {
-      const tg = window.Telegram.WebApp;
-      const stableHeight = tg.viewportStableHeight || window.innerHeight; // Get stable height for iOS
-      document.body.style.height = `${stableHeight}px`;
-      document.body.style.overflow = 'hidden'; // Disable scrolling
+
+
+  const handleKeyboard = () => {
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+      if (isIOS) {
+        // Adjust height for keyboard appearance
+        const adjustHeight = () => {
+          const activeElement = document.activeElement;
+          if (activeElement && activeElement.tagName === "INPUT") {
+            setTimeout(() => {
+              activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+          }
+        };
+
+        // Reset styles when keyboard hides
+        const resetHeight = () => {
+          document.body.style.height = "100vh";
+          document.body.style.overflow = "auto";
+        };
+
+        window.addEventListener("focusin", adjustHeight); // Focus on input
+        window.addEventListener("focusout", resetHeight); // Blur input
+
+        return () => {
+          window.removeEventListener("focusin", adjustHeight);
+          window.removeEventListener("focusout", resetHeight);
+        };
+      }
     };
-    const resetPadding = () => {
-      document.body.style.height = '100vh';
-      document.body.style.overflow = 'auto'; // Allow scrolling when the keyboard is hidden
-    };
 
-
-
-    // Adjust the viewport height on focus and blur events
-    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      window.addEventListener('focusin', adjustForKeyboard); // Handle input focus
-      window.addEventListener('focusout', resetPadding); // Handle input blur
-      window.addEventListener('resize', adjustForKeyboard); // Handle resize on iPhone
-    }
+    handleKeyboard();
 
 
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -77,11 +89,6 @@ function App({ Component, pageProps }) {
     return () => {
       clearTimeout(timer);
       document.removeEventListener("touchmove", handleTouchMove);
-      if (isIOS) {
-        window.removeEventListener('focusin', adjustForKeyboard);
-        window.removeEventListener('focusout', resetPadding);
-        window.removeEventListener('resize', adjustForKeyboard);
-      }
     };
   }, []);
   // Add this to your main component (e.g., App.js or a custom hook)
@@ -105,7 +112,7 @@ function App({ Component, pageProps }) {
           />
 
           <Route element={<PublicRoute />}>
-            <Route path="/" element={<Signup />} />
+            {/* <Route path="/" element={<Signup />} /> */}
             <Route path="/login" element={<Login />} />
             {/* <Route path="/" element={token !== null? <Navigate to="/home" /> : <Signup />} /> */}
             <Route path="/payment/:id" element={<Payment />} />
