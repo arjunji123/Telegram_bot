@@ -55,7 +55,7 @@ const {
   forgotPasswordApi,
 
   getUserDetailApi,
-
+  updatePasswordApi,
   updateProfileApi,
   uploadScreenshotApi,
   getCompanyDetailApi,
@@ -160,7 +160,9 @@ router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
 
 router.route("/referral-code").get(isApiAuthenticatedUser, getUserReferralCode);
-
+router
+  .route("/api-password/update")
+  .post(isApiAuthenticatedUser, updatePasswordApi);
 
 router
   .route("/api-me/update")
