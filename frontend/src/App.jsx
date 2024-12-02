@@ -69,7 +69,7 @@ function App({ Component, pageProps }) {
   return (
     <Provider store={store}>
       {" "}
-      <KeyboardFix /> {/* Add this component */}
+      {/* <KeyboardFix /> */}
       <BrowserRouter>
         <AuthListener />
         <Routes>

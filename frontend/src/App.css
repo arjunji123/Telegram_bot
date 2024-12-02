@@ -17,17 +17,9 @@ body {
   -webkit-overflow-scrolling: touch;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
-  
+  font-family: 'Inter', sans-serif;  
 }
-#content {
-  height: calc(100vh - 50px); /* Adjust if needed */
-  overflow: auto;
-}
-input, textarea, button {
-  /* font-size: 16px; */
-  box-sizing: border-box;
-}
+
 
 @font-face {
   font-family: 'Roobert';

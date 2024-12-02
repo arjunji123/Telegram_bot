@@ -193,20 +193,44 @@ useEffect(() => {
   };
   
   useEffect(() => {
-    const handleResize = () => {
-      const isKeyboardVisible = window.innerHeight < window.outerHeight;
-      setKeyboardVisible(isKeyboardVisible);
+    // Adjust viewport height for iOS when the keyboard appears
+    const adjustForKeyboard = () => {
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        const windowHeight = window.innerHeight; // Current visible height
+        document.body.style.height = `${windowHeight}px`;
+        document.body.style.overflow = "hidden"; // Prevent background scrolling
+      }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const resetBodyHeight = () => {
+      document.body.style.height = "100vh";
+      document.body.style.overflow = "auto";
+    };
+
+    const handleFocus = (e) => {
+      const input = e.target;
+      setTimeout(() => {
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    };
+
+    window.addEventListener("resize", adjustForKeyboard);
+    window.addEventListener("focusin", handleFocus); // Input focus
+    window.addEventListener("focusout", resetBodyHeight); // Input blur
+
+    return () => {
+      window.removeEventListener("resize", adjustForKeyboard);
+      window.removeEventListener("focusin", handleFocus);
+      window.removeEventListener("focusout", resetBodyHeight);
+    };
   }, []);
 
   return (
     <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
     <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
     <div
-                  className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl pt-safe pb-safe "
+                  className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl  "
 
     >
 
@@ -227,7 +251,7 @@ useEffect(() => {
                 onChange={handleInput}
                 required
                 aria-label="Name"
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base "
                 placeholder="Name"
               />
 
@@ -241,7 +265,7 @@ useEffect(() => {
                 onBlur={handleBlur}
                 required
                 aria-label="Mobile No."
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base "
                 placeholder="Mobile No."
               />
                         {errors.mobile && <span className="error-message text-xs text-red-500">{errors.mobile}</span>}
@@ -260,7 +284,7 @@ useEffect(() => {
               onBlur={handleBlur}
               required
               aria-label="Email"
-              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
+              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base "
               placeholder="Email"
             />
                       {errors.email && <span className="error-message text-xs text-red-500">{errors.email}</span>}
@@ -279,7 +303,7 @@ useEffect(() => {
                 onBlur={handleBlur}
                 required
                 aria-label="Password"
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base "
                 placeholder="Password"
               />
               <button
@@ -304,7 +328,7 @@ useEffect(() => {
                 onBlur={handleBlur}
                 required
                 aria-label="Confirm Password"
-                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
+                className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base "
                 placeholder="Confirm Password"
               />
               <button
@@ -331,7 +355,7 @@ useEffect(() => {
               onChange={handleInput}
               required
               aria-label="UPI ID"
-              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base input-field"
+              className="w-full px-4 py-3 bg-[#1f2024] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c6ff] placeholder-gray-400 text-sm sm:text-base "
               placeholder="UPI ID"
             />
           </div>
