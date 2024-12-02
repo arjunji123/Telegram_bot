@@ -214,19 +214,19 @@ useEffect(() => {
   };
 
   return (
-    <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
+    <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden" >
     <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
-    <div   style={{ height: "var(--app-height)" }}
-                  className="w-full max-w-lg bg-black text-white h-[calc(100%-env(safe-area-inset-bottom))] sm:h-screen shadow-2xl  "
+    <div   
+                  className="w-full max-w-lg bg-black text-white min-h-screen sm:h-auto  shadow-2xl  "
 
     >
 
-      <div id="content" className="p-4 sm:p-6 space-y-6 h-full overflow-y-auto touch-auto">
+      <div id="content" className="p-4 sm:p-6 space-y-6 h-full overflow-y-auto touch-auto"  >
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 tracking-tight text-[#eaeaea]">
           Sign Up
         </h2>
   
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 ">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 " >
   
           {/* Name and Mobile Input */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
