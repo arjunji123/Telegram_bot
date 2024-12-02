@@ -207,10 +207,18 @@ exports.registerUserApi = catchAsyncErrors(async (req, res, next) => {
     }
   } else {
     // If referralBy is not provided, fetch the referral_code of the user where user_id = 2
-    const defaultUser = await db.query(
-      "SELECT referral_code FROM user_data WHERE user_id = ?",
-      [2]
-    );
+    // const defaultUser = await db.query(
+    //   "SELECT referral_code FROM user_data WHERE user_id = ?",
+    //   [2]
+    // );
+    const defaultUser = await db.query(`
+  SELECT users.id, user_data.referral_code 
+  FROM users 
+  JOIN user_data 
+  ON users.id = user_data.user_id 
+  WHERE users.user_type = 'user' AND user_data.parent_id IS NULL;
+`);
+
     const referralCode = defaultUser[0]?.[0]?.referral_code || null;
     console.log(defaultUser);
 
