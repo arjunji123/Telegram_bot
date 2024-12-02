@@ -24,10 +24,10 @@ const {
   registerUser,
   loginUser,
   logout,
-  forgotPassword,
-  resetPassword,
+
+
   getUserDetail,
-  updatePassword,
+
   updateProfile,
   allUsers,
   addFrom,
@@ -53,9 +53,9 @@ const {
   loginUserApi,
   logoutApi,
   forgotPasswordApi,
-  resetPasswordApi,
+
   getUserDetailApi,
-  updatePasswordApi,
+
   updateProfileApi,
   uploadScreenshotApi,
   getCompanyDetailApi,
@@ -81,15 +81,15 @@ router.route("/register").post(registerUser);
 router.route("/login").get(showLogin);
 router.route("/login").post(loginUser);
 
-router.route("/password/forgot").post(forgotPassword);
 
-router.route("/password/reset/:token").put(resetPassword);
+
+
 
 router.route("/logout").get(isAuthenticatedUser, logout);
 
 router.route("/me").get(isAuthenticatedUser, getUserDetail);
 
-router.route("/password/update").post(isAuthenticatedUser, updatePassword);
+
 
 router.route("/me/update").post(isAuthenticatedUser, updateProfile);
 router.route("/notifications").get(getNotificationsApi);
@@ -151,7 +151,7 @@ router.route("/api-login").post(loginUserApi);
 
 router.route("/api-password/forgot").post(forgotPasswordApi);
 
-router.route("/api-password/reset/:token").put(resetPasswordApi);
+
 
 router.route("/api-logout").get(logoutApi);
 
@@ -160,9 +160,7 @@ router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
 
 router.route("/referral-code").get(isApiAuthenticatedUser, getUserReferralCode);
-router
-  .route("/api-password/update")
-  .post(isApiAuthenticatedUser, updatePasswordApi);
+
 
 router
   .route("/api-me/update")
