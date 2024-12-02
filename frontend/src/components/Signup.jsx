@@ -193,44 +193,31 @@ useEffect(() => {
   };
   
   useEffect(() => {
-    // Adjust viewport height for iOS when the keyboard appears
-    const adjustForKeyboard = () => {
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      if (isIOS) {
-        const windowHeight = window.innerHeight; // Current visible height
-        document.body.style.height = `${windowHeight}px`;
-        document.body.style.overflow = "hidden"; // Prevent background scrolling
-      }
+    const handleResize = () => {
+      const appHeight = window.innerHeight;
+      document.documentElement.style.setProperty("--app-height", `${appHeight}px`);
     };
 
-    const resetBodyHeight = () => {
-      // document.body.style.height = "100vh";
-      // document.body.style.overflow = "auto";
-    };
-
-    const handleFocus = (e) => {
-      const input = e.target;
-      setTimeout(() => {
-        input.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 300);
-    };
-
-    window.addEventListener("resize", adjustForKeyboard);
-    window.addEventListener("focusin", handleFocus); // Input focus
-    window.addEventListener("focusout", resetBodyHeight); // Input blur
+    handleResize(); // Set on component mount
+    window.addEventListener("resize", handleResize); // Update on resize
 
     return () => {
-      window.removeEventListener("resize", adjustForKeyboard);
-      window.removeEventListener("focusin", handleFocus);
-      window.removeEventListener("focusout", resetBodyHeight);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  const handleFocus = (e) => {
+    const inputElement = e.target;
+    setTimeout(() => {
+      inputElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300); // Delay to allow keyboard to open
+  };
 
   return (
     <div className="bg-black flex justify-center items-center min-h-screen overflow-hidden">
     <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
-    <div
-                  className="w-full max-w-lg bg-black text-white h-auto sm:h-screen shadow-2xl  "
+    <div   style={{ height: "var(--app-height)" }}
+                  className="w-full max-w-lg bg-black text-white h-[calc(100%-env(safe-area-inset-bottom))] sm:h-screen shadow-2xl  "
 
     >
 
@@ -247,6 +234,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="user_name"
+                onFocus={handleFocus} // Add this
                 value={values.user_name}
                 onChange={handleInput}
                 required
@@ -261,6 +249,7 @@ useEffect(() => {
                 type="tel"
                 name="mobile"
                 value={values.mobile}
+                onFocus={handleFocus} // Add this
                 onChange={handleInput}
                 onBlur={handleBlur}
                 required
@@ -280,6 +269,7 @@ useEffect(() => {
               type="email"
               name="email"
               value={values.email}
+              onFocus={handleFocus} // Add this
               onChange={handleInput}
               onBlur={handleBlur}
               required
@@ -299,6 +289,7 @@ useEffect(() => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={values.password}
+                onFocus={handleFocus} // Add this
                 onChange={handleInput}
                 onBlur={handleBlur}
                 required
@@ -324,6 +315,7 @@ useEffect(() => {
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={values.confirmPassword}
+                onFocus={handleFocus} // Add this
                 onChange={handleInput}
                 onBlur={handleBlur}
                 required
@@ -352,6 +344,7 @@ useEffect(() => {
               type="text"
               name="upi_id"
               value={values.upi_id}
+              onFocus={handleFocus} // Add this
               onChange={handleInput}
               required
               aria-label="UPI ID"
