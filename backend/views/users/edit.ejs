@@ -11,40 +11,40 @@
                         <form method="post" action="/admin/<%= module_slug %>/update/<%= userId %>"
                             enctype="application/x-www-form-urlencoded">
                             <div class="row">
-                                <div class="col-lg-6 float-left">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="simpleinput" class="form-label">User Name</label>
                                         <input type="text" id="simpleinput" name="user_name" class="form-control"
-                                            value="<%= user.user_name %>">
+                                            value="<%= user.user_name %>" required>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 float-left">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email</label>
                                         <input type="email" id="email" name="email" class="form-control"
-                                            value="<%= user.email %>">
+                                            value="<%= user.email %>" required>
                                     </div>
                                 </div>
-                       
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="mobile" class="form-label">Mobile No.</label>
+                                        <input type="text" id="mobile" name="mobile" class="form-control"
+                                            value="<%= user.mobile %>">
+                                    </div>
+                                </div>
 
                                 <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="upi_id" class="form-label">UPI ID</label>
-                                        <input type="text" id="upi_id" class="form-control"
+                                        <input type="text" id="upi_id" name="upi_id" class="form-control"
                                             value="<%= userData.upi_id %>">
                                     </div>
                                 </div>
-
-                             
-
-
                             </div>
 
-
-
-
                             <div class="row">
-                                <div class="col-lg-4 float-left">
+                                <div class="col-lg-4">
                                     <button class="btn btn-primary" type="submit">Update</button>
                                 </div>
                             </div>
