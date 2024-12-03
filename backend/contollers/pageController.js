@@ -1051,16 +1051,37 @@ if (completedQuestCheck.length > 0) {
     };
     console.log("Insert data for usercoin_audit:", insertAuditData);
 
-    const [insertAuditResult] = await db.query(
-      "INSERT INTO usercoin_audit SET ?",
-      insertAuditData
-    );
+    // const [insertAuditResult] = await db.query(
+    //   "INSERT INTO usercoin_audit SET ?",
+    //   insertAuditData
+    // );
 
-    if (insertAuditResult.affectedRows === 0) {
-      await db.query("ROLLBACK");
-      console.error("Failed to insert into usercoin_audit");
-      return next(new ErrorHandler("Failed to complete quest", 500));
-    }
+    // if (insertAuditResult.affectedRows === 0) {
+    //   await db.query("ROLLBACK");
+    //   console.error("Failed to insert into usercoin_audit");
+    //   return next(new ErrorHandler("Failed to complete quest", 500));
+    // }
+
+    try {
+  const [insertAuditResult] = await db.query(
+    "INSERT INTO usercoin_audit SET ?",
+    insertAuditData
+  );
+
+  if (insertAuditResult.affectedRows === 0) {
+    throw new Error("Failed to insert into usercoin_audit");
+  }
+} catch (error) {
+  if (error.code === 'ER_DUP_ENTRY') {
+    console.error("Duplicate quest entry attempted:", { user_id, quest_id });
+    return res.status(400).json({
+      success: false,
+      message: "This quest has already been completed.",
+    });
+  }
+  throw error; // Re-throw other errors
+}
+
 
 
 // Fetch the current pending_coin from user_data
