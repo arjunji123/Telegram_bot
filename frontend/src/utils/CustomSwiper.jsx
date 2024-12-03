@@ -20,7 +20,7 @@ const CustomSwiper = ({
   const [isRequestInProgress, setRequestInProgress] = useState({});
 
   const handleButtonClick = async (taskKey, action, ...args) => {
-    
+
     if (isRequestInProgress[taskKey]) return; // Prevent multiple clicks for the same task
 
     setRequestInProgress((prev) => ({ ...prev, [taskKey]: true }));
@@ -118,18 +118,18 @@ const CustomSwiper = ({
 
                         {banner.activity === "watch" && watchTimes[taskKey] && (
                           <button
-                            onClick={() =>
-                              handleButtonClick(
-                                taskKey,
-                                handleCheckButtonClick,
+                          disabled={loadingState[taskKey] || isRequestInProgress[taskKey]}
+                            onClick={() => {
+                              setRequestInProgress(prev => ({ ...prev, [taskKey]: true }));
+                              handleCheckButtonClick(
                                 taskKey,
                                 banner.quest_id
                               )
                             }
+                             
+                            }
                             className={`bg-gray-900 text-white w-20 flex justify-center py-1.5 rounded-full text-sm font-bold ${
-                              isRequestInProgress[taskKey]
-                                ? "opacity-75 cursor-wait"
-                                : ""
+                              loadingState[taskKey] || isRequestInProgress[taskKey] ? "opacity-75 cursor-not-allowed" : ""
                             }`}
                           >
                             {loadingState[taskKey] || isRequestInProgress[taskKey] ? (

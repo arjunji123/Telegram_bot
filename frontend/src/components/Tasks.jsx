@@ -16,8 +16,6 @@ import axios from "axios";
 
 function Tasks() {
   const dispatch = useDispatch();
-  const apiData = useSelector((state) => state.apiData.data.apiquests);
-  const apiQuests = apiData?.quests || [];
   const questHistory = useSelector((state) => state.apiData.data);
   const quest = questHistory?.quest?.quests
   const [loadingState, setLoadingState] = useState({});
