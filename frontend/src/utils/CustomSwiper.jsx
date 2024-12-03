@@ -20,6 +20,7 @@ const CustomSwiper = ({
   const [isRequestInProgress, setRequestInProgress] = useState({});
 
   const handleButtonClick = async (taskKey, action, ...args) => {
+    
     if (isRequestInProgress[taskKey]) return; // Prevent multiple clicks for the same task
 
     setRequestInProgress((prev) => ({ ...prev, [taskKey]: true }));

@@ -161,10 +161,13 @@ function Tasks() {
       });
 
       if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
+       // Simulate a delay after the request completes
+    setTimeout(() => {
+      setLoadingState(prevState => ({ ...prevState, [task]: false })); // End loading after delay
       dispatch(fetchQuestHistory());
       setHasWatched(prev => ({ ...prev, [task]: true }));
       toast("Task Completed!");
-      setLoadingState(prevState => ({ ...prevState, [task]: false }));
+    }, 1500); // Delay of 1.5 seconds (adjust as needed)
 
     } catch (error) {
       toast.error(`Error completing task: ${error.message}`);
