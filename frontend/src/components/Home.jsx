@@ -181,7 +181,8 @@ function Home() {
               <div
                 className="absolute top-10 left-0 animate-explode flex justify-center items-center w-full"
                 style={{
-                  background: 'url("src/assets/gif/e4d2c1d0da356797359acd9270bcdd77.gif") no-repeat center center',
+                  // background: 'url("src/assets/gif/e4d2c1d0da356797359acd9270bcdd77.gif") no-repeat center center',
+                  background: 'url("https://i.gifer.com/origin/1a/1af8d3b487b77085d5288814f151e1de_w200.gif") no-repeat center center',
                   backgroundSize: 'cover',
                   width: '100%', // Takes up 70% of the page width
                   height: '60%', // Takes up the full page height
