@@ -1563,26 +1563,27 @@ exports.getoneUserHistory = catchAsyncErrors(async (req, res) => {
 
     // Query to fetch all user history from usercoin_audit, including pending_coin and title
     const query = `
-      SELECT 
-        qa.*, 
-        q.quest_name, 
-        q.quest_type, 
-        q.activity, 
-        u.user_name, 
-         qa.earn_coin, 
-        qa.pending_coin,  -- Fetch pending_coin from usercoin_audit
-        qa.title  -- Fetch title from usercoin_audit
-      FROM 
-        usercoin_audit qa
-      JOIN 
-        users u ON qa.user_id = u.id
-      LEFT JOIN 
-        quest q ON qa.quest_id = q.id
-      LEFT JOIN 
-        user_data ud ON qa.user_id = ud.user_id
-      WHERE 
-        qa.user_id = ?
-    `;
+    SELECT 
+      qa.*, 
+      q.quest_name, 
+      q.quest_type, 
+      q.activity, 
+      u.user_name, 
+      qa.earn_coin, 
+      qa.pending_coin,  -- Fetch pending_coin from usercoin_audit
+      qa.description,
+      qa.title  -- Fetch title from usercoin_audit
+    FROM 
+      usercoin_audit qa
+    JOIN 
+      users u ON qa.user_id = u.id
+    LEFT JOIN 
+      quest q ON qa.quest_id = q.id
+    LEFT JOIN 
+      user_data ud ON qa.user_id = ud.user_id
+    WHERE 
+      qa.user_id = ?;
+  `;
 
     // Execute the query with the given user ID
     const [userHistory] = await db.query(query, [userId]);
