@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../store/store";
-import {
-  loadUserFromLocalStorage,
-} from "../store/actions/authActions";
+import { loadUserFromLocalStorage } from "../store/actions/authActions";
 
 // Component Imports
 import Friend from "./components/Friend";
@@ -52,41 +50,33 @@ function App() {
     };
   }, []);
 
-  // Add touchmove behavior for scrollable container
-  const handleTouchStart = (e) => {
-    const content = document.getElementById("content");
-    if (content) {
-      content.dataset.scrollTop = content.scrollTop || 0;
-      content.dataset.startY = e.touches[0].clientY || 0;
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    const content = document.getElementById("content");
-    if (content) {
-      const deltaY = e.touches[0].clientY - content.dataset.startY;
-      const scrollTop = parseInt(content.dataset.scrollTop, 10);
-
-      if (
-        (scrollTop <= 0 && deltaY > 0) || // Prevent dragging down at the top
-        (scrollTop >= content.scrollHeight - content.offsetHeight && deltaY < 0) // Prevent dragging up at the bottom
-      ) {
-        e.preventDefault();
-      }
-    }
-  };
-
+  // Prevent Telegram drag-to-close by managing scrolling behavior
   useEffect(() => {
     const content = document.getElementById("content");
 
+    const handleTouchMove = (e) => {
+      if (content) {
+        const scrollTop = content.scrollTop;
+        const scrollHeight = content.scrollHeight;
+        const offsetHeight = content.offsetHeight;
+        const deltaY = e.touches[0].clientY;
+
+        // Prevent scrolling outside the content
+        if (
+          (scrollTop === 0 && deltaY > 0) || // At the top and trying to scroll up
+          (scrollTop + offsetHeight >= scrollHeight && deltaY < 0) // At the bottom and trying to scroll down
+        ) {
+          e.preventDefault();
+        }
+      }
+    };
+
     if (content) {
-      content.addEventListener("touchstart", handleTouchStart);
       content.addEventListener("touchmove", handleTouchMove, { passive: false });
     }
 
     return () => {
       if (content) {
-        content.removeEventListener("touchstart", handleTouchStart);
         content.removeEventListener("touchmove", handleTouchMove);
       }
     };
@@ -101,30 +91,32 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <Routes>
-          {/* Redirect based on token existence */}
-          <Route
-            path="/"
-            element={token ? <Navigate to="/home" /> : <Signup />}
-          />
+        <div id="content" className="app-container">
+          <Routes>
+            {/* Redirect based on token existence */}
+            <Route
+              path="/"
+              element={token ? <Navigate to="/home" /> : <Signup />}
+            />
 
-          {/* Public Routes */}
-          <Route element={<PublicRoute />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/payment/:id" element={<Payment />} />
-            <Route path="/forgot" element={<ForgotPassword />} />
-          </Route>
+            {/* Public Routes */}
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/payment/:id" element={<Payment />} />
+              <Route path="/forgot" element={<ForgotPassword />} />
+            </Route>
 
-          {/* Private Routes */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/home" element={<Home />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/friend" element={<Friend />} />
-            <Route path="/withdrawal" element={<Withdrawal />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/history" element={<History />} />
-          </Route>
-        </Routes>
+            {/* Private Routes */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/friend" element={<Friend />} />
+              <Route path="/withdrawal" element={<Withdrawal />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/history" element={<History />} />
+            </Route>
+          </Routes>
+        </div>
       </BrowserRouter>
     </Provider>
   );
