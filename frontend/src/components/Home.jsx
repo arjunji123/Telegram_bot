@@ -123,7 +123,7 @@ function Home() {
               onClick={handleNavigate}
               className="bg-blue-600 text-white h-20 w-20 flex justify-center items-center rounded-full"
             >
-              {userData?.user_photo  ? (
+              {userData?.user_photo ? (
                 <img
                   src={userData.user_photo}
                   alt="Profile"
@@ -131,42 +131,42 @@ function Home() {
                 />
               ) : (
                 <span className="text-2xl font-bold">
-                {userData?.user_name
-                  ? userData.user_name
+                  {userData?.user_name
+                    ? userData.user_name
                       .split(" ") // Split the name into words
                       .map(word => word[0]) // Get the first letter of each word
                       .join("") // Join the initials
                       .toUpperCase() // Ensure uppercase
-                  : "UN"}
-              </span>              )}
+                    : "UN"}
+                </span>)}
             </div>
 
             <p className="text-2xl font-extrabold capitalize font-Inter">{userData ? userData.user_name : "User Name"}</p>
             <p className="text-4xl font-extrabold">
-            𝕌 {userData ? userData.coins : "0"}
+              𝕌 {userData ? userData.coins : "0"}
             </p>
           </div>
 
-        
+
 
           {/* The button */}
           <div className="absolute bottom-20 w-full px-4 space-y-5">
-         {/* Game Section */}
-<div className="flex justify-center items-center mt-6">
-  <div className="bg-gray-800 rounded-lg overflow-hidden w-full shadow-md">
-    <img
-      src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE" // Replace with actual game thumbnail
-      alt="Game Thumbnail"
-      className="w-full h-40 object-cover"
-    />
-    <div className="flex space-x-2 items-center px-3 py-2 bg-gray-900">
-      <p className="text-white text-sm font-semibold">Claim Coin</p>
-      <span className="text-red-400 text-sm font-bold">
-        {pendingCoin ? pendingCoin.pending_coin : "0"}
-      </span>
-    </div>
-  </div>
-</div>
+            {/* Game Section */}
+            <div className="flex justify-center items-center mt-6">
+              <div className="bg-gray-800 rounded-lg overflow-hidden w-full shadow-md">
+                <img
+                  src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSPzFN--8Y1W-1Yg9anA4ZXy-W18bIfJ-4RNZ8QWi6wPeGJUUoE" // Replace with actual game thumbnail
+                  alt="Game Thumbnail"
+                  className="w-full h-40 object-cover"
+                />
+                <div className="flex space-x-2 items-center px-3 py-2 bg-gray-900">
+                  <p className="text-white text-sm font-semibold">Claim Coin</p>
+                  <span className="text-red-400 text-sm font-bold">
+                    {pendingCoin ? pendingCoin.pending_coin : "0"}
+                  </span>
+                </div>
+              </div>
+            </div>
 
             <button
               onClick={handleClick}
@@ -218,7 +218,7 @@ function Home() {
           </style>
         </div>
       )}
-            <Footer />
+      <Footer />
     </div>
   );
 }

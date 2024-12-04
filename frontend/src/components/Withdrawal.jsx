@@ -243,7 +243,7 @@ function Withdrawal() {
               {/* <Logo /> */}
               
               <div className="flex justify-center font-Inter  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
-                <p>U</p>
+                <p>  𝕌</p>
                 <p className="">{userData ? userData.coins : "0"}</p>
               </div>
 
