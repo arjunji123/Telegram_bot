@@ -35,6 +35,7 @@ const {
   deleteRecord,
   getCompanyProfileApi,
   updateCoinRateApi,
+  reqGetAllReqApi,
 } = require("../contollers/companyController");
 var upload = multer({ storage: Storage });
 // router.post("/users/update-status", updateUserStatus);
@@ -80,4 +81,5 @@ router
   .route("/api-coinrate-update")
   .post(isApiAuthenticatedUser, updateCoinRateApi);
 
+router.route("/api-getall-req").get(isApiAuthenticatedUser, reqGetAllReqApi);
 module.exports = router;
