@@ -26,7 +26,6 @@ const sellTransactionSchema = Joi.object({
   transaction_rate: Joi.number().required(),
   transaction_amount: Joi.number().required(),
 });
-
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   try {
     // Fetch user data along with company_data
