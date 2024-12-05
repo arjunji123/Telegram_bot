@@ -52,34 +52,32 @@ function App() {
 
   // Prevent Telegram drag-to-close by managing scrolling behavior
   useEffect(() => {
-    const preventScrollOutsideContent = (e) => {
-      const content = document.getElementById("content");
-      if (content) {
-        const scrollTop = content.scrollTop;
-        const scrollHeight = content.scrollHeight;
-        const clientHeight = content.clientHeight;
+    const handleTouchMove = (e) => {
+      const scrollableContent = document.getElementById("scrollable-content");
+      if (scrollableContent) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
         const deltaY = e.touches[0].clientY;
 
-        // Prevent overscrolling at the top or bottom of the content
         if (
-          (scrollTop === 0 && deltaY > 0) || // At the top, trying to scroll up
-          (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom, trying to scroll down
+          (scrollTop === 0 && deltaY > 0) || // At top, trying to scroll up
+          (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At bottom, trying to scroll down
         ) {
-          e.preventDefault();
+          e.preventDefault(); // Prevent touch scrolling outside the content
         }
       }
     };
 
-    const content = document.getElementById("content");
-    if (content) {
-      content.addEventListener("touchmove", preventScrollOutsideContent, {
+
+    const scrollableContent = document.getElementById("scrollable-content");
+    if (scrollableContent) {
+      scrollableContent.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
     }
 
     return () => {
-      if (content) {
-        content.removeEventListener("touchmove", preventScrollOutsideContent);
+      if (scrollableContent) {
+        scrollableContent.removeEventListener("touchmove", handleTouchMove);
       }
     };
   }, []);
@@ -93,7 +91,11 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="content" className="app-container overflow-y-auto">
+        <div id="app-container" className="relative h-screen">
+        <div
+            id="scrollable-content"
+            className="overflow-y-auto h-full " // Add padding to prevent overlap with bot UI
+          >
           <Routes>
             {/* Redirect based on token existence */}
             <Route
@@ -118,6 +120,7 @@ function App() {
               <Route path="/history" element={<History />} />
             </Route>
           </Routes>
+          </div>
         </div>
       </BrowserRouter>
     </Provider>
