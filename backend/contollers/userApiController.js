@@ -850,7 +850,6 @@ exports.uploadQuestScreenshotApi = catchAsyncErrors(async (req, res, next) => {
 //   }
 // });
 
-
 exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
   try {
     // Fetch the user's ID from the request
@@ -886,12 +885,9 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     const userData = userDataQuery[0][0]; // Extract user_data details
     const referralCode = userData.referral_code; // Get the referral code of the logged-in user
 
-    // Count how many active users have used this referral code
+    // Count how many users have used this referral code
     const referralCountQuery = await db.query(
-      `SELECT COUNT(*) AS referral_count 
-       FROM user_data 
-       JOIN users ON user_data.user_id = users.id 
-       WHERE user_data.referral_by = ? AND users.status = 'active'`,
+      "SELECT COUNT(*) AS referral_count FROM user_data WHERE referral_by = ?",
       [referralCode]
     );
 
@@ -925,8 +921,6 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
-
-
 ////////////////////////////////////
 
 exports.getCompanyDetailApi = catchAsyncErrors(async (req, res, next) => {
