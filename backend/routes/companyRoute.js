@@ -21,7 +21,7 @@ var Storage = multer.diskStorage({
   },
 });
 const {
-
+  loginCompanyApi,
   addFrom,
   createRecord,
   allUsers,
@@ -62,5 +62,6 @@ router.route("/" + module_slug + "").get(isAuthenticatedUser, allUsers);
 //////////////////////////////
 router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
+router.route("/api-login-company").post(loginCompanyApi);
 
 module.exports = router;
