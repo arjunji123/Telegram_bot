@@ -52,32 +52,30 @@ function App() {
 
   // Prevent Telegram drag-to-close by managing scrolling behavior
   useEffect(() => {
-    const handleTouchMove = (e) => {
-      const scrollableContent = document.getElementById("scrollable-content");
-      if (scrollableContent) {
-        const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
-        const deltaY = e.touches[0].clientY;
+    const content = document.getElementById("scrollable-content");
 
-        if (
-          (scrollTop === 0 && deltaY > 0) || // At top, trying to scroll up
-          (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At bottom, trying to scroll down
-        ) {
-          e.preventDefault(); // Prevent touch scrolling outside the content
-        }
+    // Handle touch move on mobile to prevent closing
+    const handleTouchMove = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = content;
+      const deltaY = e.touches[0].clientY;
+
+      // Block touchmove on scroll outside the content area
+      if (
+        (scrollTop === 0 && deltaY > 0) || // At the top of the content
+        (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom of the content
+      ) {
+        e.preventDefault(); // Prevent scrolling outside the content
       }
     };
-
-
-    const scrollableContent = document.getElementById("scrollable-content");
-    if (scrollableContent) {
-      scrollableContent.addEventListener("touchmove", handleTouchMove, {
+    if (content) {
+      content.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
     }
 
     return () => {
-      if (scrollableContent) {
-        scrollableContent.removeEventListener("touchmove", handleTouchMove);
+      if (content) {
+        content.removeEventListener("touchmove", handleTouchMove);
       }
     };
   }, []);
