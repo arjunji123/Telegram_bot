@@ -524,3 +524,63 @@ exports.getCompanyDetailApi = catchAsyncErrors(async (req, res, next) => {
     );
   }
 });
+exports.loginCompanyApi = catchAsyncErrors(async (req, res, next) => {
+  const { mobile, password } = req.body; // Change to mobile instead of emailOrMobile
+
+  // Checking that mobile number and password are provided
+  if (!mobile || !password) {
+    return next(
+      new ErrorHandler("Please enter mobile number and password", 400)
+    );
+  }
+
+  // Find user by mobile number only
+  const userData = await db.query(
+    "SELECT * FROM users WHERE mobile = ? AND user_type = 'company' LIMIT 1",
+    [mobile] // Query only with mobile and user_type = 'company'
+  );
+  const user = userData[0][0];
+
+  // If user not found
+  if (!user) {
+    return next(new ErrorHandler("Invalid mobile number or password", 400));
+  }
+
+  // Debugging: Log user to check the values
+  console.log(user); // Add this to check the user data being fetched
+
+  // Ensure status is a number and check if the user is active
+  if (parseInt(user.status) === 0) {
+    // parseInt to ensure we compare number values
+    return next(
+      new ErrorHandler(
+        "Your account is deactivated. Please contact support.",
+        403
+      )
+    );
+  }
+
+  // Compare passwords
+  const isPasswordMatched = await User.comparePasswords(
+    password,
+    user.password
+  );
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Invalid mobile number or password", 400));
+  }
+
+  // Generate token for the authenticated user
+  const token = User.generateToken(user.id); // Adjust as per your user object structure
+
+  // Send the token and user details in the response
+  res.status(200).json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      mobile: user.mobile,
+      // Add any other user details you want to include in the response
+    },
+  });
+});
