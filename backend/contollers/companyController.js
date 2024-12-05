@@ -795,46 +795,65 @@ exports.updateCoinRateApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
-
 exports.reqGetAllReqApi = async (req, res, next) => {
   try {
-    // Extract company_id from the request (e.g., from user info in req)
+    // Extract user_id from the request (e.g., from query params or session)
     const userId = req.user.id;
 
-    // Check if userId is provided
+    // Check if user_id is provided
     if (!userId) {
       return next(new ErrorHandler("User ID is required", 400));
     }
 
-    // Query the database for user transactions related to the specified company
-    const [userTransactions] = await db.query(
-      "SELECT * FROM user_transction WHERE company_id = ?",
+    // Query the database for user transactions and user details related to the specified company
+    const userTransactions = await db.query(
+      `SELECT 
+        ut.*, 
+        u.user_name, 
+        ud.upi_id 
+      FROM 
+        user_transction ut
+      JOIN 
+        users u 
+      ON 
+        ut.user_id = u.id
+      JOIN 
+        user_data ud
+      ON 
+        ut.user_id = ud.user_id
+      WHERE 
+        ut.company_id = ?`,
       [userId]
     );
 
+    // Flatten the result if it’s an array of arrays
+    const flattenedTransactions = userTransactions.flat();
+
+    // Filter out any unwanted Buffer data
+    const filteredTransactions = flattenedTransactions.filter((transaction) => {
+      return !transaction._buf; // Remove transactions that contain binary data
+    });
+
     // Check if any transactions were found
-    if (!userTransactions || userTransactions.length === 0) {
-      return res.status(200).json({
-        success: false,
+    if (!filteredTransactions || filteredTransactions.length === 0) {
+      return res.status(404).json({
         message: "No user requests found for the specified company",
       });
     }
 
     // Log retrieved transactions for debugging
-    console.log("User Transactions:", userTransactions);
+    console.log("Filtered User Transactions:", filteredTransactions);
 
-    // Send the transactions in JSON response
-    res.status(200).json({
-      success: true,
-      message: "User requests retrieved successfully",
-      data: userTransactions,
+    // Send the user transactions as JSON response
+    return res.status(200).json({
+      message: "User transactions retrieved successfully",
+      transactions: filteredTransactions,
     });
   } catch (error) {
     console.error("Error retrieving user transactions:", error); // Log any error
 
-    // Send a JSON error response
+    // Send an error response as JSON
     return res.status(500).json({
-      success: false,
       message: "Failed to retrieve user requests",
       error: error.message,
     });
