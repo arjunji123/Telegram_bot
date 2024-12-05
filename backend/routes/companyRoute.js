@@ -25,6 +25,8 @@ const {
   addFrom,
   createRecord,
   allUsers,
+  forgotPasswordApi,
+  updatePasswordApi,
   getAllCompaniesApi,
   getCompanyDetailApi,
   getSingleUser,
@@ -59,9 +61,14 @@ router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
 router.route("/" + module_slug + "").get(isAuthenticatedUser, allUsers);
-//////////////////////////////
 router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
+//////////////////////////////
+
 router.route("/api-login-company").post(loginCompanyApi);
+router.route("/api-password/forgot").post(forgotPasswordApi);
+router
+  .route("/api-password/update")
+  .post(isApiAuthenticatedUser, updatePasswordApi);
 
 module.exports = router;
