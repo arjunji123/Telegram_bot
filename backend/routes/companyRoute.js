@@ -33,6 +33,7 @@ const {
   editUserForm,
   updateUserRecord,
   deleteRecord,
+  getCompanyProfileApi,
 } = require("../contollers/companyController");
 var upload = multer({ storage: Storage });
 // router.post("/users/update-status", updateUserStatus);
@@ -70,5 +71,8 @@ router.route("/api-password/forgot").post(forgotPasswordApi);
 router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
+router
+  .route("/api-company-detail")
+  .get(isApiAuthenticatedUser, getCompanyProfileApi);
 
 module.exports = router;
