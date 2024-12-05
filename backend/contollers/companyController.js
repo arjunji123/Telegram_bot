@@ -732,7 +732,6 @@ exports.getCompanyProfileApi = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-
 ///////////////////////////////////////////
 
 exports.updateCoinRateApi = catchAsyncErrors(async (req, res, next) => {
@@ -796,3 +795,48 @@ exports.updateCoinRateApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
+
+exports.reqGetAllReqApi = async (req, res, next) => {
+  try {
+    // Extract company_id from the request (e.g., from user info in req)
+    const userId = req.user.id;
+
+    // Check if userId is provided
+    if (!userId) {
+      return next(new ErrorHandler("User ID is required", 400));
+    }
+
+    // Query the database for user transactions related to the specified company
+    const [userTransactions] = await db.query(
+      "SELECT * FROM user_transction WHERE company_id = ?",
+      [userId]
+    );
+
+    // Check if any transactions were found
+    if (!userTransactions || userTransactions.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "No user requests found for the specified company",
+      });
+    }
+
+    // Log retrieved transactions for debugging
+    console.log("User Transactions:", userTransactions);
+
+    // Send the transactions in JSON response
+    res.status(200).json({
+      success: true,
+      message: "User requests retrieved successfully",
+      data: userTransactions,
+    });
+  } catch (error) {
+    console.error("Error retrieving user transactions:", error); // Log any error
+
+    // Send a JSON error response
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve user requests",
+      error: error.message,
+    });
+  }
+};
