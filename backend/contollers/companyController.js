@@ -697,7 +697,7 @@ exports.getCompanyProfileApi = catchAsyncErrors(async (req, res, next) => {
     }
 
     const user = userDetails[0]; // Extract user details
-    console.log(user);
+
     // Fetch additional details from the 'company_data' table
     const [userData] = await db.query(
       "SELECT coin_rate, company_coin FROM company_data WHERE company_id = ?",
@@ -729,5 +729,70 @@ exports.getCompanyProfileApi = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler("An error occurred while fetching company profile", 500)
     );
+  }
+});
+
+
+///////////////////////////////////////////
+
+exports.updateCoinRateApi = catchAsyncErrors(async (req, res, next) => {
+  const userId = req.user.id; // Get user ID from the request (assumes user authentication middleware is in place)
+  const { coin_rate } = req.body; // Extract coin_rate from request body
+
+  // Debugging: Log user ID and coin_rate
+  console.log(`User ID: ${userId}, New Coin Rate: ${coin_rate}`);
+
+  // Validate the coin_rate
+  if (!coin_rate || isNaN(coin_rate) || coin_rate <= 0) {
+    return next(new ErrorHandler("Invalid coin_rate provided", 400));
+  }
+
+  try {
+    // Check if the user is a company (validate from the `users` table)
+    const [userDetails] = await db.query(
+      "SELECT user_type FROM users WHERE id = ?",
+      [userId]
+    );
+
+    if (!userDetails || userDetails.length === 0) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    const { user_type } = userDetails[0];
+
+    if (user_type !== "company") {
+      return next(
+        new ErrorHandler(
+          "Unauthorized: Only company users can update the coin rate",
+          403
+        )
+      );
+    }
+
+    // Update the coin_rate in the company_data table
+    const [updateResult] = await db.query(
+      "UPDATE company_data SET coin_rate = ? WHERE company_id = ?",
+      [coin_rate, userId]
+    );
+
+    // Check if the update affected any rows
+    if (updateResult.affectedRows === 0) {
+      return next(
+        new ErrorHandler("No company found with the provided user ID", 404)
+      );
+    }
+
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message: "Coin rate updated successfully",
+      data: {
+        company_id: userId,
+        coin_rate,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating coin rate:", error); // Log the error for debugging
+    return next(new ErrorHandler("Database update failed", 500));
   }
 });
