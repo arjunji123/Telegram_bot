@@ -52,32 +52,34 @@ function App() {
 
   // Prevent Telegram drag-to-close by managing scrolling behavior
   useEffect(() => {
-    const content = document.getElementById("content");
-
-    const handleTouchMove = (e) => {
+    const preventScrollOutsideContent = (e) => {
+      const content = document.getElementById("content");
       if (content) {
         const scrollTop = content.scrollTop;
         const scrollHeight = content.scrollHeight;
-        const offsetHeight = content.offsetHeight;
+        const clientHeight = content.clientHeight;
         const deltaY = e.touches[0].clientY;
 
-        // Prevent scrolling outside the content
+        // Prevent overscrolling at the top or bottom of the content
         if (
-          (scrollTop === 0 && deltaY > 0) || // At the top and trying to scroll up
-          (scrollTop + offsetHeight >= scrollHeight && deltaY < 0) // At the bottom and trying to scroll down
+          (scrollTop === 0 && deltaY > 0) || // At the top, trying to scroll up
+          (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom, trying to scroll down
         ) {
           e.preventDefault();
         }
       }
     };
 
+    const content = document.getElementById("content");
     if (content) {
-      content.addEventListener("touchmove", handleTouchMove, { passive: false });
+      content.addEventListener("touchmove", preventScrollOutsideContent, {
+        passive: false,
+      });
     }
 
     return () => {
       if (content) {
-        content.removeEventListener("touchmove", handleTouchMove);
+        content.removeEventListener("touchmove", preventScrollOutsideContent);
       }
     };
   }, []);
@@ -91,7 +93,7 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="content" className="app-container">
+        <div id="content" className="app-container overflow-y-auto">
           <Routes>
             {/* Redirect based on token existence */}
             <Route
