@@ -32,12 +32,11 @@ function App() {
   const token = localStorage.getItem("user");
 
   useEffect(() => {
-    // Initialize Telegram WebApp
     if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-      tg.disableClosingConfirmation(); // Prevent drag-to-close behavior
+      tg.ready(); // Initialize Telegram WebApp
+      tg.expand(); // Expand WebApp interface
+      tg.disableClosingConfirmation(); // Disable drag-to-close gestures
     }
 
     // Timer for preloader
@@ -45,67 +44,19 @@ function App() {
       setIsLoading(false);
     }, 1000);
 
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    const handlePreventDefault = (e) => {
-      e.preventDefault(); // Prevent all default behaviors
-    };
-
-    // Add event listeners to prevent body-level scrolling
-    document.body.addEventListener("touchmove", handlePreventDefault, {
-      passive: false,
-    });
-    document.body.addEventListener("wheel", handlePreventDefault, {
-      passive: false,
-    });
+    // Prevent scrolling of the body
+    document.body.style.overflow = "hidden";
 
     return () => {
-      // Cleanup event listeners
-      document.body.removeEventListener("touchmove", handlePreventDefault);
-      document.body.removeEventListener("wheel", handlePreventDefault);
+      // Restore body scrolling when component unmounts
+      document.body.style.overflow = "auto";
     };
   }, []);
 
-  useEffect(() => {
-    const scrollableContent = document.getElementById("scrollable-content");
-
-    const allowScrollingInsideContent = (e) => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
-
-      if (
-        (scrollTop === 0 && e.deltaY < 0) || // At the top, trying to scroll up
-        (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0) // At the bottom, trying to scroll down
-      ) {
-        e.preventDefault(); // Block scrolling outside the container
-      }
-    };
-
-    if (scrollableContent) {
-      scrollableContent.addEventListener("wheel", allowScrollingInsideContent, {
-        passive: false,
-      });
-      scrollableContent.addEventListener("touchmove", allowScrollingInsideContent, {
-        passive: false,
-      });
-    }
-    return () => {
-      if (scrollableContent) {
-        scrollableContent.removeEventListener(
-          "wheel",
-          allowScrollingInsideContent
-        );
-        scrollableContent.removeEventListener(
-          "touchmove",
-          allowScrollingInsideContent
-        );
-      }
-    };
-  }, []);
-  
   if (isLoading) {
     return <Preloader />;
   }
@@ -115,34 +66,35 @@ function App() {
       <BrowserRouter>
         <AuthListener />
         <div id="app-container" className="relative h-screen">
-        <div
+          {/* Scrollable content */}
+          <div
             id="scrollable-content"
-            className="overflow-y-auto h-full " // Add padding to prevent overlap with bot UI
+            className="overflow-y-auto h-full px-4 py-6"
           >
-          <Routes>
-            {/* Redirect based on token existence */}
-            <Route
-              path="/"
-              element={token ? <Navigate to="/home" /> : <Signup />}
-            />
+            <Routes>
+              {/* Redirect based on token existence */}
+              <Route
+                path="/"
+                element={token ? <Navigate to="/home" /> : <Signup />}
+              />
 
-            {/* Public Routes */}
-            <Route element={<PublicRoute />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/payment/:id" element={<Payment />} />
-              <Route path="/forgot" element={<ForgotPassword />} />
-            </Route>
+              {/* Public Routes */}
+              <Route element={<PublicRoute />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/payment/:id" element={<Payment />} />
+                <Route path="/forgot" element={<ForgotPassword />} />
+              </Route>
 
-            {/* Private Routes */}
-            <Route element={<PrivateRoute />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/tasks" element={<Tasks />} />
-              <Route path="/friend" element={<Friend />} />
-              <Route path="/withdrawal" element={<Withdrawal />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/history" element={<History />} />
-            </Route>
-          </Routes>
+              {/* Private Routes */}
+              <Route element={<PrivateRoute />}>
+                <Route path="/home" element={<Home />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/friend" element={<Friend />} />
+                <Route path="/withdrawal" element={<Withdrawal />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/history" element={<History />} />
+              </Route>
+            </Routes>
           </div>
         </div>
       </BrowserRouter>
