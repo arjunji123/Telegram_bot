@@ -49,41 +49,25 @@ function App() {
 
  
 
- // Prevent Telegram drag-to-close by managing scroll and touch events
+ // Prevent Telegram drag-to-close and ensure smooth scrolling
  useEffect(() => {
-  const scrollableContent = document.getElementById("scrollable-content");
-
-  // Prevent scroll propagation to Telegram's drag-to-close
-  const preventScrollPropagation  = (e) => {
-    e.stopPropagation(); // Stop the event from bubbling to Telegram WebApp
+  const preventDefaultBehavior = (e) => {
+    e.preventDefault();
   };
 
-  const preventDragClose = (e) => {
-    e.preventDefault(); // Prevent Telegram's default drag-to-close behavior
+  const stopPropagation = (e) => {
+    e.stopPropagation();
   };
-    if (scrollableContent) {
- // Restrict scroll events to the content
- scrollableContent.addEventListener("touchmove", preventScrollPropagation, {
-  passive: false,
-      });
-      scrollableContent.addEventListener("wheel", preventScrollPropagation, {
-        passive: false,
-      });
-        // Prevent drag gestures outside content
-        document.addEventListener("touchmove", preventDragClose, {
-          passive: false,
-        });
-    }
+
+  // Apply to the document to capture all gestures
+  document.addEventListener("touchmove", preventDefaultBehavior, {
+    passive: false,
+  });
+  document.addEventListener("wheel", stopPropagation, { passive: false });
 
     return () => {
-      if (scrollableContent) {
-        scrollableContent.removeEventListener(
-          "touchmove",
-          preventDefaultScroll
-        );
-        scrollableContent.removeEventListener("wheel", preventScrollPropagation);
-      }
-      document.removeEventListener("touchmove", preventDragClose);
+      document.removeEventListener("touchmove", preventDefaultBehavior);
+      document.removeEventListener("wheel", stopPropagation);
     };
   }, []);
 
@@ -95,11 +79,11 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="app-container" className="relative h-screen overflow-hidden bg-black">
+        <div id="app-container" className="relative w-screen  h-screen overflow-hidden bg-black">
           {/* Scrollable content */}
           <div
             id="scrollable-content"
-         className="overflow-y-auto h-full px-4 py-6"
+          className="h-full w-full overflow-y-auto"
           >
             <Routes>
               {/* Redirect based on token existence */}

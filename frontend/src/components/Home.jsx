@@ -109,7 +109,7 @@ function Home() {
       ) : (
         <div className="w-full bg-black text-white min-h-screen flex flex-col max-w-lg relative">
           {/* Header Section */}
-          <div className="flex justify-between items-center  bg-black border-b border-gray-700">
+          <div className="flex justify-between items-center px-4 py-2 bg-black border-b border-gray-700">
             <div className="flex items-center space-x-2">
               <p className="text-xl font-bold font-Inter">
                 <span className="pl-2 text-xl bold"></span>
