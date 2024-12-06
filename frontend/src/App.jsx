@@ -49,25 +49,12 @@ function App() {
 
  
 
- // Prevent Telegram drag-to-close and ensure smooth scrolling
- useEffect(() => {
-  const preventDefaultBehavior = (e) => {
-    e.preventDefault();
-  };
-
-  const stopPropagation = (e) => {
-    e.stopPropagation();
-  };
-
-  // Apply to the document to capture all gestures
-  document.addEventListener("touchmove", preventDefaultBehavior, {
-    passive: false,
-  });
-  document.addEventListener("wheel", stopPropagation, { passive: false });
+  useEffect(() => {
+    // Lock body scroll and ensure smooth scrolling in the content area
+    document.body.style.overflow = "hidden"; // Fix the screen (body won't scroll)
 
     return () => {
-      document.removeEventListener("touchmove", preventDefaultBehavior);
-      document.removeEventListener("wheel", stopPropagation);
+      document.body.style.overflow = ""; // Re-enable body scroll if needed
     };
   }, []);
 
@@ -79,7 +66,7 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="app-container" className="relative w-screen  h-screen overflow-hidden bg-black">
+        <div id="app-container" className=" w-screen  h-screen overflow-hidden bg-black">
           {/* Scrollable content */}
           <div
             id="scrollable-content"
