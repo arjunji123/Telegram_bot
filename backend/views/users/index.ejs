@@ -145,16 +145,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    $(document).ready(function () {
-        // Show confirmation dialog for the Activate button
-        $('.activate-button').click(function (e) {
-            e.preventDefault();
-            const form = $(this).closest('form'); // Get the form element
-            if (confirm("Are you sure you want to activate this user?")) {
-                form.submit(); // Submit the form if the user confirms
-            }
-        });
-
+  
         // Show modal with the clicked image
         $('.view-image').click(function () {
             var imageUrl = $(this).data('image');
@@ -231,4 +222,35 @@
             }
         });
     });
+
+    $('.activate-button').click(function (e) {
+        e.preventDefault(); // Prevent default form submission
+        const form = $(this).closest('form');
+        const userId = form.find('input[name="userId"]').val();
+        const status = form.find('input[name="status"]').val();
+
+        if (confirm("Are you sure you want to activate this user?")) {
+            $.ajax({
+                url: form.attr('action'), // Use form action URL
+                method: 'POST',
+                data: {
+                    userId: userId,
+                    status: status
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Update UI dynamically
+                        const row = $(`#user-row-${userId}`);
+                        row.find('td:nth-child(9)').text('Active');
+                        form.closest('td').html('<button class="btn btn-sm btn-danger" disabled><i class="fas fa-toggle-off"></i> Deactivate</button>');
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Error:', xhr);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        }
+    });
+
 </script>
