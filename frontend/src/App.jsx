@@ -50,29 +50,52 @@ function App() {
  
 
   useEffect(() => {
-    // Prevent body scroll and enable smooth scrolling within #scrollable-content
-    document.body.style.overflow = "hidden"; // Fix the body (disable scrolling)
+      // Prevent body scroll and manage touch gestures within the content area
+      document.body.style.overflow = "hidden";
 
-    const content = document.getElementById("scrollable-content");
+      const content = document.getElementById("scrollable-content");
 
-    const preventOuterScroll = (e) => {
-      if (content) {
-        const { scrollTop, scrollHeight, clientHeight } = content;
+    const handleTouchStart  = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = content;
+      content.dataset.scrollStartY = e.touches[0].clientY; // Save the initial touch position
 
-        // Prevent scrolling when at the top or bottom of the content area
-        if (
-          (scrollTop === 0 && e.deltaY < 0) || // Trying to scroll up when at the top
-          (scrollTop + clientHeight === scrollHeight && e.deltaY > 0) // Trying to scroll down when at the bottom
-        ) {
-          e.preventDefault();
-        }
+      // Check if scrolling is needed
+      if (scrollHeight > clientHeight) {
+        content.dataset.isScrollable = true;
+      } else {
+        content.dataset.isScrollable = false;
       }
     };
-    content?.addEventListener("wheel", preventOuterScroll, { passive: false });
+    const handleTouchMove = (e) => {
+      const { scrollTop, scrollHeight, clientHeight, dataset } = content;
+      const deltaY = e.touches[0].clientY - dataset.scrollStartY;
 
+      // Prevent scrolling outside the content area
+      if (
+        (scrollTop === 0 && deltaY > 0) || // At the top and trying to scroll up
+        (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom and trying to scroll down
+      ) {
+        e.preventDefault(); // Stop the event
+      }
+
+      // Allow scrolling only if the content is scrollable
+      if (dataset.isScrollable === "false") {
+        e.preventDefault();
+      }
+    };
+
+    if (content) {
+      content.addEventListener("touchstart", handleTouchStart);
+      content.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+    }
     return () => {
-      document.body.style.overflow = ""; // Re-enable body scroll if needed
-      content?.removeEventListener("wheel", preventOuterScroll);
+      document.body.style.overflow = ""; // Restore body scroll
+      if (content) {
+        content.removeEventListener("touchstart", handleTouchStart);
+        content.removeEventListener("touchmove", handleTouchMove);
+      }
     };
   }, []);
 
