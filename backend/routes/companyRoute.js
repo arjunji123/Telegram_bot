@@ -82,4 +82,9 @@ router
   .post(isApiAuthenticatedUser, updateCoinRateApi);
 
 router.route("/api-getall-req").get(isApiAuthenticatedUser, reqGetAllReqApi);
+router.post(
+  "/upload-transaction-doc", // Route to handle transaction document upload
+  upload.single("pay_image"), // This is where multer handles file upload
+  uploadTransactionDocApi // Call the handler
+);
 module.exports = router;
