@@ -858,3 +858,55 @@ exports.reqGetAllReqApi = async (req, res, next) => {
     });
   }
 };
+
+exports.uploadTransactionDocApi = catchAsyncErrors(async (req, res, next) => {
+  // Get user ID from route parameters and transaction ID from request body
+  const user_id = req.params.id;
+  const { transaction_id } = req.body;
+
+  // Check if `transaction_id` is provided
+  if (!transaction_id) {
+    return next(new ErrorHandler("Transaction ID is required", 400));
+  }
+
+  // Get the uploaded file's filename, if present
+  let trans_doc = req.file ? req.file.filename : null;
+
+  // Debugging: Log user ID, image filename (if present), and transaction ID
+  console.log(`User ID from params: ${user_id}`);
+  console.log(`Document Filename: ${trans_doc || "No file uploaded"}`);
+  console.log(`Transaction ID: ${transaction_id}`);
+
+  try {
+    // Now, update the transaction based on id (not transaction_id) and company_id
+    let userQuery =
+      "UPDATE user_transction SET trans_doc = ?, status = ? WHERE id = ?";
+    let userData = [trans_doc, "waiting", transaction_id]; // assuming id is the unique identifier
+
+    const updateResult = await db.query(userQuery, userData);
+
+    if (updateResult.affectedRows === 0) {
+      return next(
+        new ErrorHandler(
+          "No transaction found with the provided ID and company ID",
+          404
+        )
+      );
+    }
+
+    // Send a success response back to the client
+    res.status(200).json({
+      success: true,
+      message:
+        "Transaction document uploaded successfully and status updated to 'waiting'.",
+      data: {
+        trans_doc: trans_doc || "No document uploaded", // Optional in response
+        status: "waiting",
+      },
+    });
+  } catch (error) {
+    console.error("Database operation error:", error); // Log the error for debugging
+    return next(new ErrorHandler("Database operation failed", 500));
+  }
+});
+
