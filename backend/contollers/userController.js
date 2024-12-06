@@ -425,7 +425,6 @@ exports.checkAdminLoginOrDashboard = catchAsyncErrors(
 //     user: req.user, // Pass user data if required
 //   });
 // });
-
 exports.dashboard = catchAsyncErrors(async (req, res, next) => {
   // Fetch total number of users, quests, and companies from the correct tables
   const [totalUsersResult] = await db.query(
@@ -440,10 +439,33 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
     "SELECT COUNT(*) AS count FROM company_data"
   ); // or 'companies'
 
+  // Fetch the count of pending users
+  const [pendingUsersResult] = await db.query(
+    `SELECT COUNT(*) AS count
+     FROM users
+     INNER JOIN user_data
+     ON users.id = user_data.user_id
+     WHERE users.status = 0 AND user_data.pay_image IS NULL`
+  );
+
+  const [pendingCompanyReq] = await db.query(
+    `SELECT COUNT(*) AS count
+     FROM user_transction
+     WHERE status = "waiting"`
+  );
+
+  const [questReq] = await db.query(
+    `SELECT COUNT(*) AS count
+     FROM usercoin_audit
+     WHERE status = "waiting" AND type = "quest"`
+  );
   // Extract the counts from the results
   const totalUsers = totalUsersResult[0].count;
   const totalQuests = totalQuestsResult[0].count;
   const totalCompanies = totalCompaniesResult[0].count;
+  const pendingUsers = pendingUsersResult[0].count;
+  const pendingCompany = pendingCompanyReq[0].count;
+  const questApproval = questReq[0].count;
 
   // Render the dashboard with the fetched data
   res.render("users/dashboard", {
@@ -453,6 +475,9 @@ exports.dashboard = catchAsyncErrors(async (req, res, next) => {
     totalUsers,
     totalQuests,
     totalCompanies,
+    pendingUsers,
+    pendingCompany,
+    questApproval,
   });
 });
 
