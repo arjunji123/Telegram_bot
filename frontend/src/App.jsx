@@ -58,17 +58,19 @@ function App() {
     const handleTouchMove = (e) => {
       if (!scrollableContent) return;
       const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
-      const deltaY = e.touches[0].clientY;
 
       // Block touchmove on scroll outside the content area
       if (
-        (scrollTop === 0 && deltaY > 0) || // At the top of the content
-        (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom of the content
+        (scrollTop === 0 && e.deltaY < 0) || // Trying to scroll up at the top
+        (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0) // Trying to scroll down at the bottom
       ) {
         e.preventDefault(); // Prevent scrolling outside the content
       }
     };
     if (scrollableContent) {
+      scrollableContent.addEventListener("wheel", handleTouchMove, {
+        passive: false,
+      });
       scrollableContent.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
@@ -76,6 +78,7 @@ function App() {
 
     return () => {
       if (scrollableContent) {
+        scrollableContent.removeEventListener("wheel", handleTouchMove);
         scrollableContent.removeEventListener("touchmove", handleTouchMove);
       }
     };
