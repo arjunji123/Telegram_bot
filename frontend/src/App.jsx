@@ -54,18 +54,25 @@ function App() {
   const scrollableContent = document.getElementById("scrollable-content");
 
   // Prevent scroll propagation to Telegram's drag-to-close
-  const preventDefaultScroll = (e) => {
+  const preventScrollPropagation  = (e) => {
     e.stopPropagation(); // Stop the event from bubbling to Telegram WebApp
   };
 
-
+  const preventDragClose = (e) => {
+    e.preventDefault(); // Prevent Telegram's default drag-to-close behavior
+  };
     if (scrollableContent) {
-      scrollableContent.addEventListener("touchmove", preventDefaultScroll, {
+ // Restrict scroll events to the content
+ scrollableContent.addEventListener("touchmove", preventScrollPropagation, {
+  passive: false,
+      });
+      scrollableContent.addEventListener("wheel", preventScrollPropagation, {
         passive: false,
       });
-      scrollableContent.addEventListener("wheel", preventDefaultScroll, {
-        passive: false,
-      });
+        // Prevent drag gestures outside content
+        document.addEventListener("touchmove", preventDragClose, {
+          passive: false,
+        });
     }
 
     return () => {
@@ -74,8 +81,9 @@ function App() {
           "touchmove",
           preventDefaultScroll
         );
-        scrollableContent.removeEventListener("wheel", preventDefaultScroll);
+        scrollableContent.removeEventListener("wheel", preventScrollPropagation);
       }
+      document.removeEventListener("touchmove", preventDragClose);
     };
   }, []);
 
@@ -91,7 +99,7 @@ function App() {
           {/* Scrollable content */}
           <div
             id="scrollable-content"
-            className="overflow-y-auto h-full "
+         className="overflow-y-auto h-full px-4 py-6"
           >
             <Routes>
               {/* Redirect based on token existence */}

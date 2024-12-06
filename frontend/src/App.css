@@ -13,8 +13,8 @@
 
 html,
 body {
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden; /* Prevent page-level scrolling */
+  touch-action: none; /* Prevent touch gestures outside content */
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;  
