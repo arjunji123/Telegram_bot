@@ -15,7 +15,7 @@ import Loader from "../components/Loader";
 function Friend() {
   const dispatch = useDispatch();
 
-  // State management
+
   const [loading, setLoading] = useState(true);
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
