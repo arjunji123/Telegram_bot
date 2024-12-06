@@ -50,11 +50,29 @@ function App() {
  
 
   useEffect(() => {
-    // Lock body scroll and ensure smooth scrolling in the content area
-    document.body.style.overflow = "hidden"; // Fix the screen (body won't scroll)
+    // Prevent body scroll and enable smooth scrolling within #scrollable-content
+    document.body.style.overflow = "hidden"; // Fix the body (disable scrolling)
+
+    const content = document.getElementById("scrollable-content");
+
+    const preventOuterScroll = (e) => {
+      if (content) {
+        const { scrollTop, scrollHeight, clientHeight } = content;
+
+        // Prevent scrolling when at the top or bottom of the content area
+        if (
+          (scrollTop === 0 && e.deltaY < 0) || // Trying to scroll up when at the top
+          (scrollTop + clientHeight === scrollHeight && e.deltaY > 0) // Trying to scroll down when at the bottom
+        ) {
+          e.preventDefault();
+        }
+      }
+    };
+    content?.addEventListener("wheel", preventOuterScroll, { passive: false });
 
     return () => {
       document.body.style.overflow = ""; // Re-enable body scroll if needed
+      content?.removeEventListener("wheel", preventOuterScroll);
     };
   }, []);
 
