@@ -20,7 +20,16 @@ body {
   font-family: 'Inter', sans-serif;  
 }
 
-
+#app-container {
+  position: relative;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent scrolling outside the container */
+}
+#scrollable-content {
+  height: 100%; /* Allow full-height scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile devices */
+}
 @font-face {
   font-family: 'Roobert';
   src: url('./assets/fonts/RoobertTRIALVF-BF67243fd545701.ttf') format('truetype');
