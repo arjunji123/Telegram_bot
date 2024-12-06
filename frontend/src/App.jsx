@@ -50,41 +50,62 @@ function App() {
     };
   }, []);
 
-  // Prevent Telegram drag-to-close by managing scrolling behavior
   useEffect(() => {
-    const scrollableContent = document.getElementById("scrollable-content");
-
-    // Handle touch move on mobile to prevent closing
-    const handleTouchMove = (e) => {
-      if (!scrollableContent) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
-
-      // Block touchmove on scroll outside the content area
-      if (
-        (scrollTop === 0 && e.deltaY < 0) || // Trying to scroll up at the top
-        (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0) // Trying to scroll down at the bottom
-      ) {
-        e.preventDefault(); // Prevent scrolling outside the content
-      }
+    const handlePreventDefault = (e) => {
+      e.preventDefault(); // Prevent all default behaviors
     };
-    if (scrollableContent) {
-      scrollableContent.addEventListener("wheel", handleTouchMove, {
-        passive: false,
-      });
-      scrollableContent.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      });
-    }
+
+    // Add event listeners to prevent body-level scrolling
+    document.body.addEventListener("touchmove", handlePreventDefault, {
+      passive: false,
+    });
+    document.body.addEventListener("wheel", handlePreventDefault, {
+      passive: false,
+    });
 
     return () => {
-      if (scrollableContent) {
-        scrollableContent.removeEventListener("wheel", handleTouchMove);
-        scrollableContent.removeEventListener("touchmove", handleTouchMove);
-      }
+      // Cleanup event listeners
+      document.body.removeEventListener("touchmove", handlePreventDefault);
+      document.body.removeEventListener("wheel", handlePreventDefault);
     };
   }, []);
 
-  // Show Preloader while loading
+  useEffect(() => {
+    const scrollableContent = document.getElementById("scrollable-content");
+
+    const allowScrollingInsideContent = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
+
+      if (
+        (scrollTop === 0 && e.deltaY < 0) || // At the top, trying to scroll up
+        (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0) // At the bottom, trying to scroll down
+      ) {
+        e.preventDefault(); // Block scrolling outside the container
+      }
+    };
+
+    if (scrollableContent) {
+      scrollableContent.addEventListener("wheel", allowScrollingInsideContent, {
+        passive: false,
+      });
+      scrollableContent.addEventListener("touchmove", allowScrollingInsideContent, {
+        passive: false,
+      });
+    }
+    return () => {
+      if (scrollableContent) {
+        scrollableContent.removeEventListener(
+          "wheel",
+          allowScrollingInsideContent
+        );
+        scrollableContent.removeEventListener(
+          "touchmove",
+          allowScrollingInsideContent
+        );
+      }
+    };
+  }, []);
+  
   if (isLoading) {
     return <Preloader />;
   }
