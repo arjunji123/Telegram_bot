@@ -91,7 +91,7 @@ function App() {
           {/* Scrollable content */}
           <div
             id="scrollable-content"
-            className="overflow-y-auto h-full px-2 py-4"
+            className="overflow-y-auto h-full "
           >
             <Routes>
               {/* Redirect based on token existence */}
