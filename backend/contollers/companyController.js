@@ -807,6 +807,7 @@ exports.reqGetAllReqApi = async (req, res, next) => {
     // Query the database for user transactions and user details related to the specified company
     const userTransactions = await db.query(
       `SELECT 
+        ut.id AS transaction_id, 
         ut.*, 
         u.user_name, 
         ud.upi_id 
