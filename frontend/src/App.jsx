@@ -48,12 +48,42 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Prevent scrolling of the body
+    // Disable body scrolling
     document.body.style.overflow = "hidden";
 
     return () => {
-      // Restore body scrolling when component unmounts
+      // Re-enable body scrolling when unmounting
       document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  // Prevent drag-to-close by managing touch events
+  useEffect(() => {
+    const scrollableContent = document.getElementById("scrollable-content");
+
+    const handleTouchMove = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
+
+      const isAtTop = scrollTop === 0 && e.touches[0].clientY > 0;
+      const isAtBottom =
+        scrollTop + clientHeight >= scrollHeight && e.touches[0].clientY < 0;
+
+      // Prevent scrolling outside the container
+      if (isAtTop || isAtBottom) {
+        e.preventDefault();
+      }
+    };
+
+    if (scrollableContent) {
+      scrollableContent.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      if (scrollableContent) {
+        scrollableContent.removeEventListener("touchmove", handleTouchMove);
+      }
     };
   }, []);
 
@@ -65,7 +95,7 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="app-container" className="relative h-screen">
+        <div id="app-container" className="relative h-screen overflow-hidden">
           {/* Scrollable content */}
           <div
             id="scrollable-content"
