@@ -36,6 +36,7 @@ const {
   getCompanyProfileApi,
   updateCoinRateApi,
   reqGetAllReqApi,
+  uploadTransactionDocApi,
 } = require("../contollers/companyController");
 var upload = multer({ storage: Storage });
 // router.post("/users/update-status", updateUserStatus);
