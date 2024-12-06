@@ -47,42 +47,34 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    // Disable body scrolling
-    document.body.style.overflow = "hidden";
+ 
 
-    return () => {
-      // Re-enable body scrolling when unmounting
-      document.body.style.overflow = "auto";
-    };
-  }, []);
+ // Prevent Telegram drag-to-close by managing scroll and touch events
+ useEffect(() => {
+  const scrollableContent = document.getElementById("scrollable-content");
 
-  // Prevent drag-to-close by managing touch events
-  useEffect(() => {
-    const scrollableContent = document.getElementById("scrollable-content");
+  // Prevent scroll propagation to Telegram's drag-to-close
+  const preventDefaultScroll = (e) => {
+    e.stopPropagation(); // Stop the event from bubbling to Telegram WebApp
+  };
 
-    const handleTouchMove = (e) => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
-
-      const isAtTop = scrollTop === 0 && e.touches[0].clientY > 0;
-      const isAtBottom =
-        scrollTop + clientHeight >= scrollHeight && e.touches[0].clientY < 0;
-
-      // Prevent scrolling outside the container
-      if (isAtTop || isAtBottom) {
-        e.preventDefault();
-      }
-    };
 
     if (scrollableContent) {
-      scrollableContent.addEventListener("touchmove", handleTouchMove, {
+      scrollableContent.addEventListener("touchmove", preventDefaultScroll, {
+        passive: false,
+      });
+      scrollableContent.addEventListener("wheel", preventDefaultScroll, {
         passive: false,
       });
     }
 
     return () => {
       if (scrollableContent) {
-        scrollableContent.removeEventListener("touchmove", handleTouchMove);
+        scrollableContent.removeEventListener(
+          "touchmove",
+          preventDefaultScroll
+        );
+        scrollableContent.removeEventListener("wheel", preventDefaultScroll);
       }
     };
   }, []);
@@ -95,11 +87,11 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="app-container" className="relative h-screen overflow-hidden">
+        <div id="app-container" className="relative h-screen overflow-hidden bg-black">
           {/* Scrollable content */}
           <div
             id="scrollable-content"
-            className="overflow-y-auto h-full "
+            className="overflow-y-auto h-full px-2 py-4"
           >
             <Routes>
               {/* Redirect based on token existence */}
