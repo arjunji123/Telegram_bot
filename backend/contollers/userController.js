@@ -754,12 +754,10 @@ exports.createRecord = catchAsyncErrors(async (req, res, next) => {
   }
 });
 ////////////////////////////////////////////
-
 exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
   const userId = req.body.userId;
   const newStatus = req.body.status;
   const performedByUserId = req.body.performedByUserId;
-  const redirectUrl = req.body.redirect || "/admin/users";
 
   try {
     // Update user status in the database
@@ -769,11 +767,17 @@ exports.updateUserStatus = catchAsyncErrors(async (req, res, next) => {
     // Distribute coins based on activation
     await distributeCoins(userId);
 
-    // Redirect after successful update
-    res.redirect(redirectUrl);
+    // Send a JSON response
+    res.json({
+      success: true,
+      message: `User status updated successfully for User ID: ${userId}`,
+    });
   } catch (error) {
     console.error("Error updating user status:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 });
 
