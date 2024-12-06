@@ -142,8 +142,10 @@ function Home() {
             </div>
 
             <p className="text-2xl font-extrabold capitalize font-Inter">{userData ? userData.user_name : "User Name"}</p>
-            <p className="text-4xl font-extrabold">
-              𝕌 {userData ? userData.coins : "0"}
+            <p className="text-5xl font-extrabold flex ">
+              {/* 𝕌  */}
+              <span><img src="src\assets\logo\U.png" alt="" className="w-11 h-11 mt-1" /></span>
+              <span>  {userData ? userData.coins : "0"}</span>
             </p>
           </div>
 

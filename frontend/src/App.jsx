@@ -52,11 +52,12 @@ function App() {
 
   // Prevent Telegram drag-to-close by managing scrolling behavior
   useEffect(() => {
-    const content = document.getElementById("scrollable-content");
+    const scrollableContent = document.getElementById("scrollable-content");
 
     // Handle touch move on mobile to prevent closing
     const handleTouchMove = (e) => {
-      const { scrollTop, scrollHeight, clientHeight } = content;
+      if (!scrollableContent) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
       const deltaY = e.touches[0].clientY;
 
       // Block touchmove on scroll outside the content area
@@ -67,15 +68,15 @@ function App() {
         e.preventDefault(); // Prevent scrolling outside the content
       }
     };
-    if (content) {
-      content.addEventListener("touchmove", handleTouchMove, {
+    if (scrollableContent) {
+      scrollableContent.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
     }
 
     return () => {
-      if (content) {
-        content.removeEventListener("touchmove", handleTouchMove);
+      if (scrollableContent) {
+        scrollableContent.removeEventListener("touchmove", handleTouchMove);
       }
     };
   }, []);
