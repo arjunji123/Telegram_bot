@@ -30,47 +30,45 @@ store.dispatch(loadUserFromLocalStorage());
 
 function App() {
     const [isMobile, setIsMobile] = useState(false);
-
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 useEffect(() => {
-  // Function to detect if the user is on a mobile device
-  const detectMobileDevice = () => {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    
-    // Strict check for mobile devices using the userAgent
-    const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
-    
-    // Check for screen size (e.g., 768px or less for mobile devices)
-    const isSmallScreen = window.innerWidth <= 768;
+    // Strict check for mobile device based on User-Agent and screen size
+    const detectMobileDevice = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      
+      // Detect mobile device user agent (Android/iPhone)
+      const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
 
-    // Only set isMobile to true if both conditions are met (for mobile user agent and small screen size)
-    return isMobileDevice && isSmallScreen;
-  };
+      // Detect if screen size is below a mobile breakpoint (e.g., 768px)
+      const isSmallScreen = window.innerWidth <= 768;
 
-  // Set mobile state based on strict checks
-  setIsMobile(detectMobileDevice());
+      // Only set mobile if both checks pass
+      return isMobileDevice && isSmallScreen;
+    };
 
-  // Initialize Telegram WebApp if present
-  if (window.Telegram?.WebApp) {
-    const tg = window.Telegram.WebApp;
-    tg.ready(); // Initialize Telegram WebApp
-    tg.expand(); // Expand WebApp interface
-    tg.disableClosingConfirmation(); // Disable drag-to-close gestures
-  }
+    // Set isMobile state based on strict checks
+    setIsMobile(detectMobileDevice());
 
-  // Stop loading after platform detection and Telegram WebApp setup
-  setIsLoading(false);
+    // Initialize Telegram WebApp if present
+    if (window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready(); // Initialize Telegram WebApp
+      tg.expand(); // Expand WebApp interface
+      tg.disableClosingConfirmation(); // Disable drag-to-close gestures
+    }
 
-  // Timer for preloader (optional, can adjust or remove based on requirements)
-  const timer = setTimeout(() => {
+    // Stop loading after platform detection and WebApp setup
     setIsLoading(false);
-  }, 1000);
 
-  // Cleanup function to clear timer when component unmounts
-  return () => clearTimeout(timer);
-}, []);  // Empty dependency array to run only once after mount
+    // Timer for preloader (optional, can adjust or remove based on requirements)
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
 
+    // Cleanup function to clear timer when component unmounts
+    return () => clearTimeout(timer);
+  }, []); // Empty dependency array to run only once after mount
 
  
   useEffect(() => {
