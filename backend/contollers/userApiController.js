@@ -885,13 +885,18 @@ exports.getUserDetailApi = catchAsyncErrors(async (req, res, next) => {
     const userData = userDataQuery[0][0]; // Extract user_data details
     const referralCode = userData.referral_code; // Get the referral code of the logged-in user
 
-    // Count how many users have used this referral code
-    const referralCountQuery = await db.query(
-      "SELECT COUNT(*) AS referral_count FROM user_data WHERE referral_by = ?",
+     const referralCountQuery = await db.query(
+      `SELECT COUNT(*) AS referral_count
+      FROM user_data 
+      JOIN users 
+      ON user_data.user_id = users.id
+      WHERE user_data.referral_by = ? 
+      AND users.status = 1`,
       [referralCode]
     );
 
-    const referralCount = referralCountQuery[0][0].referral_count || 0; // Extract referral count
+    const referralCount = referralCountQuery[0][0].referral_count || 0;
+
 
     // Construct the response object with all the necessary details
     const userProfile = {
