@@ -28,6 +28,8 @@ import "./App.css";
 store.dispatch(loadUserFromLocalStorage());
 
 function App() {
+    const [isMobile, setIsMobile] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
@@ -47,20 +49,18 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-   useEffect(() => {
+ 
+  useEffect(() => {
+    // Check if the user is in the Telegram app (likely mobile)
     if (window.Telegram?.WebApp) {
-      // User is in Telegram app (mobile)
       setIsMobile(true);
     } else {
-      // User is not in Telegram app, likely on desktop
-      setIsMobile(false);
+      setIsMobile(false); // Likely on desktop
     }
+  }, []); // Only run once when the component mounts
 
-    // Preloader timer
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
   if (!isMobile) {
+    // If not on mobile (desktop or other platforms), show the message
     return (
       <div className="desktop-message">
         <h1>Open this bot on a mobile device!</h1>
