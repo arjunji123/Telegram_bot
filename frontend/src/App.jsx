@@ -113,13 +113,15 @@ useEffect(() => {
   if (isLoading) {
     return <Preloader />;
   }
- if (!isMobile) {
-    return (
-      <div className="desktop-message">
-        <h1>Open this bot on a mobile device!</h1>
-      </div>
-    );
-  }
+  <img
+          src="src\Img\desktop.JPEG"  // Replace with your image path
+          alt="Open on Mobile"
+          style={{
+            width: "80%",       // Adjust the width of the image as needed
+            margin: "0 auto",   // Center the image horizontally
+            display: "block",   // Make sure it's displayed as a block element
+          }}
+        />
   return (
     <Provider store={store}>
       <BrowserRouter>
