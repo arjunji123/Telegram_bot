@@ -122,8 +122,7 @@ useEffect(() => {
                   src={desktopImage} 
        alt="Open on Mobile"
           style={{
-            width: "80%",       // Adjust the width of the image as needed
-            margin: "0 auto",   // Center the image horizontally
+            width: "100%",       // Adjust the width of the image as needed
             display: "block",   // Make sure it's displayed as a block element
           }}
         />
