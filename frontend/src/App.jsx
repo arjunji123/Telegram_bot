@@ -116,15 +116,11 @@ function App() {
   }, []);
 
   // If not mobile, show the desktop image/message
+  // If not mobile, show the desktop message
   if (!isMobile) {
     return (
       <div className="desktop-message">
         <h1>Open this bot on a mobile device!</h1>
-        <img
-          src="/path/to/desktop-image.jpg"
-          alt="Use Mobile"
-          style={{ width: "50%", margin: "0 auto", display: "block" }}
-        />
       </div>
     );
   }
