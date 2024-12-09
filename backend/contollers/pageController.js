@@ -647,7 +647,7 @@ exports.apiGetSingleRecord = catchAsyncErrors(async (req, res, next) => {
 
     // Process the image URL
     quest.image =
-      process.env.BACKEND_URL + "/uploads/" + module_slug + "/" + quest.image;
+      process.env.BACKEND_URL + "uploads/" + module_slug + "/" + quest.image;
 
     res.status(200).json({
       success: true,
