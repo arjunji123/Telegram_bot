@@ -32,31 +32,32 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
- useEffect(() => {
-    // Platform detection logic
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
-      setIsMobile(true);  // Set mobile state to true if detected
-    }
+useEffect(() => {
+  // Platform detection logic
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
+    setIsMobile(true);  // Set mobile state to true if detected
+  }
 
-    // Stop loading after platform detection
-    setIsLoading(false);  // Hide preloader once the platform is detected
-  }, []);  // Empty dependency array to run only once after mount
-  useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready(); // Initialize Telegram WebApp
-      tg.expand(); // Expand WebApp interface
-      tg.disableClosingConfirmation(); // Disable drag-to-close gestures
-    }
+  // Initialize Telegram WebApp if present
+  if (window.Telegram?.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready(); // Initialize Telegram WebApp
+    tg.expand(); // Expand WebApp interface
+    tg.disableClosingConfirmation(); // Disable drag-to-close gestures
+  }
 
-    // Timer for preloader
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+  // Stop loading after platform detection and Telegram WebApp setup
+  setIsLoading(false);  // Hide preloader once the platform is detected and WebApp is ready
 
-    return () => clearTimeout(timer);
-  }, []);
+  // Timer for preloader (optional, can adjust or remove based on requirements)
+  const timer = setTimeout(() => {
+    setIsLoading(false);
+  }, 1000);
+
+  // Cleanup function to clear timer when component unmounts
+  return () => clearTimeout(timer);
+}, []);  // Empty dependency array to run only once after mount
 
  
   useEffect(() => {
