@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../store/store";
 import { loadUserFromLocalStorage } from "../store/actions/authActions";
-import desktopImage from './images/desktop1.png'; // Import the image
+import desktopImage from './images/desktop.png'; // Import the image
 
 // Component Imports
 import Friend from "./components/Friend";
