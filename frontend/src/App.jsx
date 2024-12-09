@@ -33,22 +33,31 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 useEffect(() => {
-    // Strict check for mobile device based on User-Agent and screen size
     const detectMobileDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      
-      // Detect mobile device user agent (Android/iPhone)
-      const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
 
-      // Detect if screen size is below a mobile breakpoint (e.g., 768px)
+      // Detect if the user is on a mobile platform (Android, iPhone, iPad, iPod)
+      const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
+      
+      // Screen width must also be below a mobile breakpoint (768px) for mobile
       const isSmallScreen = window.innerWidth <= 768;
 
-      // Only set mobile if both checks pass
+      // Only consider it mobile if both conditions are true
       return isMobileDevice && isSmallScreen;
     };
 
-    // Set isMobile state based on strict checks
-    setIsMobile(detectMobileDevice());
+    // Function to check if the current window is truly on mobile
+    const updateMobileState = () => {
+      // Apply the mobile detection logic
+      const isCurrentlyMobile = detectMobileDevice();
+      setIsMobile(isCurrentlyMobile);
+    };
+
+    // Check the mobile state on initial load
+    updateMobileState();
+
+    // Handle window resize events (for responsiveness)
+    window.addEventListener('resize', updateMobileState);
 
     // Initialize Telegram WebApp if present
     if (window.Telegram?.WebApp) {
@@ -66,9 +75,12 @@ useEffect(() => {
       setIsLoading(false);
     }, 1000);
 
-    // Cleanup function to clear timer when component unmounts
-    return () => clearTimeout(timer);
-  }, []); // Empty dependency array to run only once after mount
+    // Cleanup function to clear the timer and remove resize event listener
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateMobileState);
+    };
+  }, []); // Empty dependency array ensures this runs only once after mount
 
  
   useEffect(() => {
