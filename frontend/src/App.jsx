@@ -107,7 +107,7 @@ function App() {
 
   
   // Check if the platform is mobile
- useEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth <= 768) {
         setIsMobile(true); // Mobile screen (width <= 768px)
@@ -115,6 +115,17 @@ function App() {
         setIsMobile(false); // Desktop screen (width > 768px)
       }
     };
+
+    // Initial check on component mount
+    handleResize();
+
+    // Add resize event listener for future changes in screen size
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
 
   // If not mobile, show the desktop image/message
   // If not mobile, show the desktop message
