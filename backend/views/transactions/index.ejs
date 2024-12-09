@@ -123,7 +123,7 @@
 
             // Make the POST request
             $.ajax({
-                url: 'https://telegram-bot-by30.onrender.com/api/v1/approveTransaction', // Endpoint for the approve API
+                url: '<%- process.env.BACKEND_URL %>api/v1/approveTransaction', // Endpoint for the approve API
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: userId }),
