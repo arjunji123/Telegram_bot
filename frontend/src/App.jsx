@@ -47,8 +47,26 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
- 
+   useEffect(() => {
+    if (window.Telegram?.WebApp) {
+      // User is in Telegram app (mobile)
+      setIsMobile(true);
+    } else {
+      // User is not in Telegram app, likely on desktop
+      setIsMobile(false);
+    }
 
+    // Preloader timer
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+  if (!isMobile) {
+    return (
+      <div className="desktop-message">
+        <h1>Open this bot on a mobile device!</h1>
+      </div>
+    );
+  }
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
       document.body.style.overflow = "hidden";
