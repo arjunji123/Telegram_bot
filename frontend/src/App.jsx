@@ -37,7 +37,7 @@ function App() {
     const checkDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-      // Advanced mobile detection: Require both touch capabilities and mobile user agent
+      // Strict mobile detection: Requires both a mobile user agent and touch capability
       const isTouchDevice =
         "ontouchstart" in window ||
         navigator.maxTouchPoints > 0 ||
@@ -45,38 +45,39 @@ function App() {
 
       const isMobileUserAgent = /android|iPhone|iPad|iPod/i.test(userAgent);
 
-      // Final condition: Must satisfy both touch capabilities and mobile user agent
-      setIsMobile(isTouchDevice && isMobileUserAgent);
+      // Final condition for detecting real mobile devices
+      const isMobileDevice = isTouchDevice && isMobileUserAgent;
+
+      setIsMobile(isMobileDevice);
     };
 
-    checkDevice(); // Initial device check
+    // Perform initial device check
+    checkDevice();
 
-    // Listen for resize events to handle dynamic changes (like DevTools toggling)
-    window.addEventListener("resize", checkDevice);
+    // Listen for screen resize events (for DevTools simulation toggling)
+    const handleResize = () => checkDevice();
+    window.addEventListener("resize", handleResize);
 
     // Telegram WebApp Initialization
     if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
 
-      // If not mobile, close Telegram WebApp or prevent interaction
-      if (!isMobile) {
-        tg.close();
-      } else {
+      // Only proceed if the device is detected as mobile
+      if (isMobile) {
         tg.ready();
         tg.expand();
         tg.disableClosingConfirmation();
       }
     }
 
-    // Loading state complete
+    // Remove loading state after setup
     setIsLoading(false);
 
-    // Cleanup listener on unmount
+    // Cleanup event listener on component unmount
     return () => {
-      window.removeEventListener("resize", checkDevice);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [isMobile]); // Add isMobile to dependencies for reactivity if needed
-
+  }, [isMobile]);
     
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
