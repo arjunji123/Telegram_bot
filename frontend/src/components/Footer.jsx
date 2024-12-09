@@ -100,7 +100,7 @@ function Footer() {
         <span className={`text-xs mt-1 ${activePage === 'withdrawal' ? 'font-bold' : 'opacity-50'}`}>Wallet</span>
       </Link>
     </div>
-  {/* <div className="text-center text-white w-1/5">
+  <div className="text-center text-white w-1/5">
       <div
         className="flex flex-col items-center cursor-pointer"
         onClick={handleLogout}
@@ -108,7 +108,7 @@ function Footer() {
         <IoLogOutOutline size={28} className={`transition-opacity duration-200 ${activePage === 'logout' ? 'opacity-100' : 'opacity-50'}`} />
         <span className={`text-xs mt-1 ${activePage === 'logout' ? 'font-bold' : 'opacity-50'}`}>Logout</span>
       </div>
-    </div> */}
+    </div> 
   </div>
   );
 }
