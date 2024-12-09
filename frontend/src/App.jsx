@@ -33,12 +33,23 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
-  useEffect(() => {
-  // Platform detection logic
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
-    setIsMobile(true);  // Set mobile state to true if detected
-  }
+useEffect(() => {
+  // Function to detect if the user is on a mobile device
+  const detectMobileDevice = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    
+    // Strict check for mobile devices using the userAgent
+    const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
+    
+    // Check for screen size (e.g., 768px or less for mobile devices)
+    const isSmallScreen = window.innerWidth <= 768;
+
+    // Only set isMobile to true if both conditions are met (for mobile user agent and small screen size)
+    return isMobileDevice && isSmallScreen;
+  };
+
+  // Set mobile state based on strict checks
+  setIsMobile(detectMobileDevice());
 
   // Initialize Telegram WebApp if present
   if (window.Telegram?.WebApp) {
@@ -49,7 +60,7 @@ function App() {
   }
 
   // Stop loading after platform detection and Telegram WebApp setup
-  setIsLoading(false);  // Hide preloader once the platform is detected and WebApp is ready
+  setIsLoading(false);
 
   // Timer for preloader (optional, can adjust or remove based on requirements)
   const timer = setTimeout(() => {
