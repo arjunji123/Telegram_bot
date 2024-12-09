@@ -32,31 +32,31 @@ function App() {
     const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
-useEffect(() => {
+
+  useEffect(() => {
     const detectMobileDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-      // Detect if the user is on a mobile platform (Android, iPhone, iPad, iPod)
+      // Check for mobile devices based on user agent
       const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
-      
-      // Screen width must also be below a mobile breakpoint (768px) for mobile
+
+      // Also check the screen width - we want a mobile width (max 768px)
       const isSmallScreen = window.innerWidth <= 768;
 
-      // Only consider it mobile if both conditions are true
+      // Return true if both checks match
       return isMobileDevice && isSmallScreen;
     };
 
-    // Function to check if the current window is truly on mobile
+    // Function to update mobile state
     const updateMobileState = () => {
-      // Apply the mobile detection logic
       const isCurrentlyMobile = detectMobileDevice();
       setIsMobile(isCurrentlyMobile);
     };
 
-    // Check the mobile state on initial load
+    // Initial check for mobile state
     updateMobileState();
 
-    // Handle window resize events (for responsiveness)
+    // Handle window resize to detect changes
     window.addEventListener('resize', updateMobileState);
 
     // Initialize Telegram WebApp if present
@@ -75,13 +75,12 @@ useEffect(() => {
       setIsLoading(false);
     }, 1000);
 
-    // Cleanup function to clear the timer and remove resize event listener
+    // Cleanup function
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', updateMobileState);
     };
-  }, []); // Empty dependency array ensures this runs only once after mount
-
+  }, []); // Empty dependency array to run once after mount
  
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
