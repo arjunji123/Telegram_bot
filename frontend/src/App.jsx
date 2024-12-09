@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../store/store";
 import { loadUserFromLocalStorage } from "../store/actions/authActions";
+import desktopImage from './Img/desktop.JPEG'; // Import the image
 
 // Component Imports
 import Friend from "./components/Friend";
@@ -117,10 +118,9 @@ useEffect(() => {
     // If not on mobile (desktop or other platforms), show the message and image
     return (
       <div className="desktop-message">
-        <h1>Open this bot on a mobile device!</h1>
         <img
-          src="src\Img\desktop.JPEG"  // Replace with your image path
-          alt="Open on Mobile"
+                  src={desktopImage} 
+       alt="Open on Mobile"
           style={{
             width: "80%",       // Adjust the width of the image as needed
             margin: "0 auto",   // Center the image horizontally
