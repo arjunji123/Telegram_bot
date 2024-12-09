@@ -33,31 +33,18 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-  useEffect(() => {
-    const detectMobileDevice = () => {
+    useEffect(() => {
+    // Detect mobile devices more accurately (to prevent browser DevTools toggle interference)
+    const checkDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-      // Check for mobile devices based on user agent
-      const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
-
-      // Also check the screen width - we want a mobile width (max 768px)
-      const isSmallScreen = window.innerWidth <= 768;
-
-      // Return true if both checks match
-      return isMobileDevice && isSmallScreen;
+      const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent) && window.innerWidth <= 768;
+      setIsMobile(isMobileDevice);
     };
 
-    // Function to update mobile state
-    const updateMobileState = () => {
-      const isCurrentlyMobile = detectMobileDevice();
-      setIsMobile(isCurrentlyMobile);
-    };
+    checkDevice();  // Check on initial load
 
-    // Initial check for mobile state
-    updateMobileState();
-
-    // Handle window resize to detect changes
-    window.addEventListener('resize', updateMobileState);
+    // Add event listener to check on window resize (in case screen size changes)
+    window.addEventListener("resize", checkDevice);
 
     // Initialize Telegram WebApp if present
     if (window.Telegram?.WebApp) {
@@ -70,17 +57,11 @@ function App() {
     // Stop loading after platform detection and WebApp setup
     setIsLoading(false);
 
-    // Timer for preloader (optional, can adjust or remove based on requirements)
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    // Cleanup function
+    // Cleanup on unmount
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updateMobileState);
+      window.removeEventListener("resize", checkDevice); // Remove event listener when component unmounts
     };
-  }, []); // Empty dependency array to run once after mount
+  }, []);
  
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
@@ -138,15 +119,7 @@ function App() {
   if (!isMobile) {
     // If not on mobile (desktop or other platforms), show the message and image
     return (
-          <style>
-      {`
-        @media only screen and (max-width: 768px) {
-          .desktop-message {
-            display: none;
-          }
-        }
-      `}
-    </style>
+        
       <div className="desktop-message">
         <img
                   src={desktopImage} 
