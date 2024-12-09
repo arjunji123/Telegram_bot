@@ -138,6 +138,15 @@ function App() {
   if (!isMobile) {
     // If not on mobile (desktop or other platforms), show the message and image
     return (
+          <style>
+      {`
+        @media only screen and (max-width: 768px) {
+          .desktop-message {
+            display: none;
+          }
+        }
+      `}
+    </style>
       <div className="desktop-message">
         <img
                   src={desktopImage} 
@@ -152,6 +161,7 @@ function App() {
   }
 
   return (
+      
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
