@@ -33,36 +33,31 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-    useEffect(() => {
-    // Detect mobile devices more accurately (to prevent browser DevTools toggle interference)
-    const checkDevice = () => {
+   useEffect(() => {
+    const detectMobileDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent) && window.innerWidth <= 768;
-      setIsMobile(isMobileDevice);
+
+      // Advanced mobile detection logic
+      const isTouchDevice =
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0;
+
+      const isMobileUserAgent = /android|iPhone|iPad|iPod/i.test(userAgent);
+
+      // Mark as mobile only if both user agent and touch support match
+      setIsMobile(isTouchDevice && isMobileUserAgent);
     };
 
-    checkDevice();  // Check on initial load
+    detectMobileDevice(); // Run detection on load
 
-    // Add event listener to check on window resize (in case screen size changes)
-    window.addEventListener("resize", checkDevice);
+    // Add a resize listener to re-check on screen size change (e.g., DevTools toggle)
+    window.addEventListener("resize", detectMobileDevice);
 
-    // Initialize Telegram WebApp if present
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready(); // Initialize Telegram WebApp
-      tg.expand(); // Expand WebApp interface
-      tg.disableClosingConfirmation(); // Disable drag-to-close gestures
-    }
-
-    // Stop loading after platform detection and WebApp setup
-    setIsLoading(false);
-
-    // Cleanup on unmount
     return () => {
-      window.removeEventListener("resize", checkDevice); // Remove event listener when component unmounts
+      window.removeEventListener("resize", detectMobileDevice);
     };
   }, []);
- 
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
       document.body.style.overflow = "hidden";
