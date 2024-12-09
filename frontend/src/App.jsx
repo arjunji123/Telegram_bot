@@ -107,13 +107,14 @@ function App() {
 
   
   // Check if the platform is mobile
-useEffect(() => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
-    setIsMobile(true);
-  }
-}, []);
-
+ useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsMobile(true); // Mobile screen (width <= 768px)
+      } else {
+        setIsMobile(false); // Desktop screen (width > 768px)
+      }
+    };
 
   // If not mobile, show the desktop image/message
   // If not mobile, show the desktop message
