@@ -33,15 +33,10 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
-    useEffect(() => {
+  useEffect(() => {
   // Platform detection logic
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  const isMobileDevice = /android|iPhone|iPad|iPod/i.test(userAgent);
-  
-  // Detect if the screen size is small enough to be considered a mobile device
-  const isSmallScreen = window.innerWidth <= 768; // Adjust this based on your design breakpoints
-  
-  if (isMobileDevice || isSmallScreen) {
+  if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
     setIsMobile(true);  // Set mobile state to true if detected
   }
 
