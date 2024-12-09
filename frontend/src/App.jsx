@@ -107,13 +107,13 @@ function App() {
 
   
   // Check if the platform is mobile
-  useEffect(() => {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
-      setIsMobile(true);
-    }
-    setIsLoading(false); // Preloader timer
-  }, []);
+useEffect(() => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
+    setIsMobile(true);
+  }
+}, []);
+
 
   // If not mobile, show the desktop image/message
   // If not mobile, show the desktop message
