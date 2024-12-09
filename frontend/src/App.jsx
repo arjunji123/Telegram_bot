@@ -29,6 +29,8 @@ store.dispatch(loadUserFromLocalStorage());
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+
   const token = localStorage.getItem("user");
 
   useEffect(() => {
@@ -103,6 +105,29 @@ function App() {
     return <Preloader />;
   }
 
+  
+  // Check if the platform is mobile
+  useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
+      setIsMobile(true);
+    }
+    setIsLoading(false); // Preloader timer
+  }, []);
+
+  // If not mobile, show the desktop image/message
+  if (!isMobile) {
+    return (
+      <div className="desktop-message">
+        <h1>Open this bot on a mobile device!</h1>
+        <img
+          src="/path/to/desktop-image.jpg"
+          alt="Use Mobile"
+          style={{ width: "50%", margin: "0 auto", display: "block" }}
+        />
+      </div>
+    );
+  }
   return (
     <Provider store={store}>
       <BrowserRouter>
