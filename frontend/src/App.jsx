@@ -34,10 +34,10 @@ function App() {
   const token = localStorage.getItem("user");
 
    useEffect(() => {
-    const detectMobileDevice = () => {
+    const checkDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-      // Advanced mobile detection logic
+      // Advanced mobile detection: Require both touch capabilities and mobile user agent
       const isTouchDevice =
         "ontouchstart" in window ||
         navigator.maxTouchPoints > 0 ||
@@ -45,19 +45,39 @@ function App() {
 
       const isMobileUserAgent = /android|iPhone|iPad|iPod/i.test(userAgent);
 
-      // Mark as mobile only if both user agent and touch support match
+      // Final condition: Must satisfy both touch capabilities and mobile user agent
       setIsMobile(isTouchDevice && isMobileUserAgent);
     };
 
-    detectMobileDevice(); // Run detection on load
+    checkDevice(); // Initial device check
 
-    // Add a resize listener to re-check on screen size change (e.g., DevTools toggle)
-    window.addEventListener("resize", detectMobileDevice);
+    // Listen for resize events to handle dynamic changes (like DevTools toggling)
+    window.addEventListener("resize", checkDevice);
 
+    // Telegram WebApp Initialization
+    if (window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
+
+      // If not mobile, close Telegram WebApp or prevent interaction
+      if (!isMobile) {
+        tg.close();
+      } else {
+        tg.ready();
+        tg.expand();
+        tg.disableClosingConfirmation();
+      }
+    }
+
+    // Loading state complete
+    setIsLoading(false);
+
+    // Cleanup listener on unmount
     return () => {
-      window.removeEventListener("resize", detectMobileDevice);
+      window.removeEventListener("resize", checkDevice);
     };
-  }, []);
+  }, [isMobile]); // Add isMobile to dependencies for reactivity if needed
+
+    
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
       document.body.style.overflow = "hidden";
