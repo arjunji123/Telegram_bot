@@ -29,8 +29,6 @@ store.dispatch(loadUserFromLocalStorage());
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-    const [isMobile, setIsMobile] = useState(false);
-
   const token = localStorage.getItem("user");
 
   useEffect(() => {
@@ -105,37 +103,6 @@ function App() {
     return <Preloader />;
   }
 
-  
-  // Check if the platform is mobile
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth <= 768) {
-        setIsMobile(true); // Mobile screen (width <= 768px)
-      } else {
-        setIsMobile(false); // Desktop screen (width > 768px)
-      }
-    };
-
-    // Initial check on component mount
-    handleResize();
-
-    // Add resize event listener for future changes in screen size
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup event listener on component unmount
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-
-  // If not mobile, show the desktop image/message
-  // If not mobile, show the desktop message
-  if (!isMobile) {
-    return (
-      <div className="desktop-message">
-        <h1>Open this bot on a mobile device!</h1>
-      </div>
-    );
-  }
   return (
     <Provider store={store}>
       <BrowserRouter>
