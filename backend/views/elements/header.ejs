@@ -100,7 +100,7 @@
                         `<%- process.env.BACKEND_URL %>api/v1/read-notification/${notificationId}/mark-read`,
                         { method: 'PATCH', headers: { 'Content-Type': 'application/json' } }
                     );
-                    window.location.href = '<%- process.env.BACKEND_URL %>/admin/users';
+                    window.location.href = '<%- process.env.BACKEND_URL %>admin/users';
                 } catch (error) {
                     console.error('Error marking notification as read:', error);
                 }
