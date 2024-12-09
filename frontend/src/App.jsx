@@ -32,7 +32,16 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
+ useEffect(() => {
+    // Platform detection logic
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    if (/android|iPhone|iPad|iPod/i.test(userAgent)) {
+      setIsMobile(true);  // Set mobile state to true if detected
+    }
 
+    // Stop loading after platform detection
+    setIsLoading(false);  // Hide preloader once the platform is detected
+  }, []);  // Empty dependency array to run only once after mount
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
@@ -50,23 +59,6 @@ function App() {
   }, []);
 
  
-  useEffect(() => {
-    // Check if the user is in the Telegram app (likely mobile)
-    if (window.Telegram?.WebApp) {
-      setIsMobile(true);
-    } else {
-      setIsMobile(false); // Likely on desktop
-    }
-  }, []); // Only run once when the component mounts
-
-  if (!isMobile) {
-    // If not on mobile (desktop or other platforms), show the message
-    return (
-      <div className="desktop-message">
-        <h1>Open this bot on a mobile device!</h1>
-      </div>
-    );
-  }
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
       document.body.style.overflow = "hidden";
@@ -120,7 +112,13 @@ function App() {
   if (isLoading) {
     return <Preloader />;
   }
-
+ if (!isMobile) {
+    return (
+      <div className="desktop-message">
+        <h1>Open this bot on a mobile device!</h1>
+      </div>
+    );
+  }
   return (
     <Provider store={store}>
       <BrowserRouter>
