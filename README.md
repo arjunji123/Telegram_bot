@@ -1,7 +1,3 @@
-Got it! Since you're using **MySQL**, here's the updated README file for **Unitrade** with instructions tailored for a MySQL database:  
-
----
-
 # 🌟 **Unitrade** 🌟  
 A dynamic platform for **Users**, **Co-Companies**, and **Admins**! 🚀  
 This repository contains:  
@@ -141,7 +137,3 @@ Contributions are welcome! 🎉
 For any queries, reach out at **singhnarukaarjun@gmail.com**. 📧  
 
 Happy Coding! 💻✨  
-
----
-
-Let me know if you'd like further modifications or if you have specific content to add! 🚀
