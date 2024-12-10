@@ -31,6 +31,7 @@ const table_name = Model.table_name;
 const table_name2 = Model.table_name2;
 const table_name3 = Model.table_name3;
 
+
 const module_title = Model.module_title;
 const module_single_title = Model.module_single_title;
 const module_add_text = Model.module_add_text;
