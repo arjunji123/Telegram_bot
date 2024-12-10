@@ -1,0 +1,58 @@
+
+
+### POST Request Example
+POST http://localhost:4000/api/v1/api-register
+Content-Type: application/json
+
+{
+    "user_name" : "arjun",
+    "email" : "arjuffng1@gmail.com",
+    "password" : "12345678",
+    "mobile":"9999148189",
+    "upi_id":"paytm@12345",
+    "referral_by":"02010C",
+    "user_type":"user"
+}
+
+### POST Request Example
+POST http://localhost:4000/api/v1/api-login
+Content-Type: application/json
+
+{
+    "emailOrMobile": "myea@example.com",
+ "password": "passwaord123"
+}
+
+
+### POST Request Example
+POST http://localhost:4000/api/v1/upload-screenshot/:id
+Content-Type: application/json
+
+{
+    "pay_image": "abc.png",
+    "user_id": "12"
+}
+
+
+##################
+GET http://localhost:4000/api/v1/api-quests 
+
+##################
+GET http://localhost:4000/api/v1/api-me
+Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ODYsImlhdCI6MTcyODkwNDQ1NSwiZXhwIjoxNzI5MzM2NDU1fQ.ADLeyJ39poFGDi1tYcpVADvxiLL3bgk9H07Op1d2d4k"
+Content-Type: application/json
+
+
+
+
+##################
+GET http://localhost:4000/api/v1/api-companies
+
+
+### POST Request Example
+POST http://localhost:4000/api/v1/api-quests/complete-quest
+Content-Type: application/json
+
+{
+  "quest_id": 3
+}
