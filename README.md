@@ -1,3 +1,7 @@
+Got it! Since you're using **MySQL**, here's the updated README file for **Unitrade** with instructions tailored for a MySQL database:  
+
+---
+
 # 🌟 **Unitrade** 🌟  
 A dynamic platform for **Users**, **Co-Companies**, and **Admins**! 🚀  
 This repository contains:  
@@ -23,12 +27,32 @@ Unitrade/
 Before running the project, ensure you have the following installed:  
 - **Node.js** (v14 or higher) 🌐  
 - **npm** or **yarn** 📦  
+- **MySQL Server** 🛢️  
 - **Git** 🐙  
 
-### 🗃️ **Database**  
-The database is not included in the GitHub repository. Set up your database locally or on a cloud platform like MongoDB Atlas. You will need to:  
-1. Create a MongoDB database. 🛢️  
-2. Update the **backend configuration** (`backend/.env`) with your database URI.
+---
+
+## 🗃️ **Database Setup (MySQL)**  
+
+1. **Install MySQL** on your system.  
+2. Open your MySQL CLI or GUI tool (e.g., MySQL Workbench).  
+3. Create a new database:  
+   ```sql
+   CREATE DATABASE unitrade;
+   ```
+4. Import the database schema:  
+   If you have a `.sql` file in your project with the schema (e.g., `unitrade.sql`), run:  
+   ```bash
+   mysql -u [username] -p unitrade < path/to/unitrade.sql
+   ```
+   Replace `[username]` with your MySQL username and `path/to/unitrade.sql` with the actual path to the SQL file.  
+5. Update the **backend configuration** (`backend/.env`) with your MySQL credentials:  
+   ```env
+   DB_HOST=localhost
+   DB_USER=your-mysql-username
+   DB_PASSWORD=your-mysql-password
+   DB_NAME=unitrade
+   ```
 
 ---
 
@@ -66,10 +90,13 @@ npm install
 ```
 
 #### 🔧 Configure Environment Variables  
-Create a `.env` file in the `backend` folder with the following values:  
+Ensure the `.env` file contains the correct MySQL details:  
 ```env
 PORT=5000
-MONGO_URI=your-mongodb-uri
+DB_HOST=localhost
+DB_USER=your-mysql-username
+DB_PASSWORD=your-mysql-password
+DB_NAME=unitrade
 JWT_SECRET=your-secret-key
 ```
 
@@ -96,7 +123,7 @@ _Add some screenshots or GIFs of your project to make it visually appealing!_
 ## 🛠️ **Built With**  
 - **ReactJS** - Frontend  
 - **Node.js** - Backend  
-- **MongoDB** - Database  
+- **MySQL** - Database  
 
 ---
 
@@ -111,6 +138,10 @@ Contributions are welcome! 🎉
 ---
 
 ## 📞 **Contact**  
-For any queries, reach out at **singhnarukaarjun@example.com**. 📧  
+For any queries, reach out at **singhnarukaarjun@gmail.com**. 📧  
 
 Happy Coding! 💻✨  
+
+---
+
+Let me know if you'd like further modifications or if you have specific content to add! 🚀
