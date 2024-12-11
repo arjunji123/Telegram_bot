@@ -116,6 +116,11 @@ exports.showLogin = catchAsyncErrors(async (req, res, next) => {
 
   res.render("users/login", { message });
 });
+exports.showForget = catchAsyncErrors(async (req, res, next) => {
+  const message = req.flash("msg_response");
+
+  res.render("users/forget", { message });
+});
 
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
