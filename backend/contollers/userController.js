@@ -227,60 +227,62 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
 
 //forgot password for sending token in mail
 exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
-  //const user = await User.findOne({email: req.body.email})
-  const userData = await db.query(
-    "SELECT * FROM users WHERE email = ? limit 1",
-    [req.body.email]
-  );
-  const user = userData[0][0];
+  const { email } = req.body; // Get email from request body
 
-  if (!user) {
-    return next(new ErrorHandler("User not found", 404));
+  // Find user by email
+  const userDetail = await db.query("SELECT * FROM users WHERE email = ?", [
+    email,
+  ]);
+
+  // If no user found
+  if (userDetail[0].length === 0) {
+    req.flash("msg_response", {
+      status: 400,
+      message: "Only admins can reset their password",
+    });
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   }
 
-  //get ResetPasswordToken token
-  const resetTokenValues = User.getResetPasswordToken();
+  const user = userDetail[0][0];
 
-  const resetToken = resetTokenValues.resetToken;
-  const resetPasswordToken = resetTokenValues.resetPasswordToken;
-  const resetPasswordExpire = resetTokenValues.resetPasswordExpire;
+  // Check if the user is an admin
+  if (user.user_type !== "admin") {
+    req.flash("msg_response", {
+      status: 400,
+      message: "Only admins can reset their password",
+    });
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
+  }
 
-  /*await user.save({validateBeforeSave: false});*/
+  // Generate a new random password
+  const newPassword = crypto.randomBytes(3).toString("hex"); // Generate a random 6-byte password
 
-  const resetPasswordUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/password/reset/${resetToken}`;
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  const message = `password reset token is :- \n\n ${resetPasswordUrl} \n\n If you have not requested reset password then please ingone it`;
+  // Update the password in the database
+  const query = "UPDATE users SET password = ? WHERE id = ?";
+  await db.query(query, [hashedPassword, user.id]);
+
+  // Send email to the user with the new password
+  const emailOptions = {
+    email: user.email, // User's email from the database
+    subject: "Your new password",
+    message: `Your new password is: ${newPassword}. Please use it to login to your account.`,
+  };
 
   try {
-    const query =
-      "UPDATE users SET reset_password_token = ?, reset_password_expire = ? WHERE email = ?";
-    // Execute the update query
-    const result = await db.query(query, [
-      resetPasswordToken,
-      resetPasswordExpire,
-      req.body.email,
-    ]);
-
-    await sendEmail({
-      email: user.email,
-      subject: "Password Recovery",
-      message,
+    await sendEmail(emailOptions); // Send email with the new password
+    req.flash("msg_response", {
+      status: 400,
+      message: "New password has been sent to your email.",
     });
-
-    res.status(200).json({
-      success: true,
-      message: `Email sent successfully to ${user.email}`,
-    });
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/login`);
   } catch (error) {
-    await db.query(
-      `UPDATE users SET reset_password_token = '', reset_password_expire = '' WHERE email = ${req.body.email}`
-    );
-
-    return next(new ErrorHandler(error.message, 500));
+    return next(new ErrorHandler("Error sending email", 500));
   }
 });
+
 
 // reset user password
 exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
@@ -353,42 +355,54 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
   const userDetail = await db.query("SELECT * FROM users WHERE id = ?", [
     req.user.id,
   ]);
+
+  // If user not found
+  if (userDetail[0].length === 0) {
+    req.flash("msg_response", {
+      status: 400,
+      message: "User not found",
+    });
+    return res.redirect(`/${process.env.ADMIN_PREFIX}/me`);
+  }
+
   const user = userDetail[0][0];
 
+  // Check if old password matches
   const isPasswordMatched = await User.comparePasswords(
     req.body.oldPassword,
     user.password
   );
 
   if (!isPasswordMatched) {
-    // return next(new ErrorHandler("Old password is incorrect",400));
     req.flash("msg_response", {
       status: 400,
       message: "Old password is incorrect",
     });
   }
 
+  // Check if new password and confirm password match
   if (req.body.newPassword !== req.body.confirmPassword) {
-    //return next(new ErrorHandler("password does not matched",400));
     req.flash("msg_response", {
       status: 400,
-      message: "password does not matched",
+      message: "New password and confirm password do not match",
     });
   }
 
-  // user.password = req.body.newPassword;
-
-  // await user.save();
-
+  // Hash the new password
   const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+
+  // Update the password in the database
   const query = "UPDATE users SET password = ? WHERE id = ?";
-  // Execute the update query
-  const result = await db.query(query, [hashedPassword, user.id]);
+  await db.query(query, [hashedPassword, user.id]);
 
-  const token = User.generateToken(user.id);
-  sendToken(user, token, 200, res);
+  // Set flash message for success
+  req.flash("msg_response", {
+    status: 200,
+    message: "Password updated successfully",
+  });
 
-  // res.redirect(`/${process.env.ADMIN_PREFIX}/me`);
+  // Redirect to profile page
+  return res.redirect(`/${process.env.ADMIN_PREFIX}/me`);
 });
 
 // update user profile
