@@ -24,7 +24,9 @@ const {
   registerUser,
   loginUser,
   logout,
-
+  showForget,
+  forgotPassword,
+  updatePassword,
 
   getUserDetail,
 
@@ -80,6 +82,7 @@ router.route("/register").post(registerUser);
 
 router.route("/login").get(showLogin);
 router.route("/login").post(loginUser);
+router.route("/forget-pass").post(forgotPassword);
 
 
 router
@@ -95,6 +98,7 @@ router.route("/logout").get(isAuthenticatedUser, logout);
 
 router.route("/me").get(isAuthenticatedUser, getUserDetail);
 
+router.route("/password/update").post(isAuthenticatedUser, updatePassword);
 
 
 router.route("/me/update").post(isAuthenticatedUser, updateProfile);
