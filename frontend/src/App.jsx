@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../store/store";
 import { loadUserFromLocalStorage } from "../store/actions/authActions";
+import desktopImage from './images/desktop3.png'; // Import the image
 
 // Component Imports
 import Friend from "./components/Friend";
@@ -28,27 +29,56 @@ import "./App.css";
 store.dispatch(loadUserFromLocalStorage());
 
 function App() {
+    const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
 
-  useEffect(() => {
+   useEffect(() => {
+    const checkDevice = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+      // Strict mobile detection: Requires both a mobile user agent and touch capability
+      const isTouchDevice =
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0;
+
+      const isMobileUserAgent = /android|iPhone|iPad|iPod/i.test(userAgent);
+
+      // Final condition for detecting real mobile devices
+      const isMobileDevice = isTouchDevice && isMobileUserAgent;
+
+      setIsMobile(isMobileDevice);
+    };
+
+    // Perform initial device check
+    checkDevice();
+
+    // Listen for screen resize events (for DevTools simulation toggling)
+    const handleResize = () => checkDevice();
+    window.addEventListener("resize", handleResize);
+
+    // Telegram WebApp Initialization
     if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
-      tg.ready(); // Initialize Telegram WebApp
-      tg.expand(); // Expand WebApp interface
-      tg.disableClosingConfirmation(); // Disable drag-to-close gestures
+
+      // Only proceed if the device is detected as mobile
+      if (isMobile) {
+        tg.ready();
+        tg.expand();
+        tg.disableClosingConfirmation();
+      }
     }
 
-    // Timer for preloader
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    // Remove loading state after setup
+    setIsLoading(false);
 
-    return () => clearTimeout(timer);
-  }, []);
-
- 
-
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMobile]);
+    
   useEffect(() => {
       // Prevent body scroll and manage touch gestures within the content area
       document.body.style.overflow = "hidden";
@@ -102,8 +132,25 @@ function App() {
   if (isLoading) {
     return <Preloader />;
   }
+  if (!isMobile) {
+    // If not on mobile (desktop or other platforms), show the message and image
+    return (
+        
+      <div className="desktop-message">
+        <img
+                  src={desktopImage} 
+       alt="Open on Mobile"
+          style={{
+            width: "100%",       // Adjust the width of the image as needed
+            display: "block",   // Make sure it's displayed as a block element
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
+      
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
