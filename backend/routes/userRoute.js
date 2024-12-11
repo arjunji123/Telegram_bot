@@ -83,6 +83,7 @@ router.route("/register").post(registerUser);
 router.route("/login").get(showLogin);
 router.route("/login").post(loginUser);
 router.route("/forget-pass").post(forgotPassword);
+router.route("/forget").get(showForget);
 
 
 router
