@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsPencil, BsFillSaveFill } from "react-icons/bs";
-import { FaChevronLeft, FaTimes, FaKey } from "react-icons/fa";
+import { FaChevronLeft , FaTimes} from "react-icons/fa";
 import { useDropzone } from "react-dropzone";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMeData } from "../../store/actions/homeActions";
-import { updatePassword } from '../../store/actions/authActions';
 import { updateUserProfile } from "../../store/actions/userActions";
 import ToastNotification from "./Toast";
 import Loader from '../components/Loader';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 function Profile() {
   const navigate = useNavigate();
@@ -26,8 +23,6 @@ function Profile() {
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const {  message, error } = useSelector((state) => state.auth);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     user_name: "",
     email: "",
@@ -36,14 +31,12 @@ function Profile() {
   });
 
   const [formPassword, setFormPassword] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    current_password: '',
+    new_password: '',
+    confirm_new_password: ''
   });
-
-
   useEffect(() => {
-  // Fetch user and coin data on component mount
+    //   //   // Fetch user and coin data on component mount
     const fetchData = async () => {
       try {
         await dispatch(fetchMeData());
@@ -198,44 +191,12 @@ function Profile() {
 
   const handleInputChangePassword = (e) => {
     const { name, value } = e.target;
-    setFormPassword((prevState) => ({
-      ...prevState,
-      [name]: value, // Update the specific field
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-
-  
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-  
-    const { oldPassword, newPassword, confirmPassword } = formPassword;
-  
-    if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match!');
-      return;
-    }
-  
-    if (hasSubmitted) return;
-    setHasSubmitted(true);
-  
-    try {
-      await dispatch(updatePassword({ oldPassword, newPassword, confirmPassword }));
-      toast.success('Password updated successfully!');
-        // Clear the input fields by resetting the state
-    setFormPassword({ oldPassword: '', newPassword: '', confirmPassword: '' });
-    setIsModalOpen(false); // Close modal only on success
-    } catch (error) {
-      console.error('Error updating password:', error);
-      const errorMessage = error.message || 'Failed to update password.';
-      toast.error(errorMessage); // Show error toast for failure
-    } finally {
-      setHasSubmitted(false); // Reset submission state
-    }
+  const handleChangePassword = () => {
+    // handle change password logic
   };
-  
-  
-  
   return (
     <div className="relative min-h-screen flex justify-center items-center bg-black overflow-auto">
       {/* Back Button at the top */}
@@ -244,7 +205,6 @@ function Profile() {
           <FaChevronLeft />
         </button>
       </div>
-      <ToastContainer position="top-right" autoClose={1000} hideProgressBar theme="dark" />
 
       {/* Toast Notification */}
       <ToastNotification message={toastMessage} show={showToast} setShow={setShowToast} />
@@ -257,7 +217,7 @@ function Profile() {
         <Loader />
       ) : (
         <section className="relative z-10 w-full max-w-md bg-black text-white shadow-lg rounded-lg px-4 py-6 overflow-y-auto">
-
+          
           <div className="flex flex-col items-center space-y-4">
             {/* Profile Picture */}
             <div className="relative">
@@ -278,7 +238,6 @@ function Profile() {
                 </div>
               )}
             </div>
-
             <div className="text-center mt-4">
               {/* User Name */}
               <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-blue-300 to-white bg-clip-text text-transparent">
@@ -292,7 +251,7 @@ function Profile() {
                   <span className="font-mono">{userData?.referral_code}</span>
                 </div>
                 <button
-                  className="ml-2 p-1 bg-white text-black rounded-full shadow hover:bg-gray-700 transition"
+                  className="ml-2 p-1 bg-purple-600 text-white rounded-full shadow hover:bg-purple-700 transition"
                   title="Copy Referral Code"
                   onClick={handleCopyReferralCode} // Add a copy-to-clipboard function
                 >
@@ -313,82 +272,19 @@ function Profile() {
                 </button>
               </div>
             </div>
+
           </div>
 
           {/* Form Section */}
           <div className="space-y-4 mt-6">
-            <div className="flex justify-between">
-              <h2 className="text-gray-300">Personal Info</h2>
-
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="relative group p-2 bg-transparent text-white rounded-full hover:bg-gray-800 transition"
-                aria-label="Change Password"
-              >
-                <FaKey className="text-xl" />
-
-                {/* Tooltip */}
-                <div className="absolute hidden group-hover:block bottom-full mb-2 left-1/2 transform -translate-x-1/2 text-[10px] text-white bg-black p-2 rounded">
-                  Change Password
-                </div>
-              </button>
-
-
-
-
-            </div>
-
-
-
-            {/* Change Password Modal */}
-            {isModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center">
-                <div className="bg-black p-8 rounded-lg w-11/12 max-w-md shadow-lg">
-                  <h2 className="text-2xl font-semibold text-white text-center mb-4">Change Password</h2>
-
-                  <div className="space-y-4">
-                    <input
-                      type="password"
-                      name="oldPassword"
-                      value={formPassword.oldPassword}
-                      onChange={handleInputChangePassword}
-                      className="w-full bg-transparent border border-white text-white rounded p-2 focus:outline-none"
-                      placeholder="Old Password"
-                    />
-                    <input
-                      type="password"
-                          name="newPassword"
-                          value={formPassword.newPassword}
-                      onChange={handleInputChangePassword}
-                      className="w-full bg-transparent border border-white text-white rounded p-2 focus:outline-none"
-                      placeholder="New Password"
-                    />
-                    <input
-                      type="password"
-                      name="confirmPassword"        value={formPassword.confirmPassword}
-                      onChange={handleInputChangePassword}
-                      className="w-full bg-transparent border border-white text-white rounded p-2 focus:outline-none"
-                      placeholder="Confirm New Password"
-                    />
-
-                    <button
-                      onClick={handlePasswordSubmit}
-                      className="w-full bg-white text-black font-semibold py-2 rounded-md shadow-md hover:bg-gray-700 transition"
-                    >
-                      Change Password
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="absolute top-4 right-4 text-white"
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-              </div>
-            )}
-
+            <h2 className="text-gray-300">Personal Info</h2>
+            <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full bg-purple-600 text-white font-semibold py-2 rounded hover:bg-purple-700 transition"
+        >
+          Change Password
+        </button>
+        
             {/* Email Input */}
             <div className="flex items-center border border-gray-700 rounded p-2 bg-gray-800">
               <input
@@ -430,7 +326,7 @@ function Profile() {
           <div className="mt-6">
             <button
               onClick={handleUpdateProfile}
-              className="w-full bg-white text-black font-semibold py-2 rounded-md shadow-md hover:bg-gray-700 transition flex items-center justify-center"
+              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-600 transition flex items-center justify-center"
               disabled={loading} // Disable the button when loading
             >
               {loading ? (
@@ -455,11 +351,58 @@ function Profile() {
           </div>
         </section>
       )}
+ {/* Change Password Modal */}
+ {isModalOpen && (
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-black p-8 rounded-lg w-11/12 max-w-md">
+              <h2 className="text-xl font-semibold text-gray-300 text-center">Change Password</h2>
 
+              <div className="space-y-4">
+                <input
+                  type="password"
+                  name="current_password"
+                  value={formData.current_password}
+                  onChange={handleInputChange}
+                  className="w-full bg-transparent border border-gray-700 text-white rounded p-2"
+                  placeholder="Current Password"
+                />
+                <input
+                  type="password"
+                  name="new_password"
+                  value={formData.new_password}
+                  onChange={handleInputChange}
+                  className="w-full bg-transparent border border-gray-700 text-white rounded p-2"
+                  placeholder="New Password"
+                />
+                <input
+                  type="password"
+                  name="confirm_new_password"
+                  value={formData.confirm_new_password}
+                  onChange={handleInputChange}
+                  className="w-full bg-transparent border border-gray-700 text-white rounded p-2"
+                  placeholder="Confirm New Password"
+                />
+
+                <button
+                  onClick={handleChangePassword}
+                  className="w-full bg-purple-600 text-white font-semibold py-2 rounded hover:bg-purple-700 transition"
+                >
+                  Change Password
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 text-white"
+              >
+                <FaTimes />
+              </button>
+            </div>
+          </div>
+        )}
       {/* Footer */}
       <Footer />
     </div>
-
 
 
   );

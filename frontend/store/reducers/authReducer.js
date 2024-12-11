@@ -1,6 +1,7 @@
 import { LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from '../actions/authActions';
 import { SIGNUP_SUCCESS, SIGNUP_FAILURE } from '../actions/authActions';
 import { PASSWORD_RESET_REQUEST, PASSWORD_RESET_SUCCESS, PASSWORD_RESET_FAILURE} from '../actions/authActions';
+import { PASSWORD_UPDATE_REQUEST, PASSWORD_UPDATE_SUCCESS, PASSWORD_UPDATE_FAIL, } from '../actions/authActions';
 
 const initialState = {
   user: typeof window !== 'undefined' && localStorage.getItem('user')
@@ -15,6 +16,14 @@ const initialState = {
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
     
+
+    case PASSWORD_UPDATE_REQUEST:
+      return { ...state, loading: true };
+  case PASSWORD_UPDATE_SUCCESS:
+      return { ...state, loading: false, message: action.payload };
+  case PASSWORD_UPDATE_FAIL:
+      return { ...state, loading: false, error: action.payload };
+
     case PASSWORD_RESET_REQUEST:
       return { ...state, loading: true };
   case PASSWORD_RESET_SUCCESS:

@@ -14,6 +14,10 @@ export const PASSWORD_RESET_REQUEST = 'PASSWORD_RESET_REQUEST';
 export const PASSWORD_RESET_SUCCESS = 'PASSWORD_RESET_SUCCESS';
 export const PASSWORD_RESET_FAILURE = 'PASSWORD_RESET_FAILURE';
 
+
+export const PASSWORD_UPDATE_REQUEST = 'PASSWORD_UPDATE_REQUEST';
+export const PASSWORD_UPDATE_SUCCESS = 'PASSWORD_UPDATE_SUCCESS';
+export const PASSWORD_UPDATE_FAIL = 'PASSWORD_UPDATE_FAIL';
 // Set token in cookies (expires in 7 days)
 const setToken = (token) => {
   Cookies.set('token', JSON.stringify(token), { expires: 7 });
@@ -160,6 +164,50 @@ export const resetPassword = (email) => async (dispatch) => {
     }
 };
 
+export const updatePassword = (formPassword) => async (dispatch) => {
+  dispatch({ type: 'PASSWORD_UPDATE_REQUEST' });
+
+  try {
+       // Get token from localStorage
+       const tokenData = localStorage.getItem('user');
+       if (!tokenData) {
+         throw new Error('No token data found in localStorage');
+       }
+   
+       const parsedTokenData = JSON.parse(tokenData);
+       const token = parsedTokenData.token;
+   
+       if (!token) {
+         throw new Error('Token not found');
+       }
+
+    const response = await fetch(`${BACKEND_URL}/api/v1/api-password/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`, // Include token in the Authorization header
+      },
+      body: JSON.stringify(formPassword), // Pass passwordData directly here
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update password');
+    }
+
+    const data = await response.json();
+    dispatch({
+      type: 'PASSWORD_UPDATE_SUCCESS',
+      payload: data.message,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'PASSWORD_UPDATE_FAIL',
+      payload: error.message || 'An error occurred',
+    });
+    throw error; // Re-throw error for component-level handling
+  }
+};
 // Logout action
 export const logout = () => (dispatch) => {
   localStorage.removeItem('user'); // Remove user data from localStorage
