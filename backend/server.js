@@ -10,12 +10,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-//console.log(testing);
 
-//connectDatabase();
-/*mysqlPool.query('select 1').then((error)=>{
-    console.log('mysql connection established');
-})*/
 
 mysqlPool
   .query("SELECT 1")
@@ -26,9 +21,8 @@ mysqlPool
     console.error("Error establishing MySQL connection:", err);
   });
 
-const PORT = process.env.PORT || 5001;
-const server = app.listen(PORT, () => {
-  console.log("server is working on port " + PORT);
+const server = app.listen(process.env.PORT, () => {
+  console.log("server is working on port " + process.env.PORT);
 });
 
 // unhandled promise rejection
