@@ -1,6 +1,6 @@
 const mysql = require("mysql2/promise");
 const dotenv = require("dotenv");
-dotenv.config({ path: "./config.env" });
+dotenv.config({ path: "backend/config/config.env" });
 
 const mysqlPool = mysql.createPool({
   host: process.env.DB_HOST,
