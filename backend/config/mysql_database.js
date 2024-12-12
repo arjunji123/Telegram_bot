@@ -35,7 +35,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "backend/config/config.env" });
 
 const mysqlPool = mysql.createPool({
-  host: "157.173.218.26",
+  host: "localhost",
   user: "root",
   password: ";B@$aY=G9qwsK98PV:c7",
   database: "unitrade",
