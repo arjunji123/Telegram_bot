@@ -1,7 +1,6 @@
 const app = require("./app");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
-const connectDatabase = require("./config/database");
 const mysqlPool = require("./config/mysql_database");
 
 //handling uncaught exceptions
