@@ -1,4 +1,4 @@
-<% if(userty && userty==='admin' ) { %> <!-- Check if user is admin -->
+
     <div class="left-side-menu" style="background-color: #2c3e50; color: white;">
         <div class="h-100" data-simplebar>
 
@@ -14,7 +14,7 @@
                         <!-- item-->
                         <a href="me" class="dropdown-item notify-item">
                             <i class="fe-user me-1"></i>
-                            <span>My Account</span>
+                            <span>Change Password</span>
                         </a>
 
                         <!-- item-->
@@ -162,90 +162,13 @@
             </div>
             <!-- End Sidebar -->
 
-            <div class="clearfix"></div>
+       
 
         </div>
         <!-- Sidebar -left -->
 
     </div>
-    <% } else { %> <!-- If the user is not an admin -->
-        <div class="left-side-menu">
-            <div class="h-100" data-simplebar>
-                <!-- User box -->
-                <div class="user-box text-center">
-                    <div class="dropdown">
-                        <a href="#" class="user-name dropdown-toggle h5 mt-2 mb-1 d-block" data-bs-toggle="dropdown"
-                            aria-expanded="false">Unitrade</a>
-                        <div class="dropdown-menu user-pro-dropdown">
-                            <!-- item-->
-                            <a href="me" class="dropdown-item notify-item">
-                                <i class="fe-user me-1"></i>
-                                <span>Change Password</span>
-                            </a>
-                            <!-- item-->
-
-                            <!-- item-->
-                            <a href="/admin/logout" class="dropdown-item notify-item">
-                                <i class="fe-log-out me-1"></i>
-                                <span>Logout</span>
-                            </a>
-                        </div>
-                    </div>
-                    <p class="text-muted left-user-info">
-                        Company
-                    </p>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a href="/admin/settings" class="text-muted left-user-info">
-                                <i class="mdi mdi-cog"></i>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="/admin/logout">
-                                <i class="mdi mdi-power"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!--- Sidemenu -->
-                <div id="sidebar-menu">
-                    <ul id="side-menu">
-                        <li class="menu-title">Navigation</li>
-                        <li>
-                            <a href="/admin/dashboard">
-                                <i class="mdi mdi-view-dashboard-outline"></i>
-                                <span> Dashboard </span>
-                            </a>
-                        </li>
-
-                        <!-- Admin-only sections -->
-                        <li class="menu-title mt-2">Apps</li>
-
-                        <li>
-                            <a href="#faqs" data-bs-toggle="collapse">
-                                <i class="mdi mdi-file-multiple-outline"></i>
-                                <span> Withdrawal Req. </span>
-                                <span class="menu-arrow"></span>
-                            </a>
-                            <div class="collapse" id="faqs">
-                                <ul class="nav-second-level">
-                                    <li>
-                                        <a href="/admin/faqs">Withdrawal</a>
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </li>
-
-                        <!-- Repeat similar structure for other sections like Quests, Services, Blogs, FAQs, Testimonials -->
-                    </ul>
-                </div>
-                <!-- End Sidebar -->
-                <div class="clearfix"></div>
-            </div>
-        </div>
-        <% } %>
+   
 
 
             <script>
