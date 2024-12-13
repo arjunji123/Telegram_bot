@@ -20,7 +20,6 @@ function MyApp({ Component, pageProps }) {
   }
 `}</style>
       </Head>
-      {/* Adding external script using next/script with strategy="afterInteractive" */}
       <Script
         src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=65b6a1a4a0e2af577bccce96"
         type="text/javascript"
