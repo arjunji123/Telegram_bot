@@ -4,7 +4,6 @@ const CryptoJourneySection = () => {
       <div className="container padding-top-large w-container">
         <div className="bg-blue rounded">
           <div className="w-layout-grid main-grid no-gap">
-            {/* Image Section */}
             <div id="w-node-_62144753-0e03-d805-2a1b-f1ea318be914-990d43df" className="inner-image-cta">
               <img
                 src="https://cdn.prod.website-files.com/65b6a1a4a0e2af577bccce96/65b70852a0e2af577b00d1b8_trading-half.png"
