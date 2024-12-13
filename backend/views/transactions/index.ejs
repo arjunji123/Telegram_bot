@@ -1,0 +1,147 @@
+<div class="row"></div>
+    <div class="col-12">
+        <div class="card" style="margin-top: 26px;">
+            <div class="card-body table-responsive">
+                <div class="row page_top_bar">
+                    <div class="col-12">
+                        <div class="col-6 heading float-left">
+                            <h4 class="mt-0 header-title">Transactions</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="responsive-datatable" class="table table-bordered table-bordered dt-responsive nowrap">
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>User Name</th>
+                            <th>UPI ID</th>
+                            <th>Amount</th>
+                            <th>Transaction Rate</th>
+                            <th>Transaction Coin</th>
+                            <th>Status</th>
+                            <th>Transaction Document</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% let serialNumber=1; %>
+                            <% transactions.forEach(transactions=> { %>
+                                <tr id="transactions-row-<%= transactions.user_id %>">
+                                    <td>
+                                        <%= serialNumber++ %>
+                                    </td>
+                                    <td>
+                                        <%= transactions.user_name %>
+                                    </td>
+                                    <td>
+                                        <%= transactions.upi_id || 'N/A' %>
+                                    </td>
+                                    
+                        
+                                    <td>
+                                        <%= transactions.transction_amount %>
+                                    </td>
+                                    <td>
+                                    <i class="fas fa-money-bill-wave" style="color: #28a745;"></i> <!-- Money Icon -->
+
+                                        <%= transactions.tranction_rate || 'N/A' %>
+                                    </td>
+                                    <td>
+                                    <i class="fas fa-coins" style="color: gold; margin-right: 5px;"></i>
+
+                                        <%= transactions.tranction_coin || 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <%= transactions.status==='approved' ? 'Approved' : 'Unapproved' %>
+                                    </td>
+                                    <td>
+                                        <% if (transactions.trans_doc) { %>
+                                            <button class="btn btn-info view-doc"
+                                                data-doc="<%= '/uploads/faqs' + transactions.trans_doc %>">
+                                                View Document
+                                            </button>
+                                            <% } else { %>
+                                                No document uploaded
+                                                <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (transactions.status !=='approved' ) { %>
+                                            <button class="btn btn-success approve-btn"
+                                                data-id="<%= transactions.user_id %>"
+                                                data-row-id="transactions-row-<%= transactions.user_id %>">
+                                                Approve
+                                            </button>
+                                            <% } else { %>
+                                                Approved
+                                                <% } %>
+                                    </td>
+
+                                </tr>
+                                <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for viewing documents- --->  
+<div class="modal fade" id="docModal" tabindex="-1" role="dialog" aria-labelledby="docModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="docModalLabel">Transaction Document</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalDoc" src="" alt="Transaction Document" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Show modal with the clicked document
+        $('.view-doc').click(function () {
+            var docUrl = $(this).data('doc');
+            $('#modalDoc').attr('src', docUrl);
+            $('#docModal').modal('show');
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Approve button click handler
+        $('.approve-btn').click(function () {
+            const userId = $(this).data('id');
+            const rowId = $(this).data('row-id');
+
+            // Make the POST request
+            $.ajax({
+                url: '<%- process.env.BACKEND_URL %>api/v1/approveTransaction', // Endpoint for the approve API
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ user_id: userId }),
+                success: function (response) {
+                    if (response.success) {
+                        // Update the UI
+                        const row = $(`#${rowId}`);
+                        row.find('.approve-btn').remove(); // Remove the button
+                        row.find('td:nth-child(7)').text('Approved'); // Update status
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function (error) {
+                    console.error('Approval failed:', error);
+                    alert('Something went wrong! Please try again.');
+                }
+            });
+        });
+    });
+</script>

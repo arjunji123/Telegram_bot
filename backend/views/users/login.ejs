@@ -1,64 +1,176 @@
-
 <div class="account-pages my-5">
     <div class="container">
-        
+
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6 col-xl-4">
-                <% if (typeof message !== 'undefined' && message.length > 0 && typeof message[0].status !== 'undefined' && message[0].status >= 400) { %>
-                    <div class="alert alert-danger"><%= message[0].message %></div> 
-                <% } %>
-                <div class="text-center">   
-                    <a href="javascript:void()">
-                        <img src="<%- process.env.BACKEND_URL %>/assets/images/logo.png" alt="" height="40" class="mx-auto">
-                    </a>
-                    <p class="text-dark mt-2 mb-4">Admin Dashboard</p>
+                <% if (typeof message !=='undefined' && message.length> 0 && typeof message[0].status !== 'undefined' &&
+                    message[0].status >= 400) { %>
+                    <div class="alert alert-danger">
+                        <%= message[0].message %>
+                    </div>
+                    <% } %>
+                        <div class="text-center">
+                            <!-- Main Logo -->
+                            <a href="javascript:void()">
+                                <img src="<%- process.env.BACKEND_URL %>/assets/images/logo.png" alt=""
+                                    style="height: 30px; position: absolute; top: 20px; left: 20px;">
+                            </a>
 
-                </div>
-                <div class="card">
-                    <div class="card-body p-4">
-                        
-                        <div class="text-center mb-4">
-                            <h4 class="text-uppercase mt-0">Sign In</h4>
+                            <!-- Secondary Logo -->
+                            <a href="javascript:void()">
+                                <img src="<%- process.env.BACKEND_URL %>/assets/images/logonew.png" alt=""
+                                    style="height: 100px; margin-top: 20px;">
+                            </a>
+
+
                         </div>
-
-                        <form action="/admin/login" method="post">
-                            <div class="mb-3">
-                                <label for="emailaddress" class="form-label">Email address</label>
-                                <input class="form-control" name="email" type="email" id="emailaddress" required="" placeholder="Enter your email">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input class="form-control" name="password" type="password" required="" id="password" placeholder="Enter your password">
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="checkbox-signin" checked>
-                                    <label class="form-check-label" for="checkbox-signin">Remember me</label>
+                        <!-- Card Design -->
+                        <div class="card shadow-lg rounded-lg"
+                            style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: none; transition: transform 0.3s, box-shadow 0.3s;">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-3">
+                                    <h4 class="text-uppercase"
+                                        style="color: #004080; font-weight: bold; animation: fadeIn 0.6s ease-in-out;">
+                                        Sign In</h4>
                                 </div>
+
+                                <form action="/admin/login" method="post">
+                                    <!-- Modern Input Fields -->
+                                    <div class="mb-3">
+                                        <label for="emailaddress" class="form-label"
+                                            style="color: #333; font-weight: 500; animation: slideInLeft 0.6s;">Email
+                                            address</label>
+                                        <input class="form-control form-control-lg rounded shadow-sm" name="email"
+                                            type="email" id="emailaddress" required placeholder="Enter your email"
+                                            style="border: 1px solid #ccc; padding: 10px 15px; animation: slideInLeft 0.6s;">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label"
+                                            style="color: #333; font-weight: 500; animation: slideInRight 0.6s;">Password</label>
+                                        <input class="form-control form-control-lg rounded shadow-sm" name="password"
+                                            type="password" id="password" required placeholder="Enter your password"
+                                            style="border: 1px solid #ccc; padding: 10px 15px; animation: slideInRight 0.6s;">
+                                    </div>
+
+                                    <div class="mb-3 d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="checkbox-signin"
+                                            checked>
+                                        <label class="form-check-label" for="checkbox-signin"
+                                            style="color: #333; animation: fadeIn 0.8s;">Remember me</label>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary btn-lg rounded-pill shadow-sm" type="submit"
+                                            style="background-color: #004080; border-color: #004080; transition: transform 0.3s; animation: bounceIn 0.6s;">
+                                            Log In
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
+                        </div>
+            </div>
 
-                            <div class="mb-3 d-grid text-center">
-                                <button class="btn btn-primary" type="submit"> Log In </button>
-                            </div>
-                        </form>
 
-                    </div> <!-- end card-body -->
-                </div>
-                <!-- end card -->
+            <style>
+                body {
+                    background: linear-gradient(to bottom, #004080, #0080ff);
+                    color: #fff;
+                    font-family: 'Roboto', sans-serif;
+                    margin: 0;
+                }
 
-                <div class="row mt-3">
-                    <div class="col-12 text-center">
-                        <p> <a href="pages-recoverpw.html" class="text-dark ms-1"><i class="fa fa-lock me-1"></i>Forgot your password?</a></p>
-                        <p class="text-dark">Don't have an account? <a href="pages-register.html" class="text-dark ms-1"><b>Sign Up</b></a></p>
-                    </div> <!-- end col -->
-                </div>
-                <!-- end row -->
+                .container {
+                    max-width: 1200px;
+                }
 
-            </div> <!-- end col -->
-        </div>
-        <!-- end row -->
-    </div>
-    <!-- end container -->
-</div>
+                .card {
+                    background-color: rgba(255, 255, 255, 0.95);
+                    border: none;
+                }
+
+                .form-control {
+                    border: 1px solid #ccc;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    background-color: #f9f9f9;
+                }
+
+                .btn-primary {
+                    background-color: #004080;
+                    border-color: #004080;
+                    transition: all 0.3s ease;
+                }
+
+                .btn-primary:hover {
+                    background-color: #003366;
+                    border-color: #003366;
+                }
+
+                .form-check-label {
+                    color: #333;
+                }
+
+                .text-light {
+                    color: #f9f9f9;
+                }
+
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                    }
+
+                    to {
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes slideInLeft {
+                    from {
+                        transform: translateX(-100%);
+                        opacity: 0;
+                    }
+
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes bounceIn {
+
+                    from,
+                    20%,
+                    40%,
+                    60%,
+                    80%,
+                    to {
+                        transform: translateY(0);
+                    }
+
+                    40% {
+                        transform: translateY(-30px);
+                    }
+
+                    60% {
+                        transform: translateY(-15px);
+                    }
+                }
+
+                .card:hover {
+                    transform: scale(1.02);
+                    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+                }
+            </style>

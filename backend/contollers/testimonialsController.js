@@ -14,223 +14,108 @@ const module_edit_text = Model.module_edit_text;
 const module_slug = Model.module_slug;
 const module_layout = Model.module_layout;
 
-exports.addFrom = catchAsyncErrors(async (req, res, next) => {
-  res.render(module_slug + "/add", {
-    layout: module_layout,
-    title: module_single_title + " " + module_add_text,
-    module_slug,
-  });
+
+exports.getAllRecords = catchAsyncErrors(async (req, res) => {
+  try {
+    // const query = `SELECT * FROM usercoin_audit WHERE type = 'quest'`;
+    const query = `
+  SELECT qa.*, q.quest_name, q.quest_type, q.activity, u.user_name
+  FROM usercoin_audit qa
+  JOIN users u ON qa.user_id = u.id
+  LEFT JOIN quest q ON qa.quest_id = q.id
+  WHERE qa.type = 'quest'
+`;
+  
+    const questEntries = await db.query(query);
+    // console.log("Quest Entries:", questEntries);
+    res.render('testimonials/index', { 
+      layout: module_layout,
+      title: 'User Quest Entries', 
+      module_slug, 
+      questEntries 
+    });
+  } catch (error) {
+    console.error("Error fetching quest entries:", error);
+    res.status(500).send("Error fetching data");
+  }
 });
 
-//create a new blog
-// exports.createRecord = catchAsyncErrors(async (req, res, next) => {
-//   try {
-//     await Model.insertSchema.validateAsync(req.body, {
-//       abortEarly: false,
-//       allowUnknown: true,
-//     });
-//   } catch (error) {
-//     // Joi validation failed, send 400 Bad Request with error details
-//     return next(
-//       new ErrorHandler(
-//         error.details.map((d) => d.message),
-//         400
-//       )
-//     );
-//   }
 
-//   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-//   if (req.file) {
-//     req.body.image = req.file.filename;
-//   }
+exports.approveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
 
-//   const insertData = {
-//     title: req.body.title,
-//     description: req.body.description,
-//     designation: req.body.designation,
-//     status: req.body.status,
-//     image: req.body.image,
-//     // created_at: created_at,
-//     updated_at: created_at,
-//   };
+  try {
+    // Fetch the coin_earn value from the quest table
+    const [questData] = await db.query(
+      `SELECT coin_earn FROM quest WHERE id = ?`,
+      [quest_id]
+    );
 
-//   const blog = await QueryModel.saveData(table_name, insertData, next);
+    // Check if the quest exists
+    if (questData.length === 0) {
+      return next(new ErrorHandler("Quest not found", 404));
+    }
 
-//   req.flash("msg_response", {
-//     status: 200,
-//     message: "Successfully added " + module_single_title,
-//   });
+    const coinEarned = questData[0].coin_earn;
 
-//   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
-// });
+    // Check if the quest has a positive coin_earn value
+    if (coinEarned <= 0) {
+      return next(
+        new ErrorHandler("Coin earn value must be greater than zero.", 400)
+      );
+    }
 
-// exports.editForm = catchAsyncErrors(async (req, res, next) => {
-//   const blog = await QueryModel.findById(table_name, req.params.id, next);
+    // Update the pending_coin in usercoin_audit based on coinEarned
+    const result = await db.query(
+      `UPDATE usercoin_audit 
+       SET pending_coin = pending_coin + ?, 
+           quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [coinEarned, quest_id]
+    );
 
-//   if (!blog) {
-//     return;
-//   }
-//   res.render(module_slug + "/edit", {
-//     layout: module_layout,
-//     title: module_single_title + " " + module_edit_text,
-//     blog,
-//     module_slug,
-//   });
-// });
+    // Check if the update affected any rows
+    if (result.affectedRows === 0) {
+      return next(
+        new ErrorHandler(
+          "No matching quest found or screenshot already processed",
+          404
+        )
+      );
+    }
 
-// exports.updateRecord = catchAsyncErrors(async (req, res, next) => {
-//   const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
-
-//   req.body.image = req.body.old_image;
-//   if (req.file) {
-//     req.body.image = req.file.filename;
-//   }
-
-//   const updateData = {
-//     title: req.body.title,
-//     description: req.body.description,
-//     designation: req.body.designation,
-//     status: req.body.status,
-//     image: req.body.image,
-//     updated_at: created_at,
-//   };
-
-//   const blog = await QueryModel.findByIdAndUpdateData(
-//     table_name,
-//     req.params.id,
-//     updateData,
-//     next
-//   );
-
-//   req.flash("msg_response", {
-//     status: 200,
-//     message: "Successfully updated " + module_single_title,
-//   });
-
-//   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
-// });
-
-// exports.deleteRecord = catchAsyncErrors(async (req, res, next) => {
-//   await QueryModel.findByIdAndDelete(table_name, req.params.id, next);
-
-//   req.flash("msg_response", {
-//     status: 200,
-//     message: "Successfully deleted " + module_single_title,
-//   });
-
-//   res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}`);
-// });
-
-exports.getAllRecords = catchAsyncErrors(async (req, res, next) => {
-  // const resultPerPage = 1;
-  // const page = parseInt(req.query.page) || 1;
-  // const searchQuery = req.query.search || '';
-  // const filterQuery = req.query.filter || '';
-  // // Calculate offset for pagination
-  // const offset = (page - 1) * resultPerPage;
-
-  // try {
-  //     // Count total blogs
-  //     const totalBlogsResult = await db.query('SELECT COUNT(*) as count FROM '+table_name);
-  //     const totalBlogs = totalBlogsResult[0][0].count;
-
-  //     // Fetch blogs with pagination and filtering
-
-  //     /*res.status(200).json({
-  //         success: true,
-  //         totalBlogs,
-  //         resultPerPage,
-  //         page,
-  //         blogs
-  //     });*/
-  //     const message = req.flash('msg_response');
-  // const blogs = await db.query('SELECT * FROM blogs  LIMIT ? OFFSET ?', [resultPerPage, offset]);
-  const blogs = await db.query(
-    "SELECT * FROM " + table_name + " order by id desc"
-  );
-  res.render(module_slug + "/index", {
-    layout: module_layout,
-    title: module_title,
-    blogs,
-    // message,
-    module_slug,
-  });
-
-  // } catch (error) {
-  //     return next(new ErrorHandler('Database query failed', 500));
-  // }
+    res.status(200).json({
+      success: true,
+      message: "Quest approved, pending coins updated successfully.",
+    });
+  } catch (error) {
+    console.error("Database update error:", error); // Log specific error for troubleshooting
+    return next(
+      new ErrorHandler("Approval process failed: " + error.message, 500)
+    );
+  }
 });
 
-// exports.getSingleRecord = catchAsyncErrors(async(req, res,next) => {
+exports.disapproveQuest = catchAsyncErrors(async (req, res, next) => {
+  const { quest_id } = req.params;
 
-//     const blog = await QueryModel.findById(table_name, req.params.id, next);
+  try {
+    // Remove the quest screenshot only from the usercoin_audit table
+    await db.query(
+      `UPDATE usercoin_audit 
+       SET quest_screenshot = NULL 
+       WHERE quest_id = ? AND quest_screenshot IS NOT NULL`,
+      [quest_id]
+    );
 
-//     if (!blog) {
-//         return;
-//     }
-//     res.render(module_slug+'/detail',{ layout: module_layout,title : module_single_title, blog})
-// });
+    res.status(200).json({
+      success: true,
+      message: "Quest disapproved, screenshot removed.",
+    });
+  } catch (error) {
+    console.error("Database update error:", error);
+    return next(new ErrorHandler("Disapproval process failed", 500));
+  }
+});
 
-// exports.deleteImage = catchAsyncErrors(async(req,res,next) => {
-//    const updateData = {
-//         image: ""
-//     }
-
-//     const blog = await QueryModel.findByIdAndUpdateData(table_name,req.params.id,updateData, next);
-
-//     req.flash('msg_response', { status: 200, message: 'Successfully updated '+module_single_title });
-
-//     res.redirect(`/${process.env.ADMIN_PREFIX}/${module_slug}/edit/${req.params.id}`);
-
-//  })
-
-// function generateSlug(title) {
-
-//     return title
-//         .toLowerCase()
-//         .trim()
-//         .replace(/[^a-z0-9 -]/g, '')  // Remove invalid characters
-//         .replace(/\s+/g, '-')          // Replace spaces with hyphens
-//         .replace(/-+$/g, '');          // Remove trailing hyphens
-// }
-
-// exports.apiGetAllRecords = catchAsyncErrors(async(req,res, next) => {
-
-//     const resultPerPage = 1;
-//     const page = parseInt(req.query.page) || 1;
-//     const searchQuery = req.query.search || '';
-//     const filterQuery = req.query.filter || '';
-//     // Calculate offset for pagination
-//     const offset = (page - 1) * resultPerPage;
-
-//     try {
-//         // Count total blogs
-//         const totalBlogsResult = await db.query('SELECT COUNT(*) as count FROM '+table_name);
-//         const totalBlogs = totalBlogsResult[0][0].count;
-
-//         // Fetch blogs with pagination and filtering
-//         const [blog_records] = await db.query('SELECT * FROM '+table_name+' order by id desc');
-
-//         // Filter or process rows if needed
-//         const blogs = blog_records.map(row => ({
-//             id: row.id,
-//             title: row.title,
-//             designation: row.designation,
-//             description: row.description,
-//             image: process.env.BACKEND_URL+'/uploads/'+module_slug+'/'+row.image
-//         }));
-
-//         res.status(200).json({
-//             success: true,
-//             totalBlogs,
-//             resultPerPage,
-//             page,
-//             blogs
-//         });
-
-//     } catch (error) {
-//         return next(new ErrorHandler('Database query failed', 500));
-//     }
-
-// })

@@ -6,10 +6,10 @@ const {
   editForm,
   updateRecord,
   deleteRecord,
-  getAllRecords,
+
   getSingleRecord,
   deleteImage,
-  apiGetAllRecords,
+
   apiGetSingleRecord,
 } = require("../contollers/blogController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
@@ -55,9 +55,7 @@ router
 router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
-router
-  .route("/" + module_slug + "")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), getAllRecords);
+
 router
   .route("/" + module_slug + "/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleRecord);
@@ -66,7 +64,6 @@ router
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteImage);
 
 /** REST API**/
-router.route("/api-" + module_slug + "").get(apiGetAllRecords);
 router.route("/api-" + module_slug + "/:slug").get(apiGetSingleRecord);
 
 

@@ -8,12 +8,12 @@ const {
   deleteRecord,
   getAllRecords,
   getSingleRecord,
-  deleteImage,
-  apiGetAllRecords,
+
   apiGetSingleRecord,
   completeQuest,
   getUserPendingCoins,
   transferPendingCoinsToTotal,
+  getQuestHistory,
 } = require("../contollers/pageController");
 const {
   isAuthenticatedUser,
@@ -69,12 +69,10 @@ router
 router
   .route("/" + module_slug + "/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleRecord);
-router
-  .route("/" + module_slug + "/delete-image/:id")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), deleteImage);
+
 
 /** REST API**/
-router.route("/api-" + module_slug + "").get(apiGetAllRecords);
+
 router.route("/api-" + module_slug + "/:id").get(apiGetSingleRecord);
 router
   .route("/api-" + module_slug + "/complete-quest")
@@ -86,4 +84,6 @@ router
   .route("/transfer-coins")
   .post(isApiAuthenticatedUser, transferPendingCoinsToTotal);
 
+
+  router.get("/quest-history", isApiAuthenticatedUser, getQuestHistory);
 module.exports = router;

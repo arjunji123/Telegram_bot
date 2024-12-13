@@ -27,13 +27,28 @@
             transform: scale(1.2);
         }
         .node text {
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .link {
+    font-size: 7px;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100px; /* Define a fixed width */
+    display: inline-block; /* Necessary for ellipsis to work */
+}
+
+       .link {
             fill: none;
             stroke: #888;
             stroke-width: 2px;
+            transition: stroke 0.3s;
+        }
+        
+        .left-link {
+            stroke: #1f77b4; /* Blue color for left links */
+        }
+        
+        .right-link {
+            stroke: #ff7f0e; /* Orange color for right links */
         }
     </style>
 </head>
@@ -71,6 +86,13 @@
             .data(root.links())
             .enter().append("path")
             .attr("class", "link")
+             .attr("class", d => {
+                // Determine if the link is left or right
+                const source = d.source;
+                const target = d.target;
+                return target.x < source.x ? "link left-link" : "link right-link";
+            })
+
             .attr("d", d3.linkVertical()  // Use linkVertical for portrait orientation
                 .x(d => d.x)
                 .y(d => d.y));
@@ -87,11 +109,16 @@
             .attr("r", 10);
 
         // Add labels for each node
-        node.append("text")
+          node.append("text")
             .attr("dy", 3)
             .attr("x", d => d.children ? -15 : 15)
             .style("text-anchor", d => d.children ? "end" : "start")
-            .text(d => `${d.data.user_name} (ID: ${d.data.user_id})`);
+            .text(d => {
+                const relationship = d.data.relationship ? ` (${d.data.relationship})` : '';
+                const referrerName = d.data.referrer_name ? ` [Ref: ${d.data.referrer_name}]` : '';
+
+                return `${d.data.user_name}${referrerName}`;
+            });
 
         // Implement zoom and pan functionality
         const zoom = d3.zoom()

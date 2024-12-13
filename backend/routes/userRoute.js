@@ -24,10 +24,10 @@ const {
   registerUser,
   loginUser,
   logout,
-  forgotPassword,
-  resetPassword,
+
+
   getUserDetail,
-  updatePassword,
+
   updateProfile,
   allUsers,
   addFrom,
@@ -43,13 +43,17 @@ const {
   approveQuest,
   disapproveQuest,
   renderTreeView,
+  getoneUserHistory,
+  getNotificationsApi,
+  markNotificationAsRead,
+   markAllNotificationsAsRead,
 } = require("../contollers/userController");
 const {
   registerUserApi,
   loginUserApi,
   logoutApi,
   forgotPasswordApi,
-  resetPasswordApi,
+
   getUserDetailApi,
   updatePasswordApi,
   updateProfileApi,
@@ -58,6 +62,11 @@ const {
   getAllCompaniesApi,
   getUserReferralCode,
   transferCoins,
+  uploadQuestScreenshotApi,
+  createSellTransaction,
+  approveUserTransaction,
+  getUserHistory,
+  getFilteredUserHistory,
 } = require("../contollers/userApiController");
 const {
   isAuthenticatedUser,
@@ -72,19 +81,29 @@ router.route("/register").post(registerUser);
 router.route("/login").get(showLogin);
 router.route("/login").post(loginUser);
 
-router.route("/password/forgot").post(forgotPassword);
 
-router.route("/password/reset/:token").put(resetPassword);
+router
+  .route("/read-notifications/mark-all-read")
+  .post(
+    isAuthenticatedUser,
+    authorizeRoles("admin"),
+    markAllNotificationsAsRead
+  );
+
 
 router.route("/logout").get(isAuthenticatedUser, logout);
 
 router.route("/me").get(isAuthenticatedUser, getUserDetail);
 
-router.route("/password/update").post(isAuthenticatedUser, updatePassword);
+
 
 router.route("/me/update").post(isAuthenticatedUser, updateProfile);
-
+router.route("/notifications").get(getNotificationsApi);
+router
+  .route("/read-notification/:notificationId/mark-read")
+  .patch(markNotificationAsRead);
 router.route("/users").get(isAuthenticatedUser, allUsers);
+router.get("/user-tree-view/:userId", isAuthenticatedUser, renderTreeView);
 
 router
   .route("/" + module_slug + "/add")
@@ -105,17 +124,32 @@ router
   .get(isAuthenticatedUser, authorizeRoles("admin"), editUserForm);
 
 router
+  .route("/" + module_slug + "/user-history/:user_id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getoneUserHistory);
+
+router
   .route("/" + module_slug + "/update/:id")
   .post(isAuthenticatedUser, authorizeRoles("admin"), updateUserRecord);
 router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
 
-router.post("/approve-quest/:quest_id", approveQuest);
-router.post("/disapprove-quest/:quest_id", disapproveQuest);
-router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
+router.post(
+  "/approve-quest/:quest_id",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  approveQuest
+);
+
+router.post(
+  "/approve-quest/:quest_id",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  disapproveQuest
+);
 router.get("/user-tree", isAuthenticatedUser, renderTreeView);
 /*******REST API*******/
+router.route("/sell-coin").post(isApiAuthenticatedUser, createSellTransaction);
 
 router.route("/api-register").post(registerUserApi);
 
@@ -123,7 +157,7 @@ router.route("/api-login").post(loginUserApi);
 
 router.route("/api-password/forgot").post(forgotPasswordApi);
 
-router.route("/api-password/reset/:token").put(resetPasswordApi);
+
 
 router.route("/api-logout").get(logoutApi);
 
@@ -136,7 +170,9 @@ router
   .route("/api-password/update")
   .post(isApiAuthenticatedUser, updatePasswordApi);
 
-router.route("/api-me/update").put(isApiAuthenticatedUser, updateProfileApi);
+router
+  .route("/api-me/update")
+  .patch(isApiAuthenticatedUser, upload.single("user_photo"), updateProfileApi);
 
 router.post(
   "/upload-screenshot/:id",
@@ -148,9 +184,16 @@ router.route("/api-coin-share").post(isApiAuthenticatedUser, transferCoins);
 
 router.post(
   "/upload-quest-screenshot/:quest_id",
+  isApiAuthenticatedUser, // Add this middleware to ensure req.user is set
   upload.array("screenshot", 5),
   uploadQuestScreenshotApi
 );
-router.get("/quest-history", isApiAuthenticatedUser, getQuestHistory);
+
 router.get("/user-history", isApiAuthenticatedUser, getUserHistory);
+router.get(
+  "/user-waiting-requests",
+  isApiAuthenticatedUser,
+  getFilteredUserHistory
+);
+router.post("/user-approve", isApiAuthenticatedUser, approveUserTransaction);
 module.exports = router;

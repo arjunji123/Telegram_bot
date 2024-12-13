@@ -21,31 +21,22 @@ var Storage = multer.diskStorage({
   },
 });
 const {
-  // checkAdminLoginOrDashboard,
-  // showLogin,
-  // dashboard,
-  // registerUser,
-  // loginUser,
-  // logout,
-  // forgotPassword,
-  // resetPassword,
-  // getUserDetail,
-  // updatePassword,
-  // updateProfile,
-  // allUsers,
+  loginCompanyApi,
   addFrom,
   createRecord,
   allUsers,
+  forgotPasswordApi,
+  updatePasswordApi,
   getAllCompaniesApi,
   getCompanyDetailApi,
-  // updateUserStatus,
-  // addCoinRate,
-  // showCompanyForm,
-  // submitCompanyForm,
   getSingleUser,
   editUserForm,
   updateUserRecord,
   deleteRecord,
+  getCompanyProfileApi,
+  updateCoinRateApi,
+  reqGetAllReqApi,
+  uploadTransactionDocApi,
 } = require("../contollers/companyController");
 var upload = multer({ storage: Storage });
 // router.post("/users/update-status", updateUserStatus);
@@ -74,8 +65,27 @@ router
   .route("/" + module_slug + "/delete/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), deleteRecord);
 router.route("/" + module_slug + "").get(isAuthenticatedUser, allUsers);
-//////////////////////////////
 router.route("/api-company/:id").get(getCompanyDetailApi);
 router.route("/api-companies").get(getAllCompaniesApi);
+//////////////////////////////
 
+router.route("/api-login-company").post(loginCompanyApi);
+router.route("/api-password/forgot").post(forgotPasswordApi);
+router
+  .route("/api-password/update")
+  .post(isApiAuthenticatedUser, updatePasswordApi);
+router
+  .route("/api-company-detail")
+  .get(isApiAuthenticatedUser, getCompanyProfileApi);
+
+router
+  .route("/api-coinrate-update")
+  .post(isApiAuthenticatedUser, updateCoinRateApi);
+
+router.route("/api-getall-req").get(isApiAuthenticatedUser, reqGetAllReqApi);
+router.post(
+  "/upload-transaction-doc", // Route to handle transaction document upload
+  upload.single("pay_image"), // This is where multer handles file upload
+  uploadTransactionDocApi // Call the handler
+);
 module.exports = router;
