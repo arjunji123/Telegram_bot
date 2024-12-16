@@ -1,7 +1,6 @@
 const app = require("./app");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
-const connectDatabase = require("./config/database");
 const mysqlPool = require("./config/mysql_database");
 
 //handling uncaught exceptions
@@ -27,8 +26,9 @@ mysqlPool
     console.error("Error establishing MySQL connection:", err);
   });
 
-const server = app.listen(process.env.PORT, () => {
-  console.log("server is working on port " + process.env.PORT);
+const PORT = process.env.PORT || 5001;
+const server = app.listen(PORT, () => {
+  console.log("server is working on port " + PORT);
 });
 
 // unhandled promise rejection
