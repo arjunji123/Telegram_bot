@@ -20,6 +20,7 @@ var Storage = multer.diskStorage({
     callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
   },
 });
+
 const {
   loginCompanyApi,
   addFrom,
