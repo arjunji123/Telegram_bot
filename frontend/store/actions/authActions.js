@@ -132,37 +132,41 @@ export const signUp = (credentials) => async (dispatch) => {
 
 
 export const resetPassword = (email) => async (dispatch) => {
-    dispatch({ type: PASSWORD_RESET_REQUEST });
+  dispatch({ type: PASSWORD_RESET_REQUEST });
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/v1/api-password/forgot`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-        });
+  try {
+      const response = await fetch(`${BACKEND_URL}/api/v1/api-password/forgot`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok) {
-            dispatch({
-                type: PASSWORD_RESET_SUCCESS,
-                payload: data.message || 'Reset link sent successfully.',
-            });
-        } else {
-            dispatch({
-                type: PASSWORD_RESET_FAILURE,
-                payload: data.message || 'Error sending reset link. Please try again.',
-            });
-        }
-    } catch (error) {
-        dispatch({
-            type: PASSWORD_RESET_FAILURE,
-            payload: error.message || 'Error sending reset link. Please try again.',
-        });
-    }
+      if (response.ok) {
+          dispatch({
+              type: PASSWORD_RESET_SUCCESS,
+              payload: data.message || 'Reset link sent successfully.',
+          });
+          return Promise.resolve(data.message || 'Reset link sent successfully.'); // Resolve on success
+      } else {
+          dispatch({
+              type: PASSWORD_RESET_FAILURE,
+              payload: data.message || 'Error sending reset link. Please try again.',
+          });
+          return Promise.reject(data.error || 'Error sending reset link. Please try again.'); // Reject on failure
+      }
+  } catch (error) {
+      dispatch({
+          type: PASSWORD_RESET_FAILURE,
+          payload: error.message || 'Error sending reset link. Please try again.',
+      });
+      return Promise.reject(error.message || 'Error sending reset link. Please try again.'); // Reject on catch
+  }
 };
+
 
 export const updatePassword = (formPassword) => async (dispatch) => {
   dispatch({ type: 'PASSWORD_UPDATE_REQUEST' });
