@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCompanyData , updateCoinRate} from "../../store/actions/homeActions";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Loader from '../components/Loader';
+import Loader from './Loader';
 
 function Profile() {
   const navigate = useNavigate();
@@ -38,12 +38,18 @@ function Profile() {
   // Handle coin rate update
   const handleUpdateCoinRate = () => {
     if (!coinRate) {
-      // Show toast for validation
-      toast('Coin rate is required!');
+      toast.error('Coin rate is required!');
       return;
     }
-    
-    dispatch(updateCoinRate(coinRate));
+
+    dispatch(updateCoinRate(coinRate))
+      .then(() => {
+        toast.success('Coin rate updated successfully!');
+        navigate('/home'); // Navigate to home page
+      })
+      .catch((error) => {
+        toast.error(error.message || 'Failed to update coin rate!');
+      });
   };
 
  

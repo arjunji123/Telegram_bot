@@ -85,10 +85,45 @@ function Home() {
             <div className="text-lg font-semibold">{userData?.company_coin ? userData.company_coin : "0"}</div>
             <p className="text-sm text-gray-400">Company Coin</p>
           </div>
-          <div className="bg-[#1B1A1A] shadow-xl p-2 rounded-lg">
-            <div className="text-lg font-semibold">{userData ? `${userData.coin_rate} INR` : "N/A"}</div>
-            <p className="text-sm text-gray-400">Coin Rate</p>
-          </div>
+          <div className="bg-[#1B1A1A] shadow-xl p-2 rounded-lg relative">
+    {/* Coin Rate Display */}
+    <div className="text-lg font-semibold">
+        {userData ? `${userData.coin_rate} INR` : "N/A"}
+    </div>
+    <p className="text-sm text-gray-400">Coin Rate</p>
+
+    {/* Tooltip and Update Button */}
+    <div className="absolute top-0 right-0 mt-1 mr-2">
+        <div className="group relative">
+           {/* Tooltip */}
+           <div className="absolute hidden group-hover:block bottom-full mb-2 left-1/2 transform -translate-x-1/2 text-[10px] text-white bg-black p-2 rounded">
+                  Upadate Coin Rate
+                </div>
+
+            {/* Update Button */}
+            <button
+                className="text-gray-400 hover:text-gray-200 transition"
+                onClick={() => navigate('/profile')}
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                    />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
         </div>
       </div>
 

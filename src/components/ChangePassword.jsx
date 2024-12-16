@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { updatePassword } from '../../store/actions/authActions';
+import { updatePassword, clearAuthState  } from '../../store/actions/authActions';
 import { Link , useNavigate} from 'react-router-dom'; // Import Link for navigation
 import Footer from "./Footer";
 
@@ -32,19 +32,28 @@ const ChangePassword = () => {
         dispatch(updatePassword(formData));
     };
 
-    // Monitor success and error states
-    useEffect(() => {
-        if (error) {
-            toast.error(error);
-            console.log('error', error)
-        }
-        if (message) {
-            toast.success(message);
-            setTimeout(() => {
-                navigate('/home'); // Navigate to login page after toast
-            }, 2000); // Delay navigation to let user see the toast
-        }
-    }, [error, message]);
+  // Monitor success and error states
+  useEffect(() => {
+    if (error) {
+        toast.error(error);
+        console.log('error', error)
+        dispatch(clearAuthState()); // Clear Redux error state after displaying the toast
+    }
+    if (message) {
+        toast.success(message);
+        setTimeout(() => {
+            navigate('/home'); // Navigate to home page after toast
+            dispatch(clearAuthState()); // Clear Redux state after navigation
+        }, 2000);
+    }
+}, [error, message, dispatch, navigate]);
+
+// Clear Redux state when unmounting or entering the page
+useEffect(() => {
+    return () => {
+        dispatch(clearAuthState());
+    };
+}, [dispatch]);
 
     return (
         <div className="bg-black flex justify-center items-center min-h-screen p-4">
