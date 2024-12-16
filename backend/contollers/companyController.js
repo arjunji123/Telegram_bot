@@ -1043,7 +1043,6 @@ exports.uploadTransactionDocApi = catchAsyncErrors(async (req, res, next) => {
         )
       );
     }
-
     // Send a success response back to the client
     res.status(200).json({
       success: true,
