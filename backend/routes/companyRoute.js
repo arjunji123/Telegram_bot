@@ -37,6 +37,8 @@ const {
   updateCoinRateApi,
   reqGetAllReqApi,
   uploadTransactionDocApi,
+  reqGetAllHistoryApiReqApi,
+  reqGetUnapprovedWithDocApi,
 } = require("../contollers/companyController");
 var upload = multer({ storage: Storage });
 // router.post("/users/update-status", updateUserStatus);
@@ -83,6 +85,15 @@ router
   .post(isApiAuthenticatedUser, updateCoinRateApi);
 
 router.route("/api-getall-req").get(isApiAuthenticatedUser, reqGetAllReqApi);
+
+router
+  .route("/api-getall-pending")
+  .get(isApiAuthenticatedUser, reqGetUnapprovedWithDocApi);
+
+router
+  .route("/api-getall-history")
+  .get(isApiAuthenticatedUser, reqGetAllHistoryApiReqApi);
+
 router.post(
   "/upload-transaction-doc", // Route to handle transaction document upload
   upload.single("pay_image"), // This is where multer handles file upload
