@@ -26,6 +26,7 @@ const sellTransactionSchema = Joi.object({
   transaction_rate: Joi.number().required(),
   transaction_amount: Joi.number().required(),
 });
+
 exports.allUsers = catchAsyncErrors(async (req, res, next) => {
   try {
     // Fetch user data along with company_data
@@ -794,6 +795,7 @@ exports.updateCoinRateApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database update failed", 500));
   }
 });
+
 exports.reqGetAllReqApi = async (req, res, next) => {
   try {
     // Extract user_id from the request (e.g., from query params or session)
@@ -804,7 +806,7 @@ exports.reqGetAllReqApi = async (req, res, next) => {
       return next(new ErrorHandler("User ID is required", 400));
     }
 
-    // Query the database for user transactions and user details related to the specified company
+    // Query the database for transactions where trans_doc is null and status is unapproved
     const userTransactions = await db.query(
       `SELECT 
         ut.id AS transaction_id, 
@@ -822,7 +824,9 @@ exports.reqGetAllReqApi = async (req, res, next) => {
       ON 
         ut.user_id = ud.user_id
       WHERE 
-        ut.company_id = ?`,
+        ut.company_id = ? 
+        AND ut.trans_doc IS NULL 
+        AND ut.status != 'approved'`, // Filter for trans_doc null and unapproved status
       [userId]
     );
 
@@ -837,16 +841,161 @@ exports.reqGetAllReqApi = async (req, res, next) => {
     // Check if any transactions were found
     if (!filteredTransactions || filteredTransactions.length === 0) {
       return res.status(404).json({
-        message: "No user requests found for the specified company",
+        message:
+          "No unapproved user requests without documents found for the specified company",
       });
     }
 
     // Log retrieved transactions for debugging
-    console.log("Filtered User Transactions:", filteredTransactions);
+    console.log(
+      "Filtered Unapproved User Transactions without Documents:",
+      filteredTransactions
+    );
 
     // Send the user transactions as JSON response
     return res.status(200).json({
-      message: "User transactions retrieved successfully",
+      message:
+        "Unapproved user transactions without documents retrieved successfully",
+      transactions: filteredTransactions,
+    });
+  } catch (error) {
+    console.error("Error retrieving user transactions:", error); // Log any error
+
+    // Send an error response as JSON
+    return res.status(500).json({
+      message: "Failed to retrieve user requests",
+      error: error.message,
+    });
+  }
+};
+
+exports.reqGetUnapprovedWithDocApi = async (req, res, next) => {
+  try {
+    // Extract user_id from the request (e.g., from query params or session)
+    const userId = req.user.id;
+
+    // Check if user_id is provided
+    if (!userId) {
+      return next(new ErrorHandler("User ID is required", 400));
+    }
+
+    // Query the database for transactions where trans_doc is not null and status is unapproved
+    const userTransactions = await db.query(
+      `SELECT 
+        ut.id AS transaction_id, 
+        ut.*, 
+        u.user_name, 
+        ud.upi_id 
+      FROM 
+        user_transction ut
+      JOIN 
+        users u 
+      ON 
+        ut.user_id = u.id
+      JOIN 
+        user_data ud
+      ON 
+        ut.user_id = ud.user_id
+      WHERE 
+        ut.company_id = ? 
+        AND ut.trans_doc IS NOT NULL 
+        AND ut.status != 'approved'`, // Filter by trans_doc not null and unapproved status
+      [userId]
+    );
+
+    // Flatten the result if it’s an array of arrays
+    const flattenedTransactions = userTransactions.flat();
+
+    // Filter out any unwanted Buffer data
+    const filteredTransactions = flattenedTransactions.filter((transaction) => {
+      return !transaction._buf; // Remove transactions that contain binary data
+    });
+
+    // Check if any transactions were found
+    if (!filteredTransactions || filteredTransactions.length === 0) {
+      return res.status(404).json({
+        message:
+          "No unapproved user requests with documents found for the specified company",
+      });
+    }
+
+    // Log retrieved transactions for debugging
+    console.log(
+      "Filtered Unapproved User Transactions with Documents:",
+      filteredTransactions
+    );
+
+    // Send the user transactions as JSON response
+    return res.status(200).json({
+      message:
+        "Unapproved user transactions with documents retrieved successfully",
+      transactions: filteredTransactions,
+    });
+  } catch (error) {
+    console.error("Error retrieving user transactions:", error); // Log any error
+
+    // Send an error response as JSON
+    return res.status(500).json({
+      message: "Failed to retrieve user requests",
+      error: error.message,
+    });
+  }
+};
+
+exports.reqGetAllHistoryApiReqApi = async (req, res, next) => {
+  try {
+    // Extract user_id from the request (e.g., from query params or session)
+    const userId = req.user.id;
+
+    // Check if user_id is provided
+    if (!userId) {
+      return next(new ErrorHandler("User ID is required", 400));
+    }
+
+    // Query the database for user transactions with the 'approved' status
+    const userTransactions = await db.query(
+      `SELECT 
+        ut.id AS transaction_id, 
+        ut.*, 
+        u.user_name, 
+        ud.upi_id 
+      FROM 
+        user_transction ut
+      JOIN 
+        users u 
+      ON 
+        ut.user_id = u.id
+      JOIN 
+        user_data ud
+      ON 
+        ut.user_id = ud.user_id
+      WHERE 
+        ut.company_id = ? 
+        AND ut.status = 'approved'`, // Filter by 'approved' status
+      [userId]
+    );
+
+    // Flatten the result if it’s an array of arrays
+    const flattenedTransactions = userTransactions.flat();
+
+    // Filter out any unwanted Buffer data
+    const filteredTransactions = flattenedTransactions.filter((transaction) => {
+      return !transaction._buf; // Remove transactions that contain binary data
+    });
+
+    // Check if any transactions were found
+    if (!filteredTransactions || filteredTransactions.length === 0) {
+      return res.status(404).json({
+        message: "No approved user requests found for the specified company",
+      });
+    }
+
+    // Log retrieved transactions for debugging
+    console.log("Filtered Approved User Transactions:", filteredTransactions);
+
+    // Send the user transactions as JSON response
+    return res.status(200).json({
+      message: "Approved user transactions retrieved successfully",
       transactions: filteredTransactions,
     });
   } catch (error) {
@@ -910,4 +1059,3 @@ exports.uploadTransactionDocApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database operation failed", 500));
   }
 });
-
