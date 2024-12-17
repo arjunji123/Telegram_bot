@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../store/store";
@@ -29,7 +29,6 @@ import "./App.css";
 store.dispatch(loadUserFromLocalStorage());
 
 function App() {
-  const scrollContainerRef = useRef();
     const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
@@ -81,22 +80,54 @@ function App() {
   }, [isMobile]);
     
   useEffect(() => {
-    const preventTelegramClose = (e) => {
-      // Block any touchmove event that might cause the bot to close
-      if (e.cancelable) {
+      // Prevent body scroll and manage touch gestures within the content area
+      document.body.style.overflow = "hidden";
+
+      const content = document.getElementById("scrollable-content");
+
+    const handleTouchStart  = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = content;
+      content.dataset.scrollStartY = e.touches[0].clientY; // Save the initial touch position
+
+      // Check if scrolling is needed
+      if (scrollHeight > clientHeight) {
+        content.dataset.isScrollable = true;
+      } else {
+        content.dataset.isScrollable = false;
+      }
+    };
+    const handleTouchMove = (e) => {
+      const { scrollTop, scrollHeight, clientHeight, dataset } = content;
+      const deltaY = e.touches[0].clientY - dataset.scrollStartY;
+
+      // Prevent scrolling outside the content area
+      if (
+        (scrollTop === 0 && deltaY > 0) || // At the top and trying to scroll up
+        (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom and trying to scroll down
+      ) {
+        e.preventDefault(); // Stop the event
+      }
+
+      // Allow scrolling only if the content is scrollable
+      if (dataset.isScrollable === "false") {
         e.preventDefault();
       }
     };
 
-    // Add event listener to prevent Telegram bot from closing
-    document.addEventListener('touchmove', preventTelegramClose, { passive: false });
-
-    // Remove the event listener on cleanup
+    if (content) {
+      content.addEventListener("touchstart", handleTouchStart);
+      content.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+    }
     return () => {
-      document.removeEventListener('touchmove', preventTelegramClose);
+      document.body.style.overflow = ""; // Restore body scroll
+      if (content) {
+        content.removeEventListener("touchstart", handleTouchStart);
+        content.removeEventListener("touchmove", handleTouchMove);
+      }
     };
   }, []);
-
 
   if (isLoading) {
     return <Preloader />;
@@ -123,16 +154,12 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div style={{ position: 'fixed',  width: '100%', height: '100vh', overflow: 'hidden' }}>
+        <div id="app-container" className=" w-screen  h-screen overflow-hidden bg-black">
           {/* Scrollable content */}
-         {/* Scrollable Content */}
-          {/* Scrollable Content Area */}
-          <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        paddingBottom: '60px', // Add padding to ensure content is not hidden by the fixed bot
-        WebkitOverflowScrolling: 'touch', // Smooth scrolling for iOS
-      }}>
+          <div
+            id="scrollable-content"
+          className="h-full w-full overflow-y-auto"
+          >
             <Routes>
               {/* Redirect based on token existence */}
               <Route
