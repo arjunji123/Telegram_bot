@@ -79,22 +79,7 @@ function App() {
     };
   }, [isMobile]);
     
-  useEffect(() => {
-    // Prevent default scroll behavior to avoid closing Telegram bot
-    const preventTouchMove = (e) => {
-      if (e.cancelable) {
-        e.preventDefault();
-      }
-    };
-    document.body.addEventListener("touchmove", preventTouchMove, {
-      passive: false,
-    });
-
-    // Cleanup
-    return () => {
-      document.body.removeEventListener("touchmove", preventTouchMove);
-    };
-  }, []);
+ 
 
   if (isLoading) {
     return <Preloader />;
