@@ -37,8 +37,8 @@ function Withdrawal() {
     setSharePopup(!sharePopup);
   };
   const [sendData, setSendData] = useState({
-    recipientReferralCode: '',
-    amount: ''
+    upi_id: '',
+    sell_coin: ''
   });
   const { success } = useSelector((state) => ({
     success: state.coinData.success,
@@ -122,7 +122,7 @@ function Withdrawal() {
     }));
   };
   const handleSendMoney = async () => {
-    if (!sendData.amount || !sendData.recipientReferralCode) {
+    if (!sendData.sell_coin || !sendData.upi_id) {
       toast.warn("Please fill in all fields.");
       return;
     }
@@ -148,8 +148,8 @@ function Withdrawal() {
 
       // Reset the form state if needed
       setSendData({
-        amount: '',
-        recipientReferralCode: '',
+        sell_coin: '',
+        upi_id: '',
       });
     } else if (error) {
     }

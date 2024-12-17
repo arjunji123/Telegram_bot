@@ -13,29 +13,30 @@ function ShareCoin({ toggleSharePopup, handleSendInputChange, handleSendMoney , 
         </button>
 
         <h2 className="text-lg sm:text-2xl font-semibold text-center mb-4 text-[#E0E0E0]">
-            Share Coin with Your Frens
+            Sell Coin to Admin
         </h2>
 
         {/* Description */}
         <p className="text-sm sm:text-base text-[#B0B0B0] text-center mb-6">
-         Invite your friends to join and experience the benefits of our coin system together!
+        Sell Coin to admin and take reward money!
         </p>
 
-            <input
-                type="text"
-                name="recipientReferralCode"
-                value={sendData.recipientReferralCode}
-                onChange={handleSendInputChange}
-                placeholder="Referral Code"
-                className="w-full uppercase p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
-            />
+         
             <input
                  type="text"
-                    name="amount"
-                    value={sendData.amount}
+                    name="sell_coin"
+                    value={sendData.sell_coin}
                     onChange={handleSendInputChange}
-                placeholder="Enter your amount"
+                placeholder="Enter your coin"
                 className="w-full p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
+            />
+               <input
+                type="text"
+                name="upi_id"
+                value={sendData.upi_id}
+                onChange={handleSendInputChange}
+                placeholder="UPI ID"
+                className="w-full uppercase p-2 sm:p-3 bg-[#2C2C2C] text-white border border-transparent rounded-lg mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#505050] transition duration-300 text-sm sm:text-base"
             />
 
         <div className="flex justify-center items-center">

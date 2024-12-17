@@ -3,7 +3,7 @@ import {  BsCoin } from "react-icons/bs";
 import { FaChevronLeft } from "react-icons/fa";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
-import { fetchHistory, fetchWithdrawal, userApprove } from "../../store/actions/homeActions";
+import { fetchHistory, fetchAllPendingData, userApprove } from "../../store/actions/homeActions";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../components/Loader";
 import Swal from "sweetalert2";
@@ -14,16 +14,16 @@ const TransactionHistory = () => {
   const dispatch = useDispatch();
 
   // Redux states
-  const historyData = useSelector((state) => state.apiData.data.history?.data || []);
-  const withdrawal = useSelector((state) => state.apiData.data.withdrawal?.data || []);
+  const historyData = useSelector((state) => state.apiData.data.history?.transactions || []);
+  const withdrawal = useSelector((state) => state.apiData.data.getall?.transactions || []);
   const [activeTab, setActiveTab] = useState("History");
-console.log('withdrawal', withdrawal)
+console.log('withdrawal', historyData)
   // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         await dispatch(fetchHistory());
-        await dispatch(fetchWithdrawal());
+        await dispatch(fetchAllPendingData());
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -36,7 +36,7 @@ console.log('withdrawal', withdrawal)
   // Group transactions by date
   const groupByDate = (data) =>
     data.reduce((acc, item) => {
-      const date = new Date(item.transaction_date).toLocaleDateString();
+      const date = new Date(item.date_approved).toLocaleDateString();
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;
@@ -125,12 +125,10 @@ console.log('withdrawal', withdrawal)
                         <div key={index} className="flex items-center justify-between py-3">
                           <div className="flex items-center space-x-3">
                             <BsCoin size={30} className="text-white" />
-                            <h3 className="text-sm font-semibold capitalize">{transaction.title}</h3>
+                            <h3 className="text-sm font-semibold capitalize">{transaction.user_name}</h3>
                           </div>
                           <p className="text-sm font-medium">
-                            {transaction.pending_coin === 0
-                              ? `${transaction.earn_coin > 0 ? "-" : ""}${transaction.earn_coin} Coins`
-                              : `+ ${transaction.pending_coin} Coins`}
+                            {transaction.tranction_coin} Coin
                           </p>
                         </div>
                       ))}
@@ -152,14 +150,17 @@ console.log('withdrawal', withdrawal)
                         <div key={index} className="flex items-center justify-between py-3">
                           <div className="flex items-center space-x-3">
                             <BsCoin size={30} className="text-white" />
-                            <h3 className="text-sm font-semibold capitalize">{transaction.title}</h3>
+                            <h3 className="text-sm font-semibold capitalize">{transaction.user_name}</h3>
                           </div>
-                          <button
+                          {/* <button
                             onClick={() => handleApprove(transaction.transaction_id)}
                             className="leading-none capitalize px-4 py-2 text-[13px] rounded-full bg-[#282828] flex text-white font-semibold hover:bg-[#1C1C1E] transition duration-200 ease-in-out"
                           >
                             {transaction && transaction.status ? "Approve": "Waiting"}
-                          </button>
+                          </button> */}
+                            <p className="text-sm font-medium">
+                            {transaction.tranction_coin} Coin
+                          </p>
                         </div>
                       ))}
                     </div>

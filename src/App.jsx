@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import Friend from "./components/Friend";
 import { loadUserFromLocalStorage } from "../store/actions/authActions";
 import Home from "./components/Home";
-import Tasks from "./components/Tasks";
 import Login from "./components/Login";
 import ChangePassword from "./components/ChangePassword";
 import Forgot from "./components/Forgot";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
 import Preloader from "./components/Preloader"; // Import the Preloader component
-import Payment from "./components/Payment";
 import Withdrawal from "./components/Withdrawal";
 import History from "./components/History";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -81,14 +78,11 @@ function App({ Component, pageProps }) {
 
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/payment/:id" element={<Payment />} />
             <Route path="/forgot" element={<Forgot />} />
           </Route>
 
           <Route element={<PrivateRoute />}>
             <Route path="/home" element={<Home />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/friend" element={<Friend />} />
             <Route path="/withdrawal" element={<Withdrawal />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/history" element={<History />} />

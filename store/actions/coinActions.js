@@ -8,11 +8,11 @@ export const SET_COINS_SUCCESS = "SET_COINS_SUCCESS";
 export const SHARE_COINS_FAILURE = "SHARE_COINS_FAILURE";
 
 
-export const shareCoins = (amount, recipientReferralCode) => async (dispatch) => {
+export const shareCoins = (sell_coin, upi_id) => async (dispatch) => {
     dispatch({ type: SHARE_COINS_REQUEST });
     try {
       // Call the fetcherPost function for the transfer coins API
-      const response = await fetcherPost(`${BACKEND_URL}/api/v1/api-coin-share`, amount, recipientReferralCode);
+      const response = await fetcherPost(`${BACKEND_URL}/api/v1/sell-coins-toadmin`, sell_coin, upi_id);
   
       console.log("Share coin successful:", response);
       dispatch({ type: SET_COINS_SUCCESS, payload: response });

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useRef } from 'react';
 import { ImCross } from 'react-icons/im';
 import { uploadTransactionDoc } from '../../store/actions/withdrawalActions';
+import {fetchUserData} from '../../store/actions/homeActions';
 import { useDispatch, useSelector } from 'react-redux';
 
 function Send({ togglePopup, userDetail , resetUserDetail }) {
@@ -8,7 +9,7 @@ function Send({ togglePopup, userDetail , resetUserDetail }) {
   const [payImage, setPayImage] = useState(null);
   const dispatch = useDispatch();
   const { loading, success, error } = useSelector((state) => state.moneyData);
-
+  const fetchCalled = useRef(false);
   const handleFileChange = (e) => {
     setPayImage(e.target.files[0]);
   };
@@ -28,13 +29,20 @@ function Send({ togglePopup, userDetail , resetUserDetail }) {
       console.log('Both Transaction ID and Payment Image are required');
     }
   };
-   // Close the popup when the transaction is successful
-   useEffect(() => {
-    if (success) {
-      togglePopup(); // Close the popup
-      resetUserDetail(); // Reset user details after popup closes
+  useEffect(() => {
+    console.log("Success state:", success);
+    console.log("Fetch Called Flag:", fetchCalled.current);
+  
+    if (success && !fetchCalled.current) {
+      console.log("Dispatching fetchUserData...");
+      fetchCalled.current = true; // Prevent repeated calls
+      dispatch(fetchUserData());
+  
+      // Close popup and reset user details
+      togglePopup();
+      resetUserDetail();
     }
-  }, [success, togglePopup, resetUserDetail]);
+  }, [success, dispatch, togglePopup, resetUserDetail]);
     // Sync transaction ID when userDetail changes
     useEffect(() => {
       setTransactionId(userDetail && userDetail.id);

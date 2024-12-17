@@ -42,9 +42,9 @@ export const FETCH_USER_REQUEST = 'FETCH_USER_REQUEST';
 export const SET_USER_DATA  = 'SET_USER_DATA';
 export const FETCH_USER_FAILURE = 'FETCH_USER_FAILURE';
 
-export const FETCH_REFFRAL_REQUEST = 'FETCH_REFFRAL_REQUEST';
-export const SET_REFFRAL_DATA  = 'SET_REFFRAL_DATA';
-export const FETCH_REFFRAL_FAILURE = 'FETCH_REFFRAL_FAILURE';
+export const FETCH_GETALL_PENDING_REQUEST = 'FETCH_GETALL_PENDING_REQUEST';
+export const SET_GETALL_PENDING_DATA  = 'SET_GETALL_PENDING_DATA';
+export const FETCH_GETALL_PENDING_FAILURE = 'FETCH_GETALL_PENDING_FAILURE';
 
 export const FETCH_HISTORY_REQUEST = 'FETCH_HISTORY_REQUEST';
 export const SET_HISTORY_DATA  = 'SET_HISTORY_DATA';
@@ -134,15 +134,15 @@ export const fetchUserData = () => async (dispatch) => {
   }
 };
 
-export const fetchReffralData = () => async (dispatch) => {
-  dispatch({type: FETCH_REFFRAL_REQUEST});
+export const fetchAllPendingData = () => async (dispatch) => {
+  dispatch({type: FETCH_GETALL_PENDING_REQUEST});
   
   try {
-    const data = await fetcherGet(`${BACKEND_URL}/api/v1/referral-code`);
-    dispatch({ type: SET_REFFRAL_DATA, payload: data });
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/api-getall-pending`);
+    dispatch({ type: SET_GETALL_PENDING_DATA, payload: data });
   } catch (error) {
     dispatch({
-      type: FETCH_REFFRAL_FAILURE,
+      type: FETCH_GETALL_PENDING_FAILURE,
       payload: error.message,
     });
   }
@@ -151,7 +151,7 @@ export const fetchHistory = () => async (dispatch) => {
   dispatch({type: FETCH_HISTORY_REQUEST});
   
   try {
-    const data = await fetcherGet(`${BACKEND_URL}/api/v1/user-history`);
+    const data = await fetcherGet(`${BACKEND_URL}/api/v1/api-getall-history`);
     dispatch({ type: SET_HISTORY_DATA, payload: data });
   } catch (error) {
     dispatch({
