@@ -119,11 +119,11 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="app-container" className=" w-screen  h-screen overflow-hidden bg-black">
+        <div id="app-container" className="  w-screen  h-screen overflow-hidden bg-black">
           {/* Scrollable content */}
           <div
             id="scrollable-content"
-          className="h-full w-full overflow-y-auto"
+          className=" scrollable-content h-full w-full overflow-y-auto"
           >
             <Routes>
               {/* Redirect based on token existence */}
