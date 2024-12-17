@@ -10,7 +10,6 @@ const expressLayouts = require("express-ejs-layouts");
 const errorMiddleware = require("./middleware/error");
 const { LocalStorage } = require("node-localstorage");
 const localStorage = new LocalStorage("./scratch");
-console.log("kjhg");
 
 // app.use(
 //   cors({
