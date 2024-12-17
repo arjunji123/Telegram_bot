@@ -79,7 +79,22 @@ function App() {
     };
   }, [isMobile]);
     
+  useEffect(() => {
+    // Prevent default scroll behavior to avoid closing Telegram bot
+    const preventTouchMove = (e) => {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+    };
+    document.body.addEventListener("touchmove", preventTouchMove, {
+      passive: false,
+    });
 
+    // Cleanup
+    return () => {
+      document.body.removeEventListener("touchmove", preventTouchMove);
+    };
+  }, []);
 
   if (isLoading) {
     return <Preloader />;
@@ -106,9 +121,9 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div className="app-container">       
-           {/* Scrollable content */}
-           <div className="content-container">
+        <div className="app-container">
+          {/* Scrollable Content */}
+          <div className="scrollable-content">
             <Routes>
               {/* Redirect based on token existence */}
               <Route
@@ -134,8 +149,8 @@ function App() {
               </Route>
             </Routes>
           </div>
-         {/* Fixed bot at bottom */}
-         <div className="fixed-bot">
+            {/* Fixed Bot */}
+            <div className="fixed-bot">
             {/* Telegram Bot (Fixed at Bottom) */}
           </div>
         </div>
