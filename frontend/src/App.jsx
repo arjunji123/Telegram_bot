@@ -81,35 +81,22 @@ function App() {
   }, [isMobile]);
     
   useEffect(() => {
-    // Function to prevent Telegram from closing on drag
     const preventTelegramClose = (e) => {
+      // Block any touchmove event that might cause the bot to close
       if (e.cancelable) {
-        e.preventDefault(); // Prevent closing the bot when dragging the screen
+        e.preventDefault();
       }
     };
 
-    // Add the touchmove event listener globally to prevent bot close
+    // Add event listener to prevent Telegram bot from closing
     document.addEventListener('touchmove', preventTelegramClose, { passive: false });
 
-    // Allow scroll only on the content
-    const handleTouchMove = (e) => {
-      const scrollable = scrollContainerRef.current;
-      if (scrollable && scrollable.contains(e.target)) {
-        e.stopPropagation(); // Allow scrolling within the container
-      } else {
-        e.preventDefault(); // Prevent the event from closing Telegram if not in the container
-      }
-    };
-
-    // Add touchmove event listener to handle scrolling behavior
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-    // Cleanup the event listeners on component unmount
+    // Remove the event listener on cleanup
     return () => {
       document.removeEventListener('touchmove', preventTelegramClose);
-      document.removeEventListener('touchmove', handleTouchMove);
     };
   }, []);
+
 
   if (isLoading) {
     return <Preloader />;
@@ -136,13 +123,16 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div style={{ height: '100vh', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed',  width: '100%', height: '100vh', overflow: 'hidden' }}>
           {/* Scrollable content */}
          {/* Scrollable Content */}
-      <div
-        ref={scrollContainerRef}
-      className="scrollable-content"
-      >
+          {/* Scrollable Content Area */}
+          <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        paddingBottom: '60px', // Add padding to ensure content is not hidden by the fixed bot
+        WebkitOverflowScrolling: 'touch', // Smooth scrolling for iOS
+      }}>
             <Routes>
               {/* Redirect based on token existence */}
               <Route
