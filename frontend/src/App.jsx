@@ -81,19 +81,33 @@ function App() {
   }, [isMobile]);
     
   useEffect(() => {
-    const preventDragClose = (e) => {
-      const scrollable = scrollContainerRef.current;
-      if (scrollable && !scrollable.contains(e.target)) {
-        // Prevent default only if the touch is outside the scrollable container
-        e.preventDefault();
+    // Function to prevent Telegram from closing on drag
+    const preventTelegramClose = (e) => {
+      if (e.cancelable) {
+        e.preventDefault(); // Prevent closing the bot when dragging the screen
       }
     };
 
-    // Add touch event listeners
-    document.addEventListener('touchmove', preventDragClose, { passive: false });
+    // Add the touchmove event listener globally to prevent bot close
+    document.addEventListener('touchmove', preventTelegramClose, { passive: false });
 
+    // Allow scroll only on the content
+    const handleTouchMove = (e) => {
+      const scrollable = scrollContainerRef.current;
+      if (scrollable && scrollable.contains(e.target)) {
+        e.stopPropagation(); // Allow scrolling within the container
+      } else {
+        e.preventDefault(); // Prevent the event from closing Telegram if not in the container
+      }
+    };
+
+    // Add touchmove event listener to handle scrolling behavior
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    // Cleanup the event listeners on component unmount
     return () => {
-      document.removeEventListener('touchmove', preventDragClose);
+      document.removeEventListener('touchmove', preventTelegramClose);
+      document.removeEventListener('touchmove', handleTouchMove);
     };
   }, []);
 

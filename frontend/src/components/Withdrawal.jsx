@@ -241,11 +241,12 @@ function Withdrawal() {
           <div className="w-full bg-black text-white flex flex-col max-w-lg px-4 overflow-hidden">
             <div className="flex-grow relative z-0   top-10">
               {/* <Logo /> */}
-              
-              <div className="flex justify-center font-Inter  leading-3 space-x-1 text-[34px] font-extrabold mt-3 mb-4">
-                <p>  𝕌</p>
-                <p className="">{userData ? userData.coins : "0"}</p>
+
+              <div className="flex items-center justify-center font-Inter leading-3 text-[34px] font-extrabold mt-3 mb-4">
+                <img src="src/assets/logo/U.png" alt="Logo" className="w-8 h-8 " />
+                <p>{userData ? userData.coins : "0"}</p>
               </div>
+
 
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {/* Send Button */}
@@ -308,7 +309,7 @@ function Withdrawal() {
                           </p>
                         </div>
                         <p className="flex items-start text-green-500 gap-0.5 self-start"> {/* Added self-start */}
-                        <IoMdThumbsUp size={24} className="pt-1"/>
+                          <IoMdThumbsUp size={24} className="pt-1" />
                           <span className="text-sm font-medium leading-loose">100%</span>
                         </p>
                       </div>
