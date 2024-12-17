@@ -39,6 +39,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden; /* Prevent any body-level scroll */
 }
 
 /* Scrollable Content */
@@ -46,8 +47,6 @@ body {
   flex: 1; /* Allow this area to grow */
   overflow-y: auto; /* Enable scrolling only here */
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  padding: 20px; /* Add padding for spacing */
-  box-sizing: border-box;
 }
 /* Fixed Bot at Bottom */
 .fixed-bot {
@@ -56,8 +55,9 @@ body {
   left: 0;
   right: 0;
   background-color: #000000; /* Change to your desired color */
-  text-align: center;
-  padding: 10px 0; /* Padding for content */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 1000; /* Ensure bot is above other content */
 }
 @font-face {
