@@ -74,6 +74,7 @@ const faqs = require("./routes/faqRoute");
 const testimonials = require("./routes/testimonialRoute");
 // const withdrwals = require("./routes/withdrwalRoute");
 const transactions = require("./routes/transactionRoute");
+const companytransactions = require("./routes/companytransactionRoute");
 
 app.use("/admin", user);
 app.use("/admin", blogs);
@@ -84,6 +85,7 @@ app.use("/admin", settings);
 app.use("/admin", faqs);
 app.use("/admin", testimonials);
 app.use("/admin", transactions);
+app.use("/admin", companytransactions);
 
 // app.use("/admin", withdrwals);
 
@@ -95,6 +97,7 @@ app.use("/api/v1", settings);
 app.use("/api/v1", faqs);
 app.use("/api/v1", testimonials);
 app.use("/api/v1", transactions);
+app.use("/api/v1", companytransactions);
 // app.use("/api/v1", withdrwals);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(errorMiddleware);
