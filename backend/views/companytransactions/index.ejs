@@ -104,7 +104,7 @@
 
             // Make the POST request
             $.ajax({
-                url: 'http://localhost:4000/api/v1/approvecompanyTransaction', // Endpoint for the approve API
+                url: '<%- process.env.BACKEND_URL %>api/v1/approvecompanyTransaction', // Endpoint for the approve API
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ transaction_id: companyId }),
