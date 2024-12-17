@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useRef } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../store/store";
@@ -29,6 +29,7 @@ import "./App.css";
 store.dispatch(loadUserFromLocalStorage());
 
 function App() {
+  const scrollContainerRef = useRef();
     const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("user");
@@ -81,7 +82,9 @@ function App() {
     
   useEffect(() => {
     const preventDragClose = (e) => {
-      if (e.cancelable) {
+      const scrollable = scrollContainerRef.current;
+      if (scrollable && !scrollable.contains(e.target)) {
+        // Prevent default only if the touch is outside the scrollable container
         e.preventDefault();
       }
     };
@@ -119,12 +122,13 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div id="app-container" className="  w-screen  h-screen overflow-hidden bg-black">
+        <div style={{ height: '100vh', overflow: 'hidden' }}>
           {/* Scrollable content */}
-          <div
-            id="scrollable-content"
-          className=" scrollable-content h-full w-full overflow-y-auto"
-          >
+         {/* Scrollable Content */}
+      <div
+        ref={scrollContainerRef}
+      className="scrollable-content"
+      >
             <Routes>
               {/* Redirect based on token existence */}
               <Route
