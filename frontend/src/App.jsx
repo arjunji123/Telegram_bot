@@ -79,22 +79,7 @@ function App() {
     };
   }, [isMobile]);
     
-  useEffect(() => {
-    const preventTelegramClose = (e) => {
-      // Block any touchmove event that might cause the bot to close
-      if (e.cancelable) {
-        e.preventDefault();
-      }
-    };
 
-    // Add event listener to prevent Telegram bot from closing
-    document.addEventListener('touchmove', preventTelegramClose, { passive: false });
-
-    // Remove the event listener on cleanup
-    return () => {
-      document.removeEventListener('touchmove', preventTelegramClose);
-    };
-  }, []);
 
   if (isLoading) {
     return <Preloader />;
@@ -121,14 +106,9 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AuthListener />
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>          {/* Scrollable content */}
+        <div className="app-container">       
            {/* Scrollable content */}
-           <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            paddingBottom: '60px', // To ensure content is not hidden behind the fixed bot
-            WebkitOverflowScrolling: 'touch', // Smooth scrolling for iOS
-          }}>
+           <div className="content-container">
             <Routes>
               {/* Redirect based on token existence */}
               <Route
@@ -154,20 +134,9 @@ function App() {
               </Route>
             </Routes>
           </div>
-            {/* Fixed Telegram Bot */}
-            <div
-            style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              padding: '10px',
-              textAlign: 'center',
-              zIndex: 9999, // Make sure bot stays above content
-
-            }}
-          >
-     
+         {/* Fixed bot at bottom */}
+         <div className="fixed-bot">
+            {/* Telegram Bot (Fixed at Bottom) */}
           </div>
         </div>
       </BrowserRouter>
