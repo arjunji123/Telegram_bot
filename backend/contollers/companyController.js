@@ -1058,3 +1058,81 @@ exports.uploadTransactionDocApi = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Database operation failed", 500));
   }
 });
+
+exports.createCompanySellTransaction = async (req, res, next) => {
+  try {
+    console.log("Request Body:", req.body);
+
+    // Step 1: Get company_id from logged-in user
+    const company_id = req.user?.id; // Assuming req.user has company_id
+    console.log("Company ID:", company_id);
+
+    if (!company_id) {
+      return next(
+        new ErrorHandler(
+          "Company ID is required for the logged-in company",
+          401
+        )
+      );
+    }
+
+    // Step 2: Validate incoming request
+    const { sell_coin, upi_id } = req.body;
+
+    if (!sell_coin || !upi_id) {
+      return next(new ErrorHandler("Sell coin and UPI ID are required", 400));
+    }
+
+    // Step 3: Check company_data for available coins
+    const [companyData] = await db.query(
+      "SELECT company_coin FROM company_data WHERE company_id = ?",
+      [company_id]
+    );
+
+    if (!companyData || companyData.length === 0) {
+      return next(new ErrorHandler("Company not found", 404));
+    }
+
+    const availableCoins = parseInt(companyData[0].company_coin);
+
+    if (sell_coin > availableCoins) {
+      return next(
+        new ErrorHandler("Insufficient coins in company account", 400)
+      );
+    }
+
+    // Step 4: Insert transaction into company_transaction
+    const [transactionResult] = await db.query(
+      `INSERT INTO company_transaction 
+      (company_id, sell_coin, upi_id, sell_date, status) 
+      VALUES (?, ?, ?, NOW(), 'unapproved')`,
+      [company_id, sell_coin, upi_id]
+    );
+
+    console.log("Transaction Inserted Successfully");
+
+    // Step 5: Update company_data to deduct coins
+    const updatedCoins = availableCoins - sell_coin;
+
+    await db.query(
+      "UPDATE company_data SET company_coin = ? WHERE company_id = ?",
+      [updatedCoins, company_id]
+    );
+
+    console.log(`Company coins updated. Remaining coins: ${updatedCoins}`);
+
+    // Step 6: Send Success Response
+    res.status(201).json({
+      success: true,
+      message:
+        "Sell transaction created successfully and company coins updated!",
+    });
+  } catch (error) {
+    console.error("Error creating sell transaction:", error);
+
+    return next(
+      new ErrorHandler("Failed to create transaction: " + error.message, 500)
+    );
+  }
+};
+
