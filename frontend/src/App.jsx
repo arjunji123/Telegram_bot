@@ -80,52 +80,17 @@ function App() {
   }, [isMobile]);
     
   useEffect(() => {
-      // Prevent body scroll and manage touch gestures within the content area
-      document.body.style.overflow = "hidden";
-
-      const content = document.getElementById("scrollable-content");
-
-    const handleTouchStart  = (e) => {
-      const { scrollTop, scrollHeight, clientHeight } = content;
-      content.dataset.scrollStartY = e.touches[0].clientY; // Save the initial touch position
-
-      // Check if scrolling is needed
-      if (scrollHeight > clientHeight) {
-        content.dataset.isScrollable = true;
-      } else {
-        content.dataset.isScrollable = false;
-      }
-    };
-    const handleTouchMove = (e) => {
-      const { scrollTop, scrollHeight, clientHeight, dataset } = content;
-      const deltaY = e.touches[0].clientY - dataset.scrollStartY;
-
-      // Prevent scrolling outside the content area
-      if (
-        (scrollTop === 0 && deltaY > 0) || // At the top and trying to scroll up
-        (scrollTop + clientHeight >= scrollHeight && deltaY < 0) // At the bottom and trying to scroll down
-      ) {
-        e.preventDefault(); // Stop the event
-      }
-
-      // Allow scrolling only if the content is scrollable
-      if (dataset.isScrollable === "false") {
+    const preventDragClose = (e) => {
+      if (e.cancelable) {
         e.preventDefault();
       }
     };
 
-    if (content) {
-      content.addEventListener("touchstart", handleTouchStart);
-      content.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      });
-    }
+    // Add touch event listeners
+    document.addEventListener('touchmove', preventDragClose, { passive: false });
+
     return () => {
-      document.body.style.overflow = ""; // Restore body scroll
-      if (content) {
-        content.removeEventListener("touchstart", handleTouchStart);
-        content.removeEventListener("touchmove", handleTouchMove);
-      }
+      document.removeEventListener('touchmove', preventDragClose);
     };
   }, []);
 
