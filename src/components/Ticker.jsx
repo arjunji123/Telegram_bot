@@ -1,4 +1,4 @@
-import '../styles/tickerSection.css';
+// import '../styles/tickerSection.css';
 
 const TickerSection = () => {
   return (

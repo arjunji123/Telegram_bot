@@ -2,6 +2,8 @@ import '../styles/globals.css';
 import Head from 'next/head';
 import Layout from '../components/Layout';
 import Script from 'next/script';
+import '../styles/hero.css'; // Update the path based on your project structure
+import '../styles/tickerSection.css'; // Update the path based on your project structure
 
 function MyApp({ Component, pageProps }) {
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import '../styles/hero.css';
+// import '../styles/hero.css';
 
 const HeroSection = () => {
 
