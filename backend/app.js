@@ -22,7 +22,7 @@ const localStorage = new LocalStorage("./scratch");
 app.use(
   cors({
     origin:
-      "https://unitrade-hub.vercel.app/",
+      "https://unitrade-hub.vercel.app",
     methods: ["GET", "POST", "PATCH","PUT"],
     credentials: true,
   })
